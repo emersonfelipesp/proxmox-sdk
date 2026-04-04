@@ -14,6 +14,7 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi[standard]>=0.135.2",
     "pyyaml>=6.0",
+    "aiohttp>=3.9.0",
 ]
 
 [project.optional-dependencies]
@@ -68,6 +69,9 @@ select = ["E4", "E7", "E9", "F", "I", "ANN201", "D103", "W", "C90"]
 
 [tool.ruff.lint.per-file-ignores]
 "proxmox_openapi/**/*.py" = ["ANN201", "D103"]
+"proxmox_openapi/main.py" = ["ANN201", "D103", "C901"]
+"proxmox_openapi/proxmox/routes.py" = ["ANN201", "D103", "C901"]
+"proxmox_openapi/mock/routes.py" = ["ANN201", "D103", "C901"]
 "tests/**/*.py" = ["ANN201", "D103"]
 
 [tool.ruff.format]

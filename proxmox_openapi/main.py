@@ -2,22 +2,46 @@
 
 from __future__ import annotations
 
+import os
+from typing import Any
+
 from fastapi import FastAPI
 from fastapi import __version__ as fastapi_version
 
 from proxmox_openapi import __version__
+from proxmox_openapi.proxmox.config import ProxmoxConfig
 from proxmox_openapi.routes.codegen import router as codegen_router
 from proxmox_openapi.routes.mock import router as mock_router
 from proxmox_openapi.routes.versions import router as versions_router
+from proxmox_openapi.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generated_openapi
 
 
 def create_app() -> FastAPI:
-    """Build the Proxmox OpenAPI FastAPI application."""
+    """Build the Proxmox OpenAPI FastAPI application.
+
+    Modes:
+        - mock (default): In-memory CRUD with generated mock endpoints
+        - real: Proxy to real Proxmox API with request/response validation
+
+    Environment Variables:
+        PROXMOX_API_MODE: "mock" or "real" (default: "mock")
+        PROXMOX_MOCK_SCHEMA_VERSION: Schema version tag for mock mode (default: "latest")
+
+    For real mode, also required:
+        PROXMOX_API_URL: Proxmox server URL (e.g., "https://pve.example.com:8006")
+        PROXMOX_API_TOKEN_ID + PROXMOX_API_TOKEN_SECRET: API token auth
+        OR PROXMOX_API_USERNAME + PROXMOX_API_PASSWORD: Password auth
+        PROXMOX_API_VERIFY_SSL: Verify SSL (default: "true")
+    """
+    # Load configuration from environment
+    config = ProxmoxConfig.from_env()
+    api_mode = config.api_mode
+
     app = FastAPI(
         title="Proxmox OpenAPI",
         description=(
-            "Schema-driven FastAPI package for Proxmox API: "
-            "OpenAPI generation from Proxmox API Viewer, mock data, and in-memory CRUD operations."
+            f"Schema-driven FastAPI package for Proxmox API (mode: {api_mode}). "
+            "Supports OpenAPI generation, mock data, in-memory CRUD, and real Proxmox connections."
         ),
         version=__version__,
         docs_url="/docs",
@@ -25,12 +49,17 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json",
     )
 
+    # Track loaded Proxmox endpoints
+    proxmox_route_info: dict[str, Any] = {"mode": api_mode}
+
     @app.get("/")
-    async def root() -> dict[str, str]:
+    async def root() -> dict[str, Any]:
         return {
             "message": "Proxmox OpenAPI",
             "version": __version__,
             "docs": "/docs",
+            "mode": api_mode,
+            "proxmox_endpoints": proxmox_route_info.get("route_count", 0),
         }
 
     @app.get("/health")
@@ -44,9 +73,67 @@ def create_app() -> FastAPI:
             "fastapi": fastapi_version,
         }
 
+    @app.get("/mode")
+    async def mode() -> dict[str, Any]:
+        result: dict[str, Any] = {
+            "mode": api_mode,
+            "schema_version": proxmox_route_info.get("schema_version", "unknown"),
+            "proxmox_endpoints": proxmox_route_info.get("route_count", 0),
+            "proxmox_paths": proxmox_route_info.get("path_count", 0),
+            "proxmox_methods": proxmox_route_info.get("method_count", 0),
+        }
+        if api_mode == "real":
+            result["proxmox_url"] = config.api_url
+            result["auth_method"] = (
+                "token" if config.token_id else "password" if config.username else "none"
+            )
+            result["ssl_verify"] = config.verify_ssl
+        return result
+
     app.include_router(codegen_router, prefix="/codegen", tags=["codegen"])
     app.include_router(mock_router, prefix="/mock", tags=["mock"])
     app.include_router(versions_router, prefix="/versions", tags=["versions"])
+
+    # Load Proxmox endpoints based on mode
+    version_tag = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", DEFAULT_PROXMOX_OPENAPI_TAG)
+    openapi_doc = load_proxmox_generated_openapi(version_tag=version_tag)
+
+    if openapi_doc:
+        if config.is_mock_mode():
+            # Mock mode: In-memory CRUD operations
+            from proxmox_openapi.mock.routes import register_generated_proxmox_mock_routes
+
+            proxmox_route_info.update(
+                register_generated_proxmox_mock_routes(
+                    app,
+                    version_tag=version_tag,
+                    openapi_document=openapi_doc,
+                )
+            )
+        elif config.is_real_mode():
+            # Real mode: Proxy to actual Proxmox API with validation
+            try:
+                config.validate_for_real_mode()
+                from proxmox_openapi.proxmox.routes import register_generated_proxmox_real_routes
+
+                proxmox_route_info.update(
+                    register_generated_proxmox_real_routes(
+                        app,
+                        version_tag=version_tag,
+                        openapi_document=openapi_doc,
+                        proxmox_config=config,
+                    )
+                )
+            except ValueError as config_error:
+                # Configuration validation failed - add warning endpoint
+                error_message = str(config_error)
+
+                @app.get("/api2/json")
+                async def config_error_endpoint() -> dict[str, str]:
+                    return {
+                        "error": "Invalid configuration for real API mode",
+                        "detail": error_message,
+                    }
 
     return app
 

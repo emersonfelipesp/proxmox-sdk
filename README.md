@@ -2,11 +2,15 @@
 
 Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, and in-memory CRUD operations.
 
+**📚 [Full Documentation](https://emersonfelipesp.github.io/proxmox-openapi/)**
+
 ## Features
 
-- **Crawler of Proxmox API Viewer**: Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
-- **Mock Data**: Automatically generate mock data for all endpoints
-- **In-Memory CRUD**: Allow users to modify mock data through create, update, and patch operations
+- **Dual Mode**: Mock mode (default) for development, Real mode for production Proxmox integration
+- **646 Endpoints**: Pre-generated Proxmox VE 8.1 API with full OpenAPI schema
+- **Mock Data**: Automatically generate mock data for all endpoints with in-memory CRUD
+- **Real API Proxy**: Validated proxy to real Proxmox VE API with request/response validation
+- **Code Generation**: Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
 - **Multi-version Support**: Select multiple Proxmox versions with `latest` mapped to official Proxmox API viewer
 - **Swagger Docs**: FastAPI auto-generates OpenAPI documentation at `/docs`
 
@@ -18,37 +22,61 @@ pip install proxmox-openapi
 
 ## Quick Start
 
-### Full API Server
+### Mock Mode (Default)
 
 ```bash
-proxmox-openapi
+# Install
+pip install proxmox-openapi
+
+# Start server
+uvicorn proxmox_openapi.main:app --reload
+
+# View Swagger docs
+# Open http://localhost:8000/docs
 ```
 
-This starts the FastAPI server at `http://localhost:8000` with Swagger docs at `/docs`.
-
-### Mock API Server
+### Real Mode (Connect to Proxmox)
 
 ```bash
-proxmox-openapi-mock
+# Configure credentials
+export PROXMOX_API_MODE=real
+export PROXMOX_URL=https://proxmox.example.com:8006
+export PROXMOX_API_TOKEN=PVEAPIToken=user@realm!tokenid=uuid
+
+# Start server
+uvicorn proxmox_openapi.main:app --reload
 ```
 
-This starts the standalone mock API server.
+See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-openapi/quickstart/) for more details.
 
-## API Endpoints
+## Documentation
 
-- `GET /` - Root endpoint
-- `GET /health` - Health check
-- `GET /version` - Version info
-- `GET /docs` - Swagger documentation
-- `POST /codegen/generate` - Generate OpenAPI schema from Proxmox API Viewer
-- `GET /codegen/openapi` - Get generated OpenAPI schema
-- `GET /codegen/versions` - List available versions
-- `GET /versions/` - List available Proxmox OpenAPI versions
-- `GET /mock/` - Mock API root (when using mock server)
+- **[Home](https://emersonfelipesp.github.io/proxmox-openapi/)** - Overview and features
+- **[Installation](https://emersonfelipesp.github.io/proxmox-openapi/installation/)** - Installation options (pip, uv, Docker, source)
+- **[Quick Start](https://emersonfelipesp.github.io/proxmox-openapi/quickstart/)** - 5-minute getting started guide
+- **[Mock API](https://emersonfelipesp.github.io/proxmox-openapi/mock-api/)** - Mock mode guide with custom data
+- **[Real API](https://emersonfelipesp.github.io/proxmox-openapi/real-api/)** - Real Proxmox integration guide
+- **[API Reference](https://emersonfelipesp.github.io/proxmox-openapi/api-reference/)** - Endpoint documentation
+- **[Development](https://emersonfelipesp.github.io/proxmox-openapi/development/)** - Contributing guide
+- **[Architecture](https://emersonfelipesp.github.io/proxmox-openapi/architecture/)** - How it works internally
+- **[FAQ](https://emersonfelipesp.github.io/proxmox-openapi/faq/)** - Frequently asked questions
 
 ## Environment Variables
 
-- `PROXMOX_MOCK_SCHEMA_VERSION` - Specify which version tag to use for mock (default: "latest")
+### Mock Mode
+- `PROXMOX_API_MODE` - Set to "mock" (default) or "real"
+- `PROXMOX_MOCK_SCHEMA_VERSION` - Version tag to use (default: "latest")
+- `PROXMOX_MOCK_DATA_PATH` - Path to custom mock data file (default: "/etc/proxmox-openapi/mock-data.json")
+
+### Real Mode
+- `PROXMOX_API_MODE` - Set to "real" to enable Proxmox integration
+- `PROXMOX_URL` - Proxmox server URL (e.g., "https://proxmox.example.com:8006")
+- `PROXMOX_API_TOKEN` - API token (recommended, format: "PVEAPIToken=user@realm!tokenid=uuid")
+- `PROXMOX_USERNAME` - Username (fallback, format: "user@realm")
+- `PROXMOX_PASSWORD` - Password (fallback)
+- `PROXMOX_API_VERIFY_SSL` - Verify SSL certificates (default: true)
+
+### Server
 - `HOST` - Host to bind to (default: "0.0.0.0")
 - `PORT` - Port to bind to (default: "8000")
 
