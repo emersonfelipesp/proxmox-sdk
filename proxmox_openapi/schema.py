@@ -11,7 +11,7 @@ DEFAULT_PROXMOX_OPENAPI_TAG = "latest"
 
 def _generated_dir() -> Path:
     """Return the generated artifacts directory."""
-    return Path(__file__).resolve().parents[1] / "generated" / "proxmox"
+    return Path(__file__).resolve().parent / "generated" / "proxmox"
 
 
 def available_proxmox_openapi_versions() -> list[str]:
