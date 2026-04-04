@@ -35,6 +35,20 @@ uvicorn proxmox_openapi.main:app --reload
 # Open http://localhost:8000/docs
 ```
 
+### SDK Direct Usage (No Server Required)
+
+```python
+from proxmox_openapi.sdk import ProxmoxSDK
+
+# Async with mock data
+async with ProxmoxSDK.mock() as proxmox:
+    nodes = await proxmox.nodes.get()
+
+# Or sync (blocking)
+with ProxmoxSDK.sync_mock() as proxmox:
+    nodes = proxmox.nodes.get()
+```
+
 ### Real Mode (Connect to Proxmox)
 
 ```bash
@@ -54,6 +68,7 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-openapi/qu
 - **[Home](https://emersonfelipesp.github.io/proxmox-openapi/)** - Overview and features
 - **[Installation](https://emersonfelipesp.github.io/proxmox-openapi/installation/)** - Installation options (pip, uv, Docker, source)
 - **[Quick Start](https://emersonfelipesp.github.io/proxmox-openapi/quickstart/)** - 5-minute getting started guide
+- **[SDK Mock Usage](https://emersonfelipesp.github.io/proxmox-openapi/sdk-mock/)** - Using the SDK with mock data (no server required)
 - **[Mock API](https://emersonfelipesp.github.io/proxmox-openapi/mock-api/)** - Mock mode guide with custom data
 - **[Real API](https://emersonfelipesp.github.io/proxmox-openapi/real-api/)** - Real Proxmox integration guide
 - **[API Reference](https://emersonfelipesp.github.io/proxmox-openapi/api-reference/)** - Endpoint documentation

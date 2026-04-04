@@ -213,7 +213,7 @@ class ProxmoxSDK:
 
         from proxmox_openapi.sdk.backends.mock import MockBackend
 
-        backend = MockBackend(schema_version=schema_version)
+        backend = MockBackend(schema_version=schema_version, api_path_prefix=svc.api_path_prefix)
         instance._service_config = svc
         instance._backend_name = "mock"
         instance._backend = backend
@@ -294,6 +294,42 @@ class ProxmoxSDK:
 
         return SyncProxmoxSDK(**kwargs)
 
+    @classmethod
+    def sync_mock(
+        cls,
+        schema_version: str = "latest",
+        service: Literal["PVE", "PMG", "PBS"] = "PVE",
+    ) -> "SyncProxmoxSDK":
+        """Create a synchronous mock SDK instance.
+
+        No real Proxmox host required.  Useful for tests and development.
+        All API calls block synchronously (no `async/await` needed).
+
+        Args:
+            schema_version: Proxmox schema version tag (default: "latest").
+            service: Service type (default: "PVE").
+
+        Returns:
+            A SyncProxmoxSDK instance ready for blocking API calls.
+
+        Example::
+
+            with ProxmoxSDK.sync_mock() as proxmox:
+                nodes = proxmox.nodes.get()
+                vms = proxmox.nodes("pve").qemu.get()
+        """
+        from proxmox_openapi.sdk.sync import SyncProxmoxSDK
+
+        instance = object.__new__(SyncProxmoxSDK)
+        import asyncio
+
+        instance._loop = asyncio.new_event_loop()
+        instance._sdk = cls.mock(schema_version=schema_version, service=service)
+        from proxmox_openapi.sdk.sync import SyncProxmoxResource
+
+        instance._root = SyncProxmoxResource(instance._sdk._root, instance._loop)
+        return instance
+
     # ------------------------------------------------------------------
     # Internal: backend factory
     # ------------------------------------------------------------------
@@ -325,7 +361,7 @@ class ProxmoxSDK:
         if backend == "mock":
             from proxmox_openapi.sdk.backends.mock import MockBackend
 
-            return MockBackend()
+            return MockBackend(api_path_prefix=service_config.api_path_prefix)
 
         if backend == "local":
             from proxmox_openapi.sdk.backends.local import LocalBackend

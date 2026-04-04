@@ -137,6 +137,65 @@ print(response.status_code)  # 200 OK
 
 ---
 
+## Using the SDK Directly (No Server Required)
+
+The `proxmox-openapi` SDK can work standalone without a FastAPI server:
+
+### Async SDK (with async/await)
+
+```python
+from proxmox_openapi.sdk import ProxmoxSDK
+import asyncio
+
+async def main():
+    # Create mock SDK instance
+    async with ProxmoxSDK.mock() as proxmox:
+        # List nodes
+        nodes = await proxmox.nodes.get()
+        print(f"Nodes: {nodes}")
+        
+        # Create a VM
+        vm = await proxmox.nodes("pve").qemu.post(
+            vmid=100,
+            name="my-vm"
+        )
+        print(f"Created: {vm}")
+        
+        # Retrieve VM
+        retrieved = await proxmox.nodes("pve").qemu(100).get()
+        print(f"Retrieved: {retrieved}")
+
+asyncio.run(main())
+```
+
+### Sync SDK (No async/await)
+
+```python
+from proxmox_openapi.sdk import ProxmoxSDK
+
+# Create mock SDK instance
+with ProxmoxSDK.sync_mock() as proxmox:
+    # All calls block
+    nodes = proxmox.nodes.get()
+    print(f"Nodes: {nodes}")
+    
+    # Create a VM
+    vm = proxmox.nodes("pve").qemu.post(
+        vmid=100,
+        name="my-vm"
+    )
+    print(f"Created: {vm}")
+```
+
+!!! tip "SDK Benefits"
+    - **Zero server setup** — No FastAPI required
+    - **Direct Python** — Integration into scripts and libraries
+    - **Same API** — Use synchronously or asynchronously
+    - **Multiple backends** — Switch between mock, SSH, HTTPS, local at runtime
+    - **Production-ready** — Same SDK for development and real Proxmox
+
+---
+
 ## Understanding Mock Mode
 
 !!! info "Mock Mode Behavior"
