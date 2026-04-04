@@ -18,6 +18,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+ssh = [
+    "paramiko>=3.0",
+    "openssh-wrapper>=0.4",
+]
+all = [
+    "paramiko>=3.0",
+    "openssh-wrapper>=0.4",
+]
 test = [
     "httpx>=0.28.1",
     "playwright>=1.58.0",
