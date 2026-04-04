@@ -1,0 +1,184 @@
+"""Routes for codegen endpoints."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi import APIRouter, Query
+from fastapi.responses import PlainTextResponse
+
+from proxmox_openapi import __version__
+from proxmox_openapi.proxmox_codegen.pipeline import (
+    LATEST_VERSION_TAG,
+    generate_proxmox_codegen_bundle_async,
+)
+
+router = APIRouter()
+
+
+@router.post("/generate")
+async def generate_viewer_codegen_artifacts(
+    persist: bool = Query(
+        default=True,
+        description="Persist generated artifacts under proxmox_openapi/generated/proxmox.",
+    ),
+    workers: int = Query(
+        default=10,
+        ge=1,
+        le=32,
+        description="Async worker count for parallel endpoint capture.",
+    ),
+    retry_count: int = Query(
+        default=2,
+        ge=0,
+        le=10,
+        description="Retry attempts per endpoint for transient Playwright failures.",
+    ),
+    retry_backoff: float = Query(
+        default=0.35,
+        ge=0.0,
+        le=5.0,
+        description="Base exponential backoff seconds between retries.",
+    ),
+    checkpoint_every: int = Query(
+        default=50,
+        ge=1,
+        le=500,
+        description="Write crawl checkpoint after this many processed endpoints.",
+    ),
+    source_url: str = Query(
+        default="https://pve.proxmox.com/pve-docs/apidoc.html",
+        description="Proxmox API viewer URL to crawl.",
+    ),
+    version_tag: str = Query(
+        default=LATEST_VERSION_TAG,
+        description="Version tag used for generated artifacts subdirectory.",
+    ),
+):
+    """Run Proxmox API Viewer to OpenAPI and Pydantic generation pipeline."""
+    output_dir = None
+    if persist:
+        output_dir = Path(__file__).resolve().parents[2] / "generated" / "proxmox"
+
+    bundle = await generate_proxmox_codegen_bundle_async(
+        output_dir=output_dir,
+        source_url=source_url,
+        version_tag=version_tag,
+        worker_count=workers,
+        retry_count=retry_count,
+        retry_backoff_seconds=retry_backoff,
+        checkpoint_every=checkpoint_every,
+    )
+
+    viewer_capture = bundle.capture.get("viewer", {})
+    completeness = bundle.capture.get("completeness", {})
+
+    return {
+        "message": "Generation completed",
+        "source_url": bundle.source_url,
+        "version_tag": bundle.version_tag,
+        "generated_at": bundle.generated_at,
+        "endpoint_count": bundle.endpoint_count,
+        "operation_count": bundle.operation_count,
+        "viewer": {
+            "endpoint_count": viewer_capture.get("endpoint_count"),
+            "navigation_items": viewer_capture.get("discovered_navigation_items"),
+            "method_count": viewer_capture.get("method_count"),
+            "duration_seconds": viewer_capture.get("duration_seconds"),
+            "worker_count": viewer_capture.get("worker_count"),
+            "failed_endpoint_count": viewer_capture.get("failed_endpoint_count"),
+        },
+        "completeness": {
+            "fallback_method_count": completeness.get("fallback_method_count"),
+            "missing_from_viewer": len(completeness.get("missing_from_viewer", [])),
+        },
+        "output_dir": str(Path(output_dir) / bundle.version_tag) if output_dir else None,
+        "retry": {
+            "retry_count": retry_count,
+            "retry_backoff": retry_backoff,
+            "checkpoint_every": checkpoint_every,
+        },
+    }
+
+
+@router.get("/openapi")
+async def proxmox_viewer_openapi(
+    regenerate: bool = Query(
+        default=False,
+        description="Regenerate from upstream viewer before returning OpenAPI output.",
+    ),
+    workers: int = Query(
+        default=10,
+        ge=1,
+        le=32,
+        description="Async worker count used when regeneration is requested.",
+    ),
+    version_tag: str = Query(
+        default=LATEST_VERSION_TAG,
+        description="Generated artifact version tag to load.",
+    ),
+):
+    """Return generated OpenAPI schema for Proxmox API viewer endpoints."""
+    from proxmox_openapi.schema import load_proxmox_generated_openapi
+
+    if regenerate:
+        output_dir = Path(__file__).resolve().parents[2] / "generated" / "proxmox"
+        bundle = await generate_proxmox_codegen_bundle_async(
+            output_dir=output_dir,
+            version_tag=version_tag,
+            worker_count=workers,
+        )
+        return bundle.openapi
+
+    schema = load_proxmox_generated_openapi(version_tag=version_tag)
+    if schema:
+        return schema
+
+    return {
+        "error": "Schema not found",
+        "message": f"Run /codegen/generate first to generate version '{version_tag}'",
+    }
+
+
+@router.get("/pydantic", response_class=PlainTextResponse)
+async def proxmox_viewer_pydantic_models(
+    regenerate: bool = Query(
+        default=False,
+        description="Regenerate from upstream viewer before returning model source.",
+    ),
+    version_tag: str = Query(
+        default=LATEST_VERSION_TAG,
+        description="Generated artifact version tag to load.",
+    ),
+):
+    """Return generated Pydantic v2 models source code for Proxmox API endpoints."""
+    from proxmox_openapi.schema import load_pydantic_models
+
+    if regenerate:
+        output_dir = Path(__file__).resolve().parents[2] / "generated" / "proxmox"
+        bundle = await generate_proxmox_codegen_bundle_async(
+            output_dir=output_dir,
+            version_tag=version_tag,
+        )
+        return bundle.pydantic_models_code
+
+    models = load_pydantic_models(version_tag=version_tag)
+    if models:
+        return models
+
+    return f"# Pydantic models for version {version_tag} not found. Run /codegen/generate first."
+
+
+@router.get("/versions")
+async def list_available_versions():
+    """List available Proxmox OpenAPI versions."""
+    from proxmox_openapi.schema import available_proxmox_openapi_versions
+
+    versions = available_proxmox_openapi_versions()
+    return {
+        "versions": versions,
+        "latest": LATEST_VERSION_TAG,
+    }
+
+
+__all__ = ["router"]

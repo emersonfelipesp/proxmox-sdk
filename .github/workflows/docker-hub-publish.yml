@@ -1,0 +1,234 @@
+name: Docker images
+
+on:
+  workflow_call:
+    inputs:
+      source_ref:
+        description: Branch, tag, or SHA to build
+        type: string
+        required: false
+        default: ""
+      mode:
+        description: >-
+          build-and-test-only — amd64 build + in-container tests, no Docker Hub.
+          publish — build, smoke-test, and push runtime + mkcert images.
+        type: string
+        required: false
+        default: publish
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Branch, tag, or SHA to build
+        type: string
+        required: true
+        default: main
+      mode:
+        description: >-
+          build-and-test-only — amd64 build + in-container tests, no Docker Hub.
+          publish — same as CI/release (push runtime + mkcert, multi-arch).
+        type: choice
+        required: true
+        options:
+          - build-and-test-only
+          - publish
+        default: build-and-test-only
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  docker-manual:
+    if: inputs.mode == 'build-and-test-only'
+    name: Docker — build and test only (manual)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve checkout ref
+        id: checkout_source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
+        run: |
+          set -euo pipefail
+          encoded_ref="$(python3 - <<'PY'
+          import os
+          from urllib.parse import quote
+
+          print(quote(os.environ["SOURCE_REF"], safe=""))
+          PY
+          )"
+          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.checkout_source.outputs.sha }}
+
+      - name: Validate pyproject version vs tag ref
+        id: version
+        env:
+          GIT_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
+        run: |
+          python3 <<'PY'
+          import os
+          import pathlib
+          import tomllib
+
+          git_ref = os.environ["GIT_REF"].strip()
+          version = tomllib.loads(
+              pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          )["project"]["version"]
+          expected_tag = f"v{version}"
+          if git_ref.startswith("v") and git_ref != expected_tag:
+              raise SystemExit(
+                  f"git_ref/version mismatch: ref={git_ref!r}, expected {expected_tag!r}"
+              )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"tag={version}\n')
+          PY
+
+      - name: Keep image tag in env
+        run: echo "IMAGE_TAG=${{ steps.version.outputs.tag }}" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Build amd64 image for in-container tests
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: emersonfelipesp/proxmox-openapi:${{ env.IMAGE_TAG }}-pre
+
+      - name: Smoke-test runtime image startup
+        run: |
+          set -eux
+          docker rm -f proxmox-openapi-smoke-http 2>/dev/null || true
+          docker run -d --name proxmox-openapi-smoke-http \
+            -p 127.0.0.1:18080:8000 \
+            emersonfelipesp/proxmox-openapi:${{ env.IMAGE_TAG }}-pre
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 5 http://127.0.0.1:18080/ >/dev/null 2>&1; then
+              docker rm -f proxmox-openapi-smoke-http
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs proxmox-openapi-smoke-http
+          docker rm -f proxmox-openapi-smoke-http
+          exit 1
+
+  docker-runtime:
+    if: inputs.mode == 'publish'
+    name: Docker Hub — runtime (nginx + uvicorn)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve checkout ref
+        id: checkout_source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
+        run: |
+          set -euo pipefail
+          encoded_ref="$(python3 - <<'PY'
+          import os
+          from urllib.parse import quote
+
+          print(quote(os.environ["SOURCE_REF"], safe=""))
+          PY
+          )"
+          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.checkout_source.outputs.sha }}
+
+      - name: Resolve source revision
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Resolve image version from pyproject
+        id: version
+        env:
+          GIT_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.ref_name }}
+        run: |
+          python3 <<'PY'
+          import os
+          import pathlib
+          import tomllib
+
+          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          version = data["project"]["version"]
+          expected_tag = f"v{version}"
+          git_ref = os.environ["GIT_REF"].strip()
+          if git_ref.startswith("v") and git_ref != expected_tag:
+              raise SystemExit(
+                  f"git ref / pyproject mismatch: ref={git_ref!r}, expected {expected_tag!r}"
+              )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f'tag={version}\n')
+          PY
+
+      - name: Keep image tag in env
+        run: echo "IMAGE_TAG=${{ steps.version.outputs.tag }}" >> $GITHUB_ENV
+
+      - name: Build and push Docker image (runtime)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            emersonfelipesp/proxmox-openapi:${{ env.IMAGE_TAG }}
+            emersonfelipesp/proxmox-openapi:latest
+            emersonfelipesp/proxmox-openapi:sha-${{ steps.source.outputs.sha }}
+
+      - name: Smoke-test pushed runtime images
+        run: |
+          set -eux
+          for TAG in "${{ env.IMAGE_TAG }}" latest "sha-${{ steps.source.outputs.sha }}"; do
+            NAME=$(printf 'proxmox-openapi-smoke-%s' "$TAG" | tr '.:' '-')
+            docker rm -f "$NAME" 2>/dev/null || true
+            docker run -d --name "$NAME" \
+              -p 127.0.0.1:18080:8000 \
+              emersonfelipesp/proxmox-openapi:"$TAG"
+            ok=0
+            for i in $(seq 1 40); do
+              if curl -fsS --max-time 5 http://127.0.0.1:18080/ >/dev/null 2>&1; then
+                ok=1
+                break
+              fi
+              sleep 2
+            done
+            if [ "$ok" -ne 1 ]; then
+              docker logs "$NAME"
+              docker rm -f "$NAME"
+              exit 1
+            fi
+            docker rm -f "$NAME"
+          done
