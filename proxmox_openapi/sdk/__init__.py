@@ -1,13 +1,5 @@
-"""Proxmox OpenAPI — schema-driven FastAPI package and standalone Python SDK."""
+"""Proxmox OpenAPI SDK — standalone Python SDK for the Proxmox API."""
 
-__version__ = "0.0.1"
-
-# FastAPI app exports (unchanged)
-from proxmox_openapi.main import app
-from proxmox_openapi.mock_main import app as mock_app
-from proxmox_openapi.mock_main import run
-
-# SDK exports
 from proxmox_openapi.sdk.api import ProxmoxSDK
 from proxmox_openapi.sdk.exceptions import (
     AuthenticationError,
@@ -20,11 +12,6 @@ from proxmox_openapi.sdk.tools.files import Files
 from proxmox_openapi.sdk.tools.tasks import Tasks
 
 __all__ = [
-    # FastAPI
-    "app",
-    "mock_app",
-    "run",
-    # SDK
     "ProxmoxSDK",
     "SyncProxmoxSDK",
     "ResourceException",
@@ -33,5 +20,4 @@ __all__ = [
     "ProxmoxSDKError",
     "Tasks",
     "Files",
-    "__version__",
 ]
