@@ -1,0 +1,200 @@
+# proxmox-openapi - LLM Project Guide
+
+Schema-driven FastAPI package for Proxmox VE API workflows.
+
+This guide is for LLMs, coding agents, and automation tools that need reliable context about the repository.
+
+## Project Summary
+
+proxmox-openapi provides a dual-mode API server:
+
+1. Mock mode (default): generated Proxmox-like endpoints with in-memory CRUD and schema validation.
+2. Real mode: validated proxy to a real Proxmox VE API server.
+
+Core capabilities:
+
+- OpenAPI generation from Proxmox API viewer data.
+- Runtime route generation from OpenAPI paths and schemas.
+- Generated Pydantic request/response models for validation.
+- Multi-version schema support (with latest tag).
+- Standalone mock server entrypoint.
+
+## Package Identity
+
+- Package name: proxmox-openapi
+- Current version: 0.0.1
+- Python: >= 3.11
+- License: MIT
+
+## Primary Runtime Modes
+
+### Mock Mode (default)
+
+Purpose:
+
+- Development, tests, and demos without real Proxmox infrastructure.
+
+Behavior:
+
+- Loads generated schema from generated/proxmox/<version>/openapi.json.
+- Dynamically registers FastAPI routes for schema operations.
+- Stores runtime objects/collections in shared-memory-backed state.
+- Supports GET/POST/PUT/PATCH/DELETE semantics.
+- Seeds data on first GET if resource/collection is absent.
+- Supports optional custom mock data source via JSON or YAML.
+
+### Real Mode
+
+Purpose:
+
+- Proxy requests to actual Proxmox VE while preserving schema-based validation.
+
+Behavior:
+
+- Reads environment-based Proxmox credentials and API mode.
+- Forwards requests with aiohttp client logic.
+- Validates incoming requests and outgoing responses.
+
+## Key Entry Points
+
+- proxmox_openapi/main.py
+  - Main app with mode switching.
+- proxmox_openapi/mock_main.py
+  - Mock-only server entrypoint.
+- proxmox_openapi/mock/routes.py
+  - Dynamic mock route registration and mutation logic.
+- proxmox_openapi/mock/state.py
+  - Shared in-memory state store.
+- proxmox_openapi/mock/schema_helpers.py
+  - Schema-based seeded value generation and merge helpers.
+- proxmox_openapi/proxmox/client.py
+  - Real Proxmox API client.
+- proxmox_openapi/proxmox/routes.py
+  - Real mode route registration.
+- proxmox_openapi/proxmox_codegen/pipeline.py
+  - Code generation pipeline orchestration.
+
+## Repository Layout (high-value paths)
+
+- proxmox_openapi/
+  - Runtime package implementation.
+- proxmox_openapi/generated/proxmox/latest/
+  - Package-bundled generated schema artifacts.
+- generated/proxmox/latest/
+  - Top-level generated schema artifacts used in development workflows.
+- docs/
+  - MkDocs source documentation.
+- tests/
+  - Pytest suite.
+
+## Data and Validation Pipeline
+
+1. Capture API structure from Proxmox source.
+2. Normalize and build OpenAPI schema.
+3. Generate Pydantic models from schema.
+4. Register runtime routes from schema + models.
+5. Validate request and response payloads per operation.
+
+In mock mode, route handlers use schema defaults and deterministic seeded values to synthesize responses when state is absent.
+
+## Mock Data Strategy
+
+Mock data is schema-first and deterministic:
+
+- Field-aware value synthesis in schema_helpers.py creates meaningful Proxmox-like values.
+- Seeded outputs are stable for the same route/field context.
+- Recent logic improves semantic realism for fields like node, vmid, storage, status, cpu, memory, network, and timestamps.
+
+Custom data override:
+
+- Set PROXMOX_MOCK_DATA_PATH to a JSON/YAML file mapping API paths to object/array payloads.
+
+## Important Environment Variables
+
+### Mode Selection
+
+- PROXMOX_API_MODE: mock (default) or real
+
+### Mock Mode
+
+- PROXMOX_MOCK_SCHEMA_VERSION: schema tag to load (default latest)
+- PROXMOX_MOCK_DATA_PATH: custom mock data file path
+- PROXMOX_MOCK_STATE_NAMESPACE: namespace for shared mock state
+- PROXMOX_MOCK_STATE_BYTES: shared memory allocation size
+
+### Real Mode
+
+- PROXMOX_URL: Proxmox base URL (example: https://host:8006)
+- PROXMOX_API_TOKEN: API token (recommended)
+- PROXMOX_USERNAME: username fallback
+- PROXMOX_PASSWORD: password fallback
+- PROXMOX_API_VERIFY_SSL: TLS verification toggle
+
+### Server
+
+- HOST: bind host (default 0.0.0.0)
+- PORT: bind port (default 8000)
+
+## CLI Scripts
+
+Defined in pyproject.toml:
+
+- proxmox-openapi-codegen
+  - Runs code generation tooling.
+- proxmox-openapi-mock
+  - Runs standalone mock server.
+
+## Developer Commands
+
+Install and run:
+
+- uv sync --extra test
+- uvicorn proxmox_openapi.main:app --reload
+
+Quality checks:
+
+- ruff check .
+- ruff format --check .
+- pytest
+
+## Testing Guidance
+
+When touching mock behavior:
+
+- Prefer focused tests in tests/ for schema helpers and route mutation behavior.
+- Verify that generated responses still satisfy Pydantic response models.
+- Keep deterministic behavior (same seed/context => same value family).
+
+When touching route generation:
+
+- Validate both path/query parameter handling and request body model behavior.
+- Verify fallback response synthesis does not break validation.
+
+## Design Constraints and Conventions
+
+- OpenAPI schema is source of truth for runtime route shape.
+- Keep route registration generic and schema-driven.
+- Preserve compatibility across multiple schema versions.
+- Favor deterministic mock behavior over random values.
+- Keep changes minimal and avoid broad refactors unless needed.
+
+## Documentation Map
+
+- README.md
+  - Top-level usage and quick start.
+- docs/architecture.md
+  - Internal architecture and data flow.
+- docs/mock-api.md
+  - Mock mode behavior and examples.
+- docs/development.md
+  - Contributor workflow.
+- docs/reference/
+  - Reference documents for adjacent tooling (for example Proxmoxer and pvesh).
+
+## Safe Automation Notes for LLMs
+
+- Prefer editing schema helper logic instead of hardcoding endpoint-specific route exceptions.
+- If adding semantic mock fields, keep defaults plausible and operationally conservative.
+- Avoid committing generated site artifacts unless explicitly requested.
+- Ignore incidental runtime artifacts (for example __pycache__) in feature commits.
+- Validate with lint + tests before finishing changes.
