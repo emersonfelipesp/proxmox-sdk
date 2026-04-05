@@ -2013,7 +2013,7 @@
 <p>Proxmoxer supports multiple Proxmox products:</p>
 <ol>
 <li><strong>PVE</strong> (Proxmox Virtual Environment) - Full support</li>
-<li><strong>PMG</strong> (Proxmox Mail Gateway) - Full support  </li>
+<li><strong>PMG</strong> (Proxmox Mail Gateway) - Full support</li>
 <li><strong>PBS</strong> (Proxmox Backup Server) - HTTPS backend only</li>
 </ol>
 <h3 id="design-philosophy">Design Philosophy<a class="headerlink" href="#design-philosophy" title="Permanent link">&para;</a></h3>
@@ -2073,8 +2073,8 @@
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmoxer</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxAPI</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># HTTPS backend (default)</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">proxmox</span> <span class="o">=</span> <span class="n">ProxmoxAPI</span><span class="p">(</span><span class="s1">&#39;proxmox.example.com&#39;</span><span class="p">,</span> 
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>                     <span class="n">user</span><span class="o">=</span><span class="s1">&#39;admin@pam&#39;</span><span class="p">,</span> 
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">proxmox</span> <span class="o">=</span> <span class="n">ProxmoxAPI</span><span class="p">(</span><span class="s1">&#39;proxmox.example.com&#39;</span><span class="p">,</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>                     <span class="n">user</span><span class="o">=</span><span class="s1">&#39;admin@pam&#39;</span><span class="p">,</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>                     <span class="n">password</span><span class="o">=</span><span class="s1">&#39;secret&#39;</span><span class="p">,</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>                     <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
@@ -3075,8 +3075,8 @@
 <h4 id="1-list-all-vms">1. List All VMs<a class="headerlink" href="#1-list-all-vms" title="Permanent link">&para;</a></h4>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmoxer</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxAPI</span>
 </span><span id="__span-43-2"><a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>
-</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="n">proxmox</span> <span class="o">=</span> <span class="n">ProxmoxAPI</span><span class="p">(</span><span class="s1">&#39;pve.example.com&#39;</span><span class="p">,</span> 
-</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>                     <span class="n">user</span><span class="o">=</span><span class="s1">&#39;admin@pam&#39;</span><span class="p">,</span> 
+</span><span id="__span-43-3"><a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a><span class="n">proxmox</span> <span class="o">=</span> <span class="n">ProxmoxAPI</span><span class="p">(</span><span class="s1">&#39;pve.example.com&#39;</span><span class="p">,</span>
+</span><span id="__span-43-4"><a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>                     <span class="n">user</span><span class="o">=</span><span class="s1">&#39;admin@pam&#39;</span><span class="p">,</span>
 </span><span id="__span-43-5"><a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>                     <span class="n">password</span><span class="o">=</span><span class="s1">&#39;secret&#39;</span><span class="p">,</span>
 </span><span id="__span-43-6"><a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a>                     <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span id="__span-43-7"><a id="__codelineno-43-7" name="__codelineno-43-7" href="#__codelineno-43-7"></a>
@@ -3192,7 +3192,7 @@
 </span><span id="__span-46-17"><a id="__codelineno-46-17" name="__codelineno-46-17" href="#__codelineno-46-17"></a>
 </span><span id="__span-46-18"><a id="__codelineno-46-18" name="__codelineno-46-18" href="#__codelineno-46-18"></a><span class="c1"># Shutdown multiple VMs in parallel</span>
 </span><span id="__span-46-19"><a id="__codelineno-46-19" name="__codelineno-46-19" href="#__codelineno-46-19"></a><span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
-</span><span id="__span-46-20"><a id="__codelineno-46-20" name="__codelineno-46-20" href="#__codelineno-46-20"></a>    <span class="n">futures</span> <span class="o">=</span> <span class="p">{</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">shutdown_vm</span><span class="p">,</span> <span class="n">vmid</span><span class="p">):</span> <span class="n">vmid</span> 
+</span><span id="__span-46-20"><a id="__codelineno-46-20" name="__codelineno-46-20" href="#__codelineno-46-20"></a>    <span class="n">futures</span> <span class="o">=</span> <span class="p">{</span><span class="n">executor</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">shutdown_vm</span><span class="p">,</span> <span class="n">vmid</span><span class="p">):</span> <span class="n">vmid</span>
 </span><span id="__span-46-21"><a id="__codelineno-46-21" name="__codelineno-46-21" href="#__codelineno-46-21"></a>               <span class="k">for</span> <span class="n">vmid</span> <span class="ow">in</span> <span class="n">vm_ids</span><span class="p">}</span>
 </span><span id="__span-46-22"><a id="__codelineno-46-22" name="__codelineno-46-22" href="#__codelineno-46-22"></a>
 </span><span id="__span-46-23"><a id="__codelineno-46-23" name="__codelineno-46-23" href="#__codelineno-46-23"></a>    <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">as_completed</span><span class="p">(</span><span class="n">futures</span><span class="p">):</span>
@@ -3662,14 +3662,14 @@
 <hr />
 <h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
 <p><strong>Proxmoxer</strong> is a mature, battle-tested Python library providing:</p>
-<p>✅ <strong>Simple, Pythonic API</strong> for Proxmox REST API access<br />
-✅ <strong>Multiple backends</strong> (HTTPS, SSH, local) with unified interface<br />
-✅ <strong>Dynamic resource navigation</strong> - works with any API endpoint<br />
-✅ <strong>Multi-service support</strong> - PVE, PMG, and PBS<br />
-✅ <strong>Comprehensive authentication</strong> - password, tokens, 2FA<br />
-✅ <strong>Production-ready</strong> - 10+ years of development, high test coverage<br />
-✅ <strong>Minimal dependencies</strong> - core library is pure Python<br />
-✅ <strong>Active maintenance</strong> - regular updates and security fixes  </p>
+<p>✅ <strong>Simple, Pythonic API</strong> for Proxmox REST API access
+✅ <strong>Multiple backends</strong> (HTTPS, SSH, local) with unified interface
+✅ <strong>Dynamic resource navigation</strong> - works with any API endpoint
+✅ <strong>Multi-service support</strong> - PVE, PMG, and PBS
+✅ <strong>Comprehensive authentication</strong> - password, tokens, 2FA
+✅ <strong>Production-ready</strong> - 10+ years of development, high test coverage
+✅ <strong>Minimal dependencies</strong> - core library is pure Python
+✅ <strong>Active maintenance</strong> - regular updates and security fixes</p>
 <p><strong>Best suited for:</strong>
 - Scripts and automation
 - Multi-backend scenarios (SSH/local access needed)
