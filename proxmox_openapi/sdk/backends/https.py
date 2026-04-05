@@ -260,6 +260,7 @@ class HttpsBackend:
             # Attempt best-effort cleanup on the loop that owns the old session.
             try:
                 if old_loop.is_running():
+
                     def _schedule_close() -> None:
                         asyncio.create_task(old_session.close())
 
