@@ -6,12 +6,16 @@ import hashlib
 import json
 import re
 from copy import deepcopy
+from functools import cached_property
 from pathlib import Path
 from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel, ValidationError, field_validator
 
 from proxmox_openapi.proxmox_codegen.security import validate_version_tag
+
+# Pre-compiled patterns used in hot paths
+_RE_NAME_HINT = re.compile(r"(^|_)name$")
 
 DEFAULT_PROXMOX_OPENAPI_TAG = "latest"
 
@@ -65,8 +69,9 @@ class GeneratedOpenAPIDocument(BaseModel):
         except ValidationError:
             return None
 
-    def fingerprint(self) -> str:
-        """Return a stable fingerprint for the document."""
+    @cached_property
+    def fingerprint(self) -> str:  # type: ignore[override]
+        """Return a stable fingerprint for the document (computed once, then cached)."""
         payload = self.model_dump(mode="python", exclude_none=False)
         serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
@@ -215,7 +220,7 @@ class ProxmoxSchemaValue(RootModel[Any]):
         if hint.endswith("url"):
             return "https://pve.example.local:8006"
 
-        if re.search(r"(^|_)name$", hint):
+        if _RE_NAME_HINT.search(hint):
             return f"resource-{vm_idx:02d}"
 
         return None

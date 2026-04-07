@@ -55,22 +55,42 @@ class ProxmoxConfig:
     def from_env(cls) -> ProxmoxConfig:
         """Load configuration from file and environment variables. Config file overrides env vars."""
         import json
+        import logging
         from pathlib import Path
 
-        import yaml
+        _logger = logging.getLogger("proxmox_openapi")
 
-        # Base env vars
-        env_config = {k: v for k, v in os.environ.items()}
+        # Read only the specific env keys we need instead of copying the entire os.environ.
+        _KEYS = (
+            "PROXMOX_API_MODE",
+            "PROXMOX_API_URL",
+            "PROXMOX_API_TOKEN_ID",
+            "PROXMOX_API_TOKEN_SECRET",
+            "PROXMOX_API_USERNAME",
+            "PROXMOX_API_PASSWORD",
+            "PROXMOX_API_VERIFY_SSL",
+            "PROXMOX_API_SERVICE",
+            "PROXMOX_API_BACKEND",
+            "PROXMOX_API_TIMEOUT",
+            "PROXMOX_API_PATH_PREFIX",
+            "PROXMOX_API_OTP",
+            "PROXMOX_API_OTPTYPE",
+            "PROXMOX_API_HTTP_PROXY",
+            "PROXMOX_API_HTTPS_PROXY",
+            "HTTP_PROXY",
+            "HTTPS_PROXY",
+            "http_proxy",
+            "https_proxy",
+            "PROXMOX_CONFIG_FILE",
+        )
+        env_config: dict[str, str] = {k: v for k in _KEYS if (v := os.environ.get(k)) is not None}
 
         config_file = os.environ.get("PROXMOX_CONFIG_FILE")
         if config_file:
             path = Path(config_file)
             if path.exists():
-                import logging
-
-                logger = logging.getLogger("proxmox_openapi")
                 if path.is_symlink():
-                    logger.warning(
+                    _logger.warning(
                         f"Config file {config_file} is a symlink. Ensure it points to a trusted location."
                     )
                 # Check permissions (only owner can read) to prevent symlink attacks or world-readable configs
@@ -79,11 +99,13 @@ class ProxmoxConfig:
                     import stat
 
                     if bool(st.st_mode & (stat.S_IRWXG | stat.S_IRWXO)):
-                        logger.warning(
+                        _logger.warning(
                             f"Config file {config_file} has overly permissive permissions. It should be restricted to owner."
                         )
                 try:
                     if path.suffix in (".yaml", ".yml"):
+                        import yaml  # deferred: only loaded when a YAML config file is present
+
                         file_data = yaml.safe_load(path.read_text())
                     else:
                         file_data = json.loads(path.read_text())
@@ -98,11 +120,7 @@ class ProxmoxConfig:
                             )
                             env_config[env_k] = str(v)
                 except Exception as e:
-                    import logging
-
-                    logging.getLogger("proxmox_openapi").error(
-                        f"Failed to load config file {config_file}: {e}"
-                    )
+                    _logger.error(f"Failed to load config file {config_file}: {e}")
 
         api_mode = env_config.get("PROXMOX_API_MODE", "mock").lower()
         api_url = env_config.get("PROXMOX_API_URL")

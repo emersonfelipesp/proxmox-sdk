@@ -105,15 +105,16 @@ def create_app() -> FastAPI:
             "proxmox_endpoints": proxmox_route_info.get("route_count", 0),
         }
 
+    _allowed_health_hosts: frozenset[str] = frozenset(
+        {"127.0.0.1", "::1", "localhost"}
+        | ({"testclient"} if os.environ.get("TESTING", "").lower() in ("1", "true") else set())
+    )
+
     @app.get("/health", include_in_schema=False)
     async def health(request: Request) -> dict[str, str]:
         # Require internal IP or authorization
         client_host = request.client.host if request.client else None
-        allowed_health_hosts = {"127.0.0.1", "::1", "localhost"}
-        # Allow Starlette's TestClient host only in test environments
-        if os.environ.get("TESTING", "").lower() in ("1", "true"):
-            allowed_health_hosts.add("testclient")
-        if client_host not in allowed_health_hosts:
+        if client_host not in _allowed_health_hosts:
             from fastapi import HTTPException, status
 
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

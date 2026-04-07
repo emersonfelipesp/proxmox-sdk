@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
+import posixpath
 import re
 import ssl
 from typing import TYPE_CHECKING, Any
@@ -124,6 +125,11 @@ class HttpsBackend:
     ) -> None:
         resolved_port = port if port is not None else service_config.default_port
         self._base_url = _build_base_url(host, resolved_port, path_prefix)
+        # Cache parsed URL components to avoid re-parsing on every _url_for() call.
+        _parsed = urlsplit(self._base_url)
+        self._base_scheme = _parsed.scheme
+        self._base_netloc = _parsed.netloc
+        self._base_path = _parsed.path or "/"
         self._service_config = service_config
         self._auth = auth
         self._ssl = _build_ssl_context(verify_ssl, cert)
@@ -312,12 +318,8 @@ class HttpsBackend:
         # Avoid double-prefixing: if path already starts with base_url, return it
         if path.startswith("http://") or path.startswith("https://"):
             return path
-        # Join base URL + path cleanly
-        import posixpath
-
-        parsed = urlsplit(self._base_url)
-        joined_path = posixpath.join(parsed.path or "/", path.lstrip("/"))
-        return urlunsplit((parsed.scheme, parsed.netloc, joined_path, "", ""))
+        joined_path = posixpath.join(self._base_path, path.lstrip("/"))
+        return urlunsplit((self._base_scheme, self._base_netloc, joined_path, "", ""))
 
     async def _handle_response(
         self,
