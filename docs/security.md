@@ -98,7 +98,7 @@ Wildcards (`*`) are never used for headers or origins.
 
 `GET /health` returns `404 Not Found` for any client not connecting from localhost. This prevents the endpoint from being used as a service-discovery probe.
 
-Allowed hosts: `127.0.0.1`, `::1`, `localhost`.  
+Allowed hosts: `127.0.0.1`, `::1`, `localhost`.
 `testclient` (Starlette test helper) is only added when `TESTING=1` is set.
 
 ---
