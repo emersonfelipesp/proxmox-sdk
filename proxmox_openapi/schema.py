@@ -12,8 +12,6 @@ from typing import Any, Self
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel, ValidationError, field_validator
 
-from proxmox_openapi.proxmox_codegen.security import validate_version_tag
-
 # Pre-compiled patterns used in hot paths
 _RE_NAME_HINT = re.compile(r"(^|_)name$")
 
@@ -51,6 +49,10 @@ class GeneratedOpenAPIDocument(BaseModel):
     ) -> Self | None:
         """Load and validate a generated OpenAPI document for a version tag."""
         try:
+            from proxmox_openapi.proxmox_codegen.security import (
+                validate_version_tag,  # noqa: PLC0415
+            )
+
             version_tag = validate_version_tag(version_tag)
         except ValueError:
             return None
@@ -524,6 +526,8 @@ def load_proxmox_generated_openapi(
 def load_pydantic_models(version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG) -> str | None:
     """Load generated Pydantic models for a specific version tag."""
     try:
+        from proxmox_openapi.proxmox_codegen.security import validate_version_tag  # noqa: PLC0415
+
         version_tag = validate_version_tag(version_tag)
     except ValueError:
         return None
