@@ -28,14 +28,45 @@ proxmox_openapi/
 │   └── versions.py           # Version management endpoints
 ├── proxmox/                  # Real API proxy
 │   ├── routes.py             # Proxmox API proxy routes with validation
-│   └── config.py             # ProxmoxConfig dataclass
+│   ├── config.py             # ProxmoxConfig dataclass
+│   └── client.py             # FastAPI adapter wrapping the SDK HTTPS backend
 ├── proxmox_cli/              # CLI + TUI application
-│   ├── cli.py                # Typer CLI entrypoint (proxmox, pbx)
-│   ├── commands/             # Subcommands (get, create, set, delete, ls)
-│   ├── tui_app.py            # Textual TUI application
+│   ├── app.py                # Typer app construction and setup_logging
+│   ├── batch.py              # Batch request execution
+│   ├── cache.py              # Response caching layer
+│   ├── cli.py                # CLI entrypoint (proxmox, pbx, proxmox-cli)
+│   ├── completion.py         # Shell completion helpers
 │   ├── config.py             # Config file management
-│   ├── themes/               # TUI themes
-│   └── docgen/               # CLI docs generation
+│   ├── config_commands.py    # `config` subcommand group
+│   ├── doc_commands.py       # `docs` subcommand group
+│   ├── docgen_capture.py     # CLI docs capture pipeline
+│   ├── error_suggestions.py  # User-friendly error hints
+│   ├── exceptions.py         # CLI-specific exceptions
+│   ├── install.py            # Self-install helpers
+│   ├── output.py             # Shared output formatting
+│   ├── performance.py        # Performance profiling helpers
+│   ├── release.py            # Release tooling
+│   ├── sdk_bridge.py         # Bridge between CLI and ProxmoxSDK
+│   ├── tui_app.py            # Textual TUI application
+│   ├── tui_runner.py         # TUI launch wrapper
+│   ├── utils.py              # Path/param parsing utilities
+│   ├── commands/             # Subcommands
+│   │   ├── _common.py        # Shared command utilities
+│   │   ├── create.py         # `create` subcommand
+│   │   ├── delete.py         # `delete` subcommand
+│   │   ├── get.py            # `get` subcommand
+│   │   ├── help.py           # `help` subcommand
+│   │   ├── ls.py             # `ls` subcommand
+│   │   ├── set.py            # `set` subcommand
+│   │   ├── tui.py            # `tui` subcommand
+│   │   └── usage.py          # `usage` subcommand
+│   ├── docgen/               # CLI docs generation
+│   │   ├── discovery.py      # Command discovery
+│   │   ├── engine.py         # Doc generation engine
+│   │   ├── models.py         # Doc data models
+│   │   └── specs.py          # OpenAPI spec helpers
+│   ├── plugins/              # Plugin extension point
+│   └── themes/               # TUI themes
 ├── proxmox_codegen/          # Proxmox API Viewer crawler
 │   ├── apidoc_parser.py      # Parse Proxmox apidoc.js
 │   ├── crawler.py            # Playwright-based crawler
@@ -55,12 +86,14 @@ proxmox_openapi/
 │   ├── exceptions.py         # SDK-specific exceptions
 │   ├── backends/             # Transport backends
 │   │   ├── base.py           # AbstractBackend protocol
+│   │   ├── _cli_base.py      # Shared base for pvesh/openssh CLI backends
 │   │   ├── https.py          # aiohttp HTTPS backend (default)
 │   │   ├── mock.py           # In-memory mock backend
 │   │   ├── local.py          # Local pvesh CLI backend
 │   │   ├── ssh_paramiko.py   # SSH via Paramiko
 │   │   └── openssh.py        # SSH via openssh-wrapper
 │   ├── auth/                 # Authentication handlers
+│   │   ├── base.py           # BaseAuth abstract protocol
 │   │   ├── token.py          # API token auth
 │   │   └── ticket.py         # Password/ticket auth + TOTP
 │   └── tools/                # Helper tools
@@ -159,9 +192,10 @@ If any hook fails, fix the issues and rerun until all hooks pass.
 - `GET /redoc` - ReDoc documentation
 
 ### Codegen (Protected)
-- `POST /codegen/generate` - Generate OpenAPI schema from Proxmox API Viewer (requires auth)
-- `GET /codegen/openapi` - Get generated OpenAPI schema
-- `GET /codegen/versions` - List available versions
+- `POST /codegen/generate` - Generate OpenAPI schema from Proxmox API Viewer (requires auth, rate-limited 1/hour)
+- `GET /codegen/openapi` - Get generated OpenAPI schema (requires auth)
+- `GET /codegen/pydantic` - Get generated Pydantic v2 models (requires auth, rate-limited 5/hour)
+- `GET /codegen/versions` - List available versions (requires auth)
 
 ### Mock
 - `GET /versions/` - List available Proxmox OpenAPI versions
@@ -197,3 +231,7 @@ If any hook fails, fix the issues and rerun until all hooks pass.
 
 ### Logging
 - `LOG_LEVEL` - Logging level (default: "INFO")
+
+### Security / Auth
+- `CODEGEN_API_KEY` - Bearer token required for all `/codegen/*` endpoints (`POST /codegen/generate`, `GET /codegen/openapi`, `GET /codegen/pydantic`, `GET /codegen/versions`)
+- `TESTING` - Set to `1` or `true` to add `testclient` to the health endpoint's localhost allowlist (test use only)
