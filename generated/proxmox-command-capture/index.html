@@ -1011,6 +1011,62 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1631,6 +1687,34 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#init" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Init
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Init">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmox-init-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        proxmox init --help
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ls" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1799,8 +1883,8 @@
 </span></code></pre></div>
 <h2 id="generation-metadata">Generation metadata<a class="headerlink" href="#generation-metadata" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>UTC time:</strong> <code>2026-04-05T01:14:34.729455+00:00</code></li>
-<li><strong>Subprocess command:</strong> <code>/root/nms/proxmox-openapi/.venv/bin/proxmox</code></li>
+<li><strong>UTC time:</strong> <code>2026-04-08T21:45:49.250902+00:00</code></li>
+<li><strong>Subprocess command:</strong> <code>/home/runner/work/proxmox-openapi/proxmox-openapi/.venv/bin/proxmox</code></li>
 </ul>
 <hr />
 <h2 id="top-level">Top-level<a class="headerlink" href="#top-level" title="Permanent link">&para;</a></h2>
@@ -1808,8 +1892,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>proxmox<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.293</code></p>
-<p><em>Output truncated for this doc (max 40 lines / 20000 chars).</em></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.303</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a> Usage: proxmox [OPTIONS] COMMAND [ARGS]...                                     
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
@@ -1846,12 +1929,26 @@
 </span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>╭─ Commands ───────────────────────────────────────────────────────────────────╮
 </span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>│ batch               Execute batch operations from a JSON file.               │
-</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>│ create              Create resources in the Proxmox API.                     │
+</span><span id="__span-2-36"><a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>│ create              Create new resources in the Proxmox API.                 │
 </span><span id="__span-2-37"><a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>│ delete              Delete resources from the Proxmox API.                   │
 </span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>│ get                 Retrieve resources from the Proxmox API.                 │
 </span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>│ help-cmd            Show help for API endpoints.                             │
-</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>
-</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>... (19 more lines truncated)
+</span><span id="__span-2-40"><a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>│ ls                  List child resources at a given API path.                │
+</span><span id="__span-2-41"><a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>│ set-cmd             Update (PUT/PATCH) resources in the Proxmox API.         │
+</span><span id="__span-2-42"><a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>│ tui                 Launch interactive Proxmox TUI for resource navigation   │
+</span><span id="__span-2-43"><a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>│                     and management.                                          │
+</span><span id="__span-2-44"><a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>│ usage               Show API schema and usage information for an endpoint.   │
+</span><span id="__span-2-45"><a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>│ completion-install  Install shell completion for proxmox CLI.                │
+</span><span id="__span-2-46"><a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>│ init                Initialize CLI config for production and mock TUI usage. │
+</span><span id="__span-2-47"><a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>│ config-list         List all available configuration profiles.               │
+</span><span id="__span-2-48"><a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>│ config-show         Show configuration for a specific profile.               │
+</span><span id="__span-2-49"><a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>│ config-add          Add a new configuration profile.                         │
+</span><span id="__span-2-50"><a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>│ config-remove       Remove a configuration profile.                          │
+</span><span id="__span-2-51"><a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>│ config-set-default  Set the default profile.                                 │
+</span><span id="__span-2-52"><a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>│ benchmark           Benchmark API performance.                               │
+</span><span id="__span-2-53"><a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a>│ perf-test           Run performance tests.                                   │
+</span><span id="__span-2-54"><a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>│ docs                Generate CLI documentation artifacts for MkDocs.         │
+</span><span id="__span-2-55"><a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="batch">Batch<a class="headerlink" href="#batch" title="Permanent link">&para;</a></h2>
@@ -1859,8 +1956,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>proxmox<span class="w"> </span>batch<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.079</code></p>
-<p><em>Output truncated for this doc (max 40 lines / 20000 chars).</em></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.230</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a> Usage: proxmox batch [OPTIONS] FILE                                            
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
@@ -1901,8 +1997,12 @@
 </span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>│ --json                                                 Shortcut for --output │
 </span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>│                                                        json                  │
 </span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a>│ --yaml                                                 Shortcut for --output │
-</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>
-</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>... (11 more lines truncated)
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a>│                                                        yaml                  │
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a>│ --markdown                                             Shortcut for --output │
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a>│                                                        markdown              │
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a>│ --help                                                 Show this message and │
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a>│                                                        exit.                 │
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="benchmark">Benchmark<a class="headerlink" href="#benchmark" title="Permanent link">&para;</a></h2>
@@ -1910,7 +2010,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>proxmox<span class="w"> </span>benchmark<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.261</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.223</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a> Usage: proxmox benchmark [OPTIONS]                                             
 </span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
@@ -1932,11 +2032,6 @@
 </span><span id="__span-6-18"><a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>│ --markdown                     Shortcut for --output markdown                │
 </span><span id="__span-6-19"><a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>│ --help                         Show this message and exit.                   │
 </span><span id="__span-6-20"><a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-6-21"><a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>
-</span><span id="__span-6-22"><a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>
-</span><span id="__span-6-23"><a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>--- stderr ---
-</span><span id="__span-6-24"><a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-6-25"><a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="completion-install">Completion Install<a class="headerlink" href="#completion-install" title="Permanent link">&para;</a></h2>
@@ -1944,7 +2039,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>proxmox<span class="w"> </span>completion-install<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>9.143</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.217</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a> Usage: proxmox completion-install [OPTIONS]                                    
 </span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
@@ -1961,11 +2056,6 @@
 </span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>│ --shell        TEXT  Shell type (bash or zsh) [default: bash]                │
 </span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>│ --help               Show this message and exit.                             │
 </span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>
-</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>
-</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>--- stderr ---
-</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20" href="#__codelineno-8-20"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="config-add">Config Add<a class="headerlink" href="#config-add" title="Permanent link">&para;</a></h2>
@@ -1973,7 +2063,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>proxmox<span class="w"> </span>config-add<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.182</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.231</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a> Usage: proxmox config-add [OPTIONS] NAME                                       
 </span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
@@ -2002,11 +2092,6 @@
 </span><span id="__span-10-25"><a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>│    --markdown                      Shortcut for --output markdown            │
 </span><span id="__span-10-26"><a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>│    --help                          Show this message and exit.               │
 </span><span id="__span-10-27"><a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-10-28"><a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a>
-</span><span id="__span-10-29"><a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a>
-</span><span id="__span-10-30"><a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a>--- stderr ---
-</span><span id="__span-10-31"><a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-10-32"><a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="config-list">Config List<a class="headerlink" href="#config-list" title="Permanent link">&para;</a></h2>
@@ -2014,7 +2099,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>proxmox<span class="w"> </span>config-list<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.280</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.218</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a> Usage: proxmox config-list [OPTIONS]                                           
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
@@ -2031,11 +2116,6 @@
 </span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>│ --markdown                Shortcut for --output markdown                     │
 </span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>│ --help                    Show this message and exit.                        │
 </span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>
-</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>
-</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>--- stderr ---
-</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="config-remove">Config Remove<a class="headerlink" href="#config-remove" title="Permanent link">&para;</a></h2>
@@ -2043,7 +2123,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>proxmox<span class="w"> </span>config-remove<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.481</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.229</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a> Usage: proxmox config-remove [OPTIONS] NAME                                    
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
@@ -2065,11 +2145,6 @@
 </span><span id="__span-14-18"><a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>│ --markdown                Shortcut for --output markdown                     │
 </span><span id="__span-14-19"><a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>│ --help                    Show this message and exit.                        │
 </span><span id="__span-14-20"><a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-14-21"><a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>
-</span><span id="__span-14-22"><a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>
-</span><span id="__span-14-23"><a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>--- stderr ---
-</span><span id="__span-14-24"><a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-14-25"><a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="config-set-default">Config Set Default<a class="headerlink" href="#config-set-default" title="Permanent link">&para;</a></h2>
@@ -2077,7 +2152,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>proxmox<span class="w"> </span>config-set-default<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.187</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.223</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a> Usage: proxmox config-set-default [OPTIONS] NAME                               
 </span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>
@@ -2097,11 +2172,6 @@
 </span><span id="__span-16-16"><a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a>│ --markdown                Shortcut for --output markdown                     │
 </span><span id="__span-16-17"><a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a>│ --help                    Show this message and exit.                        │
 </span><span id="__span-16-18"><a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-16-19"><a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>
-</span><span id="__span-16-20"><a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>
-</span><span id="__span-16-21"><a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>--- stderr ---
-</span><span id="__span-16-22"><a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-16-23"><a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="config-show">Config Show<a class="headerlink" href="#config-show" title="Permanent link">&para;</a></h2>
@@ -2109,7 +2179,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>proxmox<span class="w"> </span>config-show<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.258</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.220</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a> Usage: proxmox config-show [OPTIONS] [PROFILE]                                 
 </span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>
@@ -2130,11 +2200,6 @@
 </span><span id="__span-18-17"><a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>│ --markdown                Shortcut for --output markdown                     │
 </span><span id="__span-18-18"><a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>│ --help                    Show this message and exit.                        │
 </span><span id="__span-18-19"><a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-18-20"><a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>
-</span><span id="__span-18-21"><a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a>
-</span><span id="__span-18-22"><a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>--- stderr ---
-</span><span id="__span-18-23"><a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-18-24"><a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="create">Create<a class="headerlink" href="#create" title="Permanent link">&para;</a></h2>
@@ -2142,35 +2207,44 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>proxmox<span class="w"> </span>create<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.436</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.222</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a> Usage: proxmox create [OPTIONS] PATH                                           
 </span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>
-</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a> Create resources in the Proxmox API.                                           
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a> Create new resources in the Proxmox API.                                       
 </span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>
-</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a> Examples:                                                                      
-</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a> proxmox create /nodes/pve1/qemu/100 --vmid 100 --name test-vm                  
-</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a> proxmox create /nodes/pve1/qemu/100 -d vmid=100 -d name=test-vm                
-</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a> proxmox create /nodes/pve1/qemu/100 -f params.json                             
-</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>
-</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>│ *    path      TEXT  API path where to create [required]                     │
-</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>│ --data       -d      TEXT  Data parameter (key=value, can be repeated)       │
-</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>│ --json-file  -f      TEXT  JSON file with parameters                         │
-</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>│ --output     -o      TEXT  Output format (human, json, yaml, markdown,       │
-</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>│                            table, text, raw)                                 │
-</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>│ --json                     Shortcut for --output json                        │
-</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>│ --yaml                     Shortcut for --output yaml                        │
-</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>│ --markdown                 Shortcut for --output markdown                    │
-</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>│ --help                     Show this message and exit.                       │
-</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a> Sends a POST request to create a resource. Parameters can be passed via:       
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a> - -d/--data flags: repeatable key=value pairs                                  
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a> - -f/--json-file: JSON file with bulk parameters                               
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a> Examples:                                                                      
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>     # Create VM via individual parameters                                      
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>     proxmox create /nodes/pve/qemu -d vmid=100 -d name=web-vm                  
+</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>
+</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>     # Create VM from JSON file                                                 
+</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>     proxmox create /nodes/pve/qemu -f vm.json                                  
+</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>
+</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>     # Create with JSON output                                                  
+</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a>     proxmox create /nodes/pve/qemu -d vmid=100 -d name=web-vm --json           
+</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>
+</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>     # Create storage with multiple parameters                                  
+</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>     proxmox create /nodes/pve/storage \                                        
+</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>         -d storage=nfs-backup -d type=nfs \                                    
+</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>         -d server=10.0.0.5 -d path=/mnt/backup                                 
 </span><span id="__span-20-23"><a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>
-</span><span id="__span-20-24"><a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>
-</span><span id="__span-20-25"><a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>--- stderr ---
-</span><span id="__span-20-26"><a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-20-27"><a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+</span><span id="__span-20-24"><a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-20-25"><a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>│ *    path      TEXT  API path where to create [required]                     │
+</span><span id="__span-20-26"><a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-20-27"><a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-20-28"><a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a>│ --data       -d      TEXT  Data parameter (key=value, can be repeated)       │
+</span><span id="__span-20-29"><a id="__codelineno-20-29" name="__codelineno-20-29" href="#__codelineno-20-29"></a>│ --json-file  -f      TEXT  JSON file with parameters                         │
+</span><span id="__span-20-30"><a id="__codelineno-20-30" name="__codelineno-20-30" href="#__codelineno-20-30"></a>│ --output     -o      TEXT  Output format (human, json, yaml, markdown,       │
+</span><span id="__span-20-31"><a id="__codelineno-20-31" name="__codelineno-20-31" href="#__codelineno-20-31"></a>│                            table, text, raw)                                 │
+</span><span id="__span-20-32"><a id="__codelineno-20-32" name="__codelineno-20-32" href="#__codelineno-20-32"></a>│ --json                     Shortcut for --output json                        │
+</span><span id="__span-20-33"><a id="__codelineno-20-33" name="__codelineno-20-33" href="#__codelineno-20-33"></a>│ --yaml                     Shortcut for --output yaml                        │
+</span><span id="__span-20-34"><a id="__codelineno-20-34" name="__codelineno-20-34" href="#__codelineno-20-34"></a>│ --markdown                 Shortcut for --output markdown                    │
+</span><span id="__span-20-35"><a id="__codelineno-20-35" name="__codelineno-20-35" href="#__codelineno-20-35"></a>│ --help                     Show this message and exit.                       │
+</span><span id="__span-20-36"><a id="__codelineno-20-36" name="__codelineno-20-36" href="#__codelineno-20-36"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="delete">Delete<a class="headerlink" href="#delete" title="Permanent link">&para;</a></h2>
@@ -2178,33 +2252,43 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>proxmox<span class="w"> </span>delete<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>9.588</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.222</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a> Usage: proxmox delete [OPTIONS] PATH                                           
 </span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>
 </span><span id="__span-22-3"><a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a> Delete resources from the Proxmox API.                                         
 </span><span id="__span-22-4"><a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>
-</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a> Examples:                                                                      
-</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a> proxmox delete /nodes/pve1/qemu/100                                            
-</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a> proxmox delete /nodes/pve1/qemu/100 --force                                    
-</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>
-</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>│ *    path      TEXT  API path to delete [required]                           │
-</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>│ --force     -f            Force deletion without confirmation                │
-</span><span id="__span-22-14"><a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
-</span><span id="__span-22-15"><a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>│                           text, raw)                                         │
-</span><span id="__span-22-16"><a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>│ --json                    Shortcut for --output json                         │
-</span><span id="__span-22-17"><a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>│ --yaml                    Shortcut for --output yaml                         │
-</span><span id="__span-22-18"><a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>│ --markdown                Shortcut for --output markdown                     │
-</span><span id="__span-22-19"><a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>│ --help                    Show this message and exit.                        │
-</span><span id="__span-22-20"><a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-22-21"><a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>
-</span><span id="__span-22-22"><a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>
-</span><span id="__span-22-23"><a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a>--- stderr ---
-</span><span id="__span-22-24"><a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-22-25"><a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+</span><span id="__span-22-5"><a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a> Sends a DELETE request to remove a resource. By default, prompts for           
+</span><span id="__span-22-6"><a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a> confirmation unless --force is used.                                           
+</span><span id="__span-22-7"><a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>
+</span><span id="__span-22-8"><a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a> Examples:                                                                      
+</span><span id="__span-22-9"><a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>     # Delete with confirmation prompt                                          
+</span><span id="__span-22-10"><a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>     proxmox delete /nodes/pve/qemu/100                                         
+</span><span id="__span-22-11"><a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>
+</span><span id="__span-22-12"><a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>     # Delete without confirmation (useful in scripts/automation)               
+</span><span id="__span-22-13"><a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>     proxmox delete /nodes/pve/qemu/100 --force                                 
+</span><span id="__span-22-14"><a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>
+</span><span id="__span-22-15"><a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>     # Delete with JSON output                                                  
+</span><span id="__span-22-16"><a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>     proxmox delete /nodes/pve/qemu/100 --force --json                          
+</span><span id="__span-22-17"><a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>
+</span><span id="__span-22-18"><a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>     # Delete storage resource                                                  
+</span><span id="__span-22-19"><a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>     proxmox delete /storage/backup-nfs --force                                 
+</span><span id="__span-22-20"><a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>
+</span><span id="__span-22-21"><a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>     # Silently delete in automation (exit code indicates success)              
+</span><span id="__span-22-22"><a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>     proxmox delete /nodes/pve/qemu/100 --force 2&gt;/dev/null                     
+</span><span id="__span-22-23"><a id="__codelineno-22-23" name="__codelineno-22-23" href="#__codelineno-22-23"></a>
+</span><span id="__span-22-24"><a id="__codelineno-22-24" name="__codelineno-22-24" href="#__codelineno-22-24"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-22-25"><a id="__codelineno-22-25" name="__codelineno-22-25" href="#__codelineno-22-25"></a>│ *    path      TEXT  API path to delete [required]                           │
+</span><span id="__span-22-26"><a id="__codelineno-22-26" name="__codelineno-22-26" href="#__codelineno-22-26"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-22-27"><a id="__codelineno-22-27" name="__codelineno-22-27" href="#__codelineno-22-27"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-22-28"><a id="__codelineno-22-28" name="__codelineno-22-28" href="#__codelineno-22-28"></a>│ --force     -f            Force deletion without confirmation                │
+</span><span id="__span-22-29"><a id="__codelineno-22-29" name="__codelineno-22-29" href="#__codelineno-22-29"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
+</span><span id="__span-22-30"><a id="__codelineno-22-30" name="__codelineno-22-30" href="#__codelineno-22-30"></a>│                           text, raw)                                         │
+</span><span id="__span-22-31"><a id="__codelineno-22-31" name="__codelineno-22-31" href="#__codelineno-22-31"></a>│ --json                    Shortcut for --output json                         │
+</span><span id="__span-22-32"><a id="__codelineno-22-32" name="__codelineno-22-32" href="#__codelineno-22-32"></a>│ --yaml                    Shortcut for --output yaml                         │
+</span><span id="__span-22-33"><a id="__codelineno-22-33" name="__codelineno-22-33" href="#__codelineno-22-33"></a>│ --markdown                Shortcut for --output markdown                     │
+</span><span id="__span-22-34"><a id="__codelineno-22-34" name="__codelineno-22-34" href="#__codelineno-22-34"></a>│ --help                    Show this message and exit.                        │
+</span><span id="__span-22-35"><a id="__codelineno-22-35" name="__codelineno-22-35" href="#__codelineno-22-35"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="docs">Docs<a class="headerlink" href="#docs" title="Permanent link">&para;</a></h2>
@@ -2212,7 +2296,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>proxmox<span class="w"> </span>docs<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.740</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.213</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a> Usage: proxmox docs [OPTIONS] COMMAND [ARGS]...                                
 </span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>
@@ -2225,18 +2309,13 @@
 </span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>│ generate-capture  Capture proxmox CLI command input/output recursively from  │
 </span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>│                   the command tree.                                          │
 </span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>
-</span><span id="__span-24-13"><a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>
-</span><span id="__span-24-14"><a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>--- stderr ---
-</span><span id="__span-24-15"><a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-24-16"><a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h3 id="proxmox-docs-generate-capture-help">proxmox docs generate-capture --help<a class="headerlink" href="#proxmox-docs-generate-capture-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>proxmox<span class="w"> </span>docs<span class="w"> </span>generate-capture<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>7.891</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.220</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a> Usage: proxmox docs generate-capture [OPTIONS]                                 
 </span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>
@@ -2255,11 +2334,6 @@
 </span><span id="__span-26-15"><a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a>│                               [default: 120000]                              │
 </span><span id="__span-26-16"><a id="__codelineno-26-16" name="__codelineno-26-16" href="#__codelineno-26-16"></a>│ --help                        Show this message and exit.                    │
 </span><span id="__span-26-17"><a id="__codelineno-26-17" name="__codelineno-26-17" href="#__codelineno-26-17"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-26-18"><a id="__codelineno-26-18" name="__codelineno-26-18" href="#__codelineno-26-18"></a>
-</span><span id="__span-26-19"><a id="__codelineno-26-19" name="__codelineno-26-19" href="#__codelineno-26-19"></a>
-</span><span id="__span-26-20"><a id="__codelineno-26-20" name="__codelineno-26-20" href="#__codelineno-26-20"></a>--- stderr ---
-</span><span id="__span-26-21"><a id="__codelineno-26-21" name="__codelineno-26-21" href="#__codelineno-26-21"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-26-22"><a id="__codelineno-26-22" name="__codelineno-26-22" href="#__codelineno-26-22"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
 </span></code></pre></div>
 <hr />
 <h2 id="get">Get<a class="headerlink" href="#get" title="Permanent link">&para;</a></h2>
@@ -2267,34 +2341,53 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>proxmox<span class="w"> </span>get<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.960</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.224</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a> Usage: proxmox get [OPTIONS] PATH                                              
 </span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>
 </span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a> Retrieve resources from the Proxmox API.                                       
 </span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>
-</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a> Examples:                                                                      
-</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a> proxmox get /nodes                                                             
-</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a> proxmox get /nodes/pve1/status                                                 
-</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a> proxmox get /nodes/pve1/qemu --output json                                     
-</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>
-</span><span id="__span-28-10"><a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-28-11"><a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>│ *    path      TEXT  API path to retrieve [required]                         │
-</span><span id="__span-28-12"><a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-28-13"><a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-28-14"><a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a>│ --columns   -c      TEXT  Comma-separated columns to display                 │
-</span><span id="__span-28-15"><a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
-</span><span id="__span-28-16"><a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a>│                           text, raw)                                         │
-</span><span id="__span-28-17"><a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a>│ --json                    Shortcut for --output json                         │
-</span><span id="__span-28-18"><a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a>│ --yaml                    Shortcut for --output yaml                         │
-</span><span id="__span-28-19"><a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a>│ --markdown                Shortcut for --output markdown                     │
-</span><span id="__span-28-20"><a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a>│ --help                    Show this message and exit.                        │
-</span><span id="__span-28-21"><a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-28-22"><a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a> Fetches data from API endpoints with optional filtering, pagination,           
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a> watching/monitoring, and flexible output formatting.                           
+</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>
+</span><span id="__span-28-8"><a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a> Examples:                                                                      
+</span><span id="__span-28-9"><a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>     # List all nodes                                                           
+</span><span id="__span-28-10"><a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>     proxmox get /nodes                                                         
+</span><span id="__span-28-11"><a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>
+</span><span id="__span-28-12"><a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a>     # Get specific node info                                                   
+</span><span id="__span-28-13"><a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a>     proxmox get /nodes/pve1/status                                             
+</span><span id="__span-28-14"><a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a>
+</span><span id="__span-28-15"><a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a>     # Get VMs on a node                                                        
+</span><span id="__span-28-16"><a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a>     proxmox get /nodes/pve1/qemu --output json                                 
+</span><span id="__span-28-17"><a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a>
+</span><span id="__span-28-18"><a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a>     # Filter results                                                           
+</span><span id="__span-28-19"><a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a>     proxmox get /nodes/pve1/qemu --filter status=running --limit 10            
+</span><span id="__span-28-20"><a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a>
+</span><span id="__span-28-21"><a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a>     # Watch resource for changes (refresh every 5 seconds)                     
+</span><span id="__span-28-22"><a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a>     proxmox get /nodes/pve1/status --watch 5                                   
 </span><span id="__span-28-23"><a id="__codelineno-28-23" name="__codelineno-28-23" href="#__codelineno-28-23"></a>
-</span><span id="__span-28-24"><a id="__codelineno-28-24" name="__codelineno-28-24" href="#__codelineno-28-24"></a>--- stderr ---
-</span><span id="__span-28-25"><a id="__codelineno-28-25" name="__codelineno-28-25" href="#__codelineno-28-25"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-28-26"><a id="__codelineno-28-26" name="__codelineno-28-26" href="#__codelineno-28-26"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+</span><span id="__span-28-24"><a id="__codelineno-28-24" name="__codelineno-28-24" href="#__codelineno-28-24"></a>     # Get storage list with YAML output                                        
+</span><span id="__span-28-25"><a id="__codelineno-28-25" name="__codelineno-28-25" href="#__codelineno-28-25"></a>     proxmox get /storage --yaml                                                
+</span><span id="__span-28-26"><a id="__codelineno-28-26" name="__codelineno-28-26" href="#__codelineno-28-26"></a>
+</span><span id="__span-28-27"><a id="__codelineno-28-27" name="__codelineno-28-27" href="#__codelineno-28-27"></a>     # Select specific columns                                                  
+</span><span id="__span-28-28"><a id="__codelineno-28-28" name="__codelineno-28-28" href="#__codelineno-28-28"></a>     proxmox get /nodes/pve1/qemu --columns vmid,name,status --output table     
+</span><span id="__span-28-29"><a id="__codelineno-28-29" name="__codelineno-28-29" href="#__codelineno-28-29"></a>
+</span><span id="__span-28-30"><a id="__codelineno-28-30" name="__codelineno-28-30" href="#__codelineno-28-30"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-28-31"><a id="__codelineno-28-31" name="__codelineno-28-31" href="#__codelineno-28-31"></a>│ *    path      TEXT  API path to retrieve [required]                         │
+</span><span id="__span-28-32"><a id="__codelineno-28-32" name="__codelineno-28-32" href="#__codelineno-28-32"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-28-33"><a id="__codelineno-28-33" name="__codelineno-28-33" href="#__codelineno-28-33"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-28-34"><a id="__codelineno-28-34" name="__codelineno-28-34" href="#__codelineno-28-34"></a>│ --columns   -c      TEXT     Comma-separated columns to display              │
+</span><span id="__span-28-35"><a id="__codelineno-28-35" name="__codelineno-28-35" href="#__codelineno-28-35"></a>│ --limit     -l      INTEGER  Maximum number of results to return             │
+</span><span id="__span-28-36"><a id="__codelineno-28-36" name="__codelineno-28-36" href="#__codelineno-28-36"></a>│ --offset            INTEGER  Number of results to skip (for pagination)      │
+</span><span id="__span-28-37"><a id="__codelineno-28-37" name="__codelineno-28-37" href="#__codelineno-28-37"></a>│ --filter    -f      TEXT     Filter results (field=value or field~substring) │
+</span><span id="__span-28-38"><a id="__codelineno-28-38" name="__codelineno-28-38" href="#__codelineno-28-38"></a>│ --watch     -w      INTEGER  Refresh every N seconds (Ctrl+C to stop)        │
+</span><span id="__span-28-39"><a id="__codelineno-28-39" name="__codelineno-28-39" href="#__codelineno-28-39"></a>│ --output    -o      TEXT     Output format (human, json, yaml, markdown,     │
+</span><span id="__span-28-40"><a id="__codelineno-28-40" name="__codelineno-28-40" href="#__codelineno-28-40"></a>│                              table, text, raw)                               │
+</span><span id="__span-28-41"><a id="__codelineno-28-41" name="__codelineno-28-41" href="#__codelineno-28-41"></a>│ --json                       Shortcut for --output json                      │
+</span><span id="__span-28-42"><a id="__codelineno-28-42" name="__codelineno-28-42" href="#__codelineno-28-42"></a>│ --yaml                       Shortcut for --output yaml                      │
+</span><span id="__span-28-43"><a id="__codelineno-28-43" name="__codelineno-28-43" href="#__codelineno-28-43"></a>│ --markdown                   Shortcut for --output markdown                  │
+</span><span id="__span-28-44"><a id="__codelineno-28-44" name="__codelineno-28-44" href="#__codelineno-28-44"></a>│ --help                       Show this message and exit.                     │
+</span><span id="__span-28-45"><a id="__codelineno-28-45" name="__codelineno-28-45" href="#__codelineno-28-45"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="help-cmd">Help Cmd<a class="headerlink" href="#help-cmd" title="Permanent link">&para;</a></h2>
@@ -2302,7 +2395,7 @@
 <p><strong>Input:</strong></p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>proxmox<span class="w"> </span>help-cmd<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>9.397</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.234</code></p>
 <p><strong>Output:</strong></p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a> Usage: proxmox help-cmd [OPTIONS] [PATH]                                       
 </span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>
@@ -2326,188 +2419,256 @@
 </span><span id="__span-30-20"><a id="__codelineno-30-20" name="__codelineno-30-20" href="#__codelineno-30-20"></a>│ --markdown                Shortcut for --output markdown                     │
 </span><span id="__span-30-21"><a id="__codelineno-30-21" name="__codelineno-30-21" href="#__codelineno-30-21"></a>│ --help                    Show this message and exit.                        │
 </span><span id="__span-30-22"><a id="__codelineno-30-22" name="__codelineno-30-22" href="#__codelineno-30-22"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-30-23"><a id="__codelineno-30-23" name="__codelineno-30-23" href="#__codelineno-30-23"></a>
-</span><span id="__span-30-24"><a id="__codelineno-30-24" name="__codelineno-30-24" href="#__codelineno-30-24"></a>
-</span><span id="__span-30-25"><a id="__codelineno-30-25" name="__codelineno-30-25" href="#__codelineno-30-25"></a>--- stderr ---
-</span><span id="__span-30-26"><a id="__codelineno-30-26" name="__codelineno-30-26" href="#__codelineno-30-26"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-30-27"><a id="__codelineno-30-27" name="__codelineno-30-27" href="#__codelineno-30-27"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+</span></code></pre></div>
+<hr />
+<h2 id="init">Init<a class="headerlink" href="#init" title="Permanent link">&para;</a></h2>
+<h3 id="proxmox-init-help">proxmox init --help<a class="headerlink" href="#proxmox-init-help" title="Permanent link">&para;</a></h3>
+<p><strong>Input:</strong></p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>proxmox<span class="w"> </span>init<span class="w"> </span>--help
+</span></code></pre></div>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.236</code></p>
+<p><strong>Output:</strong></p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a> Usage: proxmox init [OPTIONS]                                                  
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a> Initialize CLI config for production and mock TUI usage.                       
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a> This command prompts for production endpoint/token information and             
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a> automatically creates/updates a ``mock`` profile for fake-Proxmox usage        
+</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a> without requiring any user-provided mock credentials.                          
+</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>
+</span><span id="__span-32-9"><a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-32-10"><a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a>│ --profile   -p      TEXT  Profile name to create [default: default]          │
+</span><span id="__span-32-11"><a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a>│ --service           TEXT  Service type (PVE/PMG/PBS) [default: PVE]          │
+</span><span id="__span-32-12"><a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a>│ --force     -f            Overwrite profile without prompt                   │
+</span><span id="__span-32-13"><a id="__codelineno-32-13" name="__codelineno-32-13" href="#__codelineno-32-13"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
+</span><span id="__span-32-14"><a id="__codelineno-32-14" name="__codelineno-32-14" href="#__codelineno-32-14"></a>│                           text, raw)                                         │
+</span><span id="__span-32-15"><a id="__codelineno-32-15" name="__codelineno-32-15" href="#__codelineno-32-15"></a>│ --json                    Shortcut for --output json                         │
+</span><span id="__span-32-16"><a id="__codelineno-32-16" name="__codelineno-32-16" href="#__codelineno-32-16"></a>│ --yaml                    Shortcut for --output yaml                         │
+</span><span id="__span-32-17"><a id="__codelineno-32-17" name="__codelineno-32-17" href="#__codelineno-32-17"></a>│ --markdown                Shortcut for --output markdown                     │
+</span><span id="__span-32-18"><a id="__codelineno-32-18" name="__codelineno-32-18" href="#__codelineno-32-18"></a>│ --help                    Show this message and exit.                        │
+</span><span id="__span-32-19"><a id="__codelineno-32-19" name="__codelineno-32-19" href="#__codelineno-32-19"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="ls">Ls<a class="headerlink" href="#ls" title="Permanent link">&para;</a></h2>
 <h3 id="proxmox-ls-help">proxmox ls --help<a class="headerlink" href="#proxmox-ls-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>proxmox<span class="w"> </span>ls<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>proxmox<span class="w"> </span>ls<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.796</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.234</code></p>
 <p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a> Usage: proxmox ls [OPTIONS] PATH                                               
-</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>
-</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a> List child resources at a given path.                                          
-</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>
-</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a> Examples:                                                                      
-</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a> proxmox ls /nodes                                                              
-</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a> proxmox ls /nodes/pve1/qemu                                                    
-</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a> proxmox ls /nodes/pve1/qemu --columns vmid,name,status                         
-</span><span id="__span-32-9"><a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a> proxmox ls /nodes/pve1/qemu --sort name                                        
-</span><span id="__span-32-10"><a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a>
-</span><span id="__span-32-11"><a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-32-12"><a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a>│ *    path      TEXT  API path to list [required]                             │
-</span><span id="__span-32-13"><a id="__codelineno-32-13" name="__codelineno-32-13" href="#__codelineno-32-13"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-32-14"><a id="__codelineno-32-14" name="__codelineno-32-14" href="#__codelineno-32-14"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-32-15"><a id="__codelineno-32-15" name="__codelineno-32-15" href="#__codelineno-32-15"></a>│ --columns   -c      TEXT  Comma-separated columns to display                 │
-</span><span id="__span-32-16"><a id="__codelineno-32-16" name="__codelineno-32-16" href="#__codelineno-32-16"></a>│ --sort              TEXT  Field to sort by                                   │
-</span><span id="__span-32-17"><a id="__codelineno-32-17" name="__codelineno-32-17" href="#__codelineno-32-17"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
-</span><span id="__span-32-18"><a id="__codelineno-32-18" name="__codelineno-32-18" href="#__codelineno-32-18"></a>│                           text, raw)                                         │
-</span><span id="__span-32-19"><a id="__codelineno-32-19" name="__codelineno-32-19" href="#__codelineno-32-19"></a>│ --json                    Shortcut for --output json                         │
-</span><span id="__span-32-20"><a id="__codelineno-32-20" name="__codelineno-32-20" href="#__codelineno-32-20"></a>│ --yaml                    Shortcut for --output yaml                         │
-</span><span id="__span-32-21"><a id="__codelineno-32-21" name="__codelineno-32-21" href="#__codelineno-32-21"></a>│ --markdown                Shortcut for --output markdown                     │
-</span><span id="__span-32-22"><a id="__codelineno-32-22" name="__codelineno-32-22" href="#__codelineno-32-22"></a>│ --help                    Show this message and exit.                        │
-</span><span id="__span-32-23"><a id="__codelineno-32-23" name="__codelineno-32-23" href="#__codelineno-32-23"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-32-24"><a id="__codelineno-32-24" name="__codelineno-32-24" href="#__codelineno-32-24"></a>
-</span><span id="__span-32-25"><a id="__codelineno-32-25" name="__codelineno-32-25" href="#__codelineno-32-25"></a>
-</span><span id="__span-32-26"><a id="__codelineno-32-26" name="__codelineno-32-26" href="#__codelineno-32-26"></a>--- stderr ---
-</span><span id="__span-32-27"><a id="__codelineno-32-27" name="__codelineno-32-27" href="#__codelineno-32-27"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-32-28"><a id="__codelineno-32-28" name="__codelineno-32-28" href="#__codelineno-32-28"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a> Usage: proxmox ls [OPTIONS] PATH                                               
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a> List child resources at a given API path.                                      
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>
+</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a> Fetches a collection from the API endpoint and displays the results            
+</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a> with optional sorting, filtering, pagination, and format selection.            
+</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>
+</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a> Filtering syntax:                                                              
+</span><span id="__span-34-9"><a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a>     - field=value      : Exact match                                           
+</span><span id="__span-34-10"><a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>     - field~substring  : Case-insensitive substring match                      
+</span><span id="__span-34-11"><a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a>
+</span><span id="__span-34-12"><a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a> Examples:                                                                      
+</span><span id="__span-34-13"><a id="__codelineno-34-13" name="__codelineno-34-13" href="#__codelineno-34-13"></a>     # List all nodes                                                           
+</span><span id="__span-34-14"><a id="__codelineno-34-14" name="__codelineno-34-14" href="#__codelineno-34-14"></a>     proxmox ls /nodes                                                          
+</span><span id="__span-34-15"><a id="__codelineno-34-15" name="__codelineno-34-15" href="#__codelineno-34-15"></a>
+</span><span id="__span-34-16"><a id="__codelineno-34-16" name="__codelineno-34-16" href="#__codelineno-34-16"></a>     # List VMs on a node                                                       
+</span><span id="__span-34-17"><a id="__codelineno-34-17" name="__codelineno-34-17" href="#__codelineno-34-17"></a>     proxmox ls /nodes/pve1/qemu                                                
+</span><span id="__span-34-18"><a id="__codelineno-34-18" name="__codelineno-34-18" href="#__codelineno-34-18"></a>
+</span><span id="__span-34-19"><a id="__codelineno-34-19" name="__codelineno-34-19" href="#__codelineno-34-19"></a>     # List with specific columns                                               
+</span><span id="__span-34-20"><a id="__codelineno-34-20" name="__codelineno-34-20" href="#__codelineno-34-20"></a>     proxmox ls /nodes/pve1/qemu --columns vmid,name,status                     
+</span><span id="__span-34-21"><a id="__codelineno-34-21" name="__codelineno-34-21" href="#__codelineno-34-21"></a>
+</span><span id="__span-34-22"><a id="__codelineno-34-22" name="__codelineno-34-22" href="#__codelineno-34-22"></a>     # Sort and limit results                                                   
+</span><span id="__span-34-23"><a id="__codelineno-34-23" name="__codelineno-34-23" href="#__codelineno-34-23"></a>     proxmox ls /nodes/pve1/qemu --sort name --reverse --limit 10               
+</span><span id="__span-34-24"><a id="__codelineno-34-24" name="__codelineno-34-24" href="#__codelineno-34-24"></a>
+</span><span id="__span-34-25"><a id="__codelineno-34-25" name="__codelineno-34-25" href="#__codelineno-34-25"></a>     # Filter running VMs and display as table                                  
+</span><span id="__span-34-26"><a id="__codelineno-34-26" name="__codelineno-34-26" href="#__codelineno-34-26"></a>     proxmox ls /nodes/pve1/qemu --filter status=running --output table         
+</span><span id="__span-34-27"><a id="__codelineno-34-27" name="__codelineno-34-27" href="#__codelineno-34-27"></a>
+</span><span id="__span-34-28"><a id="__codelineno-34-28" name="__codelineno-34-28" href="#__codelineno-34-28"></a>     # Pagination (skip first 20, get 10)                                       
+</span><span id="__span-34-29"><a id="__codelineno-34-29" name="__codelineno-34-29" href="#__codelineno-34-29"></a>     proxmox ls /nodes/pve1/qemu --offset 20 --limit 10                         
+</span><span id="__span-34-30"><a id="__codelineno-34-30" name="__codelineno-34-30" href="#__codelineno-34-30"></a>
+</span><span id="__span-34-31"><a id="__codelineno-34-31" name="__codelineno-34-31" href="#__codelineno-34-31"></a>     # Watch mode (refresh every 5 seconds)                                     
+</span><span id="__span-34-32"><a id="__codelineno-34-32" name="__codelineno-34-32" href="#__codelineno-34-32"></a>     proxmox ls /nodes/pve1/qemu --watch 5                                      
+</span><span id="__span-34-33"><a id="__codelineno-34-33" name="__codelineno-34-33" href="#__codelineno-34-33"></a>
+</span><span id="__span-34-34"><a id="__codelineno-34-34" name="__codelineno-34-34" href="#__codelineno-34-34"></a>     # Get storage list as JSON                                                 
+</span><span id="__span-34-35"><a id="__codelineno-34-35" name="__codelineno-34-35" href="#__codelineno-34-35"></a>     proxmox ls /storage --json                                                 
+</span><span id="__span-34-36"><a id="__codelineno-34-36" name="__codelineno-34-36" href="#__codelineno-34-36"></a>
+</span><span id="__span-34-37"><a id="__codelineno-34-37" name="__codelineno-34-37" href="#__codelineno-34-37"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-34-38"><a id="__codelineno-34-38" name="__codelineno-34-38" href="#__codelineno-34-38"></a>│ *    path      TEXT  API path to list [required]                             │
+</span><span id="__span-34-39"><a id="__codelineno-34-39" name="__codelineno-34-39" href="#__codelineno-34-39"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-34-40"><a id="__codelineno-34-40" name="__codelineno-34-40" href="#__codelineno-34-40"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-34-41"><a id="__codelineno-34-41" name="__codelineno-34-41" href="#__codelineno-34-41"></a>│ --columns   -c      TEXT     Comma-separated columns to display              │
+</span><span id="__span-34-42"><a id="__codelineno-34-42" name="__codelineno-34-42" href="#__codelineno-34-42"></a>│ --sort              TEXT     Field to sort by                                │
+</span><span id="__span-34-43"><a id="__codelineno-34-43" name="__codelineno-34-43" href="#__codelineno-34-43"></a>│ --reverse   -r               Sort in reverse order                           │
+</span><span id="__span-34-44"><a id="__codelineno-34-44" name="__codelineno-34-44" href="#__codelineno-34-44"></a>│ --limit     -l      INTEGER  Maximum number of results to return             │
+</span><span id="__span-34-45"><a id="__codelineno-34-45" name="__codelineno-34-45" href="#__codelineno-34-45"></a>│ --offset            INTEGER  Number of results to skip (for pagination)      │
+</span><span id="__span-34-46"><a id="__codelineno-34-46" name="__codelineno-34-46" href="#__codelineno-34-46"></a>│ --filter    -f      TEXT     Filter results (field=value or field~substring) │
+</span><span id="__span-34-47"><a id="__codelineno-34-47" name="__codelineno-34-47" href="#__codelineno-34-47"></a>│ --watch     -w      INTEGER  Refresh every N seconds (Ctrl+C to stop)        │
+</span><span id="__span-34-48"><a id="__codelineno-34-48" name="__codelineno-34-48" href="#__codelineno-34-48"></a>│ --output    -o      TEXT     Output format (human, json, yaml, markdown,     │
+</span><span id="__span-34-49"><a id="__codelineno-34-49" name="__codelineno-34-49" href="#__codelineno-34-49"></a>│                              table, text, raw)                               │
+</span><span id="__span-34-50"><a id="__codelineno-34-50" name="__codelineno-34-50" href="#__codelineno-34-50"></a>│ --json                       Shortcut for --output json                      │
+</span><span id="__span-34-51"><a id="__codelineno-34-51" name="__codelineno-34-51" href="#__codelineno-34-51"></a>│ --yaml                       Shortcut for --output yaml                      │
+</span><span id="__span-34-52"><a id="__codelineno-34-52" name="__codelineno-34-52" href="#__codelineno-34-52"></a>│ --markdown                   Shortcut for --output markdown                  │
+</span><span id="__span-34-53"><a id="__codelineno-34-53" name="__codelineno-34-53" href="#__codelineno-34-53"></a>│ --help                       Show this message and exit.                     │
+</span><span id="__span-34-54"><a id="__codelineno-34-54" name="__codelineno-34-54" href="#__codelineno-34-54"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="perf-test">Perf Test<a class="headerlink" href="#perf-test" title="Permanent link">&para;</a></h2>
 <h3 id="proxmox-perf-test-help">proxmox perf-test --help<a class="headerlink" href="#proxmox-perf-test-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>proxmox<span class="w"> </span>perf-test<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>proxmox<span class="w"> </span>perf-test<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.146</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.224</code></p>
 <p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a> Usage: proxmox perf-test [OPTIONS] [OPERATION]                                 
-</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>
-</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a> Run performance tests.                                                         
-</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>
-</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a> Example:                                                                       
-</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a> proxmox perf-test get --iterations 20                                          
-</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a> proxmox perf-test list                                                         
-</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>
-</span><span id="__span-34-9"><a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-34-10"><a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>│   operation      [OPERATION]  Operation type (get/create/list)               │
-</span><span id="__span-34-11"><a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a>│                               [default: get]                                 │
-</span><span id="__span-34-12"><a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-34-13"><a id="__codelineno-34-13" name="__codelineno-34-13" href="#__codelineno-34-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-34-14"><a id="__codelineno-34-14" name="__codelineno-34-14" href="#__codelineno-34-14"></a>│ --iterations          INTEGER  Number of iterations [default: 10]            │
-</span><span id="__span-34-15"><a id="__codelineno-34-15" name="__codelineno-34-15" href="#__codelineno-34-15"></a>│ --output      -o      TEXT     Output format (human, json, yaml, markdown,   │
-</span><span id="__span-34-16"><a id="__codelineno-34-16" name="__codelineno-34-16" href="#__codelineno-34-16"></a>│                                table, text, raw)                             │
-</span><span id="__span-34-17"><a id="__codelineno-34-17" name="__codelineno-34-17" href="#__codelineno-34-17"></a>│ --json                         Shortcut for --output json                    │
-</span><span id="__span-34-18"><a id="__codelineno-34-18" name="__codelineno-34-18" href="#__codelineno-34-18"></a>│ --yaml                         Shortcut for --output yaml                    │
-</span><span id="__span-34-19"><a id="__codelineno-34-19" name="__codelineno-34-19" href="#__codelineno-34-19"></a>│ --markdown                     Shortcut for --output markdown                │
-</span><span id="__span-34-20"><a id="__codelineno-34-20" name="__codelineno-34-20" href="#__codelineno-34-20"></a>│ --help                         Show this message and exit.                   │
-</span><span id="__span-34-21"><a id="__codelineno-34-21" name="__codelineno-34-21" href="#__codelineno-34-21"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-34-22"><a id="__codelineno-34-22" name="__codelineno-34-22" href="#__codelineno-34-22"></a>
-</span><span id="__span-34-23"><a id="__codelineno-34-23" name="__codelineno-34-23" href="#__codelineno-34-23"></a>
-</span><span id="__span-34-24"><a id="__codelineno-34-24" name="__codelineno-34-24" href="#__codelineno-34-24"></a>--- stderr ---
-</span><span id="__span-34-25"><a id="__codelineno-34-25" name="__codelineno-34-25" href="#__codelineno-34-25"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-34-26"><a id="__codelineno-34-26" name="__codelineno-34-26" href="#__codelineno-34-26"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a> Usage: proxmox perf-test [OPTIONS] [OPERATION]                                 
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a> Run performance tests.                                                         
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a> Example:                                                                       
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a> proxmox perf-test get --iterations 20                                          
+</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a> proxmox perf-test list                                                         
+</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>
+</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a>│   operation      [OPERATION]  Operation type (get/create/list)               │
+</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>│                               [default: get]                                 │
+</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a>│ --iterations          INTEGER  Number of iterations [default: 10]            │
+</span><span id="__span-36-15"><a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a>│ --output      -o      TEXT     Output format (human, json, yaml, markdown,   │
+</span><span id="__span-36-16"><a id="__codelineno-36-16" name="__codelineno-36-16" href="#__codelineno-36-16"></a>│                                table, text, raw)                             │
+</span><span id="__span-36-17"><a id="__codelineno-36-17" name="__codelineno-36-17" href="#__codelineno-36-17"></a>│ --json                         Shortcut for --output json                    │
+</span><span id="__span-36-18"><a id="__codelineno-36-18" name="__codelineno-36-18" href="#__codelineno-36-18"></a>│ --yaml                         Shortcut for --output yaml                    │
+</span><span id="__span-36-19"><a id="__codelineno-36-19" name="__codelineno-36-19" href="#__codelineno-36-19"></a>│ --markdown                     Shortcut for --output markdown                │
+</span><span id="__span-36-20"><a id="__codelineno-36-20" name="__codelineno-36-20" href="#__codelineno-36-20"></a>│ --help                         Show this message and exit.                   │
+</span><span id="__span-36-21"><a id="__codelineno-36-21" name="__codelineno-36-21" href="#__codelineno-36-21"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="set-cmd">Set Cmd<a class="headerlink" href="#set-cmd" title="Permanent link">&para;</a></h2>
 <h3 id="proxmox-set-cmd-help">proxmox set-cmd --help<a class="headerlink" href="#proxmox-set-cmd-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>proxmox<span class="w"> </span>set-cmd<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>proxmox<span class="w"> </span>set-cmd<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>9.247</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.231</code></p>
 <p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a> Usage: proxmox set-cmd [OPTIONS] PATH                                          
-</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>
-</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a> Update resources in the Proxmox API.                                           
-</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>
-</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a> Examples:                                                                      
-</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a> proxmox set /nodes/pve1 -d description=Node1                                   
-</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a> proxmox set /nodes/pve1 -d description=Node1 -d features=snapshot,nesting      
-</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a> proxmox set /nodes/pve1 -f updates.json                                        
-</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
-</span><span id="__span-36-10"><a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-36-11"><a id="__codelineno-36-11" name="__codelineno-36-11" href="#__codelineno-36-11"></a>│ *    path      TEXT  API path to update [required]                           │
-</span><span id="__span-36-12"><a id="__codelineno-36-12" name="__codelineno-36-12" href="#__codelineno-36-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-36-13"><a id="__codelineno-36-13" name="__codelineno-36-13" href="#__codelineno-36-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-36-14"><a id="__codelineno-36-14" name="__codelineno-36-14" href="#__codelineno-36-14"></a>│ --data       -d      TEXT  Data parameter (key=value, can be repeated)       │
-</span><span id="__span-36-15"><a id="__codelineno-36-15" name="__codelineno-36-15" href="#__codelineno-36-15"></a>│ --json-file  -f      TEXT  JSON file with parameters                         │
-</span><span id="__span-36-16"><a id="__codelineno-36-16" name="__codelineno-36-16" href="#__codelineno-36-16"></a>│ --output     -o      TEXT  Output format (human, json, yaml, markdown,       │
-</span><span id="__span-36-17"><a id="__codelineno-36-17" name="__codelineno-36-17" href="#__codelineno-36-17"></a>│                            table, text, raw)                                 │
-</span><span id="__span-36-18"><a id="__codelineno-36-18" name="__codelineno-36-18" href="#__codelineno-36-18"></a>│ --json                     Shortcut for --output json                        │
-</span><span id="__span-36-19"><a id="__codelineno-36-19" name="__codelineno-36-19" href="#__codelineno-36-19"></a>│ --yaml                     Shortcut for --output yaml                        │
-</span><span id="__span-36-20"><a id="__codelineno-36-20" name="__codelineno-36-20" href="#__codelineno-36-20"></a>│ --markdown                 Shortcut for --output markdown                    │
-</span><span id="__span-36-21"><a id="__codelineno-36-21" name="__codelineno-36-21" href="#__codelineno-36-21"></a>│ --help                     Show this message and exit.                       │
-</span><span id="__span-36-22"><a id="__codelineno-36-22" name="__codelineno-36-22" href="#__codelineno-36-22"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-36-23"><a id="__codelineno-36-23" name="__codelineno-36-23" href="#__codelineno-36-23"></a>
-</span><span id="__span-36-24"><a id="__codelineno-36-24" name="__codelineno-36-24" href="#__codelineno-36-24"></a>
-</span><span id="__span-36-25"><a id="__codelineno-36-25" name="__codelineno-36-25" href="#__codelineno-36-25"></a>--- stderr ---
-</span><span id="__span-36-26"><a id="__codelineno-36-26" name="__codelineno-36-26" href="#__codelineno-36-26"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-36-27"><a id="__codelineno-36-27" name="__codelineno-36-27" href="#__codelineno-36-27"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a> Usage: proxmox set-cmd [OPTIONS] PATH                                          
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a> Update (PUT/PATCH) resources in the Proxmox API.                               
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a> Sends a PUT request to modify an existing resource. Parameters can be          
+</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a> passed via -d/--data flags or a JSON file. Some fields can be unset            
+</span><span id="__span-38-7"><a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a> using empty values or delete prefixes.                                         
+</span><span id="__span-38-8"><a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a>
+</span><span id="__span-38-9"><a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a> Examples:                                                                      
+</span><span id="__span-38-10"><a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a>     # Update node description                                                  
+</span><span id="__span-38-11"><a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>     proxmox set /nodes/pve1 -d description=&quot;Production Node 1&quot;                 
+</span><span id="__span-38-12"><a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a>
+</span><span id="__span-38-13"><a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a>     # Update with multiple parameters                                          
+</span><span id="__span-38-14"><a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a>     proxmox set /nodes/pve1 -d features=snapshot,nesting -d cpu=host           
+</span><span id="__span-38-15"><a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a>
+</span><span id="__span-38-16"><a id="__codelineno-38-16" name="__codelineno-38-16" href="#__codelineno-38-16"></a>     # Update from JSON file                                                    
+</span><span id="__span-38-17"><a id="__codelineno-38-17" name="__codelineno-38-17" href="#__codelineno-38-17"></a>     proxmox set /nodes/pve1 -f node-update.json                                
+</span><span id="__span-38-18"><a id="__codelineno-38-18" name="__codelineno-38-18" href="#__codelineno-38-18"></a>
+</span><span id="__span-38-19"><a id="__codelineno-38-19" name="__codelineno-38-19" href="#__codelineno-38-19"></a>     # Update VM configuration                                                  
+</span><span id="__span-38-20"><a id="__codelineno-38-20" name="__codelineno-38-20" href="#__codelineno-38-20"></a>     proxmox set /nodes/pve/qemu/100 -d memory=8192 -d cores=4                  
+</span><span id="__span-38-21"><a id="__codelineno-38-21" name="__codelineno-38-21" href="#__codelineno-38-21"></a>
+</span><span id="__span-38-22"><a id="__codelineno-38-22" name="__codelineno-38-22" href="#__codelineno-38-22"></a>     # Update user profile                                                      
+</span><span id="__span-38-23"><a id="__codelineno-38-23" name="__codelineno-38-23" href="#__codelineno-38-23"></a>     proxmox set /access/users/user@pam -d firstname=&quot;John&quot; -d lastname=&quot;Doe&quot;   
+</span><span id="__span-38-24"><a id="__codelineno-38-24" name="__codelineno-38-24" href="#__codelineno-38-24"></a>
+</span><span id="__span-38-25"><a id="__codelineno-38-25" name="__codelineno-38-25" href="#__codelineno-38-25"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-38-26"><a id="__codelineno-38-26" name="__codelineno-38-26" href="#__codelineno-38-26"></a>│ *    path      TEXT  API path to update [required]                           │
+</span><span id="__span-38-27"><a id="__codelineno-38-27" name="__codelineno-38-27" href="#__codelineno-38-27"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-38-28"><a id="__codelineno-38-28" name="__codelineno-38-28" href="#__codelineno-38-28"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-38-29"><a id="__codelineno-38-29" name="__codelineno-38-29" href="#__codelineno-38-29"></a>│ --data       -d      TEXT  Data parameter (key=value, can be repeated)       │
+</span><span id="__span-38-30"><a id="__codelineno-38-30" name="__codelineno-38-30" href="#__codelineno-38-30"></a>│ --json-file  -f      TEXT  JSON file with parameters                         │
+</span><span id="__span-38-31"><a id="__codelineno-38-31" name="__codelineno-38-31" href="#__codelineno-38-31"></a>│ --output     -o      TEXT  Output format (human, json, yaml, markdown,       │
+</span><span id="__span-38-32"><a id="__codelineno-38-32" name="__codelineno-38-32" href="#__codelineno-38-32"></a>│                            table, text, raw)                                 │
+</span><span id="__span-38-33"><a id="__codelineno-38-33" name="__codelineno-38-33" href="#__codelineno-38-33"></a>│ --json                     Shortcut for --output json                        │
+</span><span id="__span-38-34"><a id="__codelineno-38-34" name="__codelineno-38-34" href="#__codelineno-38-34"></a>│ --yaml                     Shortcut for --output yaml                        │
+</span><span id="__span-38-35"><a id="__codelineno-38-35" name="__codelineno-38-35" href="#__codelineno-38-35"></a>│ --markdown                 Shortcut for --output markdown                    │
+</span><span id="__span-38-36"><a id="__codelineno-38-36" name="__codelineno-38-36" href="#__codelineno-38-36"></a>│ --help                     Show this message and exit.                       │
+</span><span id="__span-38-37"><a id="__codelineno-38-37" name="__codelineno-38-37" href="#__codelineno-38-37"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="tui">Tui<a class="headerlink" href="#tui" title="Permanent link">&para;</a></h2>
 <h3 id="proxmox-tui-help">proxmox tui --help<a class="headerlink" href="#proxmox-tui-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a>proxmox<span class="w"> </span>tui<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>proxmox<span class="w"> </span>tui<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.667</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.216</code></p>
 <p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a> Usage: proxmox tui [OPTIONS] [MODE]:[mock]                                     
-</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>
-</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a> Launch interactive Proxmox TUI.                                                
-</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>
-</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a> Examples:                                                                      
-</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a> proxmox tui                                                                    
-</span><span id="__span-38-7"><a id="__codelineno-38-7" name="__codelineno-38-7" href="#__codelineno-38-7"></a> proxmox tui mock                                                               
-</span><span id="__span-38-8"><a id="__codelineno-38-8" name="__codelineno-38-8" href="#__codelineno-38-8"></a> pbx tui                                                                        
-</span><span id="__span-38-9"><a id="__codelineno-38-9" name="__codelineno-38-9" href="#__codelineno-38-9"></a> pbx tui mock                                                                   
-</span><span id="__span-38-10"><a id="__codelineno-38-10" name="__codelineno-38-10" href="#__codelineno-38-10"></a>
-</span><span id="__span-38-11"><a id="__codelineno-38-11" name="__codelineno-38-11" href="#__codelineno-38-11"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-38-12"><a id="__codelineno-38-12" name="__codelineno-38-12" href="#__codelineno-38-12"></a>│   mode      [MODE]:[mock]  Optional mode. Use &#39;mock&#39; to run TUI against      │
-</span><span id="__span-38-13"><a id="__codelineno-38-13" name="__codelineno-38-13" href="#__codelineno-38-13"></a>│                            in-memory mock backend.                           │
-</span><span id="__span-38-14"><a id="__codelineno-38-14" name="__codelineno-38-14" href="#__codelineno-38-14"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-38-15"><a id="__codelineno-38-15" name="__codelineno-38-15" href="#__codelineno-38-15"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-38-16"><a id="__codelineno-38-16" name="__codelineno-38-16" href="#__codelineno-38-16"></a>│ --path  -p      TEXT  Initial API path to load in the TUI. [default: /nodes] │
-</span><span id="__span-38-17"><a id="__codelineno-38-17" name="__codelineno-38-17" href="#__codelineno-38-17"></a>│ --help                Show this message and exit.                            │
-</span><span id="__span-38-18"><a id="__codelineno-38-18" name="__codelineno-38-18" href="#__codelineno-38-18"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-38-19"><a id="__codelineno-38-19" name="__codelineno-38-19" href="#__codelineno-38-19"></a>
-</span><span id="__span-38-20"><a id="__codelineno-38-20" name="__codelineno-38-20" href="#__codelineno-38-20"></a>
-</span><span id="__span-38-21"><a id="__codelineno-38-21" name="__codelineno-38-21" href="#__codelineno-38-21"></a>--- stderr ---
-</span><span id="__span-38-22"><a id="__codelineno-38-22" name="__codelineno-38-22" href="#__codelineno-38-22"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-38-23"><a id="__codelineno-38-23" name="__codelineno-38-23" href="#__codelineno-38-23"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a> Usage: proxmox tui [OPTIONS] [MODE]:[mock]                                     
+</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>
+</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a> Launch interactive Proxmox TUI for resource navigation and management.         
+</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>
+</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a> Opens a full-screen terminal UI for browsing Proxmox API resources             
+</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a> hierarchically and performing operations. Supports both real backends          
+</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a> (HTTPS, SSH, local) and mock mode for testing/learning.                        
+</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a>
+</span><span id="__span-40-9"><a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a> MODE:                                                                          
+</span><span id="__span-40-10"><a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>     - Omit or use &#39;mock&#39; to connect to in-memory mock backend                  
+</span><span id="__span-40-11"><a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a>     - Otherwise connects using configured backend credentials                  
+</span><span id="__span-40-12"><a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a>
+</span><span id="__span-40-13"><a id="__codelineno-40-13" name="__codelineno-40-13" href="#__codelineno-40-13"></a> Key controls:                                                                  
+</span><span id="__span-40-14"><a id="__codelineno-40-14" name="__codelineno-40-14" href="#__codelineno-40-14"></a>     - Arrow keys: Navigate resources                                           
+</span><span id="__span-40-15"><a id="__codelineno-40-15" name="__codelineno-40-15" href="#__codelineno-40-15"></a>     - Enter: Drill into path or edit                                           
+</span><span id="__span-40-16"><a id="__codelineno-40-16" name="__codelineno-40-16" href="#__codelineno-40-16"></a>     - q: Quit                                                                  
+</span><span id="__span-40-17"><a id="__codelineno-40-17" name="__codelineno-40-17" href="#__codelineno-40-17"></a>     - j/k: Jump between entries                                                
+</span><span id="__span-40-18"><a id="__codelineno-40-18" name="__codelineno-40-18" href="#__codelineno-40-18"></a>     - s: Search                                                                
+</span><span id="__span-40-19"><a id="__codelineno-40-19" name="__codelineno-40-19" href="#__codelineno-40-19"></a>     - /: Filter                                                                
+</span><span id="__span-40-20"><a id="__codelineno-40-20" name="__codelineno-40-20" href="#__codelineno-40-20"></a>
+</span><span id="__span-40-21"><a id="__codelineno-40-21" name="__codelineno-40-21" href="#__codelineno-40-21"></a> Examples:                                                                      
+</span><span id="__span-40-22"><a id="__codelineno-40-22" name="__codelineno-40-22" href="#__codelineno-40-22"></a>     # Launch with configured Proxmox backend                                   
+</span><span id="__span-40-23"><a id="__codelineno-40-23" name="__codelineno-40-23" href="#__codelineno-40-23"></a>     proxmox tui                                                                
+</span><span id="__span-40-24"><a id="__codelineno-40-24" name="__codelineno-40-24" href="#__codelineno-40-24"></a>
+</span><span id="__span-40-25"><a id="__codelineno-40-25" name="__codelineno-40-25" href="#__codelineno-40-25"></a>     # Launch against mock backend (no credentials needed)                      
+</span><span id="__span-40-26"><a id="__codelineno-40-26" name="__codelineno-40-26" href="#__codelineno-40-26"></a>     proxmox tui mock                                                           
+</span><span id="__span-40-27"><a id="__codelineno-40-27" name="__codelineno-40-27" href="#__codelineno-40-27"></a>
+</span><span id="__span-40-28"><a id="__codelineno-40-28" name="__codelineno-40-28" href="#__codelineno-40-28"></a>     # Start at specific path                                                   
+</span><span id="__span-40-29"><a id="__codelineno-40-29" name="__codelineno-40-29" href="#__codelineno-40-29"></a>     proxmox tui -p /nodes/pve1/qemu                                            
+</span><span id="__span-40-30"><a id="__codelineno-40-30" name="__codelineno-40-30" href="#__codelineno-40-30"></a>
+</span><span id="__span-40-31"><a id="__codelineno-40-31" name="__codelineno-40-31" href="#__codelineno-40-31"></a>     # For PMG/PBS:                                                             
+</span><span id="__span-40-32"><a id="__codelineno-40-32" name="__codelineno-40-32" href="#__codelineno-40-32"></a>     pbx tui          # Proxmox Mail Gateway                                    
+</span><span id="__span-40-33"><a id="__codelineno-40-33" name="__codelineno-40-33" href="#__codelineno-40-33"></a>     pbs tui          # Proxmox Backup Server                                   
+</span><span id="__span-40-34"><a id="__codelineno-40-34" name="__codelineno-40-34" href="#__codelineno-40-34"></a>
+</span><span id="__span-40-35"><a id="__codelineno-40-35" name="__codelineno-40-35" href="#__codelineno-40-35"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-40-36"><a id="__codelineno-40-36" name="__codelineno-40-36" href="#__codelineno-40-36"></a>│   mode      [MODE]:[mock]  Optional mode. Use &#39;mock&#39; to run TUI against      │
+</span><span id="__span-40-37"><a id="__codelineno-40-37" name="__codelineno-40-37" href="#__codelineno-40-37"></a>│                            in-memory mock backend.                           │
+</span><span id="__span-40-38"><a id="__codelineno-40-38" name="__codelineno-40-38" href="#__codelineno-40-38"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-40-39"><a id="__codelineno-40-39" name="__codelineno-40-39" href="#__codelineno-40-39"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-40-40"><a id="__codelineno-40-40" name="__codelineno-40-40" href="#__codelineno-40-40"></a>│ --path  -p      TEXT  Initial API path to load in the TUI. [default: /nodes] │
+</span><span id="__span-40-41"><a id="__codelineno-40-41" name="__codelineno-40-41" href="#__codelineno-40-41"></a>│ --help                Show this message and exit.                            │
+</span><span id="__span-40-42"><a id="__codelineno-40-42" name="__codelineno-40-42" href="#__codelineno-40-42"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <h3 id="proxmox-usage-help">proxmox usage --help<a class="headerlink" href="#proxmox-usage-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-39-1"><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a>proxmox<span class="w"> </span>usage<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-41-1"><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a>proxmox<span class="w"> </span>usage<span class="w"> </span>--help
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>8.806</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.229</code></p>
 <p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-40-1"><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a> Usage: proxmox usage [OPTIONS] PATH                                            
-</span><span id="__span-40-2"><a id="__codelineno-40-2" name="__codelineno-40-2" href="#__codelineno-40-2"></a>
-</span><span id="__span-40-3"><a id="__codelineno-40-3" name="__codelineno-40-3" href="#__codelineno-40-3"></a> Show API schema and usage information for an endpoint.                         
-</span><span id="__span-40-4"><a id="__codelineno-40-4" name="__codelineno-40-4" href="#__codelineno-40-4"></a>
-</span><span id="__span-40-5"><a id="__codelineno-40-5" name="__codelineno-40-5" href="#__codelineno-40-5"></a> Examples:                                                                      
-</span><span id="__span-40-6"><a id="__codelineno-40-6" name="__codelineno-40-6" href="#__codelineno-40-6"></a> proxmox usage /nodes/pve1/qemu/100                                             
-</span><span id="__span-40-7"><a id="__codelineno-40-7" name="__codelineno-40-7" href="#__codelineno-40-7"></a> proxmox usage /nodes/pve1/qemu/100 --command GET                               
-</span><span id="__span-40-8"><a id="__codelineno-40-8" name="__codelineno-40-8" href="#__codelineno-40-8"></a> proxmox usage /nodes/pve1/qemu/100 --command POST --returns                    
-</span><span id="__span-40-9"><a id="__codelineno-40-9" name="__codelineno-40-9" href="#__codelineno-40-9"></a>
-</span><span id="__span-40-10"><a id="__codelineno-40-10" name="__codelineno-40-10" href="#__codelineno-40-10"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-40-11"><a id="__codelineno-40-11" name="__codelineno-40-11" href="#__codelineno-40-11"></a>│ *    path      TEXT  API path to get usage for [required]                    │
-</span><span id="__span-40-12"><a id="__codelineno-40-12" name="__codelineno-40-12" href="#__codelineno-40-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-40-13"><a id="__codelineno-40-13" name="__codelineno-40-13" href="#__codelineno-40-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-40-14"><a id="__codelineno-40-14" name="__codelineno-40-14" href="#__codelineno-40-14"></a>│ --command           TEXT  HTTP method to inspect (GET, POST, PUT, DELETE)    │
-</span><span id="__span-40-15"><a id="__codelineno-40-15" name="__codelineno-40-15" href="#__codelineno-40-15"></a>│ --returns                 Include return schema                              │
-</span><span id="__span-40-16"><a id="__codelineno-40-16" name="__codelineno-40-16" href="#__codelineno-40-16"></a>│ --verbose   -v            Verbose output                                     │
-</span><span id="__span-40-17"><a id="__codelineno-40-17" name="__codelineno-40-17" href="#__codelineno-40-17"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
-</span><span id="__span-40-18"><a id="__codelineno-40-18" name="__codelineno-40-18" href="#__codelineno-40-18"></a>│                           text, raw)                                         │
-</span><span id="__span-40-19"><a id="__codelineno-40-19" name="__codelineno-40-19" href="#__codelineno-40-19"></a>│ --json                    Shortcut for --output json                         │
-</span><span id="__span-40-20"><a id="__codelineno-40-20" name="__codelineno-40-20" href="#__codelineno-40-20"></a>│ --yaml                    Shortcut for --output yaml                         │
-</span><span id="__span-40-21"><a id="__codelineno-40-21" name="__codelineno-40-21" href="#__codelineno-40-21"></a>│ --markdown                Shortcut for --output markdown                     │
-</span><span id="__span-40-22"><a id="__codelineno-40-22" name="__codelineno-40-22" href="#__codelineno-40-22"></a>│ --help                    Show this message and exit.                        │
-</span><span id="__span-40-23"><a id="__codelineno-40-23" name="__codelineno-40-23" href="#__codelineno-40-23"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-40-24"><a id="__codelineno-40-24" name="__codelineno-40-24" href="#__codelineno-40-24"></a>
-</span><span id="__span-40-25"><a id="__codelineno-40-25" name="__codelineno-40-25" href="#__codelineno-40-25"></a>
-</span><span id="__span-40-26"><a id="__codelineno-40-26" name="__codelineno-40-26" href="#__codelineno-40-26"></a>--- stderr ---
-</span><span id="__span-40-27"><a id="__codelineno-40-27" name="__codelineno-40-27" href="#__codelineno-40-27"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
-</span><span id="__span-40-28"><a id="__codelineno-40-28" name="__codelineno-40-28" href="#__codelineno-40-28"></a>&lt;string&gt;:540: UserWarning: Field name &quot;schema&quot; in &quot;GetClusterAcmeChallengeSchemaResponseItem&quot; shadows an attribute in parent &quot;ProxmoxBaseModel&quot;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-42-1"><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a> Usage: proxmox usage [OPTIONS] PATH                                            
+</span><span id="__span-42-2"><a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a>
+</span><span id="__span-42-3"><a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a> Show API schema and usage information for an endpoint.                         
+</span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a>
+</span><span id="__span-42-5"><a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a> Examples:                                                                      
+</span><span id="__span-42-6"><a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a> proxmox usage /nodes/pve1/qemu/100                                             
+</span><span id="__span-42-7"><a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a> proxmox usage /nodes/pve1/qemu/100 --command GET                               
+</span><span id="__span-42-8"><a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a> proxmox usage /nodes/pve1/qemu/100 --command POST --returns                    
+</span><span id="__span-42-9"><a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a>
+</span><span id="__span-42-10"><a id="__codelineno-42-10" name="__codelineno-42-10" href="#__codelineno-42-10"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+</span><span id="__span-42-11"><a id="__codelineno-42-11" name="__codelineno-42-11" href="#__codelineno-42-11"></a>│ *    path      TEXT  API path to get usage for [required]                    │
+</span><span id="__span-42-12"><a id="__codelineno-42-12" name="__codelineno-42-12" href="#__codelineno-42-12"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-42-13"><a id="__codelineno-42-13" name="__codelineno-42-13" href="#__codelineno-42-13"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-42-14"><a id="__codelineno-42-14" name="__codelineno-42-14" href="#__codelineno-42-14"></a>│ --command           TEXT  HTTP method to inspect (GET, POST, PUT, DELETE)    │
+</span><span id="__span-42-15"><a id="__codelineno-42-15" name="__codelineno-42-15" href="#__codelineno-42-15"></a>│ --returns                 Include return schema                              │
+</span><span id="__span-42-16"><a id="__codelineno-42-16" name="__codelineno-42-16" href="#__codelineno-42-16"></a>│ --verbose   -v            Verbose output                                     │
+</span><span id="__span-42-17"><a id="__codelineno-42-17" name="__codelineno-42-17" href="#__codelineno-42-17"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
+</span><span id="__span-42-18"><a id="__codelineno-42-18" name="__codelineno-42-18" href="#__codelineno-42-18"></a>│                           text, raw)                                         │
+</span><span id="__span-42-19"><a id="__codelineno-42-19" name="__codelineno-42-19" href="#__codelineno-42-19"></a>│ --json                    Shortcut for --output json                         │
+</span><span id="__span-42-20"><a id="__codelineno-42-20" name="__codelineno-42-20" href="#__codelineno-42-20"></a>│ --yaml                    Shortcut for --output yaml                         │
+</span><span id="__span-42-21"><a id="__codelineno-42-21" name="__codelineno-42-21" href="#__codelineno-42-21"></a>│ --markdown                Shortcut for --output markdown                     │
+</span><span id="__span-42-22"><a id="__codelineno-42-22" name="__codelineno-42-22" href="#__codelineno-42-22"></a>│ --help                    Show this message and exit.                        │
+</span><span id="__span-42-23"><a id="__codelineno-42-23" name="__codelineno-42-23" href="#__codelineno-42-23"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
 <hr />
 

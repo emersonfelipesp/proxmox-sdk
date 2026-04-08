@@ -12,13 +12,13 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/installation/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/security/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../architecture/">
       
       
-        <link rel="next" href="../quickstart/">
+        <link rel="next" href="../performance/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Installation - Proxmox OpenAPI</title>
+        <title>Security - Proxmox OpenAPI</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#security-hardening" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Security
             
           </span>
         </div>
@@ -249,13 +249,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
           
   
   
@@ -311,10 +309,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../development/" class="md-tabs__link">
           
   
@@ -448,31 +448,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -490,7 +487,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -505,37 +502,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -551,192 +521,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Requirements
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from Source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#raw-image-http-only-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Raw image — HTTP only (default)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nginx-image-https-with-mkcert" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nginx image — HTTPS with mkcert
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#granian-image-https-with-mkcert-no-nginx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Granian image — HTTPS with mkcert (no nginx)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mkcert-environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mkcert environment variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build from source
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional Dependencies
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Optional Dependencies">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#for-development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        For Development
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#for-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        For Documentation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1127,28 +911,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1166,7 +953,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1237,10 +1024,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../security/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1256,6 +1070,314 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#ssrf-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSRF Protection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSRF Protection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-blocked" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is blocked
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-allowlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain allowlist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-opt-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP opt-in
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-tag-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version tag validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codegen-endpoint-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Codegen Endpoint Authentication
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CORS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#health-endpoint-restriction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Endpoint Restriction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Responses
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#credential-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Credential Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Credential Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cli-config-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI config file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log sanitization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ssh-backend-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSH Backend Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSH Backend Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#host-key-verification-paramiko" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host key verification (Paramiko)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shell-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell injection prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temp-file-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temp file names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote cleanup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ssltls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSL/TLS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSL/TLS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-api-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real API mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ticket-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ticket authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-checklist-for-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Checklist for Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1495,55 +1617,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
+  <a href="#ssrf-protection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requirements
+        SSRF Protection
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from Source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Installation">
+    <nav class="md-nav" aria-label="SSRF Protection">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#raw-image-http-only-default" class="md-nav__link">
+  <a href="#what-is-blocked" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raw image — HTTP only (default)
+        What is blocked
       
     </span>
   </a>
@@ -1551,10 +1640,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#nginx-image-https-with-mkcert" class="md-nav__link">
+  <a href="#domain-allowlist" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nginx image — HTTPS with mkcert
+        Domain allowlist
       
     </span>
   </a>
@@ -1562,10 +1651,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#granian-image-https-with-mkcert-no-nginx" class="md-nav__link">
+  <a href="#http-opt-in" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Granian image — HTTPS with mkcert (no nginx)
+        HTTP opt-in
       
     </span>
   </a>
@@ -1573,21 +1662,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#mkcert-environment-variables" class="md-nav__link">
+  <a href="#version-tag-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        mkcert environment variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build from source
+        Version tag validation
       
     </span>
   </a>
@@ -1600,10 +1678,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
+  <a href="#codegen-endpoint-authentication" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify Installation
+        Codegen Endpoint Authentication
       
     </span>
   </a>
@@ -1611,22 +1689,66 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#optional-dependencies" class="md-nav__link">
+  <a href="#rate-limiting" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optional Dependencies
+        Rate Limiting
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Optional Dependencies">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CORS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#health-endpoint-restriction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Health Endpoint Restriction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Responses
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#credential-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Credential Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Credential Handling">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#for-development" class="md-nav__link">
+  <a href="#environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        For Development
+        Environment variables
       
     </span>
   </a>
@@ -1634,10 +1756,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#for-documentation" class="md-nav__link">
+  <a href="#cli-config-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        For Documentation
+        CLI config file
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-sanitization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log sanitization
       
     </span>
   </a>
@@ -1650,10 +1783,121 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#ssh-backend-security" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        SSH Backend Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSH Backend Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#host-key-verification-paramiko" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Host key verification (Paramiko)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shell-injection-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell injection prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temp-file-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temp file names
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remote-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remote cleanup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ssltls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSL/TLS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSL/TLS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-api-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real API mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ticket-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ticket authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-checklist-for-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Checklist for Deployment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables Reference
       
     </span>
   </a>
@@ -1680,181 +1924,238 @@
   
 
 
-<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Python 3.11 or higher</li>
-<li>pip or uv package manager</li>
-</ul>
+<h1 id="security-hardening">Security Hardening<a class="headerlink" href="#security-hardening" title="Permanent link">&para;</a></h1>
+<p>This document describes the security controls implemented in proxmox-openapi, including what is protected, how each control works, and how to verify it.</p>
 <hr />
-<h2 id="install-from-pypi">Install from PyPI<a class="headerlink" href="#install-from-pypi" title="Permanent link">&para;</a></h2>
-<p>The easiest way to install proxmox-openapi:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi
-</span></code></pre></div>
-<p>Or using <code>uv</code> (recommended for faster installation):</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi
-</span></code></pre></div>
-<hr />
-<h2 id="install-from-source">Install from Source<a class="headerlink" href="#install-from-source" title="Permanent link">&para;</a></h2>
-<p>For development or to get the latest unreleased features:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Clone the repository</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/emersonfelipesp/proxmox-openapi.git
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>proxmox-openapi
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># Install with uv (recommended)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>uv<span class="w"> </span>sync
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Or with pip</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</span></code></pre></div>
-<hr />
-<h2 id="docker-installation">Docker Installation<a class="headerlink" href="#docker-installation" title="Permanent link">&para;</a></h2>
-<p>All Docker images are <strong>Alpine-based</strong> (smaller footprint). Three variants are available:</p>
+<h2 id="ssrf-protection">SSRF Protection<a class="headerlink" href="#ssrf-protection" title="Permanent link">&para;</a></h2>
+<p>All user-supplied URLs passed to the codegen pipeline are validated by <code>validate_source_url()</code> in <code>proxmox_codegen/security.py</code> before any outbound request is made.</p>
+<h3 id="what-is-blocked">What is blocked<a class="headerlink" href="#what-is-blocked" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Variant</th>
-<th>Tags</th>
-<th>Description</th>
+<th>Category</th>
+<th>Examples</th>
+<th>Error</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Raw</strong> (default)</td>
-<td><code>latest</code>, <code>&lt;version&gt;</code></td>
-<td>Pure uvicorn, HTTP only. Smallest image.</td>
+<td>Non-HTTPS schemes</td>
+<td><code>file://</code>, <code>gopher://</code>, <code>http://</code> (default)</td>
+<td><code>Invalid URL scheme</code></td>
 </tr>
 <tr>
-<td><strong>Nginx</strong></td>
-<td><code>latest-nginx</code>, <code>&lt;version&gt;-nginx</code></td>
-<td>nginx terminates HTTPS via mkcert; proxies to uvicorn.</td>
+<td>Private IPv4 ranges</td>
+<td><code>10.x.x.x</code>, <code>192.168.x.x</code>, <code>172.16–31.x.x</code>, <code>127.x.x.x</code>, <code>169.254.x.x</code></td>
+<td><code>SSRF attempt blocked: private IP range</code></td>
 </tr>
 <tr>
-<td><strong>Granian</strong></td>
-<td><code>latest-granian</code>, <code>&lt;version&gt;-granian</code></td>
-<td>Granian (Rust ASGI server) with native TLS via mkcert.</td>
+<td>Private IPv6 ranges</td>
+<td><code>::1</code>, <code>fe80::</code>, <code>fc00::</code></td>
+<td><code>SSRF attempt blocked: private IPv6 range</code></td>
+</tr>
+<tr>
+<td>IPv4-mapped IPv6</td>
+<td><code>::ffff:127.0.0.1</code>, <code>::ffff:10.0.0.1</code></td>
+<td><code>SSRF attempt blocked: IPv6-mapped address</code></td>
+</tr>
+<tr>
+<td>6to4 addresses</td>
+<td><code>2002:7f00::1</code> (encodes 127.0.0.1)</td>
+<td><code>SSRF attempt blocked: IPv6-mapped address</code></td>
+</tr>
+<tr>
+<td>Localhost strings</td>
+<td><code>localhost</code>, <code>127.</code> prefix patterns</td>
+<td><code>SSRF attempt blocked: localhost</code></td>
+</tr>
+<tr>
+<td>Non-Proxmox domains</td>
+<td>Any hostname not under <code>*.proxmox.com</code></td>
+<td><code>not in the allowed domains list</code></td>
 </tr>
 </tbody>
 </table>
-<h3 id="raw-image-http-only-default">Raw image — HTTP only (default)<a class="headerlink" href="#raw-image-http-only-default" title="Permanent link">&para;</a></h3>
-<p>Simplest option. No proxy in front, plain HTTP. Ideal for local development or behind your own reverse proxy.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest
+<h3 id="domain-allowlist">Domain allowlist<a class="headerlink" href="#domain-allowlist" title="Permanent link">&para;</a></h3>
+<p>By default only official Proxmox documentation domains are permitted:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pve.proxmox.com
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>pmg.proxmox.com
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>pbs.proxmox.com
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>proxmox.com
 </span></code></pre></div>
-<p>Service URL:</p>
+<p>To allow other domains (e.g. a self-hosted API viewer), pass <code>allow_any_domain=True</code> explicitly in code. The API endpoint does <strong>not</strong> expose this flag to callers.</p>
+<h3 id="http-opt-in">HTTP opt-in<a class="headerlink" href="#http-opt-in" title="Permanent link">&para;</a></h3>
+<p>Plain HTTP is blocked by default. Pass <code>allow_http=True</code> to <code>validate_source_url()</code> in trusted internal tooling only.</p>
+<h3 id="version-tag-validation">Version tag validation<a class="headerlink" href="#version-tag-validation" title="Permanent link">&para;</a></h3>
+<p>Version tags used in codegen URLs and file paths are validated by <code>validate_version_tag()</code>:</p>
 <ul>
-<li><a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></li>
+<li>Only <code>[a-zA-Z0-9._-]</code> characters are permitted</li>
+<li><code>..</code>, <code>/</code>, and <code>\</code> are rejected (prevents path traversal)</li>
+<li>Empty strings are rejected</li>
 </ul>
-<h3 id="nginx-image-https-with-mkcert">Nginx image — HTTPS with mkcert<a class="headerlink" href="#nginx-image-https-with-mkcert" title="Permanent link">&para;</a></h3>
-<p>nginx terminates HTTPS using auto-generated <a href="https://github.com/FiloSottile/mkcert">mkcert</a> certificates and proxies to uvicorn inside the container.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest-nginx
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-nginx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-nginx
+<hr />
+<h2 id="codegen-endpoint-authentication">Codegen Endpoint Authentication<a class="headerlink" href="#codegen-endpoint-authentication" title="Permanent link">&para;</a></h2>
+<p><code>POST /codegen/generate</code> and related endpoints require a Bearer token set via the <code>CODEGEN_API_KEY</code> environment variable.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CODEGEN_API_KEY</span><span class="o">=</span>your-secret-key
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer your-secret-key&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">     </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:8000/codegen/generate?...&quot;</span>
 </span></code></pre></div>
-<p>Service URL:</p>
-<ul>
-<li><a href="https://127.0.0.1:8443">https://127.0.0.1:8443</a> (self-signed, trusted on the container host)</li>
-</ul>
-<h3 id="granian-image-https-with-mkcert-no-nginx">Granian image — HTTPS with mkcert (no nginx)<a class="headerlink" href="#granian-image-https-with-mkcert-no-nginx" title="Permanent link">&para;</a></h3>
-<p><a href="https://github.com/emmett-framework/granian">Granian</a> is a Rust-based ASGI server with native TLS and HTTP/2. A single process handles everything — no nginx or supervisord required.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-granian<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-granian
+<p>Missing or wrong credentials return <code>401 Unauthorized</code>. The endpoint is also rate-limited to <strong>1 request per hour per IP</strong> to prevent abuse.</p>
+<hr />
+<h2 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
+<p>SlowAPI rate limits are applied to resource-intensive endpoints:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /codegen/generate</code></td>
+<td>1 / hour</td>
+</tr>
+<tr>
+<td><code>GET /codegen/openapi</code></td>
+<td>5 / hour</td>
+</tr>
+<tr>
+<td><code>GET /codegen/pydantic</code></td>
+<td>5 / hour</td>
+</tr>
+</tbody>
+</table>
+<p>Rate limiting uses the direct client IP. Behind a trusted reverse proxy, configure <code>X-Forwarded-For</code> forwarding at the proxy layer.</p>
+<hr />
+<h2 id="cors">CORS<a class="headerlink" href="#cors" title="Permanent link">&para;</a></h2>
+<p>CORS is disabled by default (no origins allowed). Enable it by setting <code>CORS_ORIGINS</code>:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://your-app.example.com,https://staging.example.com
 </span></code></pre></div>
-<p>Service URL:</p>
+<p>When set, allowed headers are restricted to:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Content-Type, Authorization, X-Requested-With
+</span></code></pre></div>
+<p>Wildcards (<code>*</code>) are never used for headers or origins.</p>
+<hr />
+<h2 id="health-endpoint-restriction">Health Endpoint Restriction<a class="headerlink" href="#health-endpoint-restriction" title="Permanent link">&para;</a></h2>
+<p><code>GET /health</code> returns <code>404 Not Found</code> for any client not connecting from localhost. This prevents the endpoint from being used as a service-discovery probe.</p>
+<p>Allowed hosts: <code>127.0.0.1</code>, <code>::1</code>, <code>localhost</code>.
+<code>testclient</code> (Starlette test helper) is only added when <code>TESTING=1</code> is set.</p>
+<hr />
+<h2 id="error-responses">Error Responses<a class="headerlink" href="#error-responses" title="Permanent link">&para;</a></h2>
+<p>Unhandled exceptions are caught by a global handler and returned as a generic <code>500</code> response:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;An internal server error occurred.&quot;</span><span class="p">}</span>
+</span></code></pre></div>
+<p>Stack traces, file paths, and internal state are never sent to clients. Full exception details are logged server-side at <code>ERROR</code> level.</p>
+<hr />
+<h2 id="credential-handling">Credential Handling<a class="headerlink" href="#credential-handling" title="Permanent link">&para;</a></h2>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>Proxmox credentials (<code>PROXMOX_API_TOKEN_SECRET</code>, <code>PROXMOX_API_PASSWORD</code>, <code>PROXMOX_API_OTP</code>) are read once at startup and then overwritten with <code>"********"</code> in <code>os.environ</code>. Subsequent code cannot accidentally read the raw values from the environment.</p>
+<h3 id="cli-config-file">CLI config file<a class="headerlink" href="#cli-config-file" title="Permanent link">&para;</a></h3>
+<p>The CLI stores credentials in <code>~/.proxmox-cli/config.json</code>. On write:</p>
 <ul>
-<li><a href="https://127.0.0.1:8443">https://127.0.0.1:8443</a></li>
+<li>The config directory is set to <code>0700</code></li>
+<li>The config file is set to <code>0600</code></li>
+<li>Writing is refused if the file or its parent directory is a symbolic link</li>
 </ul>
-<h3 id="mkcert-environment-variables">mkcert environment variables<a class="headerlink" href="#mkcert-environment-variables" title="Permanent link">&para;</a></h3>
-<p>Available for the <code>nginx</code> and <code>granian</code> images:</p>
+<p>On load, a warning is emitted if the file has group or other read/write permissions.</p>
+<h3 id="log-sanitization">Log sanitization<a class="headerlink" href="#log-sanitization" title="Permanent link">&para;</a></h3>
+<p>A <code>SensitiveDataFilter</code> is applied to all log output. It redacts values following these patterns before anything reaches stdout:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>password=…   token_value=…   token_secret=…
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>PVEAuthCookie=…   PMGAuthCookie=…   PBSAuthCookie=…
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>CSRFPreventionToken=…   Authorization=…
+</span></code></pre></div>
+<hr />
+<h2 id="ssh-backend-security">SSH Backend Security<a class="headerlink" href="#ssh-backend-security" title="Permanent link">&para;</a></h2>
+<h3 id="host-key-verification-paramiko">Host key verification (Paramiko)<a class="headerlink" href="#host-key-verification-paramiko" title="Permanent link">&para;</a></h3>
+<p>The Paramiko SSH backend uses <code>WarningPolicy</code> (logs unknown host keys) instead of <code>AutoAddPolicy</code> (silently accepts any key). System <code>known_hosts</code> is loaded automatically.</p>
+<p>To enforce strict verification, pass a custom policy at construction:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">paramiko</span><span class="w"> </span><span class="kn">import</span> <span class="n">RejectPolicy</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_openapi.sdk.backends.ssh_paramiko</span><span class="w"> </span><span class="kn">import</span> <span class="n">SshParamikoBackend</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">backend</span> <span class="o">=</span> <span class="n">SshParamikoBackend</span><span class="p">(</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;root&quot;</span><span class="p">,</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">service_config</span><span class="o">=...</span><span class="p">,</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">host_key_policy</span><span class="o">=</span><span class="n">RejectPolicy</span><span class="p">(),</span>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="shell-injection-prevention">Shell injection prevention<a class="headerlink" href="#shell-injection-prevention" title="Permanent link">&para;</a></h3>
+<p>SSH command execution uses <code>shlex.join()</code> to properly quote all arguments. Remote temp file cleanup uses <code>shlex.quote()</code> on each path. The OpenSSH backend uses <code>shlex.join()</code> natively.</p>
+<h3 id="temp-file-names">Temp file names<a class="headerlink" href="#temp-file-names" title="Permanent link">&para;</a></h3>
+<p>Uploaded temp files on the remote host use <code>secrets.token_hex(8)</code> (64-bit random) instead of <code>id(object)</code> (predictable memory address).</p>
+<h3 id="remote-cleanup">Remote cleanup<a class="headerlink" href="#remote-cleanup" title="Permanent link">&para;</a></h3>
+<p>Both SSH backends clean up temp files uploaded to the remote host in a <code>finally</code> block, preventing data leakage from failed transfers.</p>
+<hr />
+<h2 id="ssltls">SSL/TLS<a class="headerlink" href="#ssltls" title="Permanent link">&para;</a></h2>
+<h3 id="real-api-mode">Real API mode<a class="headerlink" href="#real-api-mode" title="Permanent link">&para;</a></h3>
+<p>SSL certificate verification is enabled by default (<code>PROXMOX_API_VERIFY_SSL=true</code>). Disable only in trusted internal networks:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PROXMOX_API_VERIFY_SSL</span><span class="o">=</span><span class="nb">false</span>
+</span></code></pre></div>
+<h3 id="ticket-authentication">Ticket authentication<a class="headerlink" href="#ticket-authentication" title="Permanent link">&para;</a></h3>
+<p>The <code>TicketAuth</code> handler uses the same SSL context configured for the backend when making the <code>/access/ticket</code> POST. This ensures that <code>verify_ssl=False</code> applies consistently across both auth and API requests rather than silently defaulting to system CAs for the auth step.</p>
+<hr />
+<h2 id="security-checklist-for-deployment">Security Checklist for Deployment<a class="headerlink" href="#security-checklist-for-deployment" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Verify SSRF protection rejects private IPs</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:8000/codegen/generate?source_url=http://169.254.169.254/&quot;</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1"># → 400 Bad Request</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># Verify codegen requires auth</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;http://localhost:8000/codegen/generate&quot;</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="c1"># → 401 Unauthorized</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="c1"># Verify health endpoint is hidden</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>curl<span class="w"> </span><span class="s2">&quot;http://external-host:8000/health&quot;</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="c1"># → 404 Not Found</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="c1"># Verify error responses don&#39;t leak internals</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>curl<span class="w"> </span><span class="s2">&quot;http://localhost:8000/nonexistent-path-xyz&quot;</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="c1"># → 404 with {&quot;detail&quot;: &quot;Not Found&quot;} — no stack trace</span>
+</span></code></pre></div>
+<hr />
+<h2 id="environment-variables-reference">Environment Variables Reference<a class="headerlink" href="#environment-variables-reference" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
+<th>Purpose</th>
 <th>Default</th>
-<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>PORT</code></td>
-<td><code>8000</code></td>
-<td>Port the server listens on</td>
+<td><code>CODEGEN_API_KEY</code></td>
+<td>Bearer token for <code>/codegen/*</code> endpoints</td>
+<td>— (required for codegen)</td>
 </tr>
 <tr>
-<td><code>MKCERT_CERT_DIR</code></td>
-<td><code>/certs</code></td>
-<td>Directory where certificates are stored</td>
+<td><code>CORS_ORIGINS</code></td>
+<td>Comma-separated list of allowed origins</td>
+<td><code>""</code> (disabled)</td>
 </tr>
 <tr>
-<td><code>MKCERT_EXTRA_NAMES</code></td>
+<td><code>PROXMOX_API_VERIFY_SSL</code></td>
+<td>Enable SSL certificate verification</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>PROXMOX_API_TOKEN_SECRET</code></td>
+<td>API token secret (cleared from env after read)</td>
 <td>—</td>
-<td>Extra SANs (comma or space separated), e.g. <code>proxmox-api.lan,10.0.0.5</code></td>
 </tr>
 <tr>
-<td><code>CAROOT</code></td>
+<td><code>PROXMOX_API_PASSWORD</code></td>
+<td>Password auth (cleared from env after read)</td>
 <td>—</td>
-<td>Mount a volume here to persist the local CA across restarts</td>
 </tr>
 <tr>
-<td><code>APP_MODULE</code></td>
-<td><code>proxmox_openapi.mock_main:app</code></td>
-<td>ASGI app (change to <code>proxmox_openapi.main:app</code> for real mode)</td>
+<td><code>TESTING</code></td>
+<td>Add <code>testclient</code> to health endpoint allow-list</td>
+<td><code>""</code> (disabled)</td>
 </tr>
 </tbody>
 </table>
-<p>Example with extra SANs:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-tls<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">MKCERT_EXTRA_NAMES</span><span class="o">=</span><span class="s1">&#39;myhost.local,192.168.1.10&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-nginx
-</span></code></pre></div>
-<p>Example with real Proxmox mode:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-real<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">APP_MODULE</span><span class="o">=</span><span class="s1">&#39;proxmox_openapi.main:app&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_API_MODE</span><span class="o">=</span>real<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_URL</span><span class="o">=</span>https://pve.example.com:8006<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_API_TOKEN</span><span class="o">=</span><span class="nv">PVEAPIToken</span><span class="o">=</span>user@pam!mytoken<span class="o">=</span>your-secret<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span></code></pre></div>
-<h3 id="build-from-source">Build from source<a class="headerlink" href="#build-from-source" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/emersonfelipesp/proxmox-openapi.git
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>proxmox-openapi
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:raw<span class="w"> </span>.<span class="w">                          </span><span class="c1"># raw (default)</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>nginx<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:nginx<span class="w"> </span>.<span class="w">         </span><span class="c1"># nginx</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>granian<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:granian<span class="w"> </span>.<span class="w">     </span><span class="c1"># granian</span>
-</span></code></pre></div>
-<hr />
-<h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Check installed version</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import proxmox_openapi; print(proxmox_openapi.__version__)&quot;</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Run the mock API</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>proxmox-openapi-mock
-</span></code></pre></div>
-<p>Visit <code>http://localhost:8000/docs</code> to confirm the API is running.</p>
-<hr />
-<h2 id="optional-dependencies">Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permanent link">&para;</a></h2>
-<h3 id="for-development">For Development<a class="headerlink" href="#for-development" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi<span class="o">[</span>test<span class="o">]</span>
-</span></code></pre></div>
-<p>Includes:
-- <code>pytest</code> - Testing framework
-- <code>httpx</code> - HTTP client for testing
-- <code>playwright</code> - Browser automation for API Viewer crawling</p>
-<h3 id="for-documentation">For Documentation<a class="headerlink" href="#for-documentation" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi<span class="o">[</span>docs<span class="o">]</span>
-</span></code></pre></div>
-<p>Includes:
-- <code>mkdocs</code> - Documentation generator
-- <code>mkdocs-material</code> - Material theme</p>
-<hr />
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong><a href="../quickstart/">Quick Start Guide →</a></strong></li>
-<li><strong><a href="../mock-api/">Mock API Mode →</a></strong></li>
-<li><strong><a href="../real-api/">Real API Mode →</a></strong></li>
-</ul>
 
 
 

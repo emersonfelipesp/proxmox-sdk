@@ -12,7 +12,7 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/reference/command-capture/benchmark/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/reference/command-capture/init/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>Benchmark - Proxmox OpenAPI</title>
+        <title>Init - Proxmox OpenAPI</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#benchmark" class="md-skip">
+        <a href="#init" class="md-skip">
           Skip to content
         </a>
       
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Benchmark
+              Init
             
           </span>
         </div>
@@ -1273,10 +1273,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#proxmox-benchmark-help" class="md-nav__link">
+  <a href="#proxmox-init-help" class="md-nav__link">
     <span class="md-ellipsis">
       
-        proxmox benchmark --help
+        proxmox init --help
       
     </span>
   </a>
@@ -1303,34 +1303,33 @@
   
 
 
-<h1 id="benchmark">Benchmark<a class="headerlink" href="#benchmark" title="Permanent link">&para;</a></h1>
-<h3 id="proxmox-benchmark-help"><code>proxmox benchmark --help</code><a class="headerlink" href="#proxmox-benchmark-help" title="Permanent link">&para;</a></h3>
+<h1 id="init">Init<a class="headerlink" href="#init" title="Permanent link">&para;</a></h1>
+<h3 id="proxmox-init-help"><code>proxmox init --help</code><a class="headerlink" href="#proxmox-init-help" title="Permanent link">&para;</a></h3>
 <p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxmox<span class="w"> </span>benchmark<span class="w"> </span>--help
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxmox<span class="w"> </span>init<span class="w"> </span>--help
 </span></code></pre></div>
 <p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a> Usage: proxmox benchmark [OPTIONS]                                             
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a> Usage: proxmox init [OPTIONS]                                                  
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> Benchmark API performance.                                                     
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> Initialize CLI config for production and mock TUI usage.                       
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a> Example:                                                                       
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a> proxmox benchmark --path /nodes                                                
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a> proxmox benchmark --path /nodes --iterations 10                                
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a> proxmox benchmark --backend https --path /nodes/pve1/qemu                      
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│ --iterations          INTEGER  Number of iterations to run [default: 5]      │
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│ --path                TEXT     API path to benchmark [default: /nodes]       │
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│ --backend             TEXT     Backend to use                                │
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│ --output      -o      TEXT     Output format (human, json, yaml, markdown,   │
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│                                table, text, raw)                             │
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│ --json                         Shortcut for --output json                    │
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│ --yaml                         Shortcut for --output yaml                    │
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│ --markdown                     Shortcut for --output markdown                │
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│ --help                         Show this message and exit.                   │
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a> This command prompts for production endpoint/token information and             
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a> automatically creates/updates a ``mock`` profile for fake-Proxmox usage        
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a> without requiring any user-provided mock credentials.                          
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│ --profile   -p      TEXT  Profile name to create [default: default]          │
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│ --service           TEXT  Service type (PVE/PMG/PBS) [default: PVE]          │
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│ --force     -f            Overwrite profile without prompt                   │
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│                           text, raw)                                         │
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│ --json                    Shortcut for --output json                         │
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│ --yaml                    Shortcut for --output yaml                         │
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│ --markdown                Shortcut for --output markdown                     │
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│ --help                    Show this message and exit.                        │
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>╰──────────────────────────────────────────────────────────────────────────────╯
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.223</code></p>
+<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.236</code></p>
 <hr />
 
 

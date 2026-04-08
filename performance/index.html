@@ -12,13 +12,13 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/installation/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/performance/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../security/">
       
       
-        <link rel="next" href="../quickstart/">
+        <link rel="next" href="../reference/command-capture/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Installation - Proxmox OpenAPI</title>
+        <title>Performance - Proxmox OpenAPI</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#performance" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Performance
             
           </span>
         </div>
@@ -249,13 +249,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
           
   
   
@@ -311,10 +309,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../development/" class="md-tabs__link">
           
   
@@ -448,31 +448,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -490,7 +487,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -505,37 +502,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -551,192 +521,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Requirements
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from Source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#raw-image-http-only-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Raw image — HTTP only (default)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nginx-image-https-with-mkcert" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nginx image — HTTPS with mkcert
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#granian-image-https-with-mkcert-no-nginx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Granian image — HTTPS with mkcert (no nginx)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mkcert-environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mkcert environment variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build from source
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional Dependencies
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Optional Dependencies">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#for-development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        For Development
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#for-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        For Documentation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1127,28 +911,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1166,7 +953,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1265,10 +1052,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../performance/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1284,6 +1098,259 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#startup-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup Time
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Startup Time">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lazy-package-imports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lazy package imports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#route-registration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Route registration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-request-throughput-mock-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-Request Throughput (Mock Mode)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Per-Request Throughput (Mock Mode)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-memory-locking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared-memory locking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleted-item-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deleted-item tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sdk-hot-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SDK Hot Paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SDK Hot Paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#url-construction-httpspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL construction (https.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-joining-resourcepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path joining (resource.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#none-filtering-resourcepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        None filtering (resource.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Polling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Loading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dead-code-removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dead Code Removed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regex-pre-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regex Pre-compilation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-characteristics-updated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Characteristics (Updated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Characteristics (Updated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mock-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SDK
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiling Tips
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1495,55 +1562,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
+  <a href="#startup-time" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requirements
+        Startup Time
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from Source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Installation">
+    <nav class="md-nav" aria-label="Startup Time">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#raw-image-http-only-default" class="md-nav__link">
+  <a href="#lazy-package-imports" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raw image — HTTP only (default)
+        Lazy package imports
       
     </span>
   </a>
@@ -1551,43 +1585,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#nginx-image-https-with-mkcert" class="md-nav__link">
+  <a href="#route-registration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Nginx image — HTTPS with mkcert
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#granian-image-https-with-mkcert-no-nginx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Granian image — HTTPS with mkcert (no nginx)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mkcert-environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mkcert environment variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build from source
+        Route registration
       
     </span>
   </a>
@@ -1600,33 +1601,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
+  <a href="#per-request-throughput-mock-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify Installation
+        Per-Request Throughput (Mock Mode)
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional Dependencies
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Optional Dependencies">
+    <nav class="md-nav" aria-label="Per-Request Throughput (Mock Mode)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#for-development" class="md-nav__link">
+  <a href="#shared-memory-locking" class="md-nav__link">
     <span class="md-ellipsis">
       
-        For Development
+        Shared-memory locking
       
     </span>
   </a>
@@ -1634,10 +1624,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#for-documentation" class="md-nav__link">
+  <a href="#deleted-item-tracking" class="md-nav__link">
     <span class="md-ellipsis">
       
-        For Documentation
+        Deleted-item tracking
       
     </span>
   </a>
@@ -1650,10 +1640,154 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#sdk-hot-paths" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        SDK Hot Paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SDK Hot Paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#url-construction-httpspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        URL construction (https.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-joining-resourcepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path joining (resource.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#none-filtering-resourcepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        None filtering (resource.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#task-polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Polling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-loading" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Config Loading
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dead-code-removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dead Code Removed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regex-pre-compilation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regex Pre-compilation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-characteristics-updated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Characteristics (Updated)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Characteristics (Updated)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mock-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#real-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SDK
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Profiling Tips
       
     </span>
   </a>
@@ -1680,181 +1814,230 @@
   
 
 
-<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<h1 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h1>
+<p>This document describes the performance characteristics of proxmox-openapi and the optimisations applied to startup time, per-request throughput, and the SDK hot paths.</p>
+<hr />
+<h2 id="startup-time">Startup Time<a class="headerlink" href="#startup-time" title="Permanent link">&para;</a></h2>
+<h3 id="lazy-package-imports">Lazy package imports<a class="headerlink" href="#lazy-package-imports" title="Permanent link">&para;</a></h3>
+<p><code>import proxmox_openapi</code> no longer constructs any FastAPI app or imports the SDK. All top-level exports are resolved on first attribute access via <code>__getattr__</code>. This means:</p>
 <ul>
-<li>Python 3.11 or higher</li>
-<li>pip or uv package manager</li>
+<li>CLI tools that <code>import proxmox_openapi</code> for <code>__version__</code> or SDK classes start without paying the FastAPI app construction cost.</li>
+<li>The <code>app</code> and <code>mock_app</code> attributes are only materialised when accessed (e.g. by uvicorn).</li>
 </ul>
-<hr />
-<h2 id="install-from-pypi">Install from PyPI<a class="headerlink" href="#install-from-pypi" title="Permanent link">&para;</a></h2>
-<p>The easiest way to install proxmox-openapi:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi
-</span></code></pre></div>
-<p>Or using <code>uv</code> (recommended for faster installation):</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi
-</span></code></pre></div>
-<hr />
-<h2 id="install-from-source">Install from Source<a class="headerlink" href="#install-from-source" title="Permanent link">&para;</a></h2>
-<p>For development or to get the latest unreleased features:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Clone the repository</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/emersonfelipesp/proxmox-openapi.git
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>proxmox-openapi
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># Install with uv (recommended)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>uv<span class="w"> </span>sync
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Or with pip</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</span></code></pre></div>
-<hr />
-<h2 id="docker-installation">Docker Installation<a class="headerlink" href="#docker-installation" title="Permanent link">&para;</a></h2>
-<p>All Docker images are <strong>Alpine-based</strong> (smaller footprint). Three variants are available:</p>
+<h3 id="route-registration">Route registration<a class="headerlink" href="#route-registration" title="Permanent link">&para;</a></h3>
+<p>646 mock routes are registered at startup. The critical path includes:</p>
 <table>
 <thead>
 <tr>
-<th>Variant</th>
-<th>Tags</th>
-<th>Description</th>
+<th>Step</th>
+<th>Before</th>
+<th>After</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Raw</strong> (default)</td>
-<td><code>latest</code>, <code>&lt;version&gt;</code></td>
-<td>Pure uvicorn, HTTP only. Smallest image.</td>
+<td>Child path discovery</td>
+<td>O(P²) scan — ~417K iterations for 646 paths</td>
+<td>O(P) single-pass index, ~646 iterations</td>
 </tr>
 <tr>
-<td><strong>Nginx</strong></td>
-<td><code>latest-nginx</code>, <code>&lt;version&gt;-nginx</code></td>
-<td>nginx terminates HTTPS via mkcert; proxies to uvicorn.</td>
-</tr>
-<tr>
-<td><strong>Granian</strong></td>
-<td><code>latest-granian</code>, <code>&lt;version&gt;-granian</code></td>
-<td>Granian (Rust ASGI server) with native TLS via mkcert.</td>
+<td>Schema fingerprint</td>
+<td><code>model_dump</code> + <code>json.dumps</code> + <code>sha256</code> on every call</td>
+<td>Computed once, cached as <code>@cached_property</code></td>
 </tr>
 </tbody>
 </table>
-<h3 id="raw-image-http-only-default">Raw image — HTTP only (default)<a class="headerlink" href="#raw-image-http-only-default" title="Permanent link">&para;</a></h3>
-<p>Simplest option. No proxy in front, plain HTTP. Ideal for local development or behind your own reverse proxy.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest
-</span></code></pre></div>
-<p>Service URL:</p>
-<ul>
-<li><a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></li>
-</ul>
-<h3 id="nginx-image-https-with-mkcert">Nginx image — HTTPS with mkcert<a class="headerlink" href="#nginx-image-https-with-mkcert" title="Permanent link">&para;</a></h3>
-<p>nginx terminates HTTPS using auto-generated <a href="https://github.com/FiloSottile/mkcert">mkcert</a> certificates and proxies to uvicorn inside the container.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest-nginx
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-nginx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-nginx
-</span></code></pre></div>
-<p>Service URL:</p>
-<ul>
-<li><a href="https://127.0.0.1:8443">https://127.0.0.1:8443</a> (self-signed, trusted on the container host)</li>
-</ul>
-<h3 id="granian-image-https-with-mkcert-no-nginx">Granian image — HTTPS with mkcert (no nginx)<a class="headerlink" href="#granian-image-https-with-mkcert-no-nginx" title="Permanent link">&para;</a></h3>
-<p><a href="https://github.com/emmett-framework/granian">Granian</a> is a Rust-based ASGI server with native TLS and HTTP/2. A single process handles everything — no nginx or supervisord required.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-granian<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span></code></pre></div>
-<p>Service URL:</p>
-<ul>
-<li><a href="https://127.0.0.1:8443">https://127.0.0.1:8443</a></li>
-</ul>
-<h3 id="mkcert-environment-variables">mkcert environment variables<a class="headerlink" href="#mkcert-environment-variables" title="Permanent link">&para;</a></h3>
-<p>Available for the <code>nginx</code> and <code>granian</code> images:</p>
+<p>The <code>_build_direct_child_index()</code> function builds a <code>{parent_path → child_info}</code> dict in one pass over all paths. This index is reused for all 646 <code>_build_topology()</code> calls instead of re-scanning every time.</p>
+<hr />
+<h2 id="per-request-throughput-mock-mode">Per-Request Throughput (Mock Mode)<a class="headerlink" href="#per-request-throughput-mock-mode" title="Permanent link">&para;</a></h2>
+<h3 id="shared-memory-locking">Shared-memory locking<a class="headerlink" href="#shared-memory-locking" title="Permanent link">&para;</a></h3>
+<p>The mock state is backed by a shared-memory segment protected by a filesystem lock (<code>fcntl.flock</code>).</p>
 <table>
 <thead>
 <tr>
-<th>Variable</th>
-<th>Default</th>
-<th>Description</th>
+<th>Operation</th>
+<th>Before</th>
+<th>After</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>PORT</code></td>
-<td><code>8000</code></td>
-<td>Port the server listens on</td>
+<td>Read (GET)</td>
+<td><code>LOCK_EX</code> — serialises all readers</td>
+<td><code>LOCK_SH</code> — concurrent reads allowed</td>
 </tr>
 <tr>
-<td><code>MKCERT_CERT_DIR</code></td>
-<td><code>/certs</code></td>
-<td>Directory where certificates are stored</td>
-</tr>
-<tr>
-<td><code>MKCERT_EXTRA_NAMES</code></td>
-<td>—</td>
-<td>Extra SANs (comma or space separated), e.g. <code>proxmox-api.lan,10.0.0.5</code></td>
-</tr>
-<tr>
-<td><code>CAROOT</code></td>
-<td>—</td>
-<td>Mount a volume here to persist the local CA across restarts</td>
-</tr>
-<tr>
-<td><code>APP_MODULE</code></td>
-<td><code>proxmox_openapi.mock_main:app</code></td>
-<td>ASGI app (change to <code>proxmox_openapi.main:app</code> for real mode)</td>
+<td>Write (POST/PUT/DELETE)</td>
+<td><code>LOCK_EX</code></td>
+<td><code>LOCK_EX</code> (unchanged)</td>
 </tr>
 </tbody>
 </table>
-<p>Example with extra SANs:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-tls<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">MKCERT_EXTRA_NAMES</span><span class="o">=</span><span class="s1">&#39;myhost.local,192.168.1.10&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-nginx
+<p>Concurrent GET requests no longer block each other.</p>
+<h3 id="deleted-item-tracking">Deleted-item tracking<a class="headerlink" href="#deleted-item-tracking" title="Permanent link">&para;</a></h3>
+<p>The set of deleted keys was stored as a JSON list (O(n) membership checks). It is now materialised as a Python <code>set</code> during each request (O(1) checks) and serialised back to a list only when writing state.</p>
+<hr />
+<h2 id="sdk-hot-paths">SDK Hot Paths<a class="headerlink" href="#sdk-hot-paths" title="Permanent link">&para;</a></h2>
+<h3 id="url-construction-httpspy">URL construction (<code>https.py</code>)<a class="headerlink" href="#url-construction-httpspy" title="Permanent link">&para;</a></h3>
+<p><code>_url_for()</code> is called on every API request to join the base URL with the request path. Previously it re-parsed <code>self._base_url</code> with <code>urlsplit</code>/<code>urlunsplit</code> on every call.</p>
+<p>Now the components <code>(scheme, netloc, base_path)</code> are parsed once in <code>__init__</code> and reused:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># __init__</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">_parsed</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_scheme</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">scheme</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_netloc</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">netloc</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># _url_for (called per-request)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">joined</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="k">return</span> <span class="n">urlunsplit</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_scheme</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_netloc</span><span class="p">,</span> <span class="n">joined</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
 </span></code></pre></div>
-<p>Example with real Proxmox mode:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-real<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">APP_MODULE</span><span class="o">=</span><span class="s1">&#39;proxmox_openapi.main:app&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_API_MODE</span><span class="o">=</span>real<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_URL</span><span class="o">=</span>https://pve.example.com:8006<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_API_TOKEN</span><span class="o">=</span><span class="nv">PVEAPIToken</span><span class="o">=</span>user@pam!mytoken<span class="o">=</span>your-secret<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-granian
+<p><code>posixpath</code> is now a top-level module import instead of a deferred <code>import posixpath</code> inside the method.</p>
+<h3 id="path-joining-resourcepy">Path joining (<code>resource.py</code>)<a class="headerlink" href="#path-joining-resourcepy" title="Permanent link">&para;</a></h3>
+<p><code>_url_join()</code> is called on every attribute navigation step (<code>proxmox.nodes</code>, <code>.qemu</code>, etc.). A fast path now avoids <code>urlsplit</code>/<code>urlunsplit</code> for plain path strings (no <code>://</code>), which is the common case for SDK usage:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_url_join</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>        <span class="k">return</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="c1"># full URL parsing only for absolute URLs</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="o">...</span>
 </span></code></pre></div>
-<h3 id="build-from-source">Build from source<a class="headerlink" href="#build-from-source" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/emersonfelipesp/proxmox-openapi.git
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>proxmox-openapi
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:raw<span class="w"> </span>.<span class="w">                          </span><span class="c1"># raw (default)</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>nginx<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:nginx<span class="w"> </span>.<span class="w">         </span><span class="c1"># nginx</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>granian<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:granian<span class="w"> </span>.<span class="w">     </span><span class="c1"># granian</span>
+<h3 id="none-filtering-resourcepy">None filtering (<code>resource.py</code>)<a class="headerlink" href="#none-filtering-resourcepy" title="Permanent link">&para;</a></h3>
+<p><code>_filter_none()</code> is called once per HTTP method to strip <code>None</code> values from params/data dicts. A fast path skips the dict comprehension when no <code>None</code> values are present (common for well-formed requests):</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_filter_none</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="k">return</span> <span class="n">d</span>  <span class="c1"># avoid allocation</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </span></code></pre></div>
 <hr />
-<h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Check installed version</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import proxmox_openapi; print(proxmox_openapi.__version__)&quot;</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Run the mock API</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>proxmox-openapi-mock
-</span></code></pre></div>
-<p>Visit <code>http://localhost:8000/docs</code> to confirm the API is running.</p>
-<hr />
-<h2 id="optional-dependencies">Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permanent link">&para;</a></h2>
-<h3 id="for-development">For Development<a class="headerlink" href="#for-development" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi<span class="o">[</span>test<span class="o">]</span>
-</span></code></pre></div>
-<p>Includes:
-- <code>pytest</code> - Testing framework
-- <code>httpx</code> - HTTP client for testing
-- <code>playwright</code> - Browser automation for API Viewer crawling</p>
-<h3 id="for-documentation">For Documentation<a class="headerlink" href="#for-documentation" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi<span class="o">[</span>docs<span class="o">]</span>
-</span></code></pre></div>
-<p>Includes:
-- <code>mkdocs</code> - Documentation generator
-- <code>mkdocs-material</code> - Material theme</p>
-<hr />
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<h2 id="task-polling">Task Polling<a class="headerlink" href="#task-polling" title="Permanent link">&para;</a></h2>
+<p><code>Tasks.blocking_status()</code> previously polled at a fixed interval (2 s), which means:</p>
 <ul>
-<li><strong><a href="../quickstart/">Quick Start Guide →</a></strong></li>
-<li><strong><a href="../mock-api/">Mock API Mode →</a></strong></li>
-<li><strong><a href="../real-api/">Real API Mode →</a></strong></li>
+<li>Short tasks were checked 2 s late on average.</li>
+<li>Long tasks (VM migrations, backups) generated many unnecessary API calls.</li>
 </ul>
+<p>It now uses <strong>exponential backoff</strong>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>1s → 2s → 4s → 8s → 16s → 30s (cap)
+</span></code></pre></div>
+<p>Timeout tracking uses <code>time.monotonic()</code> for accurate wall-clock measurement instead of cumulative addition (which underestimates actual elapsed time by the duration of each HTTP request).</p>
+<hr />
+<h2 id="config-loading">Config Loading<a class="headerlink" href="#config-loading" title="Permanent link">&para;</a></h2>
+<p><code>ProxmoxConfig.from_env()</code> previously copied the entire <code>os.environ</code> dict (50–200+ keys) on every call. It now reads only the ~20 specific keys it needs:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">_KEYS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="s2">&quot;PROXMOX_API_MODE&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_TOKEN_ID&quot;</span><span class="p">,</span> <span class="o">...</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">env_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_KEYS</span> <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+</span></code></pre></div>
+<p><code>yaml</code> (PyYAML) is only imported when a YAML config file is actually present, avoiding a heavy import on every startup.</p>
+<hr />
+<h2 id="dead-code-removed">Dead Code Removed<a class="headerlink" href="#dead-code-removed" title="Permanent link">&para;</a></h2>
+<p><code>mock/schema_helpers.py</code> previously contained ~200 lines of private functions (<code>_seed_int</code>, <code>_field_hint</code>, <code>_semantic_string_value</code>, etc.) that duplicated the same logic inside <code>ProxmoxSchemaValue</code> in <code>schema.py</code>. None of the module's public functions called these copies — they all delegated directly to <code>ProxmoxSchemaValue</code>. The dead code was removed, reducing module load time and memory footprint.</p>
+<hr />
+<h2 id="regex-pre-compilation">Regex Pre-compilation<a class="headerlink" href="#regex-pre-compilation" title="Permanent link">&para;</a></h2>
+<p>The pattern <code>r"(^|_)name$"</code> used in semantic mock value generation was previously compiled on every call via <code>re.search(pattern, hint)</code>. It is now compiled once at module load:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">_RE_NAME_HINT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(^|_)name$&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="performance-characteristics-updated">Performance Characteristics (Updated)<a class="headerlink" href="#performance-characteristics-updated" title="Permanent link">&para;</a></h2>
+<h3 id="mock-mode">Mock Mode<a class="headerlink" href="#mock-mode" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Startup (schema load + route registration)</td>
+<td>~1 s</td>
+</tr>
+<tr>
+<td>Request latency (in-memory, no lock contention)</td>
+<td>&lt; 5 ms</td>
+</tr>
+<tr>
+<td>Concurrent read throughput</td>
+<td>Parallel GETs (shared lock)</td>
+</tr>
+<tr>
+<td>Memory (schema + state)</td>
+<td>~100 MB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="real-mode">Real Mode<a class="headerlink" href="#real-mode" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Startup</td>
+<td>~500 ms</td>
+</tr>
+<tr>
+<td>Request latency</td>
+<td>Proxmox latency + ~10–20 ms validation overhead</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>~80 MB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sdk">SDK<a class="headerlink" href="#sdk" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First request</td>
+<td>One SSL context build + one session open</td>
+</tr>
+<tr>
+<td>Subsequent requests</td>
+<td>Connection reused from aiohttp pool</td>
+</tr>
+<tr>
+<td>Ticket renewal</td>
+<td>Automatic, uses same SSL context as API requests</td>
+</tr>
+<tr>
+<td>Task polling</td>
+<td>Exponential backoff, accurate monotonic timeout</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="profiling-tips">Profiling Tips<a class="headerlink" href="#profiling-tips" title="Permanent link">&para;</a></h2>
+<p>To measure startup time:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s2">import time</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s2">t0 = time.perf_counter()</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s2">from proxmox_openapi.main import app</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s2">print(f&#39;app ready in {time.perf_counter() - t0:.3f}s&#39;)</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s2">&quot;</span>
+</span></code></pre></div>
+<p>To measure mock route registration specifically:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="s2">import time, json</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="s2">from proxmox_openapi.mock.routes import register_generated_proxmox_mock_routes</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="s2">from proxmox_openapi.schema import load_proxmox_generated_openapi</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="s2">from fastapi import FastAPI</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="s2">doc = load_proxmox_generated_openapi()</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="s2">app = FastAPI()</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="s2">t0 = time.perf_counter()</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="s2">register_generated_proxmox_mock_routes(app, openapi_document=doc)</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="s2">print(f&#39;route registration: {time.perf_counter() - t0:.3f}s&#39;)</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="s2">&quot;</span>
+</span></code></pre></div>
 
 
 
