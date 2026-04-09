@@ -258,6 +258,53 @@ def test_tui_mock_mode_uses_mock_backend(
     assert captured["closed"] is True
 
 
+def test_tui_pbs_service_uses_pbs_defaults(
+    cli_runner: CliRunner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test that 'tui' with a PBS-configured profile uses PBS default path and passes service."""
+    tui_module = importlib.import_module("proxmox_openapi.proxmox_cli.commands.tui")
+    from proxmox_openapi.proxmox_cli.config import BackendConfig, ConfigManager
+
+    captured: dict[str, object] = {}
+
+    def fake_load_config(self: ConfigManager, config_path: str | None = None) -> None:
+        _ = config_path
+
+    def fake_get_profile(self: ConfigManager, profile_name: str | None = None) -> BackendConfig:
+        _ = profile_name
+        return BackendConfig(name="default", backend="https", service="PBS")
+
+    class DummyBridge:
+        def close(self) -> None:
+            captured["closed"] = True
+
+    def fake_create(config: BackendConfig) -> DummyBridge:
+        captured["backend"] = config.backend
+        captured["service"] = config.service
+        return DummyBridge()
+
+    def fake_launch_tui(
+        *, bridge: DummyBridge, mode: str, initial_path: str, service: str = "PVE"
+    ) -> None:
+        _ = bridge
+        captured["mode"] = mode
+        captured["path"] = initial_path
+        captured["tui_service"] = service
+
+    monkeypatch.setattr(ConfigManager, "load_config", fake_load_config)
+    monkeypatch.setattr(ConfigManager, "get_profile", fake_get_profile)
+    monkeypatch.setattr(tui_module.ProxmoxSDKBridge, "create", fake_create)
+    monkeypatch.setattr(tui_module, "launch_tui", fake_launch_tui)
+
+    result = cli_runner.invoke(app, ["--service", "PBS", "tui"])
+
+    assert result.exit_code == 0
+    assert captured["service"] == "PBS"
+    assert captured["tui_service"] == "PBS"
+    assert captured["path"] == "/admin/datastore"
+    assert captured["closed"] is True
+
+
 def test_init_command_creates_production_and_mock_profiles(
     cli_runner: CliRunner, monkeypatch: pytest.MonkeyPatch
 ) -> None:

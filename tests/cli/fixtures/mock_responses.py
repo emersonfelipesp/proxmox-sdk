@@ -61,8 +61,34 @@ MOCK_CLUSTER_RESPONSE = {
     "quorum": "ok",
 }
 
+MOCK_PBS_DATASTORE_RESPONSE = {
+    "data": [
+        {"name": "local-backup", "path": "/mnt/backup", "comment": "Local backup storage"},
+        {"name": "remote-nfs", "path": "/mnt/nfs", "comment": "NFS backup target"},
+    ]
+}
+
+MOCK_PBS_USERS_RESPONSE = {
+    "data": [
+        {"userid": "root@pam", "comment": "System root", "enable": True},
+        {"userid": "admin@pbs", "comment": "PBS admin", "enable": True},
+    ]
+}
+
+MOCK_PBS_STATUS_RESPONSE = {
+    "data": {
+        "info": {"fingerprint": "AB:CD:EF:12:34"},
+        "total": 1000000000,
+        "used": 500000000,
+        "avail": 500000000,
+    }
+}
+
 __all__ = [
     "MOCK_NODES_RESPONSE",
     "MOCK_QEMU_RESPONSE",
     "MOCK_CLUSTER_RESPONSE",
+    "MOCK_PBS_DATASTORE_RESPONSE",
+    "MOCK_PBS_USERS_RESPONSE",
+    "MOCK_PBS_STATUS_RESPONSE",
 ]

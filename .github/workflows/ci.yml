@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, testing, "v*"]
+    branches: [main, testing, pbs, "v*"]
   pull_request:
-    branches: [main, testing, "v*"]
+    branches: [main, testing, pbs, "v*"]
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
@@ -55,6 +55,7 @@ jobs:
         run: |
           uv run python -c "import proxmox_openapi.main"
           uv run python -c "import proxmox_openapi.mock_main"
+          uv run python -c "from proxmox_openapi.sdk.pbs import PBSSDK"
 
   test:
     runs-on: ubuntu-latest

@@ -179,6 +179,7 @@ jobs:
         run: |
           uv run python -c "import proxmox_openapi.main"
           uv run python -c "import proxmox_openapi.mock_main"
+          uv run python -c "from proxmox_openapi.sdk.pbs import PBSSDK"
 
       - name: Run test suite
         run: uv run pytest -n auto --cov=proxmox_openapi --cov-report=term-missing --cov-report=xml tests

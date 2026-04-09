@@ -119,6 +119,7 @@ jobs:
           uv run python -m compileall proxmox_openapi tests
           uv run python -c "import proxmox_openapi.main"
           uv run python -c "import proxmox_openapi.mock_main"
+          uv run python -c "from proxmox_openapi.sdk.pbs import PBSSDK"
           uv run pytest --cov=proxmox_openapi --cov-report=term-missing --cov-report=xml tests
           EOF
           chmod +x /tmp/docker-tests.sh

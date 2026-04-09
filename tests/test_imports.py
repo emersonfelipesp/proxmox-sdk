@@ -63,6 +63,23 @@ def test_import_sdk_backends_cli_base():
     assert proxmox_openapi.sdk.backends._cli_base is not None
 
 
+# sdk/pbs
+
+
+def test_import_sdk_pbs() -> None:
+    """Test that sdk.pbs module can be imported."""
+    from proxmox_openapi.sdk.pbs import PBSSDK
+
+    assert PBSSDK is not None
+
+
+def test_import_sdk_pbs_package() -> None:
+    """Test that sdk.pbs package itself is importable."""
+    import proxmox_openapi.sdk.pbs
+
+    assert proxmox_openapi.sdk.pbs is not None
+
+
 # proxmox_cli/ top-level modules
 
 

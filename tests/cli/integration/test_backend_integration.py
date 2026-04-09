@@ -27,6 +27,16 @@ def mock_backend_config() -> BackendConfig:
     )
 
 
+@pytest.fixture
+def pbs_mock_backend_config() -> BackendConfig:
+    """Create a PBS mock backend configuration."""
+    return BackendConfig(
+        name="pbs-mock-test",
+        backend="mock",
+        service="PBS",
+    )
+
+
 class TestBackendInitialization:
     """Test backend initialization and selection."""
 
@@ -49,6 +59,27 @@ class TestBackendInitialization:
         # Should not raise error on creation (actual connection tested separately)
         assert config.backend == "https"
         assert config.host == "proxmox.example.com"
+
+    def test_pbs_mock_backend_initialization(self, pbs_mock_backend_config: BackendConfig) -> None:
+        """Test PBS mock backend initialization."""
+        bridge = ProxmoxSDKBridge.create(pbs_mock_backend_config)
+        assert bridge is not None
+        assert bridge.sdk is not None
+
+    def test_pbs_https_backend_config(self) -> None:
+        """Test PBS HTTPS backend configuration with port 8007."""
+        config = BackendConfig(
+            name="pbs-https-test",
+            backend="https",
+            host="pbs.example.com",
+            port=8007,
+            user="admin@pbs",
+            token_value="test-token",
+            service="PBS",
+        )
+        assert config.backend == "https"
+        assert config.port == 8007
+        assert config.service == "PBS"
 
 
 class TestCLIBackendFlags:
@@ -91,6 +122,14 @@ class TestCommandBackendIntegration:
         )
         # Mock backend should work
         assert result.exit_code in (0, 1, 4, 7)  # Allow various error codes
+
+    def test_get_pbs_path_with_mock_backend(self, cli_runner: CliRunner) -> None:
+        """Test GET command against PBS path with mock backend."""
+        result = cli_runner.invoke(
+            app,
+            ["--backend", "mock", "--service", "PBS", "get", "/admin/datastore"],
+        )
+        assert result.exit_code in (0, 1, 4, 7)
 
     def test_help_with_mock_backend(self, cli_runner: CliRunner) -> None:
         """Test help with mock backend."""
@@ -254,6 +293,13 @@ class TestPathNavigation:
         path = validate_api_path("//nodes///pve1//qemu")
         assert path == "/nodes/pve1/qemu"
 
+    def test_pbs_path_normalization(self) -> None:
+        """Test PBS path normalization."""
+        from proxmox_openapi.proxmox_cli.utils import validate_api_path
+
+        path = validate_api_path("//admin///datastore")
+        assert path == "/admin/datastore"
+
     def test_path_extraction(self) -> None:
         """Test path component extraction."""
         from proxmox_openapi.proxmox_cli.utils import extract_path_components
@@ -272,6 +318,23 @@ class TestEndToEndWorkflows:
             ["--backend", "mock", "get", "/nodes", "--output", "json"],
         )
         # Should not crash
+        assert result.exit_code in (0, 1, 4, 7)
+
+    def test_get_pbs_datastore_workflow(self, cli_runner: CliRunner) -> None:
+        """Test getting PBS datastore workflow."""
+        result = cli_runner.invoke(
+            app,
+            [
+                "--backend",
+                "mock",
+                "--service",
+                "PBS",
+                "get",
+                "/admin/datastore",
+                "--output",
+                "json",
+            ],
+        )
         assert result.exit_code in (0, 1, 4, 7)
 
     def test_help_workflow(self, cli_runner: CliRunner) -> None:
