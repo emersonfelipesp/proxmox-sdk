@@ -26,7 +26,7 @@ COPY proxmox_openapi ./proxmox_openapi
 
 RUN uv venv --seed /app/.venv && \
     /app/.venv/bin/python -m pip install --upgrade pip && \
-    /app/.venv/bin/pip install '.' && \
+    /app/.venv/bin/pip install '.[server]' && \
     /app/.venv/bin/pip install 'granian>=2.7.0'
 
 # Application tree + venv only (shared by all runtime images).

@@ -69,7 +69,7 @@ jobs:
           if-no-files-found: error
 
       - name: Rewrite package name to proxmox-sdk
-        run: sed -i 's/^name = "proxmox-openapi"/name = "proxmox-sdk"/' pyproject.toml
+        run: sed -i 's/proxmox-openapi/proxmox-sdk/g' pyproject.toml
 
       - name: Build proxmox-sdk distribution
         run: |
@@ -162,7 +162,7 @@ jobs:
           enable-cache: true
 
       - name: Sync development environment
-        run: uv sync --frozen --extra test --group dev
+        run: uv sync --frozen --extra server --extra test --group dev
 
       - name: Ruff (lint + format check)
         run: |

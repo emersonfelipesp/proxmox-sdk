@@ -46,7 +46,7 @@ jobs:
           python-version: "3.12"
 
       - name: Sync dependencies
-        run: uv sync --frozen --extra test --group dev
+        run: uv sync --frozen --extra server --extra test --group dev
 
       - name: Compile package
         run: uv run python -m compileall proxmox_openapi tests
@@ -69,7 +69,7 @@ jobs:
           python-version: "3.12"
 
       - name: Sync dependencies
-        run: uv sync --frozen --extra test --group dev
+        run: uv sync --frozen --extra server --extra test --group dev
 
       - name: Run mocked schema-driven tests
         run: uv run pytest -n auto --cov=proxmox_openapi --cov-report=term-missing --cov-report=xml tests
