@@ -22,7 +22,6 @@ from proxmox_openapi.schema import (
     _generated_dir,
     available_proxmox_openapi_versions,
     load_proxmox_generated_openapi,
-    load_pydantic_models,
 )
 
 

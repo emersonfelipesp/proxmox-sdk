@@ -209,7 +209,9 @@ def create_app() -> FastAPI:
 
     version_tag = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", DEFAULT_PROXMOX_OPENAPI_TAG)
     openapi_doc = load_proxmox_generated_openapi(version_tag=version_tag, service=proxmox_service)
-    _register_mode_routes(app, config, route_info, version_tag, openapi_doc, service=proxmox_service)
+    _register_mode_routes(
+        app, config, route_info, version_tag, openapi_doc, service=proxmox_service
+    )
 
     return app
 

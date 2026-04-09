@@ -90,7 +90,9 @@ def main() -> int:
         "PVE": "proxmox_openapi/generated/proxmox",
         "PBS": "proxmox_openapi/generated/pbs",
     }
-    output_dir = Path(args.output_dir or _service_output_dirs.get(service, _service_output_dirs["PVE"]))
+    output_dir = Path(
+        args.output_dir or _service_output_dirs.get(service, _service_output_dirs["PVE"])
+    )
 
     bundle = generate_proxmox_codegen_bundle(
         output_dir=output_dir,

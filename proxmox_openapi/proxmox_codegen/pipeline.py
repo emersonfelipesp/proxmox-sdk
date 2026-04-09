@@ -7,7 +7,6 @@ from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
 from proxmox_openapi.proxmox_codegen.apidoc_parser import (
-    PROXMOX_API_VIEWER_URL,
     SERVICE_URLS,
     fetch_apidoc_js,
     flatten_api_schema,
@@ -76,7 +75,9 @@ _SERVICE_TITLES: dict[str, str] = {
 }
 
 
-def _validate_source_for_version_tag(source_url: str, version_tag: str, service: str = "PVE") -> None:
+def _validate_source_for_version_tag(
+    source_url: str, version_tag: str, service: str = "PVE"
+) -> None:
     """Reject non-official viewer URLs when using the reserved latest tag."""
     validate_source_url(source_url)
     if version_tag != LATEST_VERSION_TAG:
