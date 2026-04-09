@@ -9,6 +9,7 @@ from typing import Any, Optional
 import typer
 
 from proxmox_openapi.proxmox_cli.app import app
+from proxmox_openapi.proxmox_cli.commands._common import apply_cli_overrides
 from proxmox_openapi.proxmox_cli.config import ConfigManager
 from proxmox_openapi.proxmox_cli.exceptions import ParameterError
 from proxmox_openapi.proxmox_cli.output import (
@@ -84,6 +85,7 @@ def batch(
 
         config_mgr = ConfigManager()
         config = config_mgr.get_profile("default")
+        apply_cli_overrides(config, ctx_obj)
         if backend:
             config.backend = backend
 

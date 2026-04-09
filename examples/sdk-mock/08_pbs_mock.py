@@ -74,6 +74,7 @@ def generic_sdk_example() -> None:
 
 
 def main() -> None:
+    """Run the PBS mock SDK examples."""
     print("=" * 60)
     print("Example 8: PBS Mock SDK")
     print("=" * 60)

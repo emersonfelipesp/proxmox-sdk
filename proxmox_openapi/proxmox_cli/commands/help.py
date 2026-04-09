@@ -80,9 +80,25 @@ def help_cmd(
         }
         formatter.print_output(payload)
     elif path:
+        service = ctx_obj.get("service", "PVE")
+        _service_help: dict[str, dict[str, str]] = {
+            "PVE": {
+                "description": "This endpoint is part of the Proxmox VE API.",
+                "documentation": "https://pve.proxmox.com/pve-docs/api-viewer/",
+            },
+            "PMG": {
+                "description": "This endpoint is part of the Proxmox Mail Gateway API.",
+                "documentation": "https://pmg.proxmox.com/pmg-docs/api-viewer/",
+            },
+            "PBS": {
+                "description": "This endpoint is part of the Proxmox Backup Server API.",
+                "documentation": "https://pbs.proxmox.com/docs/api-viewer/",
+            },
+        }
+        help_info = _service_help.get(service, _service_help["PVE"])
         payload = {
             "endpoint": path,
-            "description": "This endpoint is part of the Proxmox VE API.",
-            "documentation": "https://pve.proxmox.com/pve-docs/api-viewer/",
+            "description": help_info["description"],
+            "documentation": help_info["documentation"],
         }
         formatter.print_output(payload)

@@ -14,6 +14,7 @@ def launch_tui(
     *,
     mode: TuiMode,
     initial_path: str = "/nodes",
+    service: str = "PVE",
 ) -> None:
     """Launch the Textual TUI and surface dependency errors with clear guidance."""
     try:
@@ -25,4 +26,4 @@ def launch_tui(
             ) from exc
         raise
 
-    run_proxmox_tui(bridge=bridge, mode=mode, initial_path=initial_path)
+    run_proxmox_tui(bridge=bridge, mode=mode, initial_path=initial_path, service=service)

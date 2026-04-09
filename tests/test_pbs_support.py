@@ -228,9 +228,7 @@ class TestMockBackendService:
 
         backend = MockBackend(service="PVE")
         backend._ensure_schema()
-        assert any("qemu" in p for p in backend._paths), (
-            "PVE schema should contain qemu paths"
-        )
+        assert any("qemu" in p for p in backend._paths), "PVE schema should contain qemu paths"
 
 
 class TestProxmoxSDKMockServiceRouting:
@@ -340,11 +338,10 @@ class TestPBSSDKModule:
 
     def test_pbssdk_constructor_forces_pbs(self) -> None:
         """PBSSDK.__init__ always uses service='PBS' regardless of kwargs."""
-        from proxmox_openapi.sdk.pbs import PBSSDK
-        from proxmox_openapi.sdk.services import SERVICES
-
         # Use _backend injection to avoid needing a real host
         from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_openapi.sdk.services import SERVICES
 
         mock_backend = MockBackend(service="PBS")
         sdk = PBSSDK(_backend=mock_backend)

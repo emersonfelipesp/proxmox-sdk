@@ -110,15 +110,21 @@ class CacheableSDKBridge:
     Wraps ProxmoxSDKBridge and caches read-only operations.
     """
 
-    def __init__(self, bridge: Any, cache: Optional[Cache] = None) -> None:
+    def __init__(self, bridge: Any, cache: Optional[Cache] = None, service: str = "PVE") -> None:
         """Initialize caching bridge.
 
         Args:
             bridge: ProxmoxSDKBridge instance
             cache: Cache instance (default: create new Cache)
+            service: Proxmox service type for cache key namespacing (PVE, PBS, PMG)
         """
         self.bridge = bridge
         self.cache = cache or Cache()
+        self._service = service.upper()
+
+    def _cache_key(self, path: str) -> str:
+        """Build a service-namespaced cache key."""
+        return f"{self._service}:{path}"
 
     def get(self, path: str, use_cache: bool = True) -> Any:
         """Get resource with optional caching.
@@ -130,15 +136,16 @@ class CacheableSDKBridge:
         Returns:
             API response
         """
+        key = self._cache_key(path)
         if use_cache:
-            cached = self.cache.get(path)
+            cached = self.cache.get(key)
             if cached is not None:
                 return cached
 
         result = self.bridge.get(path)
 
         if use_cache and result is not None:
-            self.cache.set(path, result)
+            self.cache.set(key, result)
 
         return result
 
@@ -169,7 +176,7 @@ class CacheableSDKBridge:
         """
         result = self.bridge.put(path, **kwargs)
         # Invalidate cache for this path and parents
-        self.cache.clear(path)
+        self.cache.clear(self._cache_key(path))
         self._invalidate_parent_paths(path)
         return result
 
@@ -184,7 +191,7 @@ class CacheableSDKBridge:
         """
         result = self.bridge.delete(path)
         # Invalidate cache for this path and parents
-        self.cache.clear(path)
+        self.cache.clear(self._cache_key(path))
         self._invalidate_parent_paths(path)
         return result
 
@@ -198,4 +205,4 @@ class CacheableSDKBridge:
         for i in range(len(parts) - 1, 0, -1):
             parent_path = "/".join(parts[:i])
             if parent_path:
-                self.cache.clear(parent_path)
+                self.cache.clear(self._cache_key(parent_path))

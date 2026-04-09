@@ -190,10 +190,13 @@ def test_tui_defaults_to_production_mode(
         captured["backend"] = config.backend
         return DummyBridge()
 
-    def fake_launch_tui(*, bridge: DummyBridge, mode: str, initial_path: str) -> None:
+    def fake_launch_tui(
+        *, bridge: DummyBridge, mode: str, initial_path: str, service: str = "PVE"
+    ) -> None:
         _ = bridge
         captured["mode"] = mode
         captured["path"] = initial_path
+        captured["service"] = service
 
     monkeypatch.setattr(ConfigManager, "load_config", fake_load_config)
     monkeypatch.setattr(ConfigManager, "get_profile", fake_get_profile)
@@ -233,10 +236,13 @@ def test_tui_mock_mode_uses_mock_backend(
         captured["backend"] = config.backend
         return DummyBridge()
 
-    def fake_launch_tui(*, bridge: DummyBridge, mode: str, initial_path: str) -> None:
+    def fake_launch_tui(
+        *, bridge: DummyBridge, mode: str, initial_path: str, service: str = "PVE"
+    ) -> None:
         _ = bridge
         captured["mode"] = mode
         captured["path"] = initial_path
+        captured["service"] = service
 
     monkeypatch.setattr(ConfigManager, "load_config", fake_load_config)
     monkeypatch.setattr(ConfigManager, "get_profile", fake_get_profile)

@@ -17,6 +17,27 @@ from proxmox_openapi.proxmox_cli.utils import validate_api_path
 
 TuiMode = Literal["production", "mock"]
 
+_SERVICE_TREE_PATHS: dict[str, list[tuple[str, str]]] = {
+    "PVE": [
+        ("/nodes", "Nodes"),
+        ("/nodes/{node}/qemu", "Virtual Machines"),
+        ("/nodes/{node}/lxc", "Containers"),
+        ("/cluster", "Cluster"),
+        ("/storage", "Storage"),
+        ("/access", "Access"),
+    ],
+    "PBS": [
+        ("/admin/datastore", "Datastores"),
+        ("/admin", "Administration"),
+        ("/config", "Configuration"),
+        ("/nodes", "Nodes"),
+        ("/access/users", "Users"),
+        ("/access/roles", "Roles"),
+        ("/status", "Status"),
+        ("/tape", "Tape"),
+    ],
+}
+
 
 @dataclass(frozen=True)
 class TuiRuntime:
@@ -24,6 +45,7 @@ class TuiRuntime:
 
     mode: TuiMode
     initial_path: str = "/nodes"
+    service: str = "PVE"
 
 
 @dataclass
@@ -151,7 +173,8 @@ class ProxmoxTuiApp(App[None]):
         yield Footer()
 
     def on_mount(self) -> None:
-        self.title = f"Proxmox TUI ({self._runtime.mode})"
+        svc_label = "PBS" if self._runtime.service == "PBS" else "Proxmox"
+        self.title = f"{svc_label} TUI ({self._runtime.mode})"
         self.sub_title = "Type a path and press Enter - Use tree or / to search"
 
         # Hide filter bar initially
@@ -172,14 +195,7 @@ class ProxmoxTuiApp(App[None]):
         tree.root.label = "/ (root)"
 
         # Add common paths as expandable nodes
-        common_paths = [
-            ("/nodes", "Nodes"),
-            ("/nodes/{node}/qemu", "Virtual Machines"),
-            ("/nodes/{node}/lxc", "Containers"),
-            ("/cluster", "Cluster"),
-            ("/storage", "Storage"),
-            ("/access", "Access"),
-        ]
+        common_paths = _SERVICE_TREE_PATHS.get(self._runtime.service, _SERVICE_TREE_PATHS["PVE"])
 
         for path, label in common_paths:
             node = tree.root.add(label, data=PathNode(path=path, label=label))
@@ -397,9 +413,13 @@ def run_proxmox_tui(
     *,
     mode: TuiMode,
     initial_path: str = "/nodes",
+    service: str = "PVE",
 ) -> None:
     """Run the Proxmox Textual TUI."""
-    app = ProxmoxTuiApp(bridge=bridge, runtime=TuiRuntime(mode=mode, initial_path=initial_path))
+    app = ProxmoxTuiApp(
+        bridge=bridge,
+        runtime=TuiRuntime(mode=mode, initial_path=initial_path, service=service),
+    )
     try:
         app.run()
     finally:

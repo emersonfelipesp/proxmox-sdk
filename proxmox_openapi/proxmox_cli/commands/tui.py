@@ -13,7 +13,13 @@ from proxmox_openapi.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_openapi.proxmox_cli.tui_runner import launch_tui
 from proxmox_openapi.proxmox_cli.utils import validate_api_path
 
-from ._common import apply_cli_overrides
+_SERVICE_DEFAULT_PATHS: dict[str, str] = {
+    "PVE": "/nodes",
+    "PMG": "/nodes",
+    "PBS": "/admin/datastore",
+}
+
+from ._common import apply_cli_overrides  # noqa: E402
 
 
 def _build_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> BackendConfig:
@@ -39,11 +45,11 @@ def tui(
         None,
         help="Optional mode. Use 'mock' to run TUI against in-memory mock backend.",
     ),
-    path: str = typer.Option(
-        "/nodes",
+    path: str | None = typer.Option(
+        None,
         "--path",
         "-p",
-        help="Initial API path to load in the TUI.",
+        help="Initial API path to load in the TUI (default: service-specific root).",
     ),
 ) -> None:
     """Launch interactive Proxmox TUI for resource navigation and management.
@@ -82,16 +88,23 @@ def tui(
 
     try:
         ctx_obj = ctx.obj or {}
-        initial_path = validate_api_path(path)
         use_mock = mode == "mock"
 
         backend_cfg = _build_backend_config(ctx_obj, use_mock=use_mock)
+        service = backend_cfg.service
+
+        if path is None:
+            initial_path = validate_api_path(_SERVICE_DEFAULT_PATHS.get(service, "/nodes"))
+        else:
+            initial_path = validate_api_path(path)
+
         bridge = ProxmoxSDKBridge.create(backend_cfg)
 
         launch_tui(
             bridge=bridge,
             mode="mock" if use_mock else "production",
             initial_path=initial_path,
+            service=service,
         )
     except RuntimeError as exc:
         typer.echo(f"Error: {exc}", err=True)
