@@ -55,13 +55,28 @@ jobs:
               fh.write(f'package_name={project_name}\nversion={version}\n')
           PY
 
-      - name: Build distribution
+      - name: Build proxmox-openapi distribution
         run: uv run --with build python -m build
 
-      - name: Upload dist artifacts
+      - name: Upload proxmox-openapi dist artifacts
         uses: actions/upload-artifact@v7
         with:
           name: dist
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Rewrite package name to proxmox-sdk
+        run: sed -i 's/^name = "proxmox-openapi"/name = "proxmox-sdk"/' pyproject.toml
+
+      - name: Build proxmox-sdk distribution
+        run: |
+          rm -rf dist
+          uv run --with build python -m build
+
+      - name: Upload proxmox-sdk dist artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist-sdk
           path: dist/*
           if-no-files-found: error
 
@@ -87,7 +102,7 @@ jobs:
           name: dist
           path: dist
 
-      - name: Upload to TestPyPI
+      - name: Upload proxmox-openapi to TestPyPI
         env:
           TEST_PYPI_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
           TEST_PYPI_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
@@ -99,6 +114,25 @@ jobs:
             --username "$TEST_PYPI_USERNAME" \
             --password "$TEST_PYPI_TOKEN" \
             dist/*
+
+      - name: Download proxmox-sdk dist artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: dist-sdk
+          path: dist-sdk
+
+      - name: Upload proxmox-sdk to TestPyPI
+        env:
+          TEST_PYPI_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
+          TEST_PYPI_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          uv run --with twine python -m twine upload \
+            --non-interactive \
+            --skip-existing \
+            --repository-url https://test.pypi.org/legacy/ \
+            --username "$TEST_PYPI_USERNAME" \
+            --password "$TEST_PYPI_TOKEN" \
+            dist-sdk/*
 
   validate-testpypi:
     name: validate TestPyPI / py${{ matrix.python-version }}
@@ -181,6 +215,8 @@ jobs:
           tags: |
             emersonfelipesp/proxmox-openapi:${{ needs.prepare-release.outputs.version }}
             emersonfelipesp/proxmox-openapi:latest
+            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}
+            emersonfelipesp/proxmox-sdk:latest
 
   publish-pypi:
     name: publish to PyPI
@@ -205,7 +241,7 @@ jobs:
           name: dist
           path: dist
 
-      - name: Upload to PyPI
+      - name: Upload proxmox-openapi to PyPI
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
@@ -217,3 +253,22 @@ jobs:
             --username "$PYPI_USERNAME" \
             --password "$PYPI_TOKEN" \
             dist/*
+
+      - name: Download proxmox-sdk dist artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: dist-sdk
+          path: dist-sdk
+
+      - name: Upload proxmox-sdk to PyPI
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          uv run --with twine python -m twine upload \
+            --non-interactive \
+            --skip-existing \
+            --repository-url https://upload.pypi.org/legacy/ \
+            --username "$PYPI_USERNAME" \
+            --password "$PYPI_TOKEN" \
+            dist-sdk/*
