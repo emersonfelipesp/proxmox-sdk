@@ -337,6 +337,11 @@ ProxmoxSDK(
 )
 ```
 
+!!! tip "PBS HOW-TO Guide"
+    For a complete guide to PBS operations — datastores, snapshots, garbage
+    collection, verification, pruning, and user management — see the
+    **[Proxmox Backup Server HOW-TO →](./sdk-pbs.md)**.
+
 ---
 
 ## Patterns & Best Practices
@@ -418,6 +423,7 @@ async with ProxmoxSDK(...) as proxmox:
 
 - **[Complete Authentication Guide →](./sdk-authentication.md)** - Detailed auth methods and token setup
 - **[Virtual Machines HOW-TO →](./sdk-virtual-machines.md)** - Getting, creating, and managing VMs
+- **[Proxmox Backup Server HOW-TO →](./sdk-pbs.md)** - Datastores, snapshots, GC, and backup management
 - **[More Examples →](./sdk-examples.md)** - Clustering, backups, networking, and more
 
 ---
@@ -488,3 +494,4 @@ ProxmoxSDK(
 - [pytest test examples](/tests/) in the repository
 - [Architecture](./architecture.md) — How the SDK works internally
 - [API Reference](./api-reference.md) — Endpoint documentation
+- [Proxmox Backup Server HOW-TO](./sdk-pbs.md) — PBS datastores, snapshots, and maintenance

@@ -54,6 +54,7 @@ nav:
       - Overview: sdk-guide.md
       - Authentication & Sessions: sdk-authentication.md
       - Virtual Machines: sdk-virtual-machines.md
+      - Proxmox Backup Server: sdk-pbs.md
       - Examples & Recipes: sdk-examples.md
   - API Modes:
       - SDK Mock Usage: sdk-mock.md
