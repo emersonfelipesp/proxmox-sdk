@@ -21,6 +21,6 @@ repos:
     hooks:
       - id: ty-check
         name: ty-check
-        entry: uv run ty check proxmox_openapi tests --output-format concise
+        entry: uv run ty check proxmox_sdk tests --output-format concise
         language: system
         pass_filenames: false

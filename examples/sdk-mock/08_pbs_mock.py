@@ -10,8 +10,8 @@ Demonstrates:
 
 import asyncio
 
-from proxmox_openapi.sdk import ProxmoxSDK
-from proxmox_openapi.sdk.pbs import PBSSDK
+from proxmox_sdk.sdk import ProxmoxSDK
+from proxmox_sdk.sdk.pbs import PBSSDK
 
 
 async def async_example() -> None:

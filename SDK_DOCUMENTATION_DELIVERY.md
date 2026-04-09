@@ -1,7 +1,7 @@
 # Proxmox SDK Documentation Delivery Summary
 
 **Date:** April 4, 2026
-**Project:** proxmox-openapi
+**Project:** proxmox-sdk
 **Deliverable:** Complete SDK documentation with real-world examples and HOW-TOs
 
 ---
@@ -307,7 +307,7 @@ Reorganized navigation into logical groups:
 ### View Documentation Locally
 
 ```bash
-cd /root/nms/proxmox-openapi
+cd /root/nms/proxmox-sdk
 
 # Build and serve documentation
 mkdocs serve
@@ -338,7 +338,7 @@ python examples/sdk-real/01_authentication.py
 ### Integrate into Your Project
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -363,7 +363,7 @@ async with ProxmoxSDK(
 ## 📚 Documentation Structure
 
 ```
-/root/nms/proxmox-openapi/
+/root/nms/proxmox-sdk/
 ├── docs/
 │   ├── sdk-guide.md                # SDK Overview (entry point)
 │   ├── sdk-authentication.md        # Auth methods deep dive

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Successfully completed comprehensive implementation of **Phases 4-6** for ProxmoxSDK-based CLI package within proxmox-openapi project. Delivered a **production-ready pvesh-like command-line interface** with advanced features, comprehensive testing, and release automation.
+Successfully completed comprehensive implementation of **Phases 4-6** for ProxmoxSDK-based CLI package within proxmox-sdk project. Delivered a **production-ready pvesh-like command-line interface** with advanced features, comprehensive testing, and release automation.
 
 ## Implementation Status
 
@@ -153,11 +153,11 @@ Backend Implementations
 ```bash
 # From source
 git clone <repo>
-cd proxmox-openapi
+cd proxmox-sdk
 pip install -e ".[cli]"
 
 # Run installer
-python -m proxmox_openapi.proxmox_cli.install
+python -m proxmox_sdk.proxmox_cli.install
 
 # Verify
 proxmox --version

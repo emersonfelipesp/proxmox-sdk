@@ -1,4 +1,4 @@
-name: Release proxmox-openapi
+name: Release proxmox-sdk
 
 on:
   release:
@@ -46,9 +46,9 @@ jobs:
           version = data['project']['version']
           event = os.getenv('GITHUB_EVENT_NAME', '')
           release_tag = os.getenv('RELEASE_TAG_NAME', '') or ''
-          if project_name != 'proxmox-openapi':
+          if project_name != 'proxmox-sdk':
               raise SystemExit(
-                  f'Expected project name proxmox-openapi, got {project_name!r}'
+                  f'Expected project name proxmox-sdk, got {project_name!r}'
               )
           if event == 'release' and release_tag != f'v{version}':
               raise SystemExit(
@@ -58,28 +58,28 @@ jobs:
               fh.write(f'package_name={project_name}\nversion={version}\n')
           PY
 
-      - name: Build proxmox-openapi distribution
+      - name: Build proxmox-sdk distribution
         run: uv run --with build python -m build
 
-      - name: Upload proxmox-openapi dist artifacts
+      - name: Upload proxmox-sdk dist artifacts
         uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/*
           if-no-files-found: error
 
-      - name: Rewrite package name to proxmox-sdk
-        run: sed -i 's/proxmox-openapi/proxmox-sdk/g' pyproject.toml
+      - name: Rewrite package name to proxmox-openapi (alternate name)
+        run: sed -i 's/proxmox-sdk/proxmox-openapi/g' pyproject.toml
 
-      - name: Build proxmox-sdk distribution
+      - name: Build proxmox-openapi distribution
         run: |
           rm -rf dist
           uv run --with build python -m build
 
-      - name: Upload proxmox-sdk dist artifacts
+      - name: Upload proxmox-openapi dist artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: dist-sdk
+          name: dist-openapi
           path: dist/*
           if-no-files-found: error
 
@@ -105,7 +105,7 @@ jobs:
           name: dist
           path: dist
 
-      - name: Upload proxmox-openapi to TestPyPI
+      - name: Upload proxmox-sdk to TestPyPI
         env:
           TEST_PYPI_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
           TEST_PYPI_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
@@ -118,13 +118,13 @@ jobs:
             --password "$TEST_PYPI_TOKEN" \
             dist/*
 
-      - name: Download proxmox-sdk dist artifacts
+      - name: Download proxmox-openapi dist artifacts
         uses: actions/download-artifact@v8
         with:
-          name: dist-sdk
-          path: dist-sdk
+          name: dist-openapi
+          path: dist-openapi
 
-      - name: Upload proxmox-sdk to TestPyPI
+      - name: Upload proxmox-openapi to TestPyPI
         env:
           TEST_PYPI_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
           TEST_PYPI_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
@@ -135,7 +135,7 @@ jobs:
             --repository-url https://test.pypi.org/legacy/ \
             --username "$TEST_PYPI_USERNAME" \
             --password "$TEST_PYPI_TOKEN" \
-            dist-sdk/*
+            dist-openapi/*
 
   validate-testpypi:
     name: validate TestPyPI / py${{ matrix.python-version }}
@@ -170,22 +170,22 @@ jobs:
           uv run ruff format --check .
 
       - name: Run ty type checks
-        run: uv run ty check proxmox_openapi tests --output-format concise
+        run: uv run ty check proxmox_sdk tests --output-format concise
 
       - name: Compile package
-        run: uv run python -m compileall proxmox_openapi
+        run: uv run python -m compileall proxmox_sdk
 
       - name: Import smoke checks
         run: |
-          uv run python -c "import proxmox_openapi.main"
-          uv run python -c "import proxmox_openapi.mock_main"
-          uv run python -c "from proxmox_openapi.sdk.pbs import PBSSDK"
+          uv run python -c "import proxmox_sdk.main"
+          uv run python -c "import proxmox_sdk.mock_main"
+          uv run python -c "from proxmox_sdk.sdk.pbs import PBSSDK"
 
       - name: Run test suite
-        run: uv run pytest -n auto --cov=proxmox_openapi --cov-report=term-missing --cov-report=xml tests
+        run: uv run pytest -n auto --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
 
   publish-docker:
-    name: publish proxmox-openapi Docker image
+    name: publish proxmox-sdk Docker image
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     needs: [prepare-release, validate-testpypi]
     runs-on: ubuntu-latest
@@ -215,12 +215,12 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            APP_MODULE=proxmox_openapi.mock_main:app
+            APP_MODULE=proxmox_sdk.mock_main:app
           tags: |
-            emersonfelipesp/proxmox-openapi:${{ needs.prepare-release.outputs.version }}
-            emersonfelipesp/proxmox-openapi:latest
             emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}
             emersonfelipesp/proxmox-sdk:latest
+            emersonfelipesp/proxmox-openapi:${{ needs.prepare-release.outputs.version }}
+            emersonfelipesp/proxmox-openapi:latest
 
   publish-pypi:
     name: publish to PyPI
@@ -245,7 +245,7 @@ jobs:
           name: dist
           path: dist
 
-      - name: Upload proxmox-openapi to PyPI
+      - name: Upload proxmox-sdk to PyPI
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
@@ -258,13 +258,13 @@ jobs:
             --password "$PYPI_TOKEN" \
             dist/*
 
-      - name: Download proxmox-sdk dist artifacts
+      - name: Download proxmox-openapi dist artifacts
         uses: actions/download-artifact@v8
         with:
-          name: dist-sdk
-          path: dist-sdk
+          name: dist-openapi
+          path: dist-openapi
 
-      - name: Upload proxmox-sdk to PyPI
+      - name: Upload proxmox-openapi to PyPI
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
@@ -275,4 +275,4 @@ jobs:
             --repository-url https://upload.pypi.org/legacy/ \
             --username "$PYPI_USERNAME" \
             --password "$PYPI_TOKEN" \
-            dist-sdk/*
+            dist-openapi/*

@@ -16,8 +16,8 @@ This guide explains how to contribute to the Proxmox OpenAPI project, set up you
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/emersonfelipesp/proxmox-openapi.git
-cd proxmox-openapi
+git clone https://github.com/emersonfelipesp/proxmox-sdk.git
+cd proxmox-sdk
 ```
 
 2. **Install in development mode:**
@@ -36,10 +36,10 @@ This installs the package in editable mode with all development dependencies.
 
 ```bash
 # Check that imports work
-python -c "from proxmox_openapi import __version__; print(__version__)"
+python -c "from proxmox_sdk import __version__; print(__version__)"
 
 # Run the server
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 ```
 
 ## Development Workflow
@@ -67,7 +67,7 @@ ruff check .
 ruff check --fix .
 
 # Type checking
-uv run ty check proxmox_openapi tests --output-format concise
+uv run ty check proxmox_sdk tests --output-format concise
 ```
 
 ### 4. Run Tests
@@ -77,7 +77,7 @@ uv run ty check proxmox_openapi tests --output-format concise
 pytest
 
 # Run with coverage
-pytest --cov=proxmox_openapi --cov-report=html
+pytest --cov=proxmox_sdk --cov-report=html
 
 # Run specific test file
 pytest tests/test_schema.py
@@ -115,8 +115,8 @@ Open a PR on GitHub with:
 ## Project Structure
 
 ```
-proxmox-openapi/
-├── proxmox_openapi/           # Main package
+proxmox-sdk/
+├── proxmox_sdk/           # Main package
 │   ├── __init__.py           # Package metadata
 │   ├── main.py               # Main FastAPI app (with mode switching)
 │   ├── mock_main.py          # Mock-only standalone app
@@ -186,19 +186,19 @@ The central FastAPI app that supports both mock and real modes:
 
 ```python
 from fastapi import FastAPI
-from proxmox_openapi import __version__
-from proxmox_openapi.proxmox.config import ProxmoxConfig
+from proxmox_sdk import __version__
+from proxmox_sdk.proxmox.config import ProxmoxConfig
 
 config = ProxmoxConfig()
 app = FastAPI(title="Proxmox OpenAPI", version=__version__)
 
 if config.mode == "real":
     # Load real Proxmox routes
-    from proxmox_openapi.proxmox.routes import register_proxmox_routes
+    from proxmox_sdk.proxmox.routes import register_proxmox_routes
     register_proxmox_routes(app, config)
 else:
     # Load mock routes (default)
-    from proxmox_openapi.mock.routes import register_generated_proxmox_mock_routes
+    from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes
     register_generated_proxmox_mock_routes(app, "latest")
 ```
 
@@ -307,7 +307,7 @@ pydantic_models.py
 ### Running Code Generation
 
 ```python
-from proxmox_openapi.proxmox_codegen import ProxmoxCodegenPipeline
+from proxmox_sdk.proxmox_codegen import ProxmoxCodegenPipeline
 
 # Initialize pipeline
 pipeline = ProxmoxCodegenPipeline(
@@ -349,7 +349,7 @@ tests/
 ```python
 import pytest
 from fastapi.testclient import TestClient
-from proxmox_openapi.main import app
+from proxmox_sdk.main import app
 
 def test_version_endpoint():
     """Test /version endpoint."""
@@ -363,7 +363,7 @@ def test_version_endpoint():
 @pytest.mark.asyncio
 async def test_proxmox_client_auth(mock_proxmox_server):
     """Test ProxmoxClient authentication."""
-    from proxmox_openapi.proxmox import ProxmoxClient, ProxmoxConfig
+    from proxmox_sdk.proxmox import ProxmoxClient, ProxmoxConfig
 
     config = ProxmoxConfig(
         url=mock_proxmox_server.url,
@@ -383,7 +383,7 @@ async def test_proxmox_client_auth(mock_proxmox_server):
 pytest
 
 # With coverage
-pytest --cov=proxmox_openapi --cov-report=html
+pytest --cov=proxmox_sdk --cov-report=html
 open htmlcov/index.html
 
 # Specific module
@@ -432,7 +432,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-from proxmox_openapi.schema import load_proxmox_schema
+from proxmox_sdk.schema import load_proxmox_schema
 
 
 def create_app(version: str = "latest") -> FastAPI:
@@ -521,7 +521,7 @@ proper 504 Gateway Timeout response.
 
 ## Release Process
 
-1. **Update version** in `proxmox_openapi/__init__.py`
+1. **Update version** in `proxmox_sdk/__init__.py`
 2. **Update CHANGELOG.md** with release notes
 3. **Create git tag:**
    ```bash
@@ -532,10 +532,10 @@ proper 504 Gateway Timeout response.
 
 ## Getting Help
 
-- **Issues:** https://github.com/emersonfelipesp/proxmox-openapi/issues
-- **Discussions:** https://github.com/emersonfelipesp/proxmox-openapi/discussions
-- **Documentation:** https://emersonfelipesp.github.io/proxmox-openapi/
+- **Issues:** https://github.com/emersonfelipesp/proxmox-sdk/issues
+- **Discussions:** https://github.com/emersonfelipesp/proxmox-sdk/discussions
+- **Documentation:** https://emersonfelipesp.github.io/proxmox-sdk/
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/emersonfelipesp/proxmox-openapi/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/emersonfelipesp/proxmox-sdk/blob/main/LICENSE) file for details.

@@ -1,6 +1,6 @@
 # SDK Implementation Plan
 
-**Goal:** Evolve `proxmox-openapi` into a first-class Python SDK that works standalone (no FastAPI required), while keeping FastAPI as an optional layer for users who want an HTTP server.
+**Goal:** Evolve `proxmox-sdk` into a first-class Python SDK that works standalone (no FastAPI required), while keeping FastAPI as an optional layer for users who want an HTTP server.
 
 **Reference:** [`proxmoxer`](../reference/proxmoxer.md) is the feature baseline. This plan does not copy proxmoxer as-is — every design decision is adapted to the existing architecture (async-first, aiohttp, OpenAPI-schema-aware, multi-version Proxmox support).
 
@@ -9,7 +9,7 @@
 ## Current Architecture (Baseline)
 
 ```
-proxmox_openapi/
+proxmox_sdk/
 ├── proxmox/
 │   ├── client.py        # ProxmoxClient — async aiohttp HTTP client (real mode)
 │   ├── config.py        # ProxmoxConfig — dataclass, env-var loader, validation
@@ -35,7 +35,7 @@ proxmox_openapi/
 ## Target Architecture
 
 ```
-proxmox_openapi/
+proxmox_sdk/
 ├── sdk/                          # NEW: standalone SDK layer
 │   ├── __init__.py               # SDK public exports
 │   ├── api.py                    # ProxmoxSDK — main entry point
@@ -123,7 +123,7 @@ SERVICES: dict[str, ServiceConfig] = {
 
 #### 1.2 `sdk/exceptions.py`
 
-Replace the current `proxmox_openapi/exception.py` `ProxmoxOpenAPIException` usage inside the SDK with typed exceptions. The existing `ProxmoxOpenAPIException` stays for FastAPI layer errors.
+Replace the current `proxmox_sdk/exception.py` `ProxmoxOpenAPIException` usage inside the SDK with typed exceptions. The existing `ProxmoxOpenAPIException` stays for FastAPI layer errors.
 
 ```python
 class ProxmoxSDKError(Exception):
@@ -174,7 +174,7 @@ class AbstractBackend(Protocol):
 
 #### 2.2 `sdk/backends/https.py` — Async HTTPS Backend
 
-This is a **refactor** of the existing `proxmox_openapi/proxmox/client.py`, not a replacement. It moves the logic into the SDK and adds missing features.
+This is a **refactor** of the existing `proxmox_sdk/proxmox/client.py`, not a replacement. It moves the logic into the SDK and adds missing features.
 
 **Features to add over existing `ProxmoxClient`:**
 
@@ -243,7 +243,7 @@ def _normalize_host(host: str, default_port: int) -> str:
 
 #### 2.3 `sdk/backends/ssh_paramiko.py` — SSH Paramiko Backend
 
-**Dependencies:** `paramiko` (optional, install extra: `pip install proxmox-openapi[ssh]`)
+**Dependencies:** `paramiko` (optional, install extra: `pip install proxmox-sdk[ssh]`)
 
 **Features:**
 - Pure Python SSH using `paramiko.SSHClient` with `AutoAddPolicy`
@@ -255,7 +255,7 @@ def _normalize_host(host: str, default_port: int) -> str:
 
 #### 2.4 `sdk/backends/openssh.py` — OpenSSH Backend
 
-**Dependencies:** `openssh_wrapper` (optional, install extra: `pip install proxmox-openapi[ssh]`)
+**Dependencies:** `openssh_wrapper` (optional, install extra: `pip install proxmox-sdk[ssh]`)
 
 **Features:**
 - Uses `openssh_wrapper.SSHConnection`
@@ -716,7 +716,7 @@ class Files:
 
 **File:** `sdk/backends/mock.py`
 
-Expose the existing in-memory mock store (`proxmox_openapi/mock/state.py`) as an SDK backend. This means `ProxmoxSDK.mock()` works without starting a FastAPI server.
+Expose the existing in-memory mock store (`proxmox_sdk/mock/state.py`) as an SDK backend. This means `ProxmoxSDK.mock()` works without starting a FastAPI server.
 
 ```python
 class MockBackend:
@@ -800,19 +800,19 @@ class ProxmoxConfig:
 
 ### Phase 11 — Public API & Package Exports
 
-**File:** `proxmox_openapi/__init__.py` (extend, no breaking changes)
+**File:** `proxmox_sdk/__init__.py` (extend, no breaking changes)
 
 ```python
 # Existing exports (unchanged):
-from proxmox_openapi.main import app
-from proxmox_openapi.mock_main import app as mock_app, run
+from proxmox_sdk.main import app
+from proxmox_sdk.mock_main import app as mock_app, run
 
 # New SDK exports:
-from proxmox_openapi.sdk.api import ProxmoxSDK
-from proxmox_openapi.sdk.sync import SyncProxmoxSDK
-from proxmox_openapi.sdk.exceptions import ResourceException, AuthenticationError
-from proxmox_openapi.sdk.tools.tasks import Tasks
-from proxmox_openapi.sdk.tools.files import Files
+from proxmox_sdk.sdk.api import ProxmoxSDK
+from proxmox_sdk.sdk.sync import SyncProxmoxSDK
+from proxmox_sdk.sdk.exceptions import ResourceException, AuthenticationError
+from proxmox_sdk.sdk.tools.tasks import Tasks
+from proxmox_sdk.sdk.tools.files import Files
 
 __all__ = [
     # Existing
@@ -846,7 +846,7 @@ try:
 except ImportError as exc:
     raise BackendNotAvailableError(
         "paramiko is required for the ssh_paramiko backend. "
-        "Install it with: pip install proxmox-openapi[ssh]"
+        "Install it with: pip install proxmox-sdk[ssh]"
     ) from exc
 ```
 
@@ -854,7 +854,7 @@ except ImportError as exc:
 
 ## Refactoring Plan for Existing Code
 
-### `proxmox_openapi/proxmox/client.py`
+### `proxmox_sdk/proxmox/client.py`
 
 **Current role:** Full async HTTP client, raises `fastapi.HTTPException`.
 **Post-refactor role:** Thin adapter — delegates to `sdk/backends/https.py`, translates `ResourceException` → `HTTPException` for the FastAPI layer.
@@ -865,7 +865,7 @@ class ProxmoxClient:
     """FastAPI adapter over the SDK HTTPS backend."""
 
     def __init__(self, config: ProxmoxConfig) -> None:
-        from proxmox_openapi.sdk.backends.https import HttpsBackend
+        from proxmox_sdk.sdk.backends.https import HttpsBackend
         self._backend = HttpsBackend.from_config(config)
 
     async def request(self, method, path, *, params=None, json=None) -> Any:
@@ -888,7 +888,7 @@ This approach:
 
 ```python
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def main():
     # Password auth
@@ -907,7 +907,7 @@ async def main():
         )
 
         # Wait for task
-        from proxmox_openapi import Tasks
+        from proxmox_sdk import Tasks
         task_id = await proxmox.nodes("pve1").qemu(101).status.start.post()
         await Tasks.blocking_status(proxmox, task_id, timeout=60)
 
@@ -917,7 +917,7 @@ asyncio.run(main())
 ### Sync SDK Usage
 
 ```python
-from proxmox_openapi import SyncProxmoxSDK
+from proxmox_sdk import SyncProxmoxSDK
 
 with SyncProxmoxSDK(
     host="pve.example.com",
@@ -932,7 +932,7 @@ with SyncProxmoxSDK(
 ### Token Auth
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -946,7 +946,7 @@ async with ProxmoxSDK(
 ### Multi-Service
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 pve = ProxmoxSDK(host="pve.example.com", user="admin@pam", password="s3cr3t")
 pmg = ProxmoxSDK(host="mail.example.com", user="admin@pmg", password="s3cr3t", service="PMG")
@@ -956,7 +956,7 @@ pbs = ProxmoxSDK(host="backup.example.com", user="admin@pbs", password="s3cr3t",
 ### SSH Backend
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -970,7 +970,7 @@ async with ProxmoxSDK(
 ### Local Backend (on Proxmox host)
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(backend="local", service="PVE") as proxmox:
     nodes = await proxmox.nodes.get()
@@ -979,7 +979,7 @@ async with ProxmoxSDK(backend="local", service="PVE") as proxmox:
 ### Mock Mode (no server, no real Proxmox)
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK.mock(schema_version="latest") as proxmox:
     nodes = await proxmox.nodes.get()   # returns generated mock data
@@ -988,7 +988,7 @@ async with ProxmoxSDK.mock(schema_version="latest") as proxmox:
 ### File Upload
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(host="pve.example.com", user="admin@pam", password="s") as proxmox:
     with open("/path/to/debian.iso", "rb") as f:
@@ -1001,7 +1001,7 @@ async with ProxmoxSDK(host="pve.example.com", user="admin@pam", password="s") as
 ### File Utilities
 
 ```python
-from proxmox_openapi import ProxmoxSDK, Files
+from proxmox_sdk import ProxmoxSDK, Files
 
 async with ProxmoxSDK(...) as proxmox:
     files = Files(proxmox, node="pve1", storage="local")
@@ -1012,7 +1012,7 @@ async with ProxmoxSDK(...) as proxmox:
 ### Error Handling
 
 ```python
-from proxmox_openapi import ProxmoxSDK, ResourceException, AuthenticationError
+from proxmox_sdk import ProxmoxSDK, ResourceException, AuthenticationError
 
 try:
     async with ProxmoxSDK(host="pve.example.com", user="admin@pam", password="wrong") as proxmox:
@@ -1032,7 +1032,7 @@ async with ProxmoxSDK(...) as proxmox:
 ```python
 # Still works exactly as before — zero breaking changes
 import uvicorn
-from proxmox_openapi import app
+from proxmox_sdk import app
 
 uvicorn.run(app, host="0.0.0.0", port=8000)
 ```

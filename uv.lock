@@ -1775,7 +1775,7 @@ wheels = [
 ]
 
 [[package]]
-name = "proxmox-openapi"
+name = "proxmox-sdk"
 version = "0.0.2"
 source = { editable = "." }
 dependencies = [
@@ -1865,10 +1865,10 @@ requires-dist = [
     { name = "paramiko", marker = "extra == 'ssh'", specifier = ">=3.0" },
     { name = "playwright", marker = "extra == 'playwright'", specifier = ">=1.58.0" },
     { name = "playwright", marker = "extra == 'test'", specifier = ">=1.58.0" },
-    { name = "proxmox-openapi", extras = ["cli"], marker = "extra == 'tui'" },
-    { name = "proxmox-openapi", extras = ["pbs", "tui"], marker = "extra == 'pbs-tui'" },
-    { name = "proxmox-openapi", extras = ["pve", "pbs", "server", "cli", "tui", "ssh"], marker = "extra == 'all'" },
-    { name = "proxmox-openapi", extras = ["pve", "tui"], marker = "extra == 'pve-tui'" },
+    { name = "proxmox-sdk", extras = ["cli"], marker = "extra == 'tui'" },
+    { name = "proxmox-sdk", extras = ["pbs", "tui"], marker = "extra == 'pbs-tui'" },
+    { name = "proxmox-sdk", extras = ["pve", "pbs", "server", "cli", "tui", "ssh"], marker = "extra == 'all'" },
+    { name = "proxmox-sdk", extras = ["pve", "tui"], marker = "extra == 'pve-tui'" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", marker = "extra == 'test'", specifier = ">=0.24.0" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=7.1.0" },

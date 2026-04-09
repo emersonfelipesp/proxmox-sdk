@@ -2,18 +2,18 @@
 
 **Status:** ✅ COMPLETE (Phases 1-3)
 **Date:** April 4, 2026
-**Repository:** /root/nms/proxmox-openapi
+**Repository:** /root/nms/proxmox-sdk
 
 ## Overview
 
-A complete pvesh-like CLI has been implemented for the proxmox-openapi project, providing a user-friendly command-line interface to interact with Proxmox VE, PMG, and PBS APIs over multiple transport backends.
+A complete pvesh-like CLI has been implemented for the proxmox-sdk project, providing a user-friendly command-line interface to interact with Proxmox VE, PMG, and PBS APIs over multiple transport backends.
 
 ## What Was Built
 
 ### 📦 Package Structure
 
 ```
-proxmox_openapi/proxmox_cli/
+proxmox_sdk/proxmox_cli/
 ├── __init__.py                 # Package exports
 ├── cli.py                       # Main entry point (Typer app)
 ├── app.py                       # App singleton and setup
@@ -252,7 +252,7 @@ proxmox help /nodes
 mkdir -p ~/.proxmox-cli
 
 # Copy example config
-cp proxmox_openapi/proxmox_cli/config.example.json ~/.proxmox-cli/config.json
+cp proxmox_sdk/proxmox_cli/config.example.json ~/.proxmox-cli/config.json
 
 # Edit with your credentials
 nano ~/.proxmox-cli/config.json
@@ -326,6 +326,6 @@ The Proxmox OpenAPI CLI is now **fully functional** with:
 
 The implementation follows the detailed plan with all core functionality completed. The CLI is ready for backend integration testing and can be used immediately with the mock backend for development and testing purposes.
 
-**Entry Point:** `python -m proxmox_openapi.proxmox_cli.cli` or `proxmox` (after installation)
+**Entry Point:** `python -m proxmox_sdk.proxmox_cli.cli` or `proxmox` (after installation)
 
 **Status:** Production-ready for Phase 1-3 deliverables ✅

@@ -3,10 +3,10 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["proxmox_openapi*"]
+include = ["proxmox_sdk*"]
 
 [project]
-name = "proxmox-openapi"
+name = "proxmox-sdk"
 version = "0.0.2"
 description = "pvesh-like CLI for Proxmox API with multi-backend support, performance profiling, and advanced configuration management"
 readme = "README.md"
@@ -36,16 +36,16 @@ cli = [
 
 # TUI — full Textual terminal UI (includes CLI deps)
 tui = [
-    "proxmox-openapi[cli]",
+    "proxmox-sdk[cli]",
     "textual>=0.79.1",
 ]
 
 # Service-specific TUI shortcuts
 pve-tui = [
-    "proxmox-openapi[pve,tui]",
+    "proxmox-sdk[pve,tui]",
 ]
 pbs-tui = [
-    "proxmox-openapi[pbs,tui]",
+    "proxmox-sdk[pbs,tui]",
 ]
 
 # SSH transport backends
@@ -56,7 +56,7 @@ ssh = [
 
 # Everything
 all = [
-    "proxmox-openapi[pve,pbs,server,cli,tui,ssh]",
+    "proxmox-sdk[pve,pbs,server,cli,tui,ssh]",
 ]
 
 test = [
@@ -88,11 +88,11 @@ dev = [
 ]
 
 [project.scripts]
-proxmox = "proxmox_openapi.proxmox_cli.cli:cli_main"
-proxmox-cli = "proxmox_openapi.proxmox_cli.cli:cli_main"
-pbx = "proxmox_openapi.proxmox_cli.cli:cli_main"
-proxmox-openapi-codegen = "proxmox_openapi.proxmox_codegen.cli:main"
-proxmox-openapi-mock = "proxmox_openapi.mock_main:run"
+proxmox = "proxmox_sdk.proxmox_cli.cli:cli_main"
+proxmox-cli = "proxmox_sdk.proxmox_cli.cli:cli_main"
+pbx = "proxmox_sdk.proxmox_cli.cli:cli_main"
+proxmox-sdk-codegen = "proxmox_sdk.proxmox_codegen.cli:main"
+proxmox-sdk-mock = "proxmox_sdk.mock_main:run"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -101,7 +101,7 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 
 [tool.coverage.run]
-source = ["proxmox_openapi"]
+source = ["proxmox_sdk"]
 branch = true
 
 [tool.coverage.report]
@@ -119,10 +119,10 @@ line-length = 100
 select = ["E4", "E7", "E9", "F", "I", "ANN201", "D103", "W"]
 
 [tool.ruff.lint.per-file-ignores]
-"proxmox_openapi/**/*.py" = ["ANN201", "D103"]
-"proxmox_openapi/main.py" = ["ANN201", "D103", "C901"]
-"proxmox_openapi/proxmox/routes.py" = ["ANN201", "D103", "C901"]
-"proxmox_openapi/mock/routes.py" = ["ANN201", "D103", "C901"]
+"proxmox_sdk/**/*.py" = ["ANN201", "D103"]
+"proxmox_sdk/main.py" = ["ANN201", "D103", "C901"]
+"proxmox_sdk/proxmox/routes.py" = ["ANN201", "D103", "C901"]
+"proxmox_sdk/mock/routes.py" = ["ANN201", "D103", "C901"]
 "tests/**/*.py" = ["ANN201", "D103"]
 
 [tool.ruff.format]

@@ -39,17 +39,17 @@ Connect to actual Proxmox servers:
 ### Installation
 
 ```bash
-pip install proxmox-openapi
+pip install proxmox-sdk
 ```
 
 ### Run Mock API (Default)
 
 ```bash
 # Using the command-line tool
-proxmox-openapi-mock
+proxmox-sdk-mock
 
 # Or with uvicorn directly
-uvicorn proxmox_openapi.mock_main:app
+uvicorn proxmox_sdk.mock_main:app
 ```
 
 Visit `http://localhost:8000/docs` to see **646 Proxmox API endpoints** ready to use!
@@ -64,7 +64,7 @@ export PROXMOX_API_TOKEN_ID=user@pam!mytoken
 export PROXMOX_API_TOKEN_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 # Run the API
-uvicorn proxmox_openapi.main:app
+uvicorn proxmox_sdk.main:app
 ```
 
 All requests now route to your real Proxmox server with full validation!
@@ -158,7 +158,7 @@ print(response.json())
 
 ```python
 import os
-from proxmox_openapi.main import create_app
+from proxmox_sdk.main import create_app
 
 # Configure real API connection
 os.environ["PROXMOX_API_MODE"] = "real"
@@ -180,7 +180,7 @@ app = create_app()
 - ✅ **Stable**: Mock API mode fully functional
 - ✅ **Production Ready**: Real API mode tested with Proxmox VE 7.x and 8.x
 - 🔄 **Active Development**: Regular updates and improvements
-- 📦 **PyPI Published**: `pip install proxmox-openapi`
+- 📦 **PyPI Published**: `pip install proxmox-sdk`
 
 ---
 
@@ -192,15 +192,15 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/emersonfelipesp/proxmox-openapi/issues)
-- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/emersonfelipesp/proxmox-openapi/discussions)
-- **Documentation**: [Full documentation site](https://emersonfelipesp.github.io/proxmox-openapi/)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/emersonfelipesp/proxmox-sdk/issues)
+- **GitHub Discussions**: [Ask questions and share ideas](https://github.com/emersonfelipesp/proxmox-sdk/discussions)
+- **Documentation**: [Full documentation site](https://emersonfelipesp.github.io/proxmox-sdk/)
 
 ---
 
 ## Next Steps
 
-- **[Install proxmox-openapi →](installation.md)**
+- **[Install proxmox-sdk →](installation.md)**
 - **[Follow the Quick Start guide →](quickstart.md)**
 - **[Explore Mock API Mode →](mock-api.md)**
 - **[Connect to Real Proxmox →](real-api.md)**

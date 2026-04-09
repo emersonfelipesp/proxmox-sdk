@@ -10,7 +10,7 @@ python examples/sdk-mock/01_basic_async.py
 python examples/sdk-mock/02_basic_sync.py
 
 # Or using the installed package
-proxmox-openapi-example-01
+proxmox-sdk-example-01
 ```
 
 ## Example List
@@ -29,7 +29,7 @@ proxmox-openapi-example-01
 
 **Async (with async/await):**
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 async with ProxmoxSDK.mock() as proxmox:
     nodes = await proxmox.nodes.get()
@@ -38,7 +38,7 @@ async with ProxmoxSDK.mock() as proxmox:
 
 **Sync (without async/await):**
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 with ProxmoxSDK.sync_mock() as proxmox:
     nodes = proxmox.nodes.get()

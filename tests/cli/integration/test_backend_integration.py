@@ -5,10 +5,10 @@ from __future__ import annotations
 import pytest
 from typer.testing import CliRunner
 
-from proxmox_openapi.proxmox_cli.cli import app
-from proxmox_openapi.proxmox_cli.config import BackendConfig, ConfigManager
-from proxmox_openapi.proxmox_cli.output import OutputFormatter
-from proxmox_openapi.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
+from proxmox_sdk.proxmox_cli.cli import app
+from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
+from proxmox_sdk.proxmox_cli.output import OutputFormatter
+from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 
 
 @pytest.fixture
@@ -288,21 +288,21 @@ class TestPathNavigation:
 
     def test_path_normalization(self) -> None:
         """Test path normalization."""
-        from proxmox_openapi.proxmox_cli.utils import validate_api_path
+        from proxmox_sdk.proxmox_cli.utils import validate_api_path
 
         path = validate_api_path("//nodes///pve1//qemu")
         assert path == "/nodes/pve1/qemu"
 
     def test_pbs_path_normalization(self) -> None:
         """Test PBS path normalization."""
-        from proxmox_openapi.proxmox_cli.utils import validate_api_path
+        from proxmox_sdk.proxmox_cli.utils import validate_api_path
 
         path = validate_api_path("//admin///datastore")
         assert path == "/admin/datastore"
 
     def test_path_extraction(self) -> None:
         """Test path component extraction."""
-        from proxmox_openapi.proxmox_cli.utils import extract_path_components
+        from proxmox_sdk.proxmox_cli.utils import extract_path_components
 
         components = extract_path_components("/nodes/pve1/qemu/100")
         assert components == ["nodes", "pve1", "qemu", "100"]

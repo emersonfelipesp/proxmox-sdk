@@ -9,11 +9,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from proxmox_openapi.proxmox_cli.cache import Cache
-from proxmox_openapi.proxmox_cli.cli import app
-from proxmox_openapi.proxmox_cli.completion import completion_app
-from proxmox_openapi.proxmox_cli.performance import Benchmark, PerformanceMetrics
-from proxmox_openapi.proxmox_cli.themes.themes import get_theme, list_themes
+from proxmox_sdk.proxmox_cli.cache import Cache
+from proxmox_sdk.proxmox_cli.cli import app
+from proxmox_sdk.proxmox_cli.completion import completion_app
+from proxmox_sdk.proxmox_cli.performance import Benchmark, PerformanceMetrics
+from proxmox_sdk.proxmox_cli.themes.themes import get_theme, list_themes
 
 
 @pytest.fixture

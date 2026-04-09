@@ -1,4 +1,4 @@
-# proxmox-openapi - LLM Project Guide (Current State)
+# proxmox-sdk - LLM Project Guide (Current State)
 
 Schema-driven Proxmox API platform with FastAPI server modes, a standalone SDK, and a Typer CLI/TUI.
 
@@ -6,7 +6,7 @@ This file is for LLMs and automation agents that need implementation-accurate co
 
 ## Snapshot (as of 2026-04-09)
 
-- Package name: `proxmox-openapi`
+- Package name: `proxmox-sdk`
 - Package version: `0.0.2`
 - Python requirement: `>=3.11`
 - License: MIT
@@ -28,20 +28,20 @@ This file is for LLMs and automation agents that need implementation-accurate co
 
 ## High-Value Paths
 
-- `proxmox_openapi/main.py`: full FastAPI app factory + mode routing.
-- `proxmox_openapi/mock_main.py`: standalone mock entrypoint (`proxmox-openapi-mock`).
-- `proxmox_openapi/mock/`: mock app, schema helpers, shared-memory state, data loader.
-- `proxmox_openapi/proxmox/`: real-mode route generator + Proxmox client adapter.
-- `proxmox_openapi/sdk/`: async/sync SDK, auth, backends, tools.
-- `proxmox_openapi/proxmox_cli/`: CLI commands, config, formatting, TUI, doc capture.
-- `proxmox_openapi/proxmox_codegen/`: crawler/parser/normalizer/generator pipeline.
-- `proxmox_openapi/generated/{proxmox,pbs}/latest/`: package-bundled generated artifacts used at runtime.
+- `proxmox_sdk/main.py`: full FastAPI app factory + mode routing.
+- `proxmox_sdk/mock_main.py`: standalone mock entrypoint (`proxmox-sdk-mock`).
+- `proxmox_sdk/mock/`: mock app, schema helpers, shared-memory state, data loader.
+- `proxmox_sdk/proxmox/`: real-mode route generator + Proxmox client adapter.
+- `proxmox_sdk/sdk/`: async/sync SDK, auth, backends, tools.
+- `proxmox_sdk/proxmox_cli/`: CLI commands, config, formatting, TUI, doc capture.
+- `proxmox_sdk/proxmox_codegen/`: crawler/parser/normalizer/generator pipeline.
+- `proxmox_sdk/generated/{proxmox,pbs}/latest/`: package-bundled generated artifacts used at runtime.
 - `generated/{proxmox,pbs}/...`: repository-level generated outputs used by codegen workflows.
 - `tests/`: unit + CLI/integration test suite.
 
 ## Runtime Surfaces
 
-### 1) Full FastAPI App (`proxmox_openapi.main:app`)
+### 1) Full FastAPI App (`proxmox_sdk.main:app`)
 
 Always mounted utility/management routes:
 
@@ -53,7 +53,7 @@ Always mounted utility/management routes:
 
 Generated API routes are mounted from loaded schema server prefix (currently `/api2/json`).
 
-### 2) Standalone Mock App (`proxmox_openapi.mock_main:app`)
+### 2) Standalone Mock App (`proxmox_sdk.mock_main:app`)
 
 - Loads generated schema version (`PROXMOX_MOCK_SCHEMA_VERSION`, default `latest`).
 - Registers generated mock routes when schema is available.
@@ -64,9 +64,9 @@ Generated API routes are mounted from loaded schema server prefix (currently `/a
 
 Primary classes:
 
-- `proxmox_openapi.sdk.api.ProxmoxSDK` (async)
-- `proxmox_openapi.sdk.sync.SyncProxmoxSDK` (sync wrapper)
-- `proxmox_openapi.sdk.resource.ProxmoxResource` (dynamic attribute/call path navigation)
+- `proxmox_sdk.sdk.api.ProxmoxSDK` (async)
+- `proxmox_sdk.sdk.sync.SyncProxmoxSDK` (sync wrapper)
+- `proxmox_sdk.sdk.resource.ProxmoxResource` (dynamic attribute/call path navigation)
 
 Helpers exported at package level:
 
@@ -146,7 +146,7 @@ Shared state implementation is in `mock/state.py`:
 Entrypoints:
 
 - HTTP: `/codegen/generate`, `/codegen/openapi`, `/codegen/pydantic`, `/codegen/versions`
-- CLI: `proxmox-openapi-codegen`
+- CLI: `proxmox-sdk-codegen`
 
 Pipeline (`proxmox_codegen/pipeline.py`) does:
 
@@ -222,8 +222,8 @@ Notes:
 From `pyproject.toml`:
 
 - `proxmox`, `proxmox-cli`, `pbx` -> CLI entrypoint
-- `proxmox-openapi-codegen` -> codegen CLI
-- `proxmox-openapi-mock` -> mock-only server
+- `proxmox-sdk-codegen` -> codegen CLI
+- `proxmox-sdk-mock` -> mock-only server
 
 ## Docker Targets
 

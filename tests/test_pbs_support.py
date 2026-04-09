@@ -6,21 +6,21 @@ from pathlib import Path
 
 import pytest
 
-from proxmox_openapi import schema as schema_module
-from proxmox_openapi.proxmox_codegen.apidoc_parser import (
+from proxmox_sdk import schema as schema_module
+from proxmox_sdk.proxmox_codegen.apidoc_parser import (
     PBS_API_VIEWER_URL,
     PBS_APIDOC_JS_URL,
     PROXMOX_API_VIEWER_URL,
     SERVICE_URLS,
     extract_api_schema_text,
 )
-from proxmox_openapi.proxmox_codegen.pipeline import (
+from proxmox_sdk.proxmox_codegen.pipeline import (
     LATEST_VERSION_TAG,
     _validate_source_for_version_tag,
 )
-from proxmox_openapi.schema import (
+from proxmox_sdk.schema import (
     _generated_dir,
-    available_proxmox_openapi_versions,
+    available_proxmox_sdk_versions,
     load_proxmox_generated_openapi,
 )
 
@@ -138,8 +138,8 @@ class TestAvailableVersions:
 
         monkeypatch.setattr(schema_module, "_generated_dir", fake_generated_dir)
 
-        pve_versions = available_proxmox_openapi_versions(service="PVE")
-        pbs_versions = available_proxmox_openapi_versions(service="PBS")
+        pve_versions = available_proxmox_sdk_versions(service="PVE")
+        pbs_versions = available_proxmox_sdk_versions(service="PBS")
 
         assert "v1" in pve_versions
         assert "v2" not in pve_versions
@@ -191,26 +191,26 @@ class TestMockBackendService:
     """MockBackend must load the correct schema for its service."""
 
     def test_mock_backend_defaults_to_pve(self) -> None:
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         backend = MockBackend()
         assert backend._service == "PVE"
 
     def test_mock_backend_accepts_pbs_service(self) -> None:
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         backend = MockBackend(service="PBS")
         assert backend._service == "PBS"
 
     def test_mock_backend_uppercases_service(self) -> None:
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         backend = MockBackend(service="pbs")
         assert backend._service == "PBS"
 
     def test_pbs_mock_backend_loads_pbs_schema(self) -> None:
         """PBS MockBackend must contain PBS-specific paths (not PVE paths)."""
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         backend = MockBackend(service="PBS")
         backend._ensure_schema()
@@ -224,7 +224,7 @@ class TestMockBackendService:
 
     def test_pve_mock_backend_loads_pve_schema(self) -> None:
         """PVE MockBackend must contain PVE-specific paths."""
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         backend = MockBackend(service="PVE")
         backend._ensure_schema()
@@ -235,16 +235,16 @@ class TestProxmoxSDKMockServiceRouting:
     """ProxmoxSDK.mock(service=...) must route to the correct backend schema."""
 
     def test_proxmoxsdk_mock_pbs_backend_has_pbs_service(self) -> None:
-        from proxmox_openapi.sdk import ProxmoxSDK
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk import ProxmoxSDK
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         sdk = ProxmoxSDK.mock(service="PBS")
         assert isinstance(sdk._backend, MockBackend)
         assert sdk._backend._service == "PBS"
 
     def test_proxmoxsdk_mock_pve_backend_has_pve_service(self) -> None:
-        from proxmox_openapi.sdk import ProxmoxSDK
-        from proxmox_openapi.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk import ProxmoxSDK
+        from proxmox_sdk.sdk.backends.mock import MockBackend
 
         sdk = ProxmoxSDK.mock(service="PVE")
         assert isinstance(sdk._backend, MockBackend)
@@ -252,7 +252,7 @@ class TestProxmoxSDKMockServiceRouting:
 
     def test_proxmoxsdk_sync_mock_pbs_crud(self) -> None:
         """sync_mock(service='PBS') performs CRUD against PBS schema."""
-        from proxmox_openapi.sdk import ProxmoxSDK
+        from proxmox_sdk.sdk import ProxmoxSDK
 
         with ProxmoxSDK.sync_mock(service="PBS") as pbs:
             # GET /access/users — present in PBS schema (returns array)
@@ -261,7 +261,7 @@ class TestProxmoxSDKMockServiceRouting:
 
     def test_proxmoxsdk_sync_mock_pbs_get_datastore(self) -> None:
         """PBS mock returns datastore list from /admin/datastore."""
-        from proxmox_openapi.sdk import ProxmoxSDK
+        from proxmox_sdk.sdk import ProxmoxSDK
 
         with ProxmoxSDK.sync_mock(service="PBS") as pbs:
             stores = pbs.admin.datastore.get()
@@ -270,7 +270,7 @@ class TestProxmoxSDKMockServiceRouting:
 
     def test_proxmoxsdk_sync_mock_pbs_post_and_get(self) -> None:
         """PBS mock supports POST (create) followed by GET on the same path."""
-        from proxmox_openapi.sdk import ProxmoxSDK
+        from proxmox_sdk.sdk import ProxmoxSDK
 
         with ProxmoxSDK.sync_mock(service="PBS") as pbs:
             # /access/users supports both GET and POST in PBS schema
@@ -282,17 +282,17 @@ class TestProxmoxSDKMockServiceRouting:
 
 
 class TestPBSSDKModule:
-    """Tests for the proxmox_openapi.sdk.pbs convenience module."""
+    """Tests for the proxmox_sdk.sdk.pbs convenience module."""
 
     def test_import_pbssdk(self) -> None:
-        from proxmox_openapi.sdk.pbs import PBSSDK  # noqa: F401
+        from proxmox_sdk.sdk.pbs import PBSSDK  # noqa: F401
 
     def test_pbssdk_available_from_sdk_init(self) -> None:
-        from proxmox_openapi.sdk import PBSSDK  # noqa: F401
+        from proxmox_sdk.sdk import PBSSDK  # noqa: F401
 
     def test_pbssdk_mock_creates_pbs_backend(self) -> None:
-        from proxmox_openapi.sdk.backends.mock import MockBackend
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         sdk = PBSSDK.mock()
         assert isinstance(sdk._backend, MockBackend)
@@ -300,13 +300,13 @@ class TestPBSSDKModule:
 
     def test_pbssdk_mock_no_service_arg_needed(self) -> None:
         """PBSSDK.mock() works without any arguments — PBS is the default."""
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         sdk = PBSSDK.mock()
         assert sdk._service_config.default_port == 8007
 
     def test_pbssdk_sync_mock_crud(self) -> None:
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         with PBSSDK.sync_mock() as pbs:
             # /access/users returns an array in PBS schema
@@ -314,14 +314,14 @@ class TestPBSSDKModule:
             assert result is not None
 
     def test_pbssdk_sync_mock_datastore(self) -> None:
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         with PBSSDK.sync_mock() as pbs:
             stores = pbs.admin.datastore.get()
             assert stores is not None
 
     def test_pbssdk_sync_mock_delete(self) -> None:
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         with PBSSDK.sync_mock() as pbs:
             # DELETE returns None per MockBackend contract
@@ -329,7 +329,7 @@ class TestPBSSDKModule:
             assert result is None
 
     def test_pbssdk_service_config_is_pbs(self) -> None:
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         sdk = PBSSDK.mock()
         assert sdk._service_config.auth_cookie_name == "PBSAuthCookie"
@@ -339,9 +339,9 @@ class TestPBSSDKModule:
     def test_pbssdk_constructor_forces_pbs(self) -> None:
         """PBSSDK.__init__ always uses service='PBS' regardless of kwargs."""
         # Use _backend injection to avoid needing a real host
-        from proxmox_openapi.sdk.backends.mock import MockBackend
-        from proxmox_openapi.sdk.pbs import PBSSDK
-        from proxmox_openapi.sdk.services import SERVICES
+        from proxmox_sdk.sdk.backends.mock import MockBackend
+        from proxmox_sdk.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.services import SERVICES
 
         mock_backend = MockBackend(service="PBS")
         sdk = PBSSDK(_backend=mock_backend)
@@ -351,7 +351,7 @@ class TestPBSSDKModule:
         """PBSSDK.mock() works as async context manager."""
         import asyncio
 
-        from proxmox_openapi.sdk.pbs import PBSSDK
+        from proxmox_sdk.sdk.pbs import PBSSDK
 
         async def run():
             async with PBSSDK.mock() as pbs:

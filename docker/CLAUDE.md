@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Container runtime configuration for the `proxmox-openapi` service. This directory holds nginx config templates, supervisord process configs, and shell entrypoints used by the multi-stage `Dockerfile` at the repo root.
+Container runtime configuration for the `proxmox-sdk` service. This directory holds nginx config templates, supervisord process configs, and shell entrypoints used by the multi-stage `Dockerfile` at the repo root.
 
 ## Files
 
 | Path | Role |
 |------|------|
-| `nginx/proxmox-openapi-https.conf.template` | nginx HTTPS site config template (used by the nginx image) |
+| `nginx/proxmox-sdk-https.conf.template` | nginx HTTPS site config template (used by the nginx image) |
 | `supervisor/supervisord.conf` | supervisord global config |
-| `supervisor/proxmox-openapi.conf` | supervisord program definition — runs uvicorn on `127.0.0.1:8001` and nginx |
+| `supervisor/proxmox-sdk.conf` | supervisord program definition — runs uvicorn on `127.0.0.1:8001` and nginx |
 | `entrypoint-nginx.sh` | Entrypoint for the nginx image — generates mkcert certs, configures nginx, starts supervisord |
 | `entrypoint-granian.sh` | Entrypoint for the granian image — generates mkcert certs, converts key to PKCS#8, starts granian |
 
@@ -34,12 +34,12 @@ The `Dockerfile` at the repo root uses five stages:
 
 ## Key Notes
 
-- `supervisor/proxmox-openapi.conf` runs the app via uvicorn — update this if the ASGI entry point changes.
+- `supervisor/proxmox-sdk.conf` runs the app via uvicorn — update this if the ASGI entry point changes.
 - The nginx image always uses HTTPS; there is no HTTP-only nginx variant.
 - The granian image requires the TLS key in PKCS#8 format; `entrypoint-granian.sh` converts it automatically with `openssl pkcs8`.
 - For Let's Encrypt / production TLS, configure nginx externally with cert volume mounts.
 - `TARGETARCH` build arg (set by BuildKit) is used instead of `dpkg --print-architecture` for Alpine compatibility when downloading the mkcert binary.
-- Default `APP_MODULE` is `proxmox_openapi.mock_main:app` (mock mode). Change to `proxmox_openapi.main:app` for real Proxmox integration.
+- Default `APP_MODULE` is `proxmox_sdk.mock_main:app` (mock mode). Change to `proxmox_sdk.main:app` for real Proxmox integration.
 
 ## Alpine Migration Notes (v0.0.2)
 
