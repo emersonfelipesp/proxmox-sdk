@@ -800,10 +800,13 @@ def register_generated_proxmox_mock_routes(
     namespace: str | None = None,
     owner_pid: int | None = None,
     custom_mock_data: dict[str, object] | None = None,
+    service: str = "PVE",
 ) -> dict[str, object]:
     """Register standalone schema-driven Proxmox mock routes on the FastAPI app."""
 
-    document = openapi_document or load_proxmox_generated_openapi(version_tag=version_tag)
+    document = openapi_document or load_proxmox_generated_openapi(
+        version_tag=version_tag, service=service
+    )
     if not document:
         raise ProxmoxOpenAPIException(
             message="Generated Proxmox OpenAPI schema not found.",
@@ -880,7 +883,7 @@ def register_generated_proxmox_mock_routes(
                 summary=operation.get("summary"),
                 description=operation.get("description"),
                 response_model=response_model,
-                tags=["proxmox mock / generated"],
+                tags=[f"{service.lower()} mock / generated"],
             )
             route_names.add(route_name)
             route_count += 1

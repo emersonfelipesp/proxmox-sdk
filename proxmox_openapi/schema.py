@@ -46,6 +46,7 @@ class GeneratedOpenAPIDocument(BaseModel):
     def load_from_version(
         cls,
         version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG,
+        service: str = "PVE",
     ) -> Self | None:
         """Load and validate a generated OpenAPI document for a version tag."""
         try:
@@ -57,7 +58,7 @@ class GeneratedOpenAPIDocument(BaseModel):
         except ValueError:
             return None
 
-        openapi_path = _generated_dir() / version_tag / "openapi.json"
+        openapi_path = _generated_dir(service=service) / version_tag / "openapi.json"
         if not openapi_path.exists():
             return None
 
@@ -494,14 +495,21 @@ class ProxmoxSchemaValue(RootModel[Any]):
         return deepcopy(override)
 
 
-def _generated_dir() -> Path:
-    """Return the generated artifacts directory."""
-    return Path(__file__).resolve().parent / "generated" / "proxmox"
+_SERVICE_GENERATED_SUBDIRS: dict[str, str] = {
+    "PVE": "proxmox",
+    "PBS": "pbs",
+}
 
 
-def available_proxmox_openapi_versions() -> list[str]:
+def _generated_dir(service: str = "PVE") -> Path:
+    """Return the generated artifacts directory for the given service."""
+    subdir = _SERVICE_GENERATED_SUBDIRS.get(service.upper(), "proxmox")
+    return Path(__file__).resolve().parent / "generated" / subdir
+
+
+def available_proxmox_openapi_versions(service: str = "PVE") -> list[str]:
     """Return list of available Proxmox OpenAPI version tags."""
-    generated = _generated_dir()
+    generated = _generated_dir(service=service)
     if not generated.exists():
         return []
 
@@ -515,15 +523,19 @@ def available_proxmox_openapi_versions() -> list[str]:
 
 def load_proxmox_generated_openapi(
     version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG,
+    service: str = "PVE",
 ) -> dict[str, Any] | None:
     """Load generated OpenAPI schema for a specific version tag."""
-    document = GeneratedOpenAPIDocument.load_from_version(version_tag=version_tag)
+    document = GeneratedOpenAPIDocument.load_from_version(version_tag=version_tag, service=service)
     if document is None:
         return None
     return document.model_dump(mode="python")
 
 
-def load_pydantic_models(version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG) -> str | None:
+def load_pydantic_models(
+    version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG,
+    service: str = "PVE",
+) -> str | None:
     """Load generated Pydantic models for a specific version tag."""
     try:
         from proxmox_openapi.proxmox_codegen.security import validate_version_tag  # noqa: PLC0415
@@ -532,7 +544,7 @@ def load_pydantic_models(version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG) -> str 
     except ValueError:
         return None
 
-    models_path = _generated_dir() / version_tag / "pydantic_models.py"
+    models_path = _generated_dir(service=service) / version_tag / "pydantic_models.py"
     if not models_path.exists():
         return None
 

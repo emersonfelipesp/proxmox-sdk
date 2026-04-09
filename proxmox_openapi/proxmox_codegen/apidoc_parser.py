@@ -11,6 +11,15 @@ from urllib.request import urlopen
 PROXMOX_API_VIEWER_URL = "https://pve.proxmox.com/pve-docs/api-viewer/"
 PROXMOX_APIDOC_JS_URL = "https://pve.proxmox.com/pve-docs/api-viewer/apidoc.js"
 
+PBS_API_VIEWER_URL = "https://pbs.proxmox.com/docs/api-viewer/"
+PBS_APIDOC_JS_URL = "https://pbs.proxmox.com/docs/api-viewer/apidoc.js"
+
+# Registry mapping service name to (viewer_url, apidoc_js_url)
+SERVICE_URLS: dict[str, tuple[str, str]] = {
+    "PVE": (PROXMOX_API_VIEWER_URL, PROXMOX_APIDOC_JS_URL),
+    "PBS": (PBS_API_VIEWER_URL, PBS_APIDOC_JS_URL),
+}
+
 
 def fetch_apidoc_js(
     url: str = PROXMOX_APIDOC_JS_URL,
@@ -57,12 +66,20 @@ def fetch_apidoc_js(
 
 
 def extract_api_schema_text(apidoc_source: str) -> str:  # noqa: C901
-    """Extract the JSON array literal assigned to `const apiSchema = [...]`."""
+    """Extract the JSON array literal assigned to `apiSchema = [...]`.
 
-    marker = "const apiSchema ="
-    marker_index = apidoc_source.find(marker)
+    Handles both ``const apiSchema =`` (PVE) and ``var apiSchema =`` (PBS).
+    """
+    marker_index = -1
+    for marker in ("const apiSchema =", "var apiSchema ="):
+        marker_index = apidoc_source.find(marker)
+        if marker_index >= 0:
+            break
+
     if marker_index < 0:
-        raise ValueError("Unable to locate `const apiSchema =` marker in apidoc source.")
+        raise ValueError(
+            "Unable to locate `const apiSchema =` or `var apiSchema =` marker in apidoc source."
+        )
 
     start_index = apidoc_source.find("[", marker_index)
     if start_index < 0:
@@ -138,6 +155,9 @@ def flatten_api_schema(schema_tree: list[dict[str, object]]) -> dict[str, dict[s
 __all__ = [
     "PROXMOX_API_VIEWER_URL",
     "PROXMOX_APIDOC_JS_URL",
+    "PBS_API_VIEWER_URL",
+    "PBS_APIDOC_JS_URL",
+    "SERVICE_URLS",
     "fetch_apidoc_js",
     "extract_api_schema_text",
     "parse_api_schema",

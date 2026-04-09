@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import PlainTextResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from proxmox_openapi.proxmox_codegen.apidoc_parser import SERVICE_URLS
 from proxmox_openapi.proxmox_codegen.pipeline import (
     LATEST_VERSION_TAG,
     generate_proxmox_codegen_bundle_async,
@@ -48,13 +49,29 @@ def verify_codegen_auth(
 router = APIRouter(dependencies=[Depends(verify_codegen_auth)])
 
 
+_VALID_SERVICES = frozenset(SERVICE_URLS.keys())
+_SERVICE_GENERATED_SUBDIRS = {"PVE": "proxmox", "PBS": "pbs"}
+
+
+def _validate_service(service: str) -> str:
+    """Validate and normalise a service identifier."""
+    upper = service.upper()
+    if upper not in _VALID_SERVICES:
+        raise ValueError(f"service must be one of {sorted(_VALID_SERVICES)}, got {service!r}")
+    return upper
+
+
 @router.post("/generate")
 @limiter.limit("1/hour")
 async def generate_viewer_codegen_artifacts(
     request: Request,
+    service: str = Query(
+        default="PVE",
+        description="Proxmox service type to generate: PVE or PBS.",
+    ),
     persist: bool = Query(
         default=True,
-        description="Persist generated artifacts under proxmox_openapi/generated/proxmox.",
+        description="Persist generated artifacts under proxmox_openapi/generated/<service>.",
     ),
     workers: int = Query(
         default=10,
@@ -80,9 +97,9 @@ async def generate_viewer_codegen_artifacts(
         le=500,
         description="Write crawl checkpoint after this many processed endpoints.",
     ),
-    source_url: str = Query(
-        default="https://pve.proxmox.com/pve-docs/apidoc.html",
-        description="Proxmox API viewer URL to crawl.",
+    source_url: str | None = Query(
+        default=None,
+        description="Proxmox API viewer URL to crawl. Defaults to the official URL for the selected service.",
     ),
     version_tag: str = Query(
         default=LATEST_VERSION_TAG,
@@ -90,29 +107,35 @@ async def generate_viewer_codegen_artifacts(
     ),
 ) -> dict[str, object]:
     """Run Proxmox API Viewer to OpenAPI and Pydantic generation pipeline."""
-    audit_logger.info(
-        "codegen_request",
-        extra={
-            "client_ip": request.client.host if request.client else "unknown",
-            "source_url": source_url,
-            "version_tag": version_tag,
-            "workers": workers,
-        },
-    )
     try:
-        source_url = validate_source_url(source_url)
+        service = _validate_service(service)
+        if source_url is not None:
+            source_url = validate_source_url(source_url)
         version_tag = validate_version_tag(version_tag)
     except SSRFProtectionError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
+    audit_logger.info(
+        "codegen_request",
+        extra={
+            "client_ip": request.client.host if request.client else "unknown",
+            "service": service,
+            "source_url": source_url,
+            "version_tag": version_tag,
+            "workers": workers,
+        },
+    )
+
     output_dir = None
     if persist:
-        output_dir = Path(__file__).resolve().parents[2] / "generated" / "proxmox"
+        subdir = _SERVICE_GENERATED_SUBDIRS.get(service, "proxmox")
+        output_dir = Path(__file__).resolve().parents[2] / "generated" / subdir
 
     bundle = await generate_proxmox_codegen_bundle_async(
         output_dir=output_dir,
+        service=service,
         source_url=source_url,
         version_tag=version_tag,
         worker_count=workers,
@@ -156,6 +179,7 @@ async def generate_viewer_codegen_artifacts(
 @limiter.limit("5/hour")
 async def proxmox_viewer_openapi(
     request: Request,
+    service: str = Query(default="PVE", description="Proxmox service type: PVE or PBS."),
     regenerate: bool = Query(
         default=False,
         description="Regenerate from upstream viewer before returning OpenAPI output.",
@@ -174,22 +198,29 @@ async def proxmox_viewer_openapi(
     """Return generated OpenAPI schema for Proxmox API viewer endpoints."""
     from proxmox_openapi.schema import load_proxmox_generated_openapi
 
+    try:
+        service = _validate_service(service)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
     if regenerate:
-        output_dir = Path(__file__).resolve().parents[2] / "generated" / "proxmox"
+        subdir = _SERVICE_GENERATED_SUBDIRS.get(service, "proxmox")
+        output_dir = Path(__file__).resolve().parents[2] / "generated" / subdir
         bundle = await generate_proxmox_codegen_bundle_async(
             output_dir=output_dir,
+            service=service,
             version_tag=version_tag,
             worker_count=workers,
         )
         return bundle.openapi
 
-    schema = load_proxmox_generated_openapi(version_tag=version_tag)
+    schema = load_proxmox_generated_openapi(version_tag=version_tag, service=service)
     if schema:
         return schema
 
     return {
         "error": "Schema not found",
-        "message": f"Run /codegen/generate first to generate version '{version_tag}'",
+        "message": f"Run /codegen/generate?service={service} first to generate version '{version_tag}'",
     }
 
 
@@ -197,6 +228,7 @@ async def proxmox_viewer_openapi(
 @limiter.limit("5/hour")
 async def proxmox_viewer_pydantic_models(
     request: Request,
+    service: str = Query(default="PVE", description="Proxmox service type: PVE or PBS."),
     regenerate: bool = Query(
         default=False,
         description="Regenerate from upstream viewer before returning model source.",
@@ -210,32 +242,43 @@ async def proxmox_viewer_pydantic_models(
     from proxmox_openapi.schema import load_pydantic_models
 
     try:
+        service = _validate_service(service)
         version_tag = validate_version_tag(version_tag)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     if regenerate:
-        output_dir = Path(__file__).resolve().parents[2] / "generated" / "proxmox"
+        subdir = _SERVICE_GENERATED_SUBDIRS.get(service, "proxmox")
+        output_dir = Path(__file__).resolve().parents[2] / "generated" / subdir
         bundle = await generate_proxmox_codegen_bundle_async(
             output_dir=output_dir,
+            service=service,
             version_tag=version_tag,
         )
         return bundle.pydantic_models_code
 
-    models = load_pydantic_models(version_tag=version_tag)
+    models = load_pydantic_models(version_tag=version_tag, service=service)
     if models:
         return models
 
-    return f"# Pydantic models for version {version_tag} not found. Run /codegen/generate first."
+    return f"# Pydantic models for {service} version {version_tag} not found. Run /codegen/generate?service={service} first."
 
 
 @router.get("/versions")
-async def list_available_versions() -> dict[str, object]:
+async def list_available_versions(
+    service: str = Query(default="PVE", description="Proxmox service type: PVE or PBS."),
+) -> dict[str, object]:
     """List available Proxmox OpenAPI versions."""
     from proxmox_openapi.schema import available_proxmox_openapi_versions
 
-    versions = available_proxmox_openapi_versions()
+    try:
+        service = _validate_service(service)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    versions = available_proxmox_openapi_versions(service=service)
     return {
+        "service": service,
         "versions": versions,
         "latest": LATEST_VERSION_TAG,
     }

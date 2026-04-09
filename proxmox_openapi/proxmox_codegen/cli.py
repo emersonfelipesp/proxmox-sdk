@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from proxmox_openapi.proxmox_codegen.apidoc_parser import PROXMOX_API_VIEWER_URL
+from proxmox_openapi.proxmox_codegen.apidoc_parser import SERVICE_URLS
 from proxmox_openapi.proxmox_codegen.pipeline import generate_proxmox_codegen_bundle
 
 
@@ -16,14 +16,24 @@ def build_parser() -> argparse.ArgumentParser:
         description="Generate OpenAPI and Pydantic v2 schemas from Proxmox API Viewer.",
     )
     parser.add_argument(
+        "--service",
+        default="PVE",
+        choices=list(SERVICE_URLS.keys()),
+        help="Proxmox service type to generate artifacts for (default: PVE).",
+    )
+    parser.add_argument(
         "--output-dir",
-        default="proxmox_openapi/generated/proxmox",
-        help="Base output directory; artifacts are written under <output-dir>/<version-tag>/.",
+        default=None,
+        help=(
+            "Base output directory; artifacts are written under <output-dir>/<version-tag>/. "
+            "Defaults to proxmox_openapi/generated/proxmox for PVE and "
+            "proxmox_openapi/generated/pbs for PBS."
+        ),
     )
     parser.add_argument(
         "--source-url",
-        default=PROXMOX_API_VIEWER_URL,
-        help="Proxmox API viewer URL to crawl.",
+        default=None,
+        help="Proxmox API viewer URL to crawl. Defaults to the official URL for the selected service.",
     )
     parser.add_argument(
         "--version-tag",
@@ -73,10 +83,19 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
-    output_dir = Path(args.output_dir)
+    service = args.service.upper()
+
+    # Resolve output_dir default based on service if not explicitly provided
+    _service_output_dirs = {
+        "PVE": "proxmox_openapi/generated/proxmox",
+        "PBS": "proxmox_openapi/generated/pbs",
+    }
+    output_dir = Path(args.output_dir or _service_output_dirs.get(service, _service_output_dirs["PVE"]))
+
     bundle = generate_proxmox_codegen_bundle(
         output_dir=output_dir,
-        source_url=args.source_url,
+        service=service,
+        source_url=args.source_url,  # None means pipeline uses service default
         version_tag=args.version_tag,
         worker_count=max(1, args.workers),
         retry_count=max(0, args.retry_count),

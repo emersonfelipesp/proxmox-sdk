@@ -201,6 +201,7 @@ def register_generated_proxmox_real_routes(
     version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG,
     openapi_document: dict[str, object] | None = None,
     proxmox_config: ProxmoxConfig,
+    service: str = "PVE",
 ) -> dict[str, object]:
     """Register real Proxmox API routes with validation.
 
@@ -209,6 +210,7 @@ def register_generated_proxmox_real_routes(
         version_tag: OpenAPI schema version tag
         openapi_document: Pre-loaded OpenAPI document (optional)
         proxmox_config: Proxmox connection configuration
+        service: Proxmox service type (PVE or PBS)
 
     Returns:
         Registration statistics
@@ -216,7 +218,9 @@ def register_generated_proxmox_real_routes(
     Raises:
         ProxmoxOpenAPIException: If schema not found or config invalid
     """
-    document = openapi_document or load_proxmox_generated_openapi(version_tag=version_tag)
+    document = openapi_document or load_proxmox_generated_openapi(
+        version_tag=version_tag, service=service
+    )
     if not document:
         raise ProxmoxOpenAPIException(
             message="Generated Proxmox OpenAPI schema not found",
@@ -270,7 +274,7 @@ def register_generated_proxmox_real_routes(
                 summary=operation.get("summary"),  # type: ignore[arg-type]
                 description=operation.get("description"),  # type: ignore[arg-type]
                 response_model=response_model,
-                tags=["proxmox real / generated"],
+                tags=[f"{service.lower()} real / generated"],
             )
             route_count += 1
             method_count += 1

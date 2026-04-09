@@ -26,7 +26,7 @@ def test_load_generated_openapi_rejects_non_object(tmp_path: Path, monkeypatch) 
     version_dir.mkdir(parents=True)
     (version_dir / "openapi.json").write_text("[]", encoding="utf-8")
 
-    monkeypatch.setattr(schema_module, "_generated_dir", lambda: tmp_path)
+    monkeypatch.setattr(schema_module, "_generated_dir", lambda service="PVE": tmp_path)
 
     assert load_proxmox_generated_openapi("latest") is None
 
@@ -36,6 +36,6 @@ def test_load_generated_openapi_rejects_malformed_json(tmp_path: Path, monkeypat
     version_dir.mkdir(parents=True)
     (version_dir / "openapi.json").write_text("{", encoding="utf-8")
 
-    monkeypatch.setattr(schema_module, "_generated_dir", lambda: tmp_path)
+    monkeypatch.setattr(schema_module, "_generated_dir", lambda service="PVE": tmp_path)
 
     assert load_proxmox_generated_openapi("latest") is None

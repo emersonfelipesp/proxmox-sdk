@@ -73,6 +73,8 @@ def _register_utility_routes(
         | ({"testclient"} if os.environ.get("TESTING", "").lower() in ("1", "true") else set())
     )
 
+    proxmox_service = route_info.get("service", "PVE")
+
     @app.get("/")
     async def root() -> dict[str, Any]:
         return {
@@ -80,6 +82,7 @@ def _register_utility_routes(
             "version": __version__,
             "docs": "/docs",
             "mode": api_mode,
+            "service": proxmox_service,
             "proxmox_endpoints": route_info.get("route_count", 0),
         }
 
@@ -100,6 +103,7 @@ def _register_utility_routes(
     async def mode() -> dict[str, Any]:
         result: dict[str, Any] = {
             "mode": api_mode,
+            "service": proxmox_service,
             "schema_version": route_info.get("schema_version", "unknown"),
             "proxmox_endpoints": route_info.get("route_count", 0),
             "proxmox_paths": route_info.get("path_count", 0),
@@ -119,6 +123,7 @@ def _register_mode_routes(
     route_info: dict[str, Any],
     version_tag: str,
     openapi_doc: Any,
+    service: str = "PVE",
 ) -> None:
     """Register Proxmox API routes for the configured mode (mock or real)."""
     if not openapi_doc:
@@ -132,6 +137,7 @@ def _register_mode_routes(
                 app,
                 version_tag=version_tag,
                 openapi_document=openapi_doc,
+                service=service,
             )
         )
     elif config.is_real_mode():
@@ -145,6 +151,7 @@ def _register_mode_routes(
                     version_tag=version_tag,
                     openapi_document=openapi_doc,
                     proxmox_config=config,
+                    service=service,
                 )
             )
         except ValueError as config_error:
@@ -190,7 +197,8 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json",
     )
 
-    route_info: dict[str, Any] = {"mode": api_mode}
+    proxmox_service = os.environ.get("PROXMOX_SERVICE", "PVE").upper()
+    route_info: dict[str, Any] = {"mode": api_mode, "service": proxmox_service}
 
     _configure_middleware(app, config)
     _register_utility_routes(app, config, route_info)
@@ -200,8 +208,8 @@ def create_app() -> FastAPI:
     app.include_router(versions_router, prefix="/versions", tags=["versions"])
 
     version_tag = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", DEFAULT_PROXMOX_OPENAPI_TAG)
-    openapi_doc = load_proxmox_generated_openapi(version_tag=version_tag)
-    _register_mode_routes(app, config, route_info, version_tag, openapi_doc)
+    openapi_doc = load_proxmox_generated_openapi(version_tag=version_tag, service=proxmox_service)
+    _register_mode_routes(app, config, route_info, version_tag, openapi_doc, service=proxmox_service)
 
     return app
 
