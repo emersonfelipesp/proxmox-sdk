@@ -15,10 +15,10 @@
         <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/architecture/">
       
       
-        <link rel="prev" href="../development/">
+        <link rel="prev" href="../api-reference/">
       
       
-        <link rel="next" href="../security/">
+        <link rel="next" href="../sdk-internals/">
       
       
         
@@ -315,11 +315,31 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Developer
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
         <a href="../development/" class="md-tabs__link">
           
   
   
-  Development
+  Reference
 
         </a>
       </li>
@@ -970,7 +990,7 @@
   <span class="md-ellipsis">
     
   
-    Development
+    Developer
   
 
     
@@ -986,39 +1006,11 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Development
+    Developer
   
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../development/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Contributing
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -1087,10 +1079,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#package-layers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Package Layers
       
     </span>
   </a>
@@ -1098,41 +1090,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mode-architecture" class="md-nav__link">
+  <a href="#dual-mode-fastapi-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Mode Architecture
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Mode Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mock-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mock Mode
+        Dual-Mode FastAPI Server
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#real-mode" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#sdk-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Real Mode
+        SDK Architecture
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1144,45 +1119,6 @@
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Flow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Flow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mock-mode-request-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mock Mode Request Flow
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#real-mode-request-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Real Mode Request Flow
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1254,49 +1190,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#6-aiohttp-for-real-mode" class="md-nav__link">
+  <a href="#6-aiohttp-for-https-transport" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. aiohttp for Real Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-characteristics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance Characteristics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance Characteristics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mock-mode_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mock Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#real-mode_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Real Mode
+        6. aiohttp for HTTPS Transport
       
     </span>
   </a>
@@ -1321,7 +1218,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mock-mode_2" class="md-nav__link">
+  <a href="#mock-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
         Mock Mode
@@ -1332,7 +1229,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#real-mode_2" class="md-nav__link">
+  <a href="#real-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
         Real Mode
@@ -1344,6 +1241,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1367,73 +1275,185 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Testing Strategy">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#unit-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Unit Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#integration-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Integration Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#end-to-end-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        End-to-End Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#future-architecture-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Future Architecture Considerations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Conclusion
-      
-    </span>
-  </a>
-  
 </li>
       
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdk-internals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SDK Internals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../codegen-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Generation Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integration-with-proxbox-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration with proxbox-api
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -1524,10 +1544,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -1545,8 +1565,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1701,10 +1721,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#package-layers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Overview
+        Package Layers
       
     </span>
   </a>
@@ -1712,41 +1732,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mode-architecture" class="md-nav__link">
+  <a href="#dual-mode-fastapi-server" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Mode Architecture
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Mode Architecture">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mock-mode" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mock Mode
+        Dual-Mode FastAPI Server
       
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#real-mode" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#sdk-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Real Mode
+        SDK Architecture
       
     </span>
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1758,45 +1761,6 @@
       
     </span>
   </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Data Flow
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Data Flow">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mock-mode-request-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mock Mode Request Flow
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#real-mode-request-flow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Real Mode Request Flow
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1868,49 +1832,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#6-aiohttp-for-real-mode" class="md-nav__link">
+  <a href="#6-aiohttp-for-https-transport" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. aiohttp for Real Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-characteristics" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Performance Characteristics
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance Characteristics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mock-mode_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Mock Mode
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#real-mode_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Real Mode
+        6. aiohttp for HTTPS Transport
       
     </span>
   </a>
@@ -1935,7 +1860,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#mock-mode_2" class="md-nav__link">
+  <a href="#mock-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
         Mock Mode
@@ -1946,7 +1871,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#real-mode_2" class="md-nav__link">
+  <a href="#real-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
         Real Mode
@@ -1958,6 +1883,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1977,67 +1913,6 @@
     <span class="md-ellipsis">
       
         Testing Strategy
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Testing Strategy">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#unit-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Unit Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#integration-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Integration Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#end-to-end-tests" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        End-to-End Tests
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#future-architecture-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Future Architecture Considerations
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conclusion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Conclusion
       
     </span>
   </a>
@@ -2065,449 +1940,338 @@
 
 
 <h1 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h1>
-<p>This document explains the internal architecture of the Proxmox OpenAPI project, including how the components work together and key design decisions.</p>
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Proxmox OpenAPI server is a <strong>dual-mode FastAPI application</strong> that can operate in two distinct modes:</p>
+<p>This page describes the internal architecture of <code>proxmox-openapi</code> — covering the package layers, the dual-mode FastAPI server, the standalone SDK, and the key design decisions behind each component.</p>
+<hr />
+<h2 id="package-layers">Package Layers<a class="headerlink" href="#package-layers" title="Permanent link">&para;</a></h2>
+<p>The project is organized into five distinct layers, each independently usable:</p>
+<pre class="mermaid"><code>flowchart TD
+    CLI["proxmox_cli/\nTyper CLI + Textual TUI\n(interactive use)"]
+    SERVER["proxmox_openapi/main.py\nDual-mode FastAPI server\n(mock OR real API proxy)"]
+    CODEGEN["proxmox_codegen/\nPlaywright crawler → OpenAPI + Pydantic\n(schema generation pipeline)"]
+    SDK["sdk/\nStandalone async Python SDK\n(production integrations)"]
+    MOCK["mock/\nIn-memory CRUD state store\n(test infrastructure)"]
+    GEN["generated/proxmox/\nPre-built OpenAPI schemas\n+ Pydantic models"]
+
+    CLI --&gt;|uses| SDK
+    CLI --&gt;|may use| SERVER
+    SERVER --&gt;|mock mode uses| MOCK
+    SERVER --&gt;|real mode uses| SDK
+    CODEGEN --&gt;|produces| GEN
+    MOCK --&gt;|loaded from| GEN
+    SDK --&gt;|mock backend loads| GEN</code></pre>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Entry point</th>
+<th>Standalone?</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sdk/</code></td>
+<td><code>proxmox_openapi.ProxmoxSDK</code></td>
+<td>Yes</td>
+<td>Async + sync Python SDK with 5 backends</td>
+</tr>
+<tr>
+<td><code>mock/</code></td>
+<td><code>proxmox_openapi.mock_main</code></td>
+<td>Yes</td>
+<td>FastAPI mock server only</td>
+</tr>
+<tr>
+<td><code>proxmox_openapi/main.py</code></td>
+<td><code>proxmox_openapi.main</code></td>
+<td>Yes</td>
+<td>Dual-mode FastAPI server</td>
+</tr>
+<tr>
+<td><code>proxmox_codegen/</code></td>
+<td><code>proxmox codegen</code> CLI</td>
+<td>Yes</td>
+<td>Schema generation pipeline</td>
+</tr>
+<tr>
+<td><code>proxmox_cli/</code></td>
+<td><code>proxmox</code> / <code>pbx</code> CLI</td>
+<td>Yes</td>
+<td>Typer CLI and Textual TUI</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="dual-mode-fastapi-server">Dual-Mode FastAPI Server<a class="headerlink" href="#dual-mode-fastapi-server" title="Permanent link">&para;</a></h2>
+<p>The FastAPI server can run in two modes, selected via <code>PROXMOX_API_MODE</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Mock Mode (default)</label><label for="__tabbed_1_2">Real Mode</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Mock mode loads pre-generated OpenAPI schemas and dynamically creates CRUD endpoints backed by an in-memory state store. No real Proxmox server required.</p>
+<pre class="mermaid"><code>flowchart TD
+    REQ["HTTP Request"]
+    ROUTER["FastAPI Router"]
+    MOCK_EP["Generated Mock Endpoint\n(from OpenAPI schema)"]
+    STATE["SharedMemoryMockStore\nin-memory dict"]
+    RESP["JSON Response"]
+
+    REQ --&gt; ROUTER
+    ROUTER --&gt; MOCK_EP
+    MOCK_EP --&gt;|"GET: read"| STATE
+    MOCK_EP --&gt;|"POST/PUT: write"| STATE
+    MOCK_EP --&gt;|"DELETE: remove"| STATE
+    STATE --&gt; RESP</code></pre>
+<p><strong>Startup flow:</strong></p>
 <ol>
-<li><strong>Mock Mode (Default)</strong> - Provides in-memory CRUD operations with pre-generated OpenAPI schema</li>
-<li><strong>Real Mode</strong> - Acts as a validated proxy to a real Proxmox VE API</li>
+<li>Load <code>generated/proxmox/latest/openapi.json</code></li>
+<li><code>register_generated_proxmox_mock_routes()</code> iterates all 646 path/method pairs</li>
+<li>For each operation, create a dynamic FastAPI route with Pydantic request/response validation</li>
+<li>Routes perform CRUD on <code>SharedMemoryMockStore</code></li>
+<li>State persists only in memory — resets on restart</li>
 </ol>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────┐
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│              Proxmox OpenAPI Server                     │
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                                                         │
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  ┌──────────────────┐         ┌──────────────────┐    │
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  │   Mock Mode      │   OR    │   Real Mode      │    │
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  │                  │         │                  │    │
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│  │  In-memory CRUD  │         │  Proxmox Proxy   │    │
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│  │  646 endpoints   │         │  + Validation    │    │
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  └──────────────────┘         └──────────────────┘    │
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│                                                         │
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│  ┌─────────────────────────────────────────────────┐  │
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│  │        FastAPI Core + Swagger UI                │  │
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│  └─────────────────────────────────────────────────┘  │
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>└─────────────────────────────────────────────────────────┘
-</span></code></pre></div>
-<h2 id="mode-architecture">Mode Architecture<a class="headerlink" href="#mode-architecture" title="Permanent link">&para;</a></h2>
-<h3 id="mock-mode">Mock Mode<a class="headerlink" href="#mock-mode" title="Permanent link">&para;</a></h3>
-<p>Mock mode loads pre-generated OpenAPI schemas and dynamically creates CRUD endpoints with in-memory state management.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>┌───────────────┐
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>│  User Request │
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>└───────┬───────┘
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>        │
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>        ▼
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>┌───────────────────┐
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│  FastAPI Router   │
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└───────┬───────────┘
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        │
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        ▼
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>┌────────────────────────────┐
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│  Generated Mock Endpoint   │  (created from OpenAPI schema)
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│  - Validates request       │
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│  - Performs CRUD operation │
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│  - Returns response        │
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>└────────┬───────────────────┘
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>         │
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>         ▼
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>┌─────────────────────┐
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│  MockState          │  (in-memory dictionary)
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│  - Stores resources │
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│  - Generates IDs    │
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>└─────────────────────┘
-</span></code></pre></div>
-<p><strong>Key Components:</strong></p>
-<ul>
-<li><strong><code>mock/routes.py</code></strong> - Route builder that reads OpenAPI schema and generates FastAPI endpoints</li>
-<li><strong><code>mock/state.py</code></strong> - In-memory state management with dict-based storage</li>
-<li><strong><code>mock/loader.py</code></strong> - Custom mock data loader from JSON/YAML files</li>
-<li><strong><code>schema.py</code></strong> - Schema loading utilities</li>
-</ul>
-<p><strong>Flow:</strong></p>
+<p><strong>Performance:</strong> ~1 second startup, &lt;5 ms per request, ~100 MB memory.</p>
+</div>
+<div class="tabbed-block">
+<p>Real mode proxies requests to an actual Proxmox VE API, validating both the incoming request and the Proxmox response against the OpenAPI schema.</p>
+<pre class="mermaid"><code>flowchart TD
+    REQ["HTTP Request"]
+    ROUTER["FastAPI Router"]
+    REAL_EP["Real API Endpoint\n(validates request)"]
+    CLIENT["ProxmoxClient\n(HttpsBackend)"]
+    PVE["Real Proxmox VE\n:8006"]
+    VALID["Response Validation\n(Pydantic)"]
+    RESP["JSON Response"]
+
+    REQ --&gt; ROUTER
+    ROUTER --&gt; REAL_EP
+    REAL_EP --&gt; CLIENT
+    CLIENT --&gt;|"aiohttp HTTPS"| PVE
+    PVE --&gt;|"JSON data"| CLIENT
+    CLIENT --&gt; VALID
+    VALID --&gt; RESP</code></pre>
+<p><strong>Startup flow:</strong></p>
 <ol>
-<li>App startup loads <code>generated/proxmox/latest/openapi.json</code></li>
-<li><code>register_generated_proxmox_mock_routes()</code> iterates through all paths/operations</li>
-<li>For each operation, creates a dynamic FastAPI route with:</li>
-<li>Path parameters from URL template</li>
-<li>Query parameters from schema</li>
-<li>Request body validation (Pydantic)</li>
-<li>Response model validation (Pydantic)</li>
-<li>Routes perform CRUD operations on <code>MockState</code></li>
-<li>Data persists only in memory (resets on restart)</li>
+<li>Load <code>ProxmoxConfig</code> from environment variables</li>
+<li><code>register_proxmox_routes()</code> creates endpoints mirroring the mock structure</li>
+<li>Each request: validate → call <code>ProxmoxClient.request()</code> → validate response → return</li>
 </ol>
-<h3 id="real-mode">Real Mode<a class="headerlink" href="#real-mode" title="Permanent link">&para;</a></h3>
-<p>Real mode proxies requests to an actual Proxmox VE API with full request/response validation.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>┌───────────────┐
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>│  User Request │
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>└───────┬───────┘
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        │
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        ▼
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>┌───────────────────┐
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│  FastAPI Router   │
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>└───────┬───────────┘
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        │
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        ▼
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>┌────────────────────────────┐
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>│  Real API Endpoint         │
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>│  - Validates request       │
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>│  - Calls ProxmoxClient     │
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>│  - Validates response      │
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>└────────┬───────────────────┘
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>         │
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>         ▼
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>┌─────────────────────┐
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>│  ProxmoxClient      │  (aiohttp)
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>│  - Authenticates    │
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>│  - Makes HTTP call  │
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>│  - Handles errors   │
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>└────────┬────────────┘
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>         │
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>         ▼
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>┌─────────────────────┐
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>│  Real Proxmox API   │
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>│  (8.1 or later)     │
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>└─────────────────────┘
-</span></code></pre></div>
-<p><strong>Key Components:</strong></p>
-<ul>
-<li><strong><code>proxmox/config.py</code></strong> - Configuration loading from environment variables</li>
-<li><strong><code>proxmox/client.py</code></strong> - aiohttp-based client with authentication</li>
-<li><strong><code>proxmox/routes.py</code></strong> - Route builder that proxies to real API</li>
-<li><strong><code>schema.py</code></strong> - Shared schema utilities</li>
-</ul>
-<p><strong>Flow:</strong></p>
-<ol>
-<li>App startup loads <code>ProxmoxConfig</code> from environment</li>
-<li><code>register_proxmox_routes()</code> creates endpoints similar to mock mode</li>
-<li>For each request:</li>
-<li>Validate request using Pydantic models</li>
-<li>Call <code>ProxmoxClient.request()</code></li>
-<li>ProxmoxClient authenticates (API token or username/password)</li>
-<li>Forward request to real Proxmox API</li>
-<li>Validate response</li>
-<li>Return to user</li>
-<li>All data comes from real Proxmox server</li>
-</ol>
+<p><strong>Performance:</strong> ~500 ms startup, Proxmox latency + ~20–100 ms validation overhead.</p>
+</div>
+</div>
+</div>
+<hr />
+<h2 id="sdk-architecture">SDK Architecture<a class="headerlink" href="#sdk-architecture" title="Permanent link">&para;</a></h2>
+<p>The standalone SDK (<code>sdk/</code>) is the primary way for Python applications to query Proxmox programmatically without running the FastAPI server.</p>
+<pre class="mermaid"><code>flowchart TD
+    USER["Application code\n(proxbox-api, CLI, tests)"]
+    SDK_CLASS["ProxmoxSDK\nsdk/api.py"]
+    ROOT["ProxmoxResource('_/api2/json')\nsdk/resource.py"]
+    NAV["Navigation chain\n.nodes('pve1').qemu(100).config"]
+    LEAF["ProxmoxResource\npath=/api2/json/nodes/pve1/qemu/100/config"]
+    BACKEND["AbstractBackend\nsdk/backends/base.py"]
+    HTTPS["HttpsBackend\naiohttp + auth"]
+    MOCK_B["MockBackend\nin-memory"]
+    SSH["SshParamikoBackend\nor OpenSshBackend"]
+    LOCAL["LocalBackend\npvesh subprocess"]
+    PROXMOX["Proxmox VE"]
+
+    USER --&gt;|"ProxmoxSDK(host=..., user=..., ...)"| SDK_CLASS
+    SDK_CLASS --&gt;|"creates"| ROOT
+    ROOT --&gt;|"__getattr__ / __call__"| NAV
+    NAV --&gt;|"each step creates new resource"| LEAF
+    LEAF --&gt;|".get() / .post() / ..."| BACKEND
+    BACKEND --&gt;|"https"| HTTPS
+    BACKEND --&gt;|"mock"| MOCK_B
+    BACKEND --&gt;|"ssh_paramiko / openssh"| SSH
+    BACKEND --&gt;|"local"| LOCAL
+    HTTPS --&gt;|"aiohttp HTTPS"| PROXMOX
+    MOCK_B --&gt;|"in-memory"| PROXMOX
+    SSH --&gt;|"pvesh via SSH"| PROXMOX
+    LOCAL --&gt;|"pvesh subprocess"| PROXMOX</code></pre>
+<hr />
 <h2 id="code-generation-pipeline">Code Generation Pipeline<a class="headerlink" href="#code-generation-pipeline" title="Permanent link">&para;</a></h2>
-<p>The project includes a sophisticated code generation pipeline that converts the Proxmox VE API into OpenAPI schemas and Pydantic models.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>┌──────────────────┐
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>│  Proxmox VE API  │
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>│  /api2/json/...  │
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>└────────┬─────────┘
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>         │
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>         ▼
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>┌──────────────────────┐
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>│  ProxmoxCrawler      │  (recursive API exploration)
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>│  - GET /api2/json    │
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>│  - Follow children   │
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>│  - Capture metadata  │
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>└────────┬─────────────┘
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>         │
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>         ▼
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>┌──────────────────────┐
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>│  raw_capture.json    │  (646 endpoints)
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>│  - Paths             │
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>│  - Methods           │
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>│  - Parameters        │
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>└────────┬─────────────┘
-</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>         │
-</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>         ▼
-</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>┌──────────────────────┐
-</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>│  Pipeline            │  (normalization)
-</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>│  - Deduplicate       │
-</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>│  - Enrich metadata   │
-</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>│  - Extract schemas   │
-</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>└────────┬─────────────┘
-</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>         │
-</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>         ▼
-</span><span id="__span-3-31"><a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>┌──────────────────────┐
-</span><span id="__span-3-32"><a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>│  OpenAPIBuilder      │  (schema generation)
-</span><span id="__span-3-33"><a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>│  - Create paths      │
-</span><span id="__span-3-34"><a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>│  - Build schemas     │
-</span><span id="__span-3-35"><a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>│  - Add security      │
-</span><span id="__span-3-36"><a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>└────────┬─────────────┘
-</span><span id="__span-3-37"><a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a>         │
-</span><span id="__span-3-38"><a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a>         ▼
-</span><span id="__span-3-39"><a id="__codelineno-3-39" name="__codelineno-3-39" href="#__codelineno-3-39"></a>┌──────────────────────┐
-</span><span id="__span-3-40"><a id="__codelineno-3-40" name="__codelineno-3-40" href="#__codelineno-3-40"></a>│  openapi.json        │  (5.2MB OpenAPI 3.1)
-</span><span id="__span-3-41"><a id="__codelineno-3-41" name="__codelineno-3-41" href="#__codelineno-3-41"></a>│  - 646 operations    │
-</span><span id="__span-3-42"><a id="__codelineno-3-42" name="__codelineno-3-42" href="#__codelineno-3-42"></a>│  - 428 paths         │
-</span><span id="__span-3-43"><a id="__codelineno-3-43" name="__codelineno-3-43" href="#__codelineno-3-43"></a>└────────┬─────────────┘
-</span><span id="__span-3-44"><a id="__codelineno-3-44" name="__codelineno-3-44" href="#__codelineno-3-44"></a>         │
-</span><span id="__span-3-45"><a id="__codelineno-3-45" name="__codelineno-3-45" href="#__codelineno-3-45"></a>         ▼
-</span><span id="__span-3-46"><a id="__codelineno-3-46" name="__codelineno-3-46" href="#__codelineno-3-46"></a>┌──────────────────────┐
-</span><span id="__span-3-47"><a id="__codelineno-3-47" name="__codelineno-3-47" href="#__codelineno-3-47"></a>│  PydanticBuilder     │  (model generation)
-</span><span id="__span-3-48"><a id="__codelineno-3-48" name="__codelineno-3-48" href="#__codelineno-3-48"></a>│  - Parse schemas     │
-</span><span id="__span-3-49"><a id="__codelineno-3-49" name="__codelineno-3-49" href="#__codelineno-3-49"></a>│  - Generate classes  │
-</span><span id="__span-3-50"><a id="__codelineno-3-50" name="__codelineno-3-50" href="#__codelineno-3-50"></a>│  - Add validators    │
-</span><span id="__span-3-51"><a id="__codelineno-3-51" name="__codelineno-3-51" href="#__codelineno-3-51"></a>└────────┬─────────────┘
-</span><span id="__span-3-52"><a id="__codelineno-3-52" name="__codelineno-3-52" href="#__codelineno-3-52"></a>         │
-</span><span id="__span-3-53"><a id="__codelineno-3-53" name="__codelineno-3-53" href="#__codelineno-3-53"></a>         ▼
-</span><span id="__span-3-54"><a id="__codelineno-3-54" name="__codelineno-3-54" href="#__codelineno-3-54"></a>┌──────────────────────┐
-</span><span id="__span-3-55"><a id="__codelineno-3-55" name="__codelineno-3-55" href="#__codelineno-3-55"></a>│  pydantic_models.py  │  (Python models)
-</span><span id="__span-3-56"><a id="__codelineno-3-56" name="__codelineno-3-56" href="#__codelineno-3-56"></a>│  - Request models    │
-</span><span id="__span-3-57"><a id="__codelineno-3-57" name="__codelineno-3-57" href="#__codelineno-3-57"></a>│  - Response models   │
-</span><span id="__span-3-58"><a id="__codelineno-3-58" name="__codelineno-3-58" href="#__codelineno-3-58"></a>└──────────────────────┘
-</span></code></pre></div>
-<p><strong>Key Classes:</strong></p>
-<ul>
-<li><strong><code>ProxmoxCrawler</code></strong> - Recursively explores Proxmox API structure</li>
-<li><strong><code>ProxmoxCodegenPipeline</code></strong> - Orchestrates the full pipeline</li>
-<li><strong><code>OpenAPIBuilder</code></strong> - Converts normalized data → OpenAPI schema</li>
-<li><strong><code>PydanticBuilder</code></strong> - Converts OpenAPI schema → Pydantic models</li>
-</ul>
-<h2 id="data-flow">Data Flow<a class="headerlink" href="#data-flow" title="Permanent link">&para;</a></h2>
-<h3 id="mock-mode-request-flow">Mock Mode Request Flow<a class="headerlink" href="#mock-mode-request-flow" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>User → FastAPI → validate_request() → mock_endpoint()
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                                           │
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                                           ▼
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>                                    MockState.get()
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>                                           │
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>                                           ▼
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>                                    validate_response()
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>                                           │
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>                                           ▼
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>                                    Return JSON
-</span></code></pre></div>
-<h3 id="real-mode-request-flow">Real Mode Request Flow<a class="headerlink" href="#real-mode-request-flow" title="Permanent link">&para;</a></h3>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>User → FastAPI → validate_request() → real_endpoint()
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                                           │
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>                                           ▼
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>                                    ProxmoxClient
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>                                           │
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>                                           ▼
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>                                    auth_headers()
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>                                           │
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>                                           ▼
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>                                    aiohttp.request()
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>                                           │
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>                                           ▼
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>                                    Proxmox VE API
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>                                           │
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>                                           ▼
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>                                    validate_response()
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>                                           │
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>                                           ▼
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>                                    Return JSON
-</span></code></pre></div>
+<p>The codegen pipeline converts the Proxmox VE API Viewer into reusable artifacts:</p>
+<pre class="mermaid"><code>flowchart LR
+    PVE["Proxmox VE\nAPI Viewer"]
+    CRAWL["ProxmoxCrawler\nPlaywright"]
+    PARSE["apidoc_parser.py"]
+    NORM["normalize.py"]
+    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 646 ops"]
+    PYD["PydanticBuilder\n→ pydantic_models.py"]
+    USE1["proxmox-openapi\nMock routes"]
+    USE2["proxbox-api\nResponse validation"]
+
+    PVE --&gt; CRAWL
+    CRAWL --&gt; PARSE
+    PARSE --&gt; NORM
+    NORM --&gt; OA
+    OA --&gt; PYD
+    OA --&gt; USE1
+    PYD --&gt; USE2</code></pre>
+<p>See <a href="../codegen-pipeline/">Code Generation Pipeline</a> for the full stage-by-stage breakdown.</p>
+<hr />
 <h2 id="key-design-decisions">Key Design Decisions<a class="headerlink" href="#key-design-decisions" title="Permanent link">&para;</a></h2>
 <h3 id="1-dual-mode-architecture">1. Dual-Mode Architecture<a class="headerlink" href="#1-dual-mode-architecture" title="Permanent link">&para;</a></h3>
-<p><strong>Why?</strong></p>
-<ul>
-<li>Development teams need mock APIs for testing without real infrastructure</li>
-<li>Production deployments need validated proxies to real Proxmox servers</li>
-<li>Single codebase reduces maintenance burden</li>
-</ul>
-<p><strong>Trade-offs:</strong></p>
-<ul>
-<li>✅ Maximum flexibility for different use cases</li>
-<li>✅ Same API surface in both modes</li>
-<li>❌ More complex startup logic</li>
-<li>❌ Two code paths to maintain</li>
-</ul>
+<p>A single codebase serves both development (mock) and production (real proxy) use cases. The same API surface — same paths, same schemas, same validation — is available in both modes. Switching from mock to real is a single environment variable change.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Mock</th>
+<th>Real</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Proxmox server required</strong></td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><strong>Data persistence</strong></td>
+<td>In-memory (reset on restart)</td>
+<td>Real Proxmox state</td>
+</tr>
+<tr>
+<td><strong>Request validation</strong></td>
+<td>Yes (Pydantic)</td>
+<td>Yes (Pydantic)</td>
+</tr>
+<tr>
+<td><strong>Response validation</strong></td>
+<td>Yes (Pydantic)</td>
+<td>Yes (Pydantic)</td>
+</tr>
+<tr>
+<td><strong>Startup time</strong></td>
+<td>~1 s</td>
+<td>~500 ms</td>
+</tr>
+</tbody>
+</table>
 <h3 id="2-dynamic-route-generation">2. Dynamic Route Generation<a class="headerlink" href="#2-dynamic-route-generation" title="Permanent link">&para;</a></h3>
-<p><strong>Why?</strong></p>
-<p>Instead of hardcoding 646 routes, we generate them from OpenAPI schema at runtime.</p>
-<p><strong>Benefits:</strong></p>
-<ul>
-<li>Schema updates automatically create new routes</li>
-<li>No manual route maintenance</li>
-<li>Guaranteed schema/implementation consistency</li>
-<li>Smaller codebase</li>
-</ul>
-<p><strong>Trade-offs:</strong></p>
-<ul>
-<li>✅ Extremely maintainable</li>
-<li>✅ Easy to update to new Proxmox versions</li>
-<li>❌ Slightly slower startup time (~1s)</li>
-<li>❌ More complex debugging</li>
-</ul>
+<p>Rather than hardcoding 646 routes, the server registers them at startup from the OpenAPI schema. This means schema updates automatically produce new routes with zero manual work. Startup takes ~1 second for schema loading plus route generation.</p>
 <h3 id="3-pre-generated-schemas">3. Pre-Generated Schemas<a class="headerlink" href="#3-pre-generated-schemas" title="Permanent link">&para;</a></h3>
-<p><strong>Why?</strong></p>
-<p>We ship pre-generated OpenAPI schemas instead of requiring live Proxmox access.</p>
-<p><strong>Benefits:</strong></p>
-<ul>
-<li>Users can run mock mode without any Proxmox server</li>
-<li>Faster startup (no crawling needed)</li>
-<li>Offline development support</li>
-<li>Version pinning for reproducibility</li>
-</ul>
-<p><strong>Trade-offs:</strong></p>
-<ul>
-<li>✅ Zero dependencies for mock mode</li>
-<li>✅ Works completely offline</li>
-<li>❌ Schema updates require regeneration</li>
-<li>❌ Larger repository size (~5MB per version)</li>
-</ul>
+<p>The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., <code>8.1.0</code>) is stored independently under <code>generated/proxmox/</code>.</p>
 <h3 id="4-full-requestresponse-validation">4. Full Request/Response Validation<a class="headerlink" href="#4-full-requestresponse-validation" title="Permanent link">&para;</a></h3>
-<p><strong>Why?</strong></p>
-<p>Every request and response passes through Pydantic validation.</p>
-<p><strong>Benefits:</strong></p>
-<ul>
-<li>Type safety for client applications</li>
-<li>Early error detection</li>
-<li>Self-documenting API via schemas</li>
-<li>Swagger UI with accurate models</li>
-</ul>
-<p><strong>Trade-offs:</strong></p>
-<ul>
-<li>✅ Production-quality reliability</li>
-<li>✅ Better developer experience</li>
-<li>❌ Small performance overhead</li>
-<li>❌ Stricter than raw Proxmox API</li>
-</ul>
+<p>Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.</p>
 <h3 id="5-in-memory-mock-state">5. In-Memory Mock State<a class="headerlink" href="#5-in-memory-mock-state" title="Permanent link">&para;</a></h3>
-<p><strong>Why?</strong></p>
-<p>Mock mode uses a simple dict-based state instead of a database.</p>
-<p><strong>Benefits:</strong></p>
-<ul>
-<li>Zero dependencies (no database needed)</li>
-<li>Fast CRUD operations</li>
-<li>Simple testing</li>
-<li>Easy to reset state</li>
-</ul>
-<p><strong>Trade-offs:</strong></p>
-<ul>
-<li>✅ Extremely simple and fast</li>
-<li>✅ Perfect for testing/development</li>
-<li>❌ Data lost on restart</li>
-<li>❌ Not suitable for persistent mock environments</li>
-</ul>
-<h3 id="6-aiohttp-for-real-mode">6. aiohttp for Real Mode<a class="headerlink" href="#6-aiohttp-for-real-mode" title="Permanent link">&para;</a></h3>
-<p><strong>Why?</strong></p>
-<p>We chose aiohttp over httpx or requests.</p>
-<p><strong>Benefits:</strong></p>
-<ul>
-<li>Async/await native (matches FastAPI)</li>
-<li>Battle-tested and mature</li>
-<li>Excellent session/connection pooling</li>
-<li>Good SSL/TLS handling</li>
-</ul>
-<p><strong>Trade-offs:</strong></p>
-<ul>
-<li>✅ High performance</li>
-<li>✅ Native async integration</li>
-<li>❌ More complex than synchronous clients</li>
-<li>❌ Requires async context management</li>
-</ul>
-<h2 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">&para;</a></h2>
-<h3 id="mock-mode_1">Mock Mode<a class="headerlink" href="#mock-mode_1" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Startup:</strong> ~1 second (schema loading + route generation)</li>
-<li><strong>Request latency:</strong> &lt;5ms (in-memory operations)</li>
-<li><strong>Memory usage:</strong> ~100MB (schema + state)</li>
-<li><strong>Throughput:</strong> 10,000+ req/s (limited by FastAPI)</li>
-</ul>
-<h3 id="real-mode_1">Real Mode<a class="headerlink" href="#real-mode_1" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Startup:</strong> ~500ms (config loading + client setup)</li>
-<li><strong>Request latency:</strong> Proxmox latency + validation (~20-100ms overhead)</li>
-<li><strong>Memory usage:</strong> ~80MB (schema + client session)</li>
-<li><strong>Throughput:</strong> Limited by Proxmox server capacity</li>
-</ul>
+<p>Mock state uses <code>SharedMemoryMockStore</code> — a dict-based in-memory store with shared read locks (<code>LOCK_SH</code>) and exclusive write locks (<code>LOCK_EX</code>) for thread safety. No database dependency, zero configuration, trivially resettable. It uses a materialised <code>set</code> for deleted-item checks (<code>O(1)</code> membership test).</p>
+<h3 id="6-aiohttp-for-https-transport">6. aiohttp for HTTPS Transport<a class="headerlink" href="#6-aiohttp-for-https-transport" title="Permanent link">&para;</a></h3>
+<p>The HTTPS backend uses <code>aiohttp</code> for its native async/await support, mature session pooling, and robust SSL/TLS handling. The session is created lazily on first request and reused across all subsequent calls.</p>
+<hr />
 <h2 id="security-model">Security Model<a class="headerlink" href="#security-model" title="Permanent link">&para;</a></h2>
-<h3 id="mock-mode_2">Mock Mode<a class="headerlink" href="#mock-mode_2" title="Permanent link">&para;</a></h3>
+<h3 id="mock-mode">Mock Mode<a class="headerlink" href="#mock-mode" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>No authentication</strong> by default (safe for development)</li>
-<li>Can add custom auth middleware if needed</li>
-<li>Intended for trusted development environments only</li>
+<li>No authentication by default — safe for development environments</li>
+<li>Rate-limited at the FastAPI level (<code>PROXMOX_RATE_LIMIT</code>)</li>
+<li>Codegen endpoints require <code>CODEGEN_API_KEY</code> Bearer token</li>
 </ul>
-<h3 id="real-mode_2">Real Mode<a class="headerlink" href="#real-mode_2" title="Permanent link">&para;</a></h3>
+<h3 id="real-mode">Real Mode<a class="headerlink" href="#real-mode" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>API Token authentication</strong> (recommended)</li>
-<li><strong>Username/Password authentication</strong> (fallback)</li>
-<li>SSL/TLS verification (configurable)</li>
-<li>All auth handled by <code>ProxmoxClient</code></li>
-<li>No credential storage in memory after initial auth</li>
+<li>All outbound Proxmox calls use API token auth (recommended) or password/ticket auth</li>
+<li>SSL/TLS verification configurable via <code>PROXMOX_API_VERIFY_SSL</code></li>
+<li>No credentials stored in memory after session initialization</li>
+<li><code>SensitiveDataFilter</code> redacts passwords and tokens from all log output</li>
 </ul>
+<p>See <a href="../security/">Security</a> for the full reference.</p>
+<hr />
+<h2 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Mock Mode</th>
+<th>Real Mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Startup time</td>
+<td>~1 s</td>
+<td>~500 ms</td>
+</tr>
+<tr>
+<td>Request latency</td>
+<td>&lt;5 ms</td>
+<td>Proxmox latency + ~20–100 ms</td>
+</tr>
+<tr>
+<td>Memory footprint</td>
+<td>~100 MB</td>
+<td>~80 MB</td>
+</tr>
+<tr>
+<td>Max throughput</td>
+<td>10,000+ req/s (FastAPI-bound)</td>
+<td>Proxmox server capacity</td>
+</tr>
+</tbody>
+</table>
+<p>Key optimizations:</p>
+<ul>
+<li><strong>Lazy package imports</strong> — <code>import proxmox_openapi</code> does not construct any FastAPI app</li>
+<li><strong>Cached URL components</strong> — <code>HttpsBackend</code> caches <code>(scheme, netloc, base_path)</code> to skip per-request URL parsing</li>
+<li><strong>Shared read locks</strong> — concurrent GETs on mock state do not block each other</li>
+<li><strong>Schema fingerprint caching</strong> — <code>ProxmoxSchemaValue.fingerprint</code> is a <code>@cached_property</code></li>
+</ul>
+<p>See <a href="../performance/">Performance</a> for the complete optimization reference.</p>
+<hr />
 <h2 id="extension-points">Extension Points<a class="headerlink" href="#extension-points" title="Permanent link">&para;</a></h2>
-<p>The architecture is designed for easy extension:</p>
 <ol>
-<li><strong>Custom Mock Data Loaders</strong></li>
-<li>Implement <code>load_custom_mock_data()</code></li>
-<li>
-<p>Support new file formats (currently JSON/YAML)</p>
-</li>
-<li>
-<p><strong>Custom Route Middleware</strong></p>
-</li>
-<li>Add FastAPI middleware for auth, logging, etc.</li>
-<li>
-<p>Works with both mock and real modes</p>
-</li>
-<li>
-<p><strong>New API Versions</strong></p>
-</li>
-<li>Run codegen pipeline with new Proxmox version</li>
-<li>Store in <code>generated/proxmox/&lt;version&gt;/</code></li>
-<li>
-<p>Switch via version parameter</p>
-</li>
-<li>
-<p><strong>Alternative Backends</strong></p>
-</li>
-<li>Implement new mode (e.g., "database mode")</li>
-<li>Register routes conditionally in <code>main.py</code></li>
+<li><strong>Custom mock data</strong> — Point <code>PROXMOX_MOCK_DATA_PATH</code> at a JSON/YAML file with initial mock state</li>
+<li><strong>New Proxmox version</strong> — Run the codegen pipeline, store artifacts under <code>generated/proxmox/&lt;version&gt;/</code></li>
+<li><strong>Custom middleware</strong> — Add FastAPI middleware for auth, logging, or rate limiting in <code>main.py</code></li>
+<li><strong>New SDK backend</strong> — Implement <code>AbstractBackend.request()</code> and <code>AbstractBackend.close()</code>, register in <code>_create_backend()</code></li>
 </ol>
+<hr />
 <h2 id="testing-strategy">Testing Strategy<a class="headerlink" href="#testing-strategy" title="Permanent link">&para;</a></h2>
-<h3 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>test_schema.py</code> - Schema loading and validation</li>
-<li><code>test_mock_routes.py</code> - Individual CRUD operations</li>
-<li><code>test_proxmox_client.py</code> - Client auth and requests (mocked)</li>
-</ul>
-<h3 id="integration-tests">Integration Tests<a class="headerlink" href="#integration-tests" title="Permanent link">&para;</a></h3>
-<ul>
-<li><code>test_main_app.py</code> - Full app startup in both modes</li>
-<li><code>test_custom_mock_data.py</code> - Data loading from files</li>
-</ul>
-<h3 id="end-to-end-tests">End-to-End Tests<a class="headerlink" href="#end-to-end-tests" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Manual testing via Swagger UI</li>
-<li>Real Proxmox environment testing for real mode</li>
-</ul>
-<h2 id="future-architecture-considerations">Future Architecture Considerations<a class="headerlink" href="#future-architecture-considerations" title="Permanent link">&para;</a></h2>
-<p>Potential improvements for future versions:</p>
-<ol>
-<li><strong>Database-Backed Mock Mode</strong></li>
-<li>SQLite or PostgreSQL for persistent mock data</li>
-<li>
-<p>Would enable multi-user testing scenarios</p>
-</li>
-<li>
-<p><strong>Caching Layer</strong></p>
-</li>
-<li>Cache frequently-accessed Proxmox resources</li>
-<li>
-<p>Reduce load on real Proxmox API</p>
-</li>
-<li>
-<p><strong>WebSocket Support</strong></p>
-</li>
-<li>Real-time updates for task status</li>
-<li>
-<p>Event streaming for cluster changes</p>
-</li>
-<li>
-<p><strong>Plugin System</strong></p>
-</li>
-<li>Allow custom endpoint extensions</li>
-<li>
-<p>Third-party Proxmox integrations</p>
-</li>
-<li>
-<p><strong>GraphQL Layer</strong></p>
-</li>
-<li>Alternative query interface</li>
-<li>More flexible client queries</li>
-</ol>
-<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
-<p>The Proxmox OpenAPI architecture balances:</p>
-<ul>
-<li><strong>Flexibility</strong> - Mock and real modes for different use cases</li>
-<li><strong>Simplicity</strong> - Minimal dependencies, straightforward code</li>
-<li><strong>Maintainability</strong> - Schema-driven, auto-generated routes</li>
-<li><strong>Reliability</strong> - Full validation, type safety, error handling</li>
-</ul>
-<p>This design enables rapid development, comprehensive testing, and production-ready Proxmox API integration.</p>
+<table>
+<thead>
+<tr>
+<th>Test type</th>
+<th>Scope</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit</td>
+<td>Schema loading and validation</td>
+<td><code>test_schema.py</code></td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>Individual CRUD operations</td>
+<td><code>test_mock_routes.py</code></td>
+</tr>
+<tr>
+<td>Unit</td>
+<td>Client auth and request logic</td>
+<td><code>test_proxmox_client.py</code> (mocked)</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>Full app startup in both modes</td>
+<td><code>test_main_app.py</code></td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>Custom mock data loading</td>
+<td><code>test_custom_mock_data.py</code></td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Manual via Swagger UI</td>
+<td>—</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Real Proxmox environment</td>
+<td>Requires live cluster</td>
+</tr>
+</tbody>
+</table>
 
 
 

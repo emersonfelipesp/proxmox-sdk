@@ -12,13 +12,13 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/installation/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-openapi/codegen-pipeline/">
       
       
-        <link rel="prev" href="..">
+        <link rel="prev" href="../sdk-internals/">
       
       
-        <link rel="next" href="../quickstart/">
+        <link rel="next" href="../integration-with-proxbox-api/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Installation - Proxmox OpenAPI</title>
+        <title>Code Generation Pipeline - Proxmox OpenAPI</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#code-generation-pipeline" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              Code Generation Pipeline
             
           </span>
         </div>
@@ -249,13 +249,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../installation/" class="md-tabs__link">
           
   
   
@@ -311,10 +309,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../architecture/" class="md-tabs__link">
           
   
@@ -468,31 +468,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -510,7 +507,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -525,37 +522,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -571,192 +541,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Requirements
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from Source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#docker-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Docker Installation
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Docker Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#raw-image-http-only-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Raw image — HTTP only (default)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nginx-image-https-with-mkcert" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nginx image — HTTPS with mkcert
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#granian-image-https-with-mkcert-no-nginx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Granian image — HTTPS with mkcert (no nginx)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mkcert-environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mkcert environment variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build from source
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Optional Dependencies
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Optional Dependencies">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#for-development" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        For Development
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#for-documentation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        For Documentation
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1175,28 +959,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -1214,7 +1001,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1285,10 +1072,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../codegen-pipeline/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code Generation Pipeline
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1304,6 +1118,192 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#pipeline-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-1-crawler-proxmoxcrawler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Crawler (ProxmoxCrawler)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-2-parser-apidoc_parserpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: Parser (apidoc_parser.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-3-normalization-normalizepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: Normalization (normalize.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-4-openapi-builder-openapi_generatorpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 4: OpenAPI Builder (openapi_generator.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-5-pydantic-generator-pydantic_generatorpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 5: Pydantic Generator (pydantic_generator.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stage 5: Pydantic Generator (pydantic_generator.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-proxbox-api-uses-generated-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How proxbox-api Uses Generated Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#triggering-the-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Triggering the Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ssrf-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSRF Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-key-auth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Key Auth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Versioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-the-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating the Schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1688,10 +1688,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
+  <a href="#pipeline-overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requirements
+        Pipeline Overview
       
     </span>
   </a>
@@ -1699,10 +1699,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
+  <a href="#stage-1-crawler-proxmoxcrawler" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install from PyPI
+        Stage 1: Crawler (ProxmoxCrawler)
       
     </span>
   </a>
@@ -1710,10 +1710,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
+  <a href="#stage-2-parser-apidoc_parserpy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install from Source
+        Stage 2: Parser (apidoc_parser.py)
       
     </span>
   </a>
@@ -1721,66 +1721,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#docker-installation" class="md-nav__link">
+  <a href="#stage-3-normalization-normalizepy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Docker Installation
+        Stage 3: Normalization (normalize.py)
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Docker Installation">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-4-openapi-builder-openapi_generatorpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 4: OpenAPI Builder (openapi_generator.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stage-5-pydantic-generator-pydantic_generatorpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 5: Pydantic Generator (pydantic_generator.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Stage 5: Pydantic Generator (pydantic_generator.py)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#raw-image-http-only-default" class="md-nav__link">
+  <a href="#how-proxbox-api-uses-generated-models" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Raw image — HTTP only (default)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#nginx-image-https-with-mkcert" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Nginx image — HTTPS with mkcert
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#granian-image-https-with-mkcert-no-nginx" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Granian image — HTTPS with mkcert (no nginx)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#mkcert-environment-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mkcert environment variables
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build from source
+        How proxbox-api Uses Generated Models
       
     </span>
   </a>
@@ -1793,10 +1771,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
+  <a href="#triggering-the-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify Installation
+        Triggering the Pipeline
       
     </span>
   </a>
@@ -1804,22 +1782,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#optional-dependencies" class="md-nav__link">
+  <a href="#security-controls" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Optional Dependencies
+        Security Controls
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Optional Dependencies">
+    <nav class="md-nav" aria-label="Security Controls">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#for-development" class="md-nav__link">
+  <a href="#ssrf-protection" class="md-nav__link">
     <span class="md-ellipsis">
       
-        For Development
+        SSRF Protection
       
     </span>
   </a>
@@ -1827,10 +1805,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#for-documentation" class="md-nav__link">
+  <a href="#api-key-auth" class="md-nav__link">
     <span class="md-ellipsis">
       
-        For Documentation
+        API Key Auth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
       
     </span>
   </a>
@@ -1843,10 +1832,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#versioning" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        Versioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-the-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating the Schema
       
     </span>
   </a>
@@ -1873,181 +1873,276 @@
   
 
 
-<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<h1 id="code-generation-pipeline">Code Generation Pipeline<a class="headerlink" href="#code-generation-pipeline" title="Permanent link">&para;</a></h1>
+<p>The <code>proxmox-openapi</code> project ships a complete pipeline that crawls the Proxmox VE API Viewer and converts it into an OpenAPI 3.1 schema and Pydantic v2 models. The generated artifacts are checked into <code>proxmox_openapi/generated/</code> so users never need to run the pipeline themselves.</p>
+<hr />
+<h2 id="pipeline-overview">Pipeline Overview<a class="headerlink" href="#pipeline-overview" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
+
+    CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
+    RAW["raw_capture.json\n646 endpoints\npaths + methods + parameters"]
+    NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
+    OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
+    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n646 operations · 428 paths"]
+    PYDANTIC_GEN["PydanticBuilder\nParse response schemas\nGenerate typed classes\nAdd validators"]
+    PYDANTIC["pydantic_models.py\nRequest + Response models\nUsed by proxbox-api for validation"]
+
+    PVE --&gt;|"Playwright browser"| CRAWL
+    CRAWL --&gt; RAW
+    RAW --&gt; NORM
+    NORM --&gt; OPENAPI_GEN
+    OPENAPI_GEN --&gt; OPENAPI
+    OPENAPI --&gt; PYDANTIC_GEN
+    PYDANTIC_GEN --&gt; PYDANTIC</code></pre>
+<p>All pipeline stages are orchestrated by <code>ProxmoxCodegenPipeline</code> in <code>proxmox_codegen/pipeline.py</code>.</p>
+<hr />
+<h2 id="stage-1-crawler-proxmoxcrawler">Stage 1: Crawler (<code>ProxmoxCrawler</code>)<a class="headerlink" href="#stage-1-crawler-proxmoxcrawler" title="Permanent link">&para;</a></h2>
+<p><code>proxmox_codegen/crawler.py</code> uses <strong>Playwright</strong> to drive a headless browser against the Proxmox API Viewer web application. The Proxmox API Viewer renders its endpoint tree from an embedded <code>apidoc.js</code> file rather than serving plain JSON, so a browser is required to execute the JavaScript.</p>
+<p>The crawler:</p>
+<ol>
+<li>Navigates to the Proxmox API Viewer at <code>https://&lt;host&gt;:8006</code></li>
+<li>Waits for <code>apidoc.js</code> to load and the tree to render</li>
+<li>Recursively expands every tree node</li>
+<li>For each endpoint, captures: path, HTTP methods, parameters, request/response schemas, descriptions</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    participant CLI as proxmox-cli codegen
+    participant CW as ProxmoxCrawler
+    participant PW as Playwright (headless Chromium)
+    participant PVE as Proxmox VE API Viewer
+
+    CLI-&gt;&gt;CW: crawl(url, output_path)
+    CW-&gt;&gt;PW: launch()
+    PW-&gt;&gt;PVE: GET https://pve:8006/
+    PVE--&gt;&gt;PW: HTML + apidoc.js
+    PW-&gt;&gt;PW: Execute apidoc.js, render tree
+    loop For each tree node
+        CW-&gt;&gt;PW: click tree item
+        PW-&gt;&gt;CW: endpoint metadata
+    end
+    CW-&gt;&gt;CLI: raw_capture.json (646 items)</code></pre>
+<div class="admonition warning">
+<p class="admonition-title">Crawler requires a real Proxmox host</p>
+<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 8.1. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
+</div>
+<hr />
+<h2 id="stage-2-parser-apidoc_parserpy">Stage 2: Parser (<code>apidoc_parser.py</code>)<a class="headerlink" href="#stage-2-parser-apidoc_parserpy" title="Permanent link">&para;</a></h2>
+<p><code>proxmox_codegen/apidoc_parser.py</code> post-processes the raw capture. It:</p>
 <ul>
-<li>Python 3.11 or higher</li>
-<li>pip or uv package manager</li>
+<li>Normalizes path parameter syntax (<code>{vmid}</code> → <code>{vmid: integer}</code>)</li>
+<li>Extracts inline schemas from parameter definitions</li>
+<li>Resolves enum values for string parameters</li>
+<li>Handles Proxmox-specific documentation quirks (e.g., undocumented query params)</li>
 </ul>
 <hr />
-<h2 id="install-from-pypi">Install from PyPI<a class="headerlink" href="#install-from-pypi" title="Permanent link">&para;</a></h2>
-<p>The easiest way to install proxmox-openapi:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi
-</span></code></pre></div>
-<p>Or using <code>uv</code> (recommended for faster installation):</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi
-</span></code></pre></div>
+<h2 id="stage-3-normalization-normalizepy">Stage 3: Normalization (<code>normalize.py</code>)<a class="headerlink" href="#stage-3-normalization-normalizepy" title="Permanent link">&para;</a></h2>
+<p><code>proxmox_codegen/normalize.py</code> deduplicates endpoints and enriches metadata:</p>
+<ul>
+<li><strong>Deduplication</strong>: Some Proxmox API paths appear in multiple tree branches; the normalizer collapses them</li>
+<li><strong>Type enrichment</strong>: Proxmox uses custom type annotations; these are mapped to JSON Schema types</li>
+<li><strong>Tag assignment</strong>: Groups endpoints by resource category (nodes, storage, cluster, etc.)</li>
+<li><strong>Operation ID generation</strong>: Creates unique <code>operationId</code> values for each operation</li>
+</ul>
 <hr />
-<h2 id="install-from-source">Install from Source<a class="headerlink" href="#install-from-source" title="Permanent link">&para;</a></h2>
-<p>For development or to get the latest unreleased features:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Clone the repository</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/emersonfelipesp/proxmox-openapi.git
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">cd</span><span class="w"> </span>proxmox-openapi
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># Install with uv (recommended)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>uv<span class="w"> </span>sync
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Or with pip</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</span></code></pre></div>
-<hr />
-<h2 id="docker-installation">Docker Installation<a class="headerlink" href="#docker-installation" title="Permanent link">&para;</a></h2>
-<p>All Docker images are <strong>Alpine-based</strong> (smaller footprint). Three variants are available:</p>
+<h2 id="stage-4-openapi-builder-openapi_generatorpy">Stage 4: OpenAPI Builder (<code>openapi_generator.py</code>)<a class="headerlink" href="#stage-4-openapi-builder-openapi_generatorpy" title="Permanent link">&para;</a></h2>
+<p><code>proxmox_codegen/openapi_generator.py</code> produces an <strong>OpenAPI 3.1</strong> JSON document:</p>
 <table>
 <thead>
 <tr>
-<th>Variant</th>
-<th>Tags</th>
-<th>Description</th>
+<th>Stat</th>
+<th>Value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Raw</strong> (default)</td>
-<td><code>latest</code>, <code>&lt;version&gt;</code></td>
-<td>Pure uvicorn, HTTP only. Smallest image.</td>
+<td>Operations</td>
+<td>646</td>
 </tr>
 <tr>
-<td><strong>Nginx</strong></td>
-<td><code>latest-nginx</code>, <code>&lt;version&gt;-nginx</code></td>
-<td>nginx terminates HTTPS via mkcert; proxies to uvicorn.</td>
+<td>Paths</td>
+<td>428</td>
 </tr>
 <tr>
-<td><strong>Granian</strong></td>
-<td><code>latest-granian</code>, <code>&lt;version&gt;-granian</code></td>
-<td>Granian (Rust ASGI server) with native TLS via mkcert.</td>
+<td>File size</td>
+<td>~5.2 MB</td>
+</tr>
+<tr>
+<td>Format</td>
+<td>OpenAPI 3.1</td>
+</tr>
+<tr>
+<td>Security schemes</td>
+<td><code>ApiToken</code> (API token), <code>TicketAuth</code> (password/ticket)</td>
 </tr>
 </tbody>
 </table>
-<h3 id="raw-image-http-only-default">Raw image — HTTP only (default)<a class="headerlink" href="#raw-image-http-only-default" title="Permanent link">&para;</a></h3>
-<p>Simplest option. No proxy in front, plain HTTP. Ideal for local development or behind your own reverse proxy.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8000</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest
-</span></code></pre></div>
-<p>Service URL:</p>
+<p>The builder adds:</p>
 <ul>
-<li><a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></li>
+<li>Path item objects with all supported HTTP methods</li>
+<li>Parameter objects for path, query, and body parameters</li>
+<li>Response schemas with Proxmox <code>data</code> envelope</li>
+<li>Reusable component schemas for shared types</li>
+<li>Security requirement declarations per operation</li>
 </ul>
-<h3 id="nginx-image-https-with-mkcert">Nginx image — HTTPS with mkcert<a class="headerlink" href="#nginx-image-https-with-mkcert" title="Permanent link">&para;</a></h3>
-<p>nginx terminates HTTPS using auto-generated <a href="https://github.com/FiloSottile/mkcert">mkcert</a> certificates and proxies to uvicorn inside the container.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest-nginx
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-nginx<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-nginx
+<hr />
+<h2 id="stage-5-pydantic-generator-pydantic_generatorpy">Stage 5: Pydantic Generator (<code>pydantic_generator.py</code>)<a class="headerlink" href="#stage-5-pydantic-generator-pydantic_generatorpy" title="Permanent link">&para;</a></h2>
+<p><code>proxmox_codegen/pydantic_generator.py</code> converts the OpenAPI response schemas into <strong>Pydantic v2</strong> model classes. These models are used by <code>proxbox-api</code> to validate SDK responses against the expected schema.</p>
+<h3 id="how-proxbox-api-uses-generated-models">How proxbox-api Uses Generated Models<a class="headerlink" href="#how-proxbox-api-uses-generated-models" title="Permanent link">&para;</a></h3>
+<p>Generated models live at:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxbox_api/generated/proxmox/latest/pydantic_models.py
+</span></code></pre></div></p>
+<p>Every typed helper in <code>proxbox_api/services/proxmox_helpers.py</code> imports and uses these models:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxbox_api.generated.proxmox.latest</span><span class="w"> </span><span class="kn">import</span> <span class="n">pydantic_models</span> <span class="k">as</span> <span class="n">generated_models</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># After SDK call:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">validated</span> <span class="o">=</span> <span class="n">generated_models</span><span class="o">.</span><span class="n">GetClusterStatusResponse</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Returns typed List[GetClusterStatusResponseItem] — validated against schema</span>
 </span></code></pre></div>
-<p>Service URL:</p>
-<ul>
-<li><a href="https://127.0.0.1:8443">https://127.0.0.1:8443</a> (self-signed, trusted on the container host)</li>
-</ul>
-<h3 id="granian-image-https-with-mkcert-no-nginx">Granian image — HTTPS with mkcert (no nginx)<a class="headerlink" href="#granian-image-https-with-mkcert-no-nginx" title="Permanent link">&para;</a></h3>
-<p><a href="https://github.com/emmett-framework/granian">Granian</a> is a Rust-based ASGI server with native TLS and HTTP/2. A single process handles everything — no nginx or supervisord required.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker<span class="w"> </span>pull<span class="w"> </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-granian<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span></code></pre></div>
-<p>Service URL:</p>
-<ul>
-<li><a href="https://127.0.0.1:8443">https://127.0.0.1:8443</a></li>
-</ul>
-<h3 id="mkcert-environment-variables">mkcert environment variables<a class="headerlink" href="#mkcert-environment-variables" title="Permanent link">&para;</a></h3>
-<p>Available for the <code>nginx</code> and <code>granian</code> images:</p>
+<p>The naming convention follows the OpenAPI <code>operationId</code>:</p>
 <table>
 <thead>
 <tr>
-<th>Variable</th>
-<th>Default</th>
-<th>Description</th>
+<th>Proxmox endpoint</th>
+<th>Generated model</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>PORT</code></td>
-<td><code>8000</code></td>
-<td>Port the server listens on</td>
+<td><code>GET /cluster/status</code></td>
+<td><code>GetClusterStatusResponse</code></td>
 </tr>
 <tr>
-<td><code>MKCERT_CERT_DIR</code></td>
-<td><code>/certs</code></td>
-<td>Directory where certificates are stored</td>
+<td><code>GET /cluster/resources</code></td>
+<td><code>GetClusterResourcesResponse</code></td>
 </tr>
 <tr>
-<td><code>MKCERT_EXTRA_NAMES</code></td>
-<td>—</td>
-<td>Extra SANs (comma or space separated), e.g. <code>proxmox-api.lan,10.0.0.5</code></td>
+<td><code>GET /nodes/{node}/qemu/{vmid}/config</code></td>
+<td><code>GetNodesNodeQemuVmidConfigResponse</code></td>
 </tr>
 <tr>
-<td><code>CAROOT</code></td>
-<td>—</td>
-<td>Mount a volume here to persist the local CA across restarts</td>
+<td><code>GET /nodes/{node}/lxc/{vmid}/config</code></td>
+<td><code>GetNodesNodeLxcVmidConfigResponse</code></td>
 </tr>
 <tr>
-<td><code>APP_MODULE</code></td>
-<td><code>proxmox_openapi.mock_main:app</code></td>
-<td>ASGI app (change to <code>proxmox_openapi.main:app</code> for real mode)</td>
+<td><code>GET /storage</code></td>
+<td><code>GetStorageResponse</code></td>
+</tr>
+<tr>
+<td><code>GET /storage/{storage}</code></td>
+<td><code>GetStorageStorageResponse</code></td>
+</tr>
+<tr>
+<td><code>GET /nodes/{node}/storage/{storage}/content</code></td>
+<td><code>GetNodesNodeStorageStorageContentResponse</code></td>
+</tr>
+<tr>
+<td><code>GET /nodes/{node}/tasks</code></td>
+<td><code>GetNodesNodeTasksResponse</code></td>
+</tr>
+<tr>
+<td><code>GET /nodes/{node}/tasks/{upid}/status</code></td>
+<td><code>GetNodesNodeTasksUpidStatusResponse</code></td>
 </tr>
 </tbody>
 </table>
-<p>Example with extra SANs:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-tls<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">MKCERT_EXTRA_NAMES</span><span class="o">=</span><span class="s1">&#39;myhost.local,192.168.1.10&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-nginx
-</span></code></pre></div>
-<p>Example with real Proxmox mode:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>--name<span class="w"> </span>proxmox-openapi-real<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">APP_MODULE</span><span class="o">=</span><span class="s1">&#39;proxmox_openapi.main:app&#39;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_API_MODE</span><span class="o">=</span>real<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_URL</span><span class="o">=</span>https://pve.example.com:8006<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span>-e<span class="w"> </span><span class="nv">PROXMOX_API_TOKEN</span><span class="o">=</span><span class="nv">PVEAPIToken</span><span class="o">=</span>user@pam!mytoken<span class="o">=</span>your-secret<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span>emersonfelipesp/proxmox-openapi:latest-granian
-</span></code></pre></div>
-<h3 id="build-from-source">Build from source<a class="headerlink" href="#build-from-source" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/emersonfelipesp/proxmox-openapi.git
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">cd</span><span class="w"> </span>proxmox-openapi
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:raw<span class="w"> </span>.<span class="w">                          </span><span class="c1"># raw (default)</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>nginx<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:nginx<span class="w"> </span>.<span class="w">         </span><span class="c1"># nginx</span>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>granian<span class="w"> </span>-t<span class="w"> </span>proxmox-openapi:granian<span class="w"> </span>.<span class="w">     </span><span class="c1"># granian</span>
-</span></code></pre></div>
 <hr />
-<h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Check installed version</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import proxmox_openapi; print(proxmox_openapi.__version__)&quot;</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Run the mock API</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>proxmox-openapi-mock
+<h2 id="triggering-the-pipeline">Triggering the Pipeline<a class="headerlink" href="#triggering-the-pipeline" title="Permanent link">&para;</a></h2>
+<p>The codegen pipeline is exposed as a protected API endpoint on the FastAPI server and as CLI commands:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">REST API</label><label for="__tabbed_1_2">CLI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Generate schema from Proxmox API Viewer (rate-limited: 1/hour)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://your-proxbox-api/codegen/generate<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$CODEGEN_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;proxmox_url&quot;: &quot;https://pve.example.com:8006&quot;}&#39;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Retrieve generated OpenAPI schema</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$CODEGEN_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span>https://your-proxbox-api/codegen/openapi
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># Retrieve generated Pydantic models (rate-limited: 5/hour)</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$CODEGEN_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span>https://your-proxbox-api/codegen/pydantic
 </span></code></pre></div>
-<p>Visit <code>http://localhost:8000/docs</code> to confirm the API is running.</p>
+</div>
+<div class="tabbed-block">
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Run full pipeline against a Proxmox host</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>proxmox<span class="w"> </span>codegen<span class="w"> </span>generate<span class="w"> </span>--url<span class="w"> </span>https://pve.example.com:8006
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># List available generated versions</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>proxmox<span class="w"> </span>codegen<span class="w"> </span>versions
+</span></code></pre></div>
+</div>
+</div>
+</div>
 <hr />
-<h2 id="optional-dependencies">Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permanent link">&para;</a></h2>
-<h3 id="for-development">For Development<a class="headerlink" href="#for-development" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi<span class="o">[</span>test<span class="o">]</span>
+<h2 id="security-controls">Security Controls<a class="headerlink" href="#security-controls" title="Permanent link">&para;</a></h2>
+<p>The codegen pipeline has strict security controls because it makes outbound HTTP requests to user-supplied URLs.</p>
+<h3 id="ssrf-protection">SSRF Protection<a class="headerlink" href="#ssrf-protection" title="Permanent link">&para;</a></h3>
+<p><code>proxmox_codegen/security.py</code> validates all user-supplied URLs before any outbound request:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">validate_source_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">allow_any_domain</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Includes:
-- <code>pytest</code> - Testing framework
-- <code>httpx</code> - HTTP client for testing
-- <code>playwright</code> - Browser automation for API Viewer crawling</p>
-<h3 id="for-documentation">For Documentation<a class="headerlink" href="#for-documentation" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-openapi<span class="o">[</span>docs<span class="o">]</span>
-</span></code></pre></div>
-<p>Includes:
-- <code>mkdocs</code> - Documentation generator
-- <code>mkdocs-material</code> - Material theme</p>
+<p>Blocked addresses:
+- Private IPv4 ranges (RFC 1918): <code>10.x.x.x</code>, <code>172.16-31.x.x</code>, <code>192.168.x.x</code>
+- Loopback: <code>127.x.x.x</code>, <code>::1</code>
+- Private IPv6
+- IPv4-mapped IPv6 (<code>::ffff:...</code>)
+- 6to4 addresses (<code>2002::/16</code>)</p>
+<p>Only addresses that resolve to public Proxmox VE API endpoints are allowed by default.</p>
+<h3 id="api-key-auth">API Key Auth<a class="headerlink" href="#api-key-auth" title="Permanent link">&para;</a></h3>
+<p>All codegen endpoints require <code>Authorization: Bearer &lt;CODEGEN_API_KEY&gt;</code>. The key is set via the <code>CODEGEN_API_KEY</code> environment variable at server startup.</p>
+<h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Rate limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /codegen/generate</code></td>
+<td>1 request / hour</td>
+</tr>
+<tr>
+<td><code>GET /codegen/pydantic</code></td>
+<td>5 requests / hour</td>
+</tr>
+<tr>
+<td><code>GET /codegen/openapi</code></td>
+<td>No limit (read-only)</td>
+</tr>
+</tbody>
+</table>
 <hr />
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong><a href="../quickstart/">Quick Start Guide →</a></strong></li>
-<li><strong><a href="../mock-api/">Mock API Mode →</a></strong></li>
-<li><strong><a href="../real-api/">Real API Mode →</a></strong></li>
-</ul>
+<h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h2>
+<p>Generated artifacts are stored under <code>generated/proxmox/&lt;version&gt;/</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>proxmox_openapi/
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>└── generated/
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    └── proxmox/
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        ├── latest/       ← symlink to most recent version
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        │   ├── openapi.json
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        │   └── pydantic_models.py
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        └── 8.1.0/
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            ├── openapi.json
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            └── pydantic_models.py
+</span></code></pre></div>
+<p>The SDK reads the version to use from <code>PROXMOX_MOCK_SCHEMA_VERSION</code> (default: <code>"latest"</code>). Multiple versions can coexist; <code>GET /versions/</code> lists all available versions.</p>
+<hr />
+<h2 id="updating-the-schema">Updating the Schema<a class="headerlink" href="#updating-the-schema" title="Permanent link">&para;</a></h2>
+<p>To update to a new Proxmox VE version:</p>
+<ol>
+<li>Run the codegen pipeline against the new Proxmox version</li>
+<li>Store the new artifacts in <code>generated/proxmox/&lt;new-version&gt;/</code></li>
+<li>Update the <code>latest</code> symlink</li>
+<li>Re-run <code>proxbox-api</code> to pick up the new models</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">proxbox-api model imports</p>
+<p><code>proxbox-api</code> always imports from <code>proxbox_api.generated.proxmox.latest</code>. If you update the <code>latest</code> version, regenerate the proxbox-api generated models by running the proxbox-api codegen pipeline as well. The two generated artifact sets must be in sync.</p>
+</div>
 
 
 
