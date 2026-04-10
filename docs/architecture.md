@@ -1,471 +1,263 @@
 # Architecture
 
-This document explains the internal architecture of the Proxmox OpenAPI project, including how the components work together and key design decisions.
+This page describes the internal architecture of `proxmox-openapi` — covering the package layers, the dual-mode FastAPI server, the standalone SDK, and the key design decisions behind each component.
 
-## Overview
+---
 
-The Proxmox OpenAPI server is a **dual-mode FastAPI application** that can operate in two distinct modes:
+## Package Layers
 
-1. **Mock Mode (Default)** - Provides in-memory CRUD operations with pre-generated OpenAPI schema
-2. **Real Mode** - Acts as a validated proxy to a real Proxmox VE API
+The project is organized into five distinct layers, each independently usable:
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              Proxmox OpenAPI Server                     │
-│                                                         │
-│  ┌──────────────────┐         ┌──────────────────┐    │
-│  │   Mock Mode      │   OR    │   Real Mode      │    │
-│  │                  │         │                  │    │
-│  │  In-memory CRUD  │         │  Proxmox Proxy   │    │
-│  │  646 endpoints   │         │  + Validation    │    │
-│  └──────────────────┘         └──────────────────┘    │
-│                                                         │
-│  ┌─────────────────────────────────────────────────┐  │
-│  │        FastAPI Core + Swagger UI                │  │
-│  └─────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-```
+```mermaid
+flowchart TD
+    CLI["proxmox_cli/\nTyper CLI + Textual TUI\n(interactive use)"]
+    SERVER["proxmox_openapi/main.py\nDual-mode FastAPI server\n(mock OR real API proxy)"]
+    CODEGEN["proxmox_codegen/\nPlaywright crawler → OpenAPI + Pydantic\n(schema generation pipeline)"]
+    SDK["sdk/\nStandalone async Python SDK\n(production integrations)"]
+    MOCK["mock/\nIn-memory CRUD state store\n(test infrastructure)"]
+    GEN["generated/proxmox/\nPre-built OpenAPI schemas\n+ Pydantic models"]
 
-## Mode Architecture
-
-### Mock Mode
-
-Mock mode loads pre-generated OpenAPI schemas and dynamically creates CRUD endpoints with in-memory state management.
-
-```
-┌───────────────┐
-│  User Request │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────────┐
-│  FastAPI Router   │
-└───────┬───────────┘
-        │
-        ▼
-┌────────────────────────────┐
-│  Generated Mock Endpoint   │  (created from OpenAPI schema)
-│  - Validates request       │
-│  - Performs CRUD operation │
-│  - Returns response        │
-└────────┬───────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  MockState          │  (in-memory dictionary)
-│  - Stores resources │
-│  - Generates IDs    │
-└─────────────────────┘
+    CLI -->|uses| SDK
+    CLI -->|may use| SERVER
+    SERVER -->|mock mode uses| MOCK
+    SERVER -->|real mode uses| SDK
+    CODEGEN -->|produces| GEN
+    MOCK -->|loaded from| GEN
+    SDK -->|mock backend loads| GEN
 ```
 
-**Key Components:**
+| Layer | Entry point | Standalone? | Description |
+|---|---|---|---|
+| `sdk/` | `proxmox_openapi.ProxmoxSDK` | Yes | Async + sync Python SDK with 5 backends |
+| `mock/` | `proxmox_openapi.mock_main` | Yes | FastAPI mock server only |
+| `proxmox_openapi/main.py` | `proxmox_openapi.main` | Yes | Dual-mode FastAPI server |
+| `proxmox_codegen/` | `proxmox codegen` CLI | Yes | Schema generation pipeline |
+| `proxmox_cli/` | `proxmox` / `pbx` CLI | Yes | Typer CLI and Textual TUI |
 
-- **`mock/routes.py`** - Route builder that reads OpenAPI schema and generates FastAPI endpoints
-- **`mock/state.py`** - In-memory state management with dict-based storage
-- **`mock/loader.py`** - Custom mock data loader from JSON/YAML files
-- **`schema.py`** - Schema loading utilities
+---
 
-**Flow:**
+## Dual-Mode FastAPI Server
 
-1. App startup loads `generated/proxmox/latest/openapi.json`
-2. `register_generated_proxmox_mock_routes()` iterates through all paths/operations
-3. For each operation, creates a dynamic FastAPI route with:
-   - Path parameters from URL template
-   - Query parameters from schema
-   - Request body validation (Pydantic)
-   - Response model validation (Pydantic)
-4. Routes perform CRUD operations on `MockState`
-5. Data persists only in memory (resets on restart)
+The FastAPI server can run in two modes, selected via `PROXMOX_API_MODE`:
 
-### Real Mode
+=== "Mock Mode (default)"
 
-Real mode proxies requests to an actual Proxmox VE API with full request/response validation.
+    Mock mode loads pre-generated OpenAPI schemas and dynamically creates CRUD endpoints backed by an in-memory state store. No real Proxmox server required.
 
+    ```mermaid
+    flowchart TD
+        REQ["HTTP Request"]
+        ROUTER["FastAPI Router"]
+        MOCK_EP["Generated Mock Endpoint\n(from OpenAPI schema)"]
+        STATE["SharedMemoryMockStore\nin-memory dict"]
+        RESP["JSON Response"]
+
+        REQ --> ROUTER
+        ROUTER --> MOCK_EP
+        MOCK_EP -->|"GET: read"| STATE
+        MOCK_EP -->|"POST/PUT: write"| STATE
+        MOCK_EP -->|"DELETE: remove"| STATE
+        STATE --> RESP
+    ```
+
+    **Startup flow:**
+
+    1. Load `generated/proxmox/latest/openapi.json`
+    2. `register_generated_proxmox_mock_routes()` iterates all 646 path/method pairs
+    3. For each operation, create a dynamic FastAPI route with Pydantic request/response validation
+    4. Routes perform CRUD on `SharedMemoryMockStore`
+    5. State persists only in memory — resets on restart
+
+    **Performance:** ~1 second startup, <5 ms per request, ~100 MB memory.
+
+=== "Real Mode"
+
+    Real mode proxies requests to an actual Proxmox VE API, validating both the incoming request and the Proxmox response against the OpenAPI schema.
+
+    ```mermaid
+    flowchart TD
+        REQ["HTTP Request"]
+        ROUTER["FastAPI Router"]
+        REAL_EP["Real API Endpoint\n(validates request)"]
+        CLIENT["ProxmoxClient\n(HttpsBackend)"]
+        PVE["Real Proxmox VE\n:8006"]
+        VALID["Response Validation\n(Pydantic)"]
+        RESP["JSON Response"]
+
+        REQ --> ROUTER
+        ROUTER --> REAL_EP
+        REAL_EP --> CLIENT
+        CLIENT -->|"aiohttp HTTPS"| PVE
+        PVE -->|"JSON data"| CLIENT
+        CLIENT --> VALID
+        VALID --> RESP
+    ```
+
+    **Startup flow:**
+
+    1. Load `ProxmoxConfig` from environment variables
+    2. `register_proxmox_routes()` creates endpoints mirroring the mock structure
+    3. Each request: validate → call `ProxmoxClient.request()` → validate response → return
+
+    **Performance:** ~500 ms startup, Proxmox latency + ~20–100 ms validation overhead.
+
+---
+
+## SDK Architecture
+
+The standalone SDK (`sdk/`) is the primary way for Python applications to query Proxmox programmatically without running the FastAPI server.
+
+```mermaid
+flowchart TD
+    USER["Application code\n(proxbox-api, CLI, tests)"]
+    SDK_CLASS["ProxmoxSDK\nsdk/api.py"]
+    ROOT["ProxmoxResource('_/api2/json')\nsdk/resource.py"]
+    NAV["Navigation chain\n.nodes('pve1').qemu(100).config"]
+    LEAF["ProxmoxResource\npath=/api2/json/nodes/pve1/qemu/100/config"]
+    BACKEND["AbstractBackend\nsdk/backends/base.py"]
+    HTTPS["HttpsBackend\naiohttp + auth"]
+    MOCK_B["MockBackend\nin-memory"]
+    SSH["SshParamikoBackend\nor OpenSshBackend"]
+    LOCAL["LocalBackend\npvesh subprocess"]
+    PROXMOX["Proxmox VE"]
+
+    USER -->|"ProxmoxSDK(host=..., user=..., ...)"| SDK_CLASS
+    SDK_CLASS -->|"creates"| ROOT
+    ROOT -->|"__getattr__ / __call__"| NAV
+    NAV -->|"each step creates new resource"| LEAF
+    LEAF -->|".get() / .post() / ..."| BACKEND
+    BACKEND -->|"https"| HTTPS
+    BACKEND -->|"mock"| MOCK_B
+    BACKEND -->|"ssh_paramiko / openssh"| SSH
+    BACKEND -->|"local"| LOCAL
+    HTTPS -->|"aiohttp HTTPS"| PROXMOX
+    MOCK_B -->|"in-memory"| PROXMOX
+    SSH -->|"pvesh via SSH"| PROXMOX
+    LOCAL -->|"pvesh subprocess"| PROXMOX
 ```
-┌───────────────┐
-│  User Request │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────────┐
-│  FastAPI Router   │
-└───────┬───────────┘
-        │
-        ▼
-┌────────────────────────────┐
-│  Real API Endpoint         │
-│  - Validates request       │
-│  - Calls ProxmoxClient     │
-│  - Validates response      │
-└────────┬───────────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  ProxmoxClient      │  (aiohttp)
-│  - Authenticates    │
-│  - Makes HTTP call  │
-│  - Handles errors   │
-└────────┬────────────┘
-         │
-         ▼
-┌─────────────────────┐
-│  Real Proxmox API   │
-│  (8.1 or later)     │
-└─────────────────────┘
-```
 
-**Key Components:**
-
-- **`proxmox/config.py`** - Configuration loading from environment variables
-- **`proxmox/client.py`** - aiohttp-based client with authentication
-- **`proxmox/routes.py`** - Route builder that proxies to real API
-- **`schema.py`** - Shared schema utilities
-
-**Flow:**
-
-1. App startup loads `ProxmoxConfig` from environment
-2. `register_proxmox_routes()` creates endpoints similar to mock mode
-3. For each request:
-   - Validate request using Pydantic models
-   - Call `ProxmoxClient.request()`
-   - ProxmoxClient authenticates (API token or username/password)
-   - Forward request to real Proxmox API
-   - Validate response
-   - Return to user
-4. All data comes from real Proxmox server
+---
 
 ## Code Generation Pipeline
 
-The project includes a sophisticated code generation pipeline that converts the Proxmox VE API into OpenAPI schemas and Pydantic models.
+The codegen pipeline converts the Proxmox VE API Viewer into reusable artifacts:
 
-```
-┌──────────────────┐
-│  Proxmox VE API  │
-│  /api2/json/...  │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  ProxmoxCrawler      │  (recursive API exploration)
-│  - GET /api2/json    │
-│  - Follow children   │
-│  - Capture metadata  │
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  raw_capture.json    │  (646 endpoints)
-│  - Paths             │
-│  - Methods           │
-│  - Parameters        │
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  Pipeline            │  (normalization)
-│  - Deduplicate       │
-│  - Enrich metadata   │
-│  - Extract schemas   │
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  OpenAPIBuilder      │  (schema generation)
-│  - Create paths      │
-│  - Build schemas     │
-│  - Add security      │
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  openapi.json        │  (5.2MB OpenAPI 3.1)
-│  - 646 operations    │
-│  - 428 paths         │
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  PydanticBuilder     │  (model generation)
-│  - Parse schemas     │
-│  - Generate classes  │
-│  - Add validators    │
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────┐
-│  pydantic_models.py  │  (Python models)
-│  - Request models    │
-│  - Response models   │
-└──────────────────────┘
+```mermaid
+flowchart LR
+    PVE["Proxmox VE\nAPI Viewer"]
+    CRAWL["ProxmoxCrawler\nPlaywright"]
+    PARSE["apidoc_parser.py"]
+    NORM["normalize.py"]
+    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 646 ops"]
+    PYD["PydanticBuilder\n→ pydantic_models.py"]
+    USE1["proxmox-openapi\nMock routes"]
+    USE2["proxbox-api\nResponse validation"]
+
+    PVE --> CRAWL
+    CRAWL --> PARSE
+    PARSE --> NORM
+    NORM --> OA
+    OA --> PYD
+    OA --> USE1
+    PYD --> USE2
 ```
 
-**Key Classes:**
+See [Code Generation Pipeline](codegen-pipeline.md) for the full stage-by-stage breakdown.
 
-- **`ProxmoxCrawler`** - Recursively explores Proxmox API structure
-- **`ProxmoxCodegenPipeline`** - Orchestrates the full pipeline
-- **`OpenAPIBuilder`** - Converts normalized data → OpenAPI schema
-- **`PydanticBuilder`** - Converts OpenAPI schema → Pydantic models
-
-## Data Flow
-
-### Mock Mode Request Flow
-
-```
-User → FastAPI → validate_request() → mock_endpoint()
-                                           │
-                                           ▼
-                                    MockState.get()
-                                           │
-                                           ▼
-                                    validate_response()
-                                           │
-                                           ▼
-                                    Return JSON
-```
-
-### Real Mode Request Flow
-
-```
-User → FastAPI → validate_request() → real_endpoint()
-                                           │
-                                           ▼
-                                    ProxmoxClient
-                                           │
-                                           ▼
-                                    auth_headers()
-                                           │
-                                           ▼
-                                    aiohttp.request()
-                                           │
-                                           ▼
-                                    Proxmox VE API
-                                           │
-                                           ▼
-                                    validate_response()
-                                           │
-                                           ▼
-                                    Return JSON
-```
+---
 
 ## Key Design Decisions
 
 ### 1. Dual-Mode Architecture
 
-**Why?**
+A single codebase serves both development (mock) and production (real proxy) use cases. The same API surface — same paths, same schemas, same validation — is available in both modes. Switching from mock to real is a single environment variable change.
 
-- Development teams need mock APIs for testing without real infrastructure
-- Production deployments need validated proxies to real Proxmox servers
-- Single codebase reduces maintenance burden
-
-**Trade-offs:**
-
-- ✅ Maximum flexibility for different use cases
-- ✅ Same API surface in both modes
-- ❌ More complex startup logic
-- ❌ Two code paths to maintain
+| | Mock | Real |
+|---|---|---|
+| **Proxmox server required** | No | Yes |
+| **Data persistence** | In-memory (reset on restart) | Real Proxmox state |
+| **Request validation** | Yes (Pydantic) | Yes (Pydantic) |
+| **Response validation** | Yes (Pydantic) | Yes (Pydantic) |
+| **Startup time** | ~1 s | ~500 ms |
 
 ### 2. Dynamic Route Generation
 
-**Why?**
-
-Instead of hardcoding 646 routes, we generate them from OpenAPI schema at runtime.
-
-**Benefits:**
-
-- Schema updates automatically create new routes
-- No manual route maintenance
-- Guaranteed schema/implementation consistency
-- Smaller codebase
-
-**Trade-offs:**
-
-- ✅ Extremely maintainable
-- ✅ Easy to update to new Proxmox versions
-- ❌ Slightly slower startup time (~1s)
-- ❌ More complex debugging
+Rather than hardcoding 646 routes, the server registers them at startup from the OpenAPI schema. This means schema updates automatically produce new routes with zero manual work. Startup takes ~1 second for schema loading plus route generation.
 
 ### 3. Pre-Generated Schemas
 
-**Why?**
-
-We ship pre-generated OpenAPI schemas instead of requiring live Proxmox access.
-
-**Benefits:**
-
-- Users can run mock mode without any Proxmox server
-- Faster startup (no crawling needed)
-- Offline development support
-- Version pinning for reproducibility
-
-**Trade-offs:**
-
-- ✅ Zero dependencies for mock mode
-- ✅ Works completely offline
-- ❌ Schema updates require regeneration
-- ❌ Larger repository size (~5MB per version)
+The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., `8.1.0`) is stored independently under `generated/proxmox/`.
 
 ### 4. Full Request/Response Validation
 
-**Why?**
-
-Every request and response passes through Pydantic validation.
-
-**Benefits:**
-
-- Type safety for client applications
-- Early error detection
-- Self-documenting API via schemas
-- Swagger UI with accurate models
-
-**Trade-offs:**
-
-- ✅ Production-quality reliability
-- ✅ Better developer experience
-- ❌ Small performance overhead
-- ❌ Stricter than raw Proxmox API
+Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.
 
 ### 5. In-Memory Mock State
 
-**Why?**
+Mock state uses `SharedMemoryMockStore` — a dict-based in-memory store with shared read locks (`LOCK_SH`) and exclusive write locks (`LOCK_EX`) for thread safety. No database dependency, zero configuration, trivially resettable. It uses a materialised `set` for deleted-item checks (`O(1)` membership test).
 
-Mock mode uses a simple dict-based state instead of a database.
+### 6. aiohttp for HTTPS Transport
 
-**Benefits:**
+The HTTPS backend uses `aiohttp` for its native async/await support, mature session pooling, and robust SSL/TLS handling. The session is created lazily on first request and reused across all subsequent calls.
 
-- Zero dependencies (no database needed)
-- Fast CRUD operations
-- Simple testing
-- Easy to reset state
-
-**Trade-offs:**
-
-- ✅ Extremely simple and fast
-- ✅ Perfect for testing/development
-- ❌ Data lost on restart
-- ❌ Not suitable for persistent mock environments
-
-### 6. aiohttp for Real Mode
-
-**Why?**
-
-We chose aiohttp over httpx or requests.
-
-**Benefits:**
-
-- Async/await native (matches FastAPI)
-- Battle-tested and mature
-- Excellent session/connection pooling
-- Good SSL/TLS handling
-
-**Trade-offs:**
-
-- ✅ High performance
-- ✅ Native async integration
-- ❌ More complex than synchronous clients
-- ❌ Requires async context management
-
-## Performance Characteristics
-
-### Mock Mode
-
-- **Startup:** ~1 second (schema loading + route generation)
-- **Request latency:** <5ms (in-memory operations)
-- **Memory usage:** ~100MB (schema + state)
-- **Throughput:** 10,000+ req/s (limited by FastAPI)
-
-### Real Mode
-
-- **Startup:** ~500ms (config loading + client setup)
-- **Request latency:** Proxmox latency + validation (~20-100ms overhead)
-- **Memory usage:** ~80MB (schema + client session)
-- **Throughput:** Limited by Proxmox server capacity
+---
 
 ## Security Model
 
 ### Mock Mode
 
-- **No authentication** by default (safe for development)
-- Can add custom auth middleware if needed
-- Intended for trusted development environments only
+- No authentication by default — safe for development environments
+- Rate-limited at the FastAPI level (`PROXMOX_RATE_LIMIT`)
+- Codegen endpoints require `CODEGEN_API_KEY` Bearer token
 
 ### Real Mode
 
-- **API Token authentication** (recommended)
-- **Username/Password authentication** (fallback)
-- SSL/TLS verification (configurable)
-- All auth handled by `ProxmoxClient`
-- No credential storage in memory after initial auth
+- All outbound Proxmox calls use API token auth (recommended) or password/ticket auth
+- SSL/TLS verification configurable via `PROXMOX_API_VERIFY_SSL`
+- No credentials stored in memory after session initialization
+- `SensitiveDataFilter` redacts passwords and tokens from all log output
+
+See [Security](security.md) for the full reference.
+
+---
+
+## Performance Characteristics
+
+| Metric | Mock Mode | Real Mode |
+|---|---|---|
+| Startup time | ~1 s | ~500 ms |
+| Request latency | <5 ms | Proxmox latency + ~20–100 ms |
+| Memory footprint | ~100 MB | ~80 MB |
+| Max throughput | 10,000+ req/s (FastAPI-bound) | Proxmox server capacity |
+
+Key optimizations:
+
+- **Lazy package imports** — `import proxmox_openapi` does not construct any FastAPI app
+- **Cached URL components** — `HttpsBackend` caches `(scheme, netloc, base_path)` to skip per-request URL parsing
+- **Shared read locks** — concurrent GETs on mock state do not block each other
+- **Schema fingerprint caching** — `ProxmoxSchemaValue.fingerprint` is a `@cached_property`
+
+See [Performance](performance.md) for the complete optimization reference.
+
+---
 
 ## Extension Points
 
-The architecture is designed for easy extension:
+1. **Custom mock data** — Point `PROXMOX_MOCK_DATA_PATH` at a JSON/YAML file with initial mock state
+2. **New Proxmox version** — Run the codegen pipeline, store artifacts under `generated/proxmox/<version>/`
+3. **Custom middleware** — Add FastAPI middleware for auth, logging, or rate limiting in `main.py`
+4. **New SDK backend** — Implement `AbstractBackend.request()` and `AbstractBackend.close()`, register in `_create_backend()`
 
-1. **Custom Mock Data Loaders**
-   - Implement `load_custom_mock_data()`
-   - Support new file formats (currently JSON/YAML)
-
-2. **Custom Route Middleware**
-   - Add FastAPI middleware for auth, logging, etc.
-   - Works with both mock and real modes
-
-3. **New API Versions**
-   - Run codegen pipeline with new Proxmox version
-   - Store in `generated/proxmox/<version>/`
-   - Switch via version parameter
-
-4. **Alternative Backends**
-   - Implement new mode (e.g., "database mode")
-   - Register routes conditionally in `main.py`
+---
 
 ## Testing Strategy
 
-### Unit Tests
-
-- `test_schema.py` - Schema loading and validation
-- `test_mock_routes.py` - Individual CRUD operations
-- `test_proxmox_client.py` - Client auth and requests (mocked)
-
-### Integration Tests
-
-- `test_main_app.py` - Full app startup in both modes
-- `test_custom_mock_data.py` - Data loading from files
-
-### End-to-End Tests
-
-- Manual testing via Swagger UI
-- Real Proxmox environment testing for real mode
-
-## Future Architecture Considerations
-
-Potential improvements for future versions:
-
-1. **Database-Backed Mock Mode**
-   - SQLite or PostgreSQL for persistent mock data
-   - Would enable multi-user testing scenarios
-
-2. **Caching Layer**
-   - Cache frequently-accessed Proxmox resources
-   - Reduce load on real Proxmox API
-
-3. **WebSocket Support**
-   - Real-time updates for task status
-   - Event streaming for cluster changes
-
-4. **Plugin System**
-   - Allow custom endpoint extensions
-   - Third-party Proxmox integrations
-
-5. **GraphQL Layer**
-   - Alternative query interface
-   - More flexible client queries
-
-## Conclusion
-
-The Proxmox OpenAPI architecture balances:
-
-- **Flexibility** - Mock and real modes for different use cases
-- **Simplicity** - Minimal dependencies, straightforward code
-- **Maintainability** - Schema-driven, auto-generated routes
-- **Reliability** - Full validation, type safety, error handling
-
-This design enables rapid development, comprehensive testing, and production-ready Proxmox API integration.
+| Test type | Scope | File |
+|---|---|---|
+| Unit | Schema loading and validation | `test_schema.py` |
+| Unit | Individual CRUD operations | `test_mock_routes.py` |
+| Unit | Client auth and request logic | `test_proxmox_client.py` (mocked) |
+| Integration | Full app startup in both modes | `test_main_app.py` |
+| Integration | Custom mock data loading | `test_custom_mock_data.py` |
+| E2E | Manual via Swagger UI | — |
+| E2E | Real Proxmox environment | Requires live cluster |

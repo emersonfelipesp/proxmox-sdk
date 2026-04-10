@@ -61,9 +61,13 @@ nav:
       - Mock API Mode: mock-api.md
       - Real API Mode: real-api.md
       - API Reference: api-reference.md
-  - Development:
-      - Contributing: development.md
+  - Developer:
       - Architecture: architecture.md
+      - SDK Internals: sdk-internals.md
+      - Code Generation Pipeline: codegen-pipeline.md
+      - Integration with proxbox-api: integration-with-proxbox-api.md
+  - Reference:
+      - Contributing: development.md
       - Security: security.md
       - Performance: performance.md
   - Reference:
