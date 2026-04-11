@@ -58,14 +58,14 @@ For production, consider whether you need the validation/proxy layer, or if dire
 
 ```bash
 # Using pip
-pip install proxmox-openapi
+pip install proxmox-sdk
 
 # Using uv (recommended)
-uv pip install proxmox-openapi
+uv pip install proxmox-sdk
 
 # From source
-git clone https://github.com/emersonfelipesp/proxmox-openapi.git
-cd proxmox-openapi
+git clone https://github.com/emersonfelipesp/proxmox-sdk.git
+cd proxmox-sdk
 uv pip install -e .
 ```
 
@@ -75,13 +75,13 @@ See the [Installation Guide](installation.md) for more details.
 
 ```bash
 # Default (mock mode)
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 
 # Real mode
 export PROXMOX_API_MODE=real
 export PROXMOX_URL=https://proxmox.example.com:8006
 export PROXMOX_API_TOKEN=PVEAPIToken=user@realm!tokenid=uuid
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 ```
 
 See the [Quick Start Guide](quickstart.md) for more details.
@@ -112,7 +112,7 @@ Perfect for development, testing, and CI/CD pipelines.
 
 ```bash
 export PROXMOX_MOCK_DATA_PATH=/path/to/custom-data.json
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 ```
 
 See the [Mock API Guide](mock-api.md#custom-mock-data) for data format examples.
@@ -133,7 +133,7 @@ If you need persistent mock data:
 # Example GitHub Actions workflow
 - name: Start Proxmox Mock API
   run: |
-    uvicorn proxmox_openapi.main:app &
+    uvicorn proxmox_sdk.main:app &
     sleep 2  # Wait for startup
 
 - name: Run integration tests
@@ -161,7 +161,7 @@ export PROXMOX_PASSWORD=your-password
 Then start the server:
 
 ```bash
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 ```
 
 See the [Real API Guide](real-api.md) for full details.
@@ -253,7 +253,7 @@ See the [API Reference](api-reference.md) for all available endpoints.
 
 **pynetbox** is a Python client for **NetBox** (DCIM/IPAM tool).
 
-**proxmox-openapi** is a FastAPI server for **Proxmox VE** (virtualization platform).
+**proxmox-sdk** is a FastAPI server for **Proxmox VE** (virtualization platform).
 
 They're completely different projects for different tools. You might use both if you're managing infrastructure with both NetBox and Proxmox.
 
@@ -276,7 +276,7 @@ See the [Development Guide](development.md) for contribution guidelines.
 Use the built-in code generation pipeline:
 
 ```python
-from proxmox_openapi.proxmox_codegen import ProxmoxCodegenPipeline
+from proxmox_sdk.proxmox_codegen import ProxmoxCodegenPipeline
 
 pipeline = ProxmoxCodegenPipeline(
     proxmox_url="https://proxmox.example.com:8006",
@@ -308,7 +308,7 @@ uv pip install -e ".[dev]"
 pytest
 
 # Run with coverage
-pytest --cov=proxmox_openapi --cov-report=html
+pytest --cov=proxmox_sdk --cov-report=html
 ```
 
 See the [Development Guide](development.md#testing) for more details.
@@ -335,7 +335,7 @@ Documentation will be available at `http://127.0.0.1:8000`.
 Make sure you've installed the package:
 
 ```bash
-uv pip install proxmox-openapi
+uv pip install proxmox-sdk
 
 # Or for development
 uv pip install -e .
@@ -347,7 +347,7 @@ The pre-generated schema should be included in the package. If missing:
 
 ```bash
 # Reinstall the package
-uv pip install --force-reinstall proxmox-openapi
+uv pip install --force-reinstall proxmox-sdk
 ```
 
 ### Real mode: "Connection refused" error
@@ -450,13 +450,13 @@ For mock mode:
 
 **MIT License** - Free to use, modify, and distribute, including commercial use.
 
-See the [LICENSE](https://github.com/emersonfelipesp/proxmox-openapi/blob/main/LICENSE) file for full details.
+See the [LICENSE](https://github.com/emersonfelipesp/proxmox-sdk/blob/main/LICENSE) file for full details.
 
 ### Where can I get help?
 
-- **Documentation:** https://emersonfelipesp.github.io/proxmox-openapi/
-- **Issues:** https://github.com/emersonfelipesp/proxmox-openapi/issues
-- **Discussions:** https://github.com/emersonfelipesp/proxmox-openapi/discussions
+- **Documentation:** https://emersonfelipesp.github.io/proxmox-sdk/
+- **Issues:** https://github.com/emersonfelipesp/proxmox-sdk/issues
+- **Discussions:** https://github.com/emersonfelipesp/proxmox-sdk/discussions
 
 ### Can I hire you for custom development?
 
@@ -468,4 +468,4 @@ This is an open-source project maintained by community contributors. For custom 
 
 ---
 
-**Still have questions?** Open a [GitHub Discussion](https://github.com/emersonfelipesp/proxmox-openapi/discussions) or [Issue](https://github.com/emersonfelipesp/proxmox-openapi/issues).
+**Still have questions?** Open a [GitHub Discussion](https://github.com/emersonfelipesp/proxmox-sdk/discussions) or [Issue](https://github.com/emersonfelipesp/proxmox-sdk/issues).

@@ -7,7 +7,7 @@ import importlib
 import pytest
 from typer.testing import CliRunner
 
-from proxmox_openapi.proxmox_cli.cli import app
+from proxmox_sdk.proxmox_cli.cli import app
 
 
 def test_cli_version(cli_runner: CliRunner) -> None:
@@ -63,7 +63,7 @@ def test_get_command_with_path_mock(cli_runner: CliRunner) -> None:
 
 def test_config_paths() -> None:
     """Test configuration file path detection."""
-    from proxmox_openapi.proxmox_cli.config import ConfigManager
+    from proxmox_sdk.proxmox_cli.config import ConfigManager
 
     mgr = ConfigManager()
     assert mgr.DEFAULT_CONFIG_PATHS
@@ -72,7 +72,7 @@ def test_config_paths() -> None:
 
 def test_output_formatter() -> None:
     """Test output formatter initialization."""
-    from proxmox_openapi.proxmox_cli.output import OutputFormatter, resolve_output_format
+    from proxmox_sdk.proxmox_cli.output import OutputFormatter, resolve_output_format
 
     formatter = OutputFormatter(format="json")
     assert formatter.format == "json"
@@ -102,7 +102,7 @@ def test_help_yaml_output(cli_runner: CliRunner) -> None:
 
 def test_exceptions() -> None:
     """Test CLI exceptions."""
-    from proxmox_openapi.proxmox_cli.exceptions import (
+    from proxmox_sdk.proxmox_cli.exceptions import (
         BackendError,
         ConfigError,
         ParameterError,
@@ -128,7 +128,7 @@ def test_exceptions() -> None:
 
 def test_utils_validate_path() -> None:
     """Test path validation utility."""
-    from proxmox_openapi.proxmox_cli.utils import extract_path_components, validate_api_path
+    from proxmox_sdk.proxmox_cli.utils import extract_path_components, validate_api_path
 
     path = validate_api_path("/nodes/pve1/qemu/100")
     assert path == "/nodes/pve1/qemu/100"
@@ -142,7 +142,7 @@ def test_utils_validate_path() -> None:
 
 def test_utils_parse_parameters() -> None:
     """Test parameter parsing utility."""
-    from proxmox_openapi.proxmox_cli.utils import parse_parameter_data
+    from proxmox_sdk.proxmox_cli.utils import parse_parameter_data
 
     params = parse_parameter_data(
         short_params=["vmid=100", "name=test-vm", "cores=2"],
@@ -164,8 +164,8 @@ def test_tui_defaults_to_production_mode(
     cli_runner: CliRunner, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test that 'tui' defaults to production mode and avoids mock backend."""
-    tui_module = importlib.import_module("proxmox_openapi.proxmox_cli.commands.tui")
-    from proxmox_openapi.proxmox_cli.config import BackendConfig, ConfigManager
+    tui_module = importlib.import_module("proxmox_sdk.proxmox_cli.commands.tui")
+    from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
 
     captured: dict[str, object] = {}
 
@@ -207,8 +207,8 @@ def test_tui_mock_mode_uses_mock_backend(
     cli_runner: CliRunner, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test that 'tui mock' forces mock backend and mode."""
-    tui_module = importlib.import_module("proxmox_openapi.proxmox_cli.commands.tui")
-    from proxmox_openapi.proxmox_cli.config import BackendConfig, ConfigManager
+    tui_module = importlib.import_module("proxmox_sdk.proxmox_cli.commands.tui")
+    from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
 
     captured: dict[str, object] = {}
 
@@ -250,7 +250,7 @@ def test_init_command_creates_production_and_mock_profiles(
     cli_runner: CliRunner, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test that init prompts for production data and auto-creates mock profile."""
-    from proxmox_openapi.proxmox_cli.config import ConfigManager
+    from proxmox_sdk.proxmox_cli.config import ConfigManager
 
     captured: dict[str, object] = {}
 
@@ -296,7 +296,7 @@ def test_init_command_accepts_url_without_scheme(
     cli_runner: CliRunner, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test that init parses host-only endpoint input and applies default port."""
-    from proxmox_openapi.proxmox_cli.config import ConfigManager
+    from proxmox_sdk.proxmox_cli.config import ConfigManager
 
     captured: dict[str, object] = {}
 

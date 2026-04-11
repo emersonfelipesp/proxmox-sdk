@@ -1,4 +1,4 @@
-from proxmox_openapi.mock.schema_helpers import sample_value_for_schema
+from proxmox_sdk.mock.schema_helpers import sample_value_for_schema
 
 
 def test_semantic_node_string_value() -> None:

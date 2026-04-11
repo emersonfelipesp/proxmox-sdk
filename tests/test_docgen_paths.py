@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from proxmox_openapi.proxmox_cli import docgen_capture
+from proxmox_sdk.proxmox_cli import docgen_capture
 
 
 def test_default_paths_under_docs() -> None:

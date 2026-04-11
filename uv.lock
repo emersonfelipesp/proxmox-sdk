@@ -1775,8 +1775,8 @@ wheels = [
 ]
 
 [[package]]
-name = "proxmox-openapi"
-version = "0.0.2"
+name = "proxmox-sdk"
+version = "0.0.2.post1"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },

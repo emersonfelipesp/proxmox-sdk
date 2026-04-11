@@ -1,8 +1,8 @@
-# proxmox-openapi
+# proxmox-sdk
 
 Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, and in-memory CRUD operations.
 
-**📚 [Full Documentation](https://emersonfelipesp.github.io/proxmox-openapi/)**
+**📚 [Full Documentation](https://emersonfelipesp.github.io/proxmox-sdk/)**
 
 ## Features
 
@@ -17,7 +17,7 @@ Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, an
 ## Installation
 
 ```bash
-pip install proxmox-openapi
+pip install proxmox-sdk
 ```
 
 ## Quick Start
@@ -26,10 +26,10 @@ pip install proxmox-openapi
 
 ```bash
 # Install
-pip install proxmox-openapi
+pip install proxmox-sdk
 
 # Start server
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 
 # View Swagger docs
 # Open http://localhost:8000/docs
@@ -38,7 +38,7 @@ uvicorn proxmox_openapi.main:app --reload
 ### SDK Direct Usage (No Server Required)
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 # Async with mock data
 async with ProxmoxSDK.mock() as proxmox:
@@ -53,7 +53,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 
 ```bash
 # Install with CLI extras
-pip install proxmox-openapi[cli]
+pip install proxmox-sdk[cli]
 
 # Production TUI
 pbx tui
@@ -71,30 +71,30 @@ export PROXMOX_URL=https://proxmox.example.com:8006
 export PROXMOX_API_TOKEN=PVEAPIToken=user@realm!tokenid=uuid
 
 # Start server
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 ```
 
-See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-openapi/quickstart/) for more details.
+See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quickstart/) for more details.
 
 ## Documentation
 
-- **[Home](https://emersonfelipesp.github.io/proxmox-openapi/)** - Overview and features
-- **[Installation](https://emersonfelipesp.github.io/proxmox-openapi/installation/)** - Installation options (pip, uv, Docker, source)
-- **[Quick Start](https://emersonfelipesp.github.io/proxmox-openapi/quickstart/)** - 5-minute getting started guide
-- **[SDK Mock Usage](https://emersonfelipesp.github.io/proxmox-openapi/sdk-mock/)** - Using the SDK with mock data (no server required)
-- **[Mock API](https://emersonfelipesp.github.io/proxmox-openapi/mock-api/)** - Mock mode guide with custom data
-- **[Real API](https://emersonfelipesp.github.io/proxmox-openapi/real-api/)** - Real Proxmox integration guide
-- **[API Reference](https://emersonfelipesp.github.io/proxmox-openapi/api-reference/)** - Endpoint documentation
-- **[Development](https://emersonfelipesp.github.io/proxmox-openapi/development/)** - Contributing guide
-- **[Architecture](https://emersonfelipesp.github.io/proxmox-openapi/architecture/)** - How it works internally
-- **[FAQ](https://emersonfelipesp.github.io/proxmox-openapi/faq/)** - Frequently asked questions
+- **[Home](https://emersonfelipesp.github.io/proxmox-sdk/)** - Overview and features
+- **[Installation](https://emersonfelipesp.github.io/proxmox-sdk/installation/)** - Installation options (pip, uv, Docker, source)
+- **[Quick Start](https://emersonfelipesp.github.io/proxmox-sdk/quickstart/)** - 5-minute getting started guide
+- **[SDK Mock Usage](https://emersonfelipesp.github.io/proxmox-sdk/sdk-mock/)** - Using the SDK with mock data (no server required)
+- **[Mock API](https://emersonfelipesp.github.io/proxmox-sdk/mock-api/)** - Mock mode guide with custom data
+- **[Real API](https://emersonfelipesp.github.io/proxmox-sdk/real-api/)** - Real Proxmox integration guide
+- **[API Reference](https://emersonfelipesp.github.io/proxmox-sdk/api-reference/)** - Endpoint documentation
+- **[Development](https://emersonfelipesp.github.io/proxmox-sdk/development/)** - Contributing guide
+- **[Architecture](https://emersonfelipesp.github.io/proxmox-sdk/architecture/)** - How it works internally
+- **[FAQ](https://emersonfelipesp.github.io/proxmox-sdk/faq/)** - Frequently asked questions
 
 ## Environment Variables
 
 ### Mock Mode
 - `PROXMOX_API_MODE` - Set to "mock" (default) or "real"
 - `PROXMOX_MOCK_SCHEMA_VERSION` - Version tag to use (default: "latest")
-- `PROXMOX_MOCK_DATA_PATH` - Path to custom mock data file (default: "/etc/proxmox-openapi/mock-data.json")
+- `PROXMOX_MOCK_DATA_PATH` - Path to custom mock data file (default: "/etc/proxmox-sdk/mock-data.json")
 
 ### Real Mode
 - `PROXMOX_API_MODE` - Set to "real" to enable Proxmox integration
@@ -139,15 +139,15 @@ All images are **Alpine-based** (smaller footprint), built from this repository 
 Plain uvicorn on HTTP — the simplest option for local dev or when you put your own proxy in front.
 
 ```bash
-docker pull emersonfelipesp/proxmox-openapi:latest
-docker run -d -p 8000:8000 --name proxmox-openapi emersonfelipesp/proxmox-openapi:latest
+docker pull emersonfelipesp/proxmox-sdk:latest
+docker run -d -p 8000:8000 --name proxmox-sdk emersonfelipesp/proxmox-sdk:latest
 ```
 
 Build from source:
 
 ```bash
-docker build -t proxmox-openapi:raw .
-docker run -d -p 8000:8000 proxmox-openapi:raw
+docker build -t proxmox-sdk:raw .
+docker run -d -p 8000:8000 proxmox-sdk:raw
 ```
 
 ### Nginx image (nginx + mkcert HTTPS + uvicorn)
@@ -155,16 +155,16 @@ docker run -d -p 8000:8000 proxmox-openapi:raw
 **nginx** terminates HTTPS on `PORT` (default **8000**) using certificates from [mkcert](https://github.com/FiloSottile/mkcert) and proxies to **uvicorn** on `127.0.0.1:8001`. **supervisord** manages both processes.
 
 ```bash
-docker pull emersonfelipesp/proxmox-openapi:latest-nginx
-docker run -d -p 8443:8000 --name proxmox-openapi-nginx \
-  emersonfelipesp/proxmox-openapi:latest-nginx
+docker pull emersonfelipesp/proxmox-sdk:latest-nginx
+docker run -d -p 8443:8000 --name proxmox-sdk-nginx \
+  emersonfelipesp/proxmox-sdk:latest-nginx
 ```
 
 Build from source:
 
 ```bash
-docker build --target nginx -t proxmox-openapi:nginx .
-docker run -d -p 8443:8000 proxmox-openapi:nginx
+docker build --target nginx -t proxmox-sdk:nginx .
+docker run -d -p 8443:8000 proxmox-sdk:nginx
 ```
 
 ### Granian image (granian + mkcert HTTPS)
@@ -172,16 +172,16 @@ docker run -d -p 8443:8000 proxmox-openapi:nginx
 [Granian](https://github.com/emmett-framework/granian) is a Rust-based ASGI server with native HTTP/2, WebSocket, and TLS support. This variant eliminates nginx and supervisord — a single granian process handles everything.
 
 ```bash
-docker pull emersonfelipesp/proxmox-openapi:latest-granian
-docker run -d -p 8443:8000 --name proxmox-openapi-granian \
-  emersonfelipesp/proxmox-openapi:latest-granian
+docker pull emersonfelipesp/proxmox-sdk:latest-granian
+docker run -d -p 8443:8000 --name proxmox-sdk-granian \
+  emersonfelipesp/proxmox-sdk:latest-granian
 ```
 
 Build from source:
 
 ```bash
-docker build --target granian -t proxmox-openapi:granian .
-docker run -d -p 8443:8000 proxmox-openapi:granian
+docker build --target granian -t proxmox-sdk:granian .
+docker run -d -p 8443:8000 proxmox-sdk:granian
 ```
 
 ### mkcert environment variables (nginx and granian images)
@@ -192,19 +192,19 @@ docker run -d -p 8443:8000 proxmox-openapi:granian
 | `MKCERT_CERT_DIR` | `/certs` | Directory where certs are stored |
 | `MKCERT_EXTRA_NAMES` | — | Extra SANs (commas or spaces), e.g. `proxmox-api.lan,10.0.0.5` |
 | `CAROOT` | — | Mount a volume here to persist the local CA across container restarts |
-| `APP_MODULE` | `proxmox_openapi.mock_main:app` | ASGI app to run (change to `proxmox_openapi.main:app` for real mode) |
+| `APP_MODULE` | `proxmox_sdk.mock_main:app` | ASGI app to run (change to `proxmox_sdk.main:app` for real mode) |
 
 ```bash
-docker run -d -p 8443:8000 --name proxmox-openapi-tls \
+docker run -d -p 8443:8000 --name proxmox-sdk-tls \
   -e MKCERT_EXTRA_NAMES='myhost.local,192.168.1.10' \
-  -e APP_MODULE='proxmox_openapi.main:app' \
-  emersonfelipesp/proxmox-openapi:latest-nginx
+  -e APP_MODULE='proxmox_sdk.main:app' \
+  emersonfelipesp/proxmox-sdk:latest-nginx
 ```
 
 To run a shell instead of starting the server, pass a command (the entrypoint delegates to it):
 
 ```bash
-docker run --rm emersonfelipesp/proxmox-openapi:latest-nginx sh
+docker run --rm emersonfelipesp/proxmox-sdk:latest-nginx sh
 ```
 
 ## License

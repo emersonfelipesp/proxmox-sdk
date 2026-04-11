@@ -1,6 +1,6 @@
 # Proxmox Python SDK Guide
 
-Welcome to the `proxmox-openapi` SDK! This is a **standalone, production-ready Python SDK** for the Proxmox API that works without any FastAPI server.
+Welcome to the `proxmox-sdk` SDK! This is a **standalone, production-ready Python SDK** for the Proxmox API that works without any FastAPI server.
 
 ---
 
@@ -21,7 +21,7 @@ The Proxmox SDK provides a **Pythonic, dynamic interface** to the Proxmox REST A
 ### Installation
 
 ```bash
-pip install proxmox-openapi
+pip install proxmox-sdk
 ```
 
 ### Basic Usage (3 ways)
@@ -29,7 +29,7 @@ pip install proxmox-openapi
 **1. Async Context Manager (Recommended)**
 ```python
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def main():
     async with ProxmoxSDK(
@@ -45,7 +45,7 @@ asyncio.run(main())
 
 **2. Synchronous (Blocking)**
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 with ProxmoxSDK.sync(
     host="pve.example.com",
@@ -58,7 +58,7 @@ with ProxmoxSDK.sync(
 
 **3. Manual Lifecycle (Async)**
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 proxmox = ProxmoxSDK(
     host="pve.example.com",
@@ -158,7 +158,7 @@ await proxmox.nodes("pve1").qemu.post(
 The SDK raises typed exceptions for different scenarios:
 
 ```python
-from proxmox_openapi import (
+from proxmox_sdk import (
     ProxmoxSDK,
     ResourceException,
     AuthenticationError,
@@ -382,7 +382,7 @@ async def setup_environment():
 Many operations (create VM, backup, etc.) return a **Task ID** you can monitor:
 
 ```python
-from proxmox_openapi.sdk.tools import Tasks
+from proxmox_sdk.sdk.tools import Tasks
 
 async with ProxmoxSDK(...) as proxmox:
     # Create VM returns task ID
@@ -404,7 +404,7 @@ async with ProxmoxSDK(...) as proxmox:
 Upload and download backups or configs:
 
 ```python
-from proxmox_openapi.sdk.tools import Files
+from proxmox_sdk.sdk.tools import Files
 
 async with ProxmoxSDK(...) as proxmox:
     files_tool = Files(proxmox)

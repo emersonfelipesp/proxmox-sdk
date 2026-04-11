@@ -15,7 +15,7 @@ To use a real Proxmox instance, update the connection parameters.
 
 import asyncio
 
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 
 async def list_nodes() -> None:

@@ -1,8 +1,8 @@
-# proxmox-openapi Agent Index
+# proxmox-sdk Agent Index
 
 ## Overview
 
-`proxmox-openapi` is a schema-driven FastAPI package for Proxmox API that provides:
+`proxmox-sdk` is a schema-driven FastAPI package for Proxmox API that provides:
 
 1. **Dual-mode operation** - Mock mode (default, in-memory CRUD) or Real mode (proxy to actual Proxmox)
 2. **Standalone Python SDK** - Production-ready SDK without FastAPI server (async + sync)
@@ -14,7 +14,7 @@
 ## Package Structure
 
 ```
-proxmox_openapi/
+proxmox_sdk/
 ├── __init__.py               # Package exports and public API
 ├── main.py                   # Full API server (mock OR real mode)
 ├── mock_main.py              # Standalone mock-only server entrypoint
@@ -124,18 +124,18 @@ ruff check .
 ruff format --check .
 
 # Compile package
-uv run python -m compileall proxmox_openapi
+uv run python -m compileall proxmox_sdk
 
 # Test core imports
-uv run python -c "import proxmox_openapi.main"
-uv run python -c "import proxmox_openapi.mock_main"
+uv run python -c "import proxmox_sdk.main"
+uv run python -c "import proxmox_sdk.mock_main"
 
 # Test SDK imports
-uv run python -c "from proxmox_openapi.sdk import ProxmoxSDK"
-uv run python -c "from proxmox_openapi.sdk.sync import SyncProxmoxSDK"
+uv run python -c "from proxmox_sdk.sdk import ProxmoxSDK"
+uv run python -c "from proxmox_sdk.sdk.sync import SyncProxmoxSDK"
 
 # Test CLI imports
-uv run python -c "from proxmox_openapi.proxmox_cli.cli import cli"
+uv run python -c "from proxmox_sdk.proxmox_cli.cli import cli"
 
 # Run tests
 pytest
@@ -159,7 +159,7 @@ See [docs/security.md](docs/security.md) for the full reference. Key patterns to
 
 See [docs/performance.md](docs/performance.md) for the full reference. Key patterns to be aware of:
 
-- **Lazy package imports** — `proxmox_openapi/__init__.py` uses `__getattr__` to defer app construction. `import proxmox_openapi` alone does not build any FastAPI app.
+- **Lazy package imports** — `proxmox_sdk/__init__.py` uses `__getattr__` to defer app construction. `import proxmox_sdk` alone does not build any FastAPI app.
 - **Route registration** — `_build_direct_child_index()` in `mock/routes.py` builds a `{parent→child}` index in one O(P) pass before the registration loop, avoiding O(P²) re-scanning.
 - **Schema fingerprint** — `ProxmoxSchemaValue.fingerprint` is a `@cached_property`; the JSON hash is computed once per object.
 - **Shared read locks** — Mock state reads use `LOCK_SH` (shared); only writes use `LOCK_EX`. Concurrent GETs no longer block each other.

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-GitHub Actions CI/CD workflows for `proxmox-openapi`. All workflows live under `.github/workflows/`.
+GitHub Actions CI/CD workflows for `proxmox-sdk`. All workflows live under `.github/workflows/`.
 
 ## Workflow Index
 
@@ -12,7 +12,7 @@ GitHub Actions CI/CD workflows for `proxmox-openapi`. All workflows live under `
 | `ci.yml` docker-images | Push to main/testing or Release published | Builds and pushes Docker images to Docker Hub (dev or release tags) |
 | `docs.yml` | Push to `main` | Builds MkDocs site and deploys to GitHub Pages |
 | `docker-hub-publish.yml` | Called by CI | Builds three Alpine-based Docker images: raw (uvicorn), nginx (nginx+mkcert+uvicorn), granian (granian+mkcert) |
-| `publish-testpypi.yml` | GitHub Release published | Validates release metadata, publishes `proxmox_openapi` to TestPyPI, validates install across Python 3.11–3.13, publishes to PyPI |
+| `publish-testpypi.yml` | GitHub Release published | Validates release metadata, publishes `proxmox_sdk` to TestPyPI, validates install across Python 3.11–3.13, publishes to PyPI |
 | `release-docker-verify.yml` | Release published | Post-release smoke test of all three published Docker images |
 
 ## CI Job Dependencies

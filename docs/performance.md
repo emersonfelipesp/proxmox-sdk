@@ -1,6 +1,6 @@
 # Performance
 
-This document describes the performance characteristics of proxmox-openapi and the optimisations applied to startup time, per-request throughput, and the SDK hot paths.
+This document describes the performance characteristics of proxmox-sdk and the optimisations applied to startup time, per-request throughput, and the SDK hot paths.
 
 ---
 
@@ -8,9 +8,9 @@ This document describes the performance characteristics of proxmox-openapi and t
 
 ### Lazy package imports
 
-`import proxmox_openapi` no longer constructs any FastAPI app or imports the SDK. All top-level exports are resolved on first attribute access via `__getattr__`. This means:
+`import proxmox_sdk` no longer constructs any FastAPI app or imports the SDK. All top-level exports are resolved on first attribute access via `__getattr__`. This means:
 
-- CLI tools that `import proxmox_openapi` for `__version__` or SDK classes start without paying the FastAPI app construction cost.
+- CLI tools that `import proxmox_sdk` for `__version__` or SDK classes start without paying the FastAPI app construction cost.
 - The `app` and `mock_app` attributes are only materialised when accessed (e.g. by uvicorn).
 
 ### Route registration
@@ -178,7 +178,7 @@ To measure startup time:
 python -c "
 import time
 t0 = time.perf_counter()
-from proxmox_openapi.main import app
+from proxmox_sdk.main import app
 print(f'app ready in {time.perf_counter() - t0:.3f}s')
 "
 ```
@@ -188,8 +188,8 @@ To measure mock route registration specifically:
 ```bash
 python -c "
 import time, json
-from proxmox_openapi.mock.routes import register_generated_proxmox_mock_routes
-from proxmox_openapi.schema import load_proxmox_generated_openapi
+from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes
+from proxmox_sdk.schema import load_proxmox_generated_openapi
 from fastapi import FastAPI
 
 doc = load_proxmox_generated_openapi()

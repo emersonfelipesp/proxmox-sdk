@@ -5,7 +5,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from proxmox_openapi.routes.codegen import router
+from proxmox_sdk.routes.codegen import router
 
 app = FastAPI()
 app.include_router(router, prefix="/codegen")
@@ -41,7 +41,7 @@ async def test_codegen_generate_valid_auth_header():
         # But wait, calling /codegen/generate will try to run Playwright.
         # We can just check if auth passes by mocking the pipeline function.
         with patch(
-            "proxmox_openapi.routes.codegen.generate_proxmox_codegen_bundle_async"
+            "proxmox_sdk.routes.codegen.generate_proxmox_codegen_bundle_async"
         ) as mock_generate:
             mock_generate.return_value.capture = {}
             mock_generate.return_value.source_url = "test"

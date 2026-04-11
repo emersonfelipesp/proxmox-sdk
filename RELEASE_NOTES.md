@@ -280,7 +280,7 @@ Output includes:
 python -m pytest tests/cli/ -v
 
 # With coverage
-python -m pytest tests/cli/ --cov=proxmox_openapi.proxmox_cli --cov-report=html
+python -m pytest tests/cli/ --cov=proxmox_sdk.proxmox_cli --cov-report=html
 
 # Run specific test suite
 python -m pytest tests/cli/test_cli.py -v
@@ -293,8 +293,8 @@ python -m pytest tests/cli/test_phase_4_6_features.py -v
 ### From Source
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/proxmox-openapi.git
-cd proxmox-openapi
+git clone https://github.com/yourusername/proxmox-sdk.git
+cd proxmox-sdk
 
 # Install with CLI dependencies
 pip install -e ".[cli]"
@@ -306,7 +306,7 @@ proxmox --version
 ### Via Installation Script
 ```bash
 # Run automated installation
-python -m proxmox_openapi.proxmox_cli.install
+python -m proxmox_sdk.proxmox_cli.install
 
 # Or manually
 pip install -e .
@@ -371,7 +371,7 @@ Command Dispatcher (Typer)
 
 ## Bug Reports & Feature Requests
 
-- GitHub Issues: https://github.com/yourusername/proxmox-openapi/issues
+- GitHub Issues: https://github.com/yourusername/proxmox-sdk/issues
 - Feature Requests: Label with `enhancement`
 - Bug Reports: Label with `bug`
 

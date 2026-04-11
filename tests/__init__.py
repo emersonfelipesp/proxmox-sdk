@@ -1,1 +1,1 @@
-"""Test suite for proxmox-openapi package."""
+"""Test suite for proxmox-sdk package."""

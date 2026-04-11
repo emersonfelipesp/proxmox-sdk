@@ -1,13 +1,13 @@
 # Quick Start
 
-Get up and running with proxmox-openapi in under 5 minutes.
+Get up and running with proxmox-sdk in under 5 minutes.
 
 ---
 
 ## Step 1: Install
 
 ```bash
-pip install proxmox-openapi
+pip install proxmox-sdk
 ```
 
 ---
@@ -15,7 +15,7 @@ pip install proxmox-openapi
 ## Step 2: Start the Mock API
 
 ```bash
-proxmox-openapi-mock
+proxmox-sdk-mock
 ```
 
 You should see output like:
@@ -139,12 +139,12 @@ print(response.status_code)  # 200 OK
 
 ## Using the SDK Directly (No Server Required)
 
-The `proxmox-openapi` SDK can work standalone without a FastAPI server:
+The `proxmox-sdk` SDK can work standalone without a FastAPI server:
 
 ### Async SDK (with async/await)
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 import asyncio
 
 async def main():
@@ -171,7 +171,7 @@ asyncio.run(main())
 ### Sync SDK (No async/await)
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 # Create mock SDK instance
 with ProxmoxSDK.sync_mock() as proxmox:
@@ -243,13 +243,13 @@ EOF
 export PROXMOX_MOCK_DATA_PATH=./mock-data.json
 
 # Start API
-proxmox-openapi-mock
+proxmox-sdk-mock
 ```
 
 ### Run with Docker
 
 ```bash
-docker run -p 8000:8000 ghcr.io/emersonfelipesp/proxmox-openapi:latest
+docker run -p 8000:8000 ghcr.io/emersonfelipesp/proxmox-sdk:latest
 ```
 
 ### Switch to Real API Mode
@@ -260,7 +260,7 @@ export PROXMOX_API_URL=https://pve.example.com:8006
 export PROXMOX_API_TOKEN_ID=user@pam!mytoken
 export PROXMOX_API_TOKEN_SECRET=your-secret
 
-uvicorn proxmox_openapi.main:app
+uvicorn proxmox_sdk.main:app
 ```
 
 ---
@@ -271,20 +271,20 @@ uvicorn proxmox_openapi.main:app
 
 ```bash
 # Use a different port
-proxmox-openapi-mock --port 8080
+proxmox-sdk-mock --port 8080
 
 # Or with environment variable
-PORT=8080 proxmox-openapi-mock
+PORT=8080 proxmox-sdk-mock
 ```
 
 ### Import Errors
 
 ```bash
-# Ensure proxmox-openapi is installed
-pip show proxmox-openapi
+# Ensure proxmox-sdk is installed
+pip show proxmox-sdk
 
 # Reinstall if needed
-pip install --upgrade proxmox-openapi
+pip install --upgrade proxmox-sdk
 ```
 
 ### No Endpoints Showing in /docs
@@ -292,7 +292,7 @@ pip install --upgrade proxmox-openapi
 This usually means the pre-generated schema isn't loading. Check:
 
 ```python
-from proxmox_openapi.schema import load_proxmox_generated_openapi
+from proxmox_sdk.schema import load_proxmox_generated_openapi
 
 schema = load_proxmox_generated_openapi("latest")
 print(f"Schema loaded: {schema is not None}")
@@ -304,5 +304,5 @@ print(f"Paths: {len(schema.get('paths', {})) if schema else 0}")
 ## Get Help
 
 - **[FAQ →](faq.md)** - Common questions and answers
-- **[GitHub Issues](https://github.com/emersonfelipesp/proxmox-openapi/issues)** - Report bugs
-- **[GitHub Discussions](https://github.com/emersonfelipesp/proxmox-openapi/discussions)** - Ask questions
+- **[GitHub Issues](https://github.com/emersonfelipesp/proxmox-sdk/issues)** - Report bugs
+- **[GitHub Discussions](https://github.com/emersonfelipesp/proxmox-sdk/discussions)** - Ask questions

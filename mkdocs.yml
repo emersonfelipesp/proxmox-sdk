@@ -1,9 +1,9 @@
 site_name: Proxmox OpenAPI
-site_url: https://emersonfelipesp.github.io/proxmox-openapi/
+site_url: https://emersonfelipesp.github.io/proxmox-sdk/
 site_description: Schema-driven FastAPI package for Proxmox API with OpenAPI generation, mock data, and real API connections
 site_author: Emerson Felipe
-repo_url: https://github.com/emersonfelipesp/proxmox-openapi
-repo_name: emersonfelipesp/proxmox-openapi
+repo_url: https://github.com/emersonfelipesp/proxmox-sdk
+repo_name: emersonfelipesp/proxmox-sdk
 edit_uri: edit/main/docs/
 
 theme:
@@ -109,9 +109,9 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/emersonfelipesp/proxmox-openapi
+      link: https://github.com/emersonfelipesp/proxmox-sdk
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/proxmox-openapi/
+      link: https://pypi.org/project/proxmox-sdk/
   version:
     provider: mike
 

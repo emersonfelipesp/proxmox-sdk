@@ -22,7 +22,7 @@ The best way to explore the API is through the **interactive Swagger UI** includ
 
 ```bash
 # Start the server
-uvicorn proxmox_openapi.main:app --reload
+uvicorn proxmox_sdk.main:app --reload
 
 # Open in browser
 http://localhost:8000/docs

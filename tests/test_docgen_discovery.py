@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from proxmox_openapi.proxmox_cli.docgen.discovery import iter_discovered_help_specs
+from proxmox_sdk.proxmox_cli.docgen.discovery import iter_discovered_help_specs
 
 
 def test_discovery_returns_help_specs() -> None:

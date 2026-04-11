@@ -20,7 +20,7 @@ Or edit the example values below.
 import asyncio
 import os
 
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 
 async def example_api_token_auth() -> None:

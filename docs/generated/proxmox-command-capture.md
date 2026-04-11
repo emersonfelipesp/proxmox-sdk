@@ -3,7 +3,7 @@
 This file is machine-generated. Regenerate with:
 
 ```bash
-cd /path/to/proxmox-openapi
+cd /path/to/proxmox-sdk
 uv sync --group dev --group docs --extra cli
 uv run proxmox docs generate-capture
 # or: uv run python docs/generate_command_docs.py
@@ -12,7 +12,7 @@ uv run proxmox docs generate-capture
 ## Generation metadata
 
 - **UTC time:** `2026-04-05T01:14:34.729455+00:00`
-- **Subprocess command:** `/root/nms/proxmox-openapi/.venv/bin/proxmox`
+- **Subprocess command:** `/root/nms/proxmox-sdk/.venv/bin/proxmox`
 
 ---
 

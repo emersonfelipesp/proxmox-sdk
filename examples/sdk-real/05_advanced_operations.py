@@ -14,7 +14,7 @@ This example uses the mock backend by default.
 
 import asyncio
 
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 
 async def list_storage() -> None:

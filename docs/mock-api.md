@@ -1,6 +1,6 @@
 # Mock API Mode
 
-Complete guide to using proxmox-openapi in mock mode for development and testing.
+Complete guide to using proxmox-sdk in mock mode for development and testing.
 
 ---
 
@@ -21,7 +21,7 @@ Mock mode provides a **fully functional Proxmox API simulation** with:
 ### Method 1: Dedicated Mock Server
 
 ```bash
-proxmox-openapi-mock
+proxmox-sdk-mock
 ```
 
 This runs a standalone mock-only server.
@@ -30,11 +30,11 @@ This runs a standalone mock-only server.
 
 ```bash
 # Mock mode is the default
-uvicorn proxmox_openapi.main:app
+uvicorn proxmox_sdk.main:app
 
 # Or explicitly set mock mode
 export PROXMOX_API_MODE=mock
-uvicorn proxmox_openapi.main:app
+uvicorn proxmox_sdk.main:app
 ```
 
 Both methods provide the same functionality.
@@ -146,7 +146,7 @@ Create `mock-data.yaml`:
 
     ```bash
     export PROXMOX_MOCK_DATA_PATH=./mock-data.json
-    proxmox-openapi-mock
+    proxmox-sdk-mock
     ```
 
 === "Default Location"
@@ -154,9 +154,9 @@ Create `mock-data.yaml`:
     Place your file at the default path:
 
     ```bash
-    sudo mkdir -p /etc/proxmox-openapi
-    sudo cp mock-data.json /etc/proxmox-openapi/
-    proxmox-openapi-mock
+    sudo mkdir -p /etc/proxmox-sdk
+    sudo cp mock-data.json /etc/proxmox-sdk/
+    proxmox-sdk-mock
     ```
 
 === "Docker"
@@ -165,7 +165,7 @@ Create `mock-data.yaml`:
     docker run -p 8000:8000 \
       -v $(pwd)/mock-data.json:/data/mock.json \
       -e PROXMOX_MOCK_DATA_PATH=/data/mock.json \
-      ghcr.io/emersonfelipesp/proxmox-openapi:latest
+      ghcr.io/emersonfelipesp/proxmox-sdk:latest
     ```
 
 ---
@@ -278,7 +278,7 @@ Configure mock mode behavior:
 |----------|---------|-------------|
 | `PROXMOX_API_MODE` | `mock` | Set to `mock` for mock mode |
 | `PROXMOX_MOCK_SCHEMA_VERSION` | `latest` | OpenAPI schema version to use |
-| `PROXMOX_MOCK_DATA_PATH` | `/etc/proxmox-openapi/mock-data.json` | Custom mock data file path |
+| `PROXMOX_MOCK_DATA_PATH` | `/etc/proxmox-sdk/mock-data.json` | Custom mock data file path |
 | `HOST` | `0.0.0.0` | Server host to bind |
 | `PORT` | `8000` | Server port |
 
@@ -320,8 +320,8 @@ jobs:
 
       - name: Start Mock Proxmox API
         run: |
-          pip install proxmox-openapi
-          proxmox-openapi-mock &
+          pip install proxmox-sdk
+          proxmox-sdk-mock &
           sleep 2
 
       - name: Run Integration Tests
@@ -332,7 +332,7 @@ jobs:
 
 ```bash
 # Start mock API
-proxmox-openapi-mock
+proxmox-sdk-mock
 
 # In another terminal, develop your application
 python my_proxmox_app.py

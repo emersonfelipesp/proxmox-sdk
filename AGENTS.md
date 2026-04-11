@@ -1,4 +1,4 @@
-# AGENTS.md - proxmox-openapi Agent Index
+# AGENTS.md - proxmox-sdk Agent Index
 
 ## Quick Start
 

@@ -1,6 +1,6 @@
 # Code Generation Pipeline
 
-The `proxmox-openapi` project ships a complete pipeline that crawls the Proxmox VE API Viewer and converts it into an OpenAPI 3.1 schema and Pydantic v2 models. The generated artifacts are checked into `proxmox_openapi/generated/` so users never need to run the pipeline themselves.
+The `proxmox-sdk` project ships a complete pipeline that crawls the Proxmox VE API Viewer and converts it into an OpenAPI 3.1 schema and Pydantic v2 models. The generated artifacts are checked into `proxmox_sdk/generated/` so users never need to run the pipeline themselves.
 
 ---
 
@@ -221,7 +221,7 @@ All codegen endpoints require `Authorization: Bearer <CODEGEN_API_KEY>`. The key
 Generated artifacts are stored under `generated/proxmox/<version>/`:
 
 ```
-proxmox_openapi/
+proxmox_sdk/
 └── generated/
     └── proxmox/
         ├── latest/       ← symlink to most recent version

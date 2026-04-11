@@ -15,14 +15,14 @@ def validate_imports() -> bool:
     print("[*] Validating module imports...")
     try:
         modules = [
-            "proxmox_openapi.proxmox_cli.batch",
-            "proxmox_openapi.proxmox_cli.cache",
-            "proxmox_openapi.proxmox_cli.cli",
-            "proxmox_openapi.proxmox_cli.completion",
-            "proxmox_openapi.proxmox_cli.config_commands",
-            "proxmox_openapi.proxmox_cli.error_suggestions",
-            "proxmox_openapi.proxmox_cli.performance",
-            "proxmox_openapi.proxmox_cli.themes.themes",
+            "proxmox_sdk.proxmox_cli.batch",
+            "proxmox_sdk.proxmox_cli.cache",
+            "proxmox_sdk.proxmox_cli.cli",
+            "proxmox_sdk.proxmox_cli.completion",
+            "proxmox_sdk.proxmox_cli.config_commands",
+            "proxmox_sdk.proxmox_cli.error_suggestions",
+            "proxmox_sdk.proxmox_cli.performance",
+            "proxmox_sdk.proxmox_cli.themes.themes",
         ]
         for module in modules:
             importlib.import_module(module)
@@ -37,7 +37,7 @@ def validate_cache() -> bool:
     """Validate cache system."""
     print("[*] Validating cache system...")
     try:
-        from proxmox_openapi.proxmox_cli.cache import Cache
+        from proxmox_sdk.proxmox_cli.cache import Cache
 
         with tempfile.TemporaryDirectory() as tmpdir:
             cache = Cache(cache_dir=Path(tmpdir))
@@ -64,7 +64,7 @@ def validate_performance() -> bool:
     """Validate performance benchmarking."""
     print("[*] Validating performance benchmarking...")
     try:
-        from proxmox_openapi.proxmox_cli.performance import Benchmark
+        from proxmox_sdk.proxmox_cli.performance import Benchmark
 
         def test_func() -> None:
             pass
@@ -91,7 +91,7 @@ def validate_themes() -> bool:
     """Validate theme system."""
     print("[*] Validating theme system...")
     try:
-        from proxmox_openapi.proxmox_cli.themes.themes import (
+        from proxmox_sdk.proxmox_cli.themes.themes import (
             DARK_THEME,
             get_theme,
             list_themes,
@@ -123,7 +123,7 @@ def validate_error_suggestions() -> bool:
     """Validate error suggestion system."""
     print("[*] Validating error suggestion system...")
     try:
-        from proxmox_openapi.proxmox_cli.error_suggestions import ErrorSuggester
+        from proxmox_sdk.proxmox_cli.error_suggestions import ErrorSuggester
 
         # Test path error suggestion
         suggestion = ErrorSuggester.suggest_for_path_error("qemu_path")
@@ -154,7 +154,7 @@ def validate_cli_entry_point() -> bool:
     """Validate CLI entry point."""
     print("[*] Validating CLI entry point...")
     try:
-        from proxmox_openapi.proxmox_cli.cli import cli_main
+        from proxmox_sdk.proxmox_cli.cli import cli_main
 
         if not callable(cli_main):
             print("    ✗ CLI entry point not callable")
