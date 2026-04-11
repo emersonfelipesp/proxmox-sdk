@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from proxmox_openapi import schema as schema_module
-from proxmox_openapi.mock.loader import load_mock_data
-from proxmox_openapi.schema import load_proxmox_generated_openapi
+from proxmox_sdk import schema as schema_module
+from proxmox_sdk.mock.loader import load_mock_data
+from proxmox_sdk.schema import load_proxmox_generated_openapi
 
 
 def test_load_mock_data_rejects_json_array(tmp_path: Path) -> None:

@@ -1,6 +1,6 @@
 # Security Hardening
 
-This document describes the security controls implemented in proxmox-openapi, including what is protected, how each control works, and how to verify it.
+This document describes the security controls implemented in proxmox-sdk, including what is protected, how each control works, and how to verify it.
 
 ---
 
@@ -153,7 +153,7 @@ To enforce strict verification, pass a custom policy at construction:
 
 ```python
 from paramiko import RejectPolicy
-from proxmox_openapi.sdk.backends.ssh_paramiko import SshParamikoBackend
+from proxmox_sdk.sdk.backends.ssh_paramiko import SshParamikoBackend
 
 backend = SshParamikoBackend(
     host="pve.example.com",

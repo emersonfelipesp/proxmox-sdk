@@ -1,12 +1,12 @@
 # Real API Mode
 
-Connect proxmox-openapi to actual Proxmox servers with full request/response validation.
+Connect proxmox-sdk to actual Proxmox servers with full request/response validation.
 
 ---
 
 ## Overview
 
-Real mode transforms proxmox-openapi into a **validated proxy** for your Proxmox API:
+Real mode transforms proxmox-sdk into a **validated proxy** for your Proxmox API:
 
 - ✅ **646 endpoints** route to real Proxmox server
 - ✅ **Request validation** - Pydantic models ensure correct request format
@@ -35,7 +35,7 @@ export PROXMOX_API_TOKEN_ID=user@pam!mytoken
 export PROXMOX_API_TOKEN_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 # Start the API
-uvicorn proxmox_openapi.main:app
+uvicorn proxmox_sdk.main:app
 ```
 
 Now all requests to `http://localhost:8000/api2/json/*` are proxied to your real Proxmox server!
@@ -196,7 +196,7 @@ docker run -p 8000:8000 \
   -e PROXMOX_API_TOKEN_ID=root@pam!mytoken \
   -e PROXMOX_API_TOKEN_SECRET=your-secret \
   -e PROXMOX_API_VERIFY_SSL=false \
-  ghcr.io/emersonfelipesp/proxmox-openapi:latest
+  ghcr.io/emersonfelipesp/proxmox-sdk:latest
 ```
 
 ### Using .env File
@@ -214,7 +214,7 @@ PROXMOX_API_VERIFY_SSL=true
 Run with env file:
 
 ```bash
-docker run -p 8000:8000 --env-file .env ghcr.io/emersonfelipesp/proxmox-openapi:latest
+docker run -p 8000:8000 --env-file .env ghcr.io/emersonfelipesp/proxmox-sdk:latest
 ```
 
 ---
@@ -223,7 +223,7 @@ docker run -p 8000:8000 --env-file .env ghcr.io/emersonfelipesp/proxmox-openapi:
 
 ### How It Works
 
-1. **Request arrives** at proxmox-openapi
+1. **Request arrives** at proxmox-sdk
 2. **Pydantic validation** checks request matches OpenAPI schema
 3. **Validation passes** → Forward to real Proxmox
 4. **Proxmox responds** with data
@@ -286,7 +286,7 @@ SSL: CERTIFICATE_VERIFY_FAILED
 **Solutions:**
 - Add proper SSL certificate to Proxmox
 - Disable verification (dev only): `PROXMOX_API_VERIFY_SSL=false`
-- Install CA certificate on system running proxmox-openapi
+- Install CA certificate on system running proxmox-sdk
 
 ### Authentication Failed
 
@@ -323,7 +323,7 @@ Proxmox API error: 403 Forbidden
 
 ```bash
 # Use systemd service
-sudo tee /etc/systemd/system/proxmox-openapi.service <<EOF
+sudo tee /etc/systemd/system/proxmox-sdk.service <<EOF
 [Unit]
 Description=Proxmox OpenAPI Gateway
 After=network.target
@@ -332,12 +332,12 @@ After=network.target
 Type=simple
 User=proxmox-api
 Group=proxmox-api
-WorkingDirectory=/opt/proxmox-openapi
+WorkingDirectory=/opt/proxmox-sdk
 Environment="PROXMOX_API_MODE=real"
 Environment="PROXMOX_API_URL=https://pve.example.com:8006"
 Environment="PROXMOX_API_TOKEN_ID=automation@pam!gateway"
-EnvironmentFile=/etc/proxmox-openapi/env
-ExecStart=/usr/local/bin/uvicorn proxmox_openapi.main:app --host 0.0.0.0 --port 8000
+EnvironmentFile=/etc/proxmox-sdk/env
+ExecStart=/usr/local/bin/uvicorn proxmox_sdk.main:app --host 0.0.0.0 --port 8000
 Restart=always
 
 [Install]
@@ -345,15 +345,15 @@ WantedBy=multi-user.target
 EOF
 
 # Store secret in protected file
-sudo mkdir -p /etc/proxmox-openapi
-sudo tee /etc/proxmox-openapi/env <<EOF
+sudo mkdir -p /etc/proxmox-sdk
+sudo tee /etc/proxmox-sdk/env <<EOF
 PROXMOX_API_TOKEN_SECRET=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 EOF
-sudo chmod 600 /etc/proxmox-openapi/env
+sudo chmod 600 /etc/proxmox-sdk/env
 
 # Enable and start
-sudo systemctl enable proxmox-openapi
-sudo systemctl start proxmox-openapi
+sudo systemctl enable proxmox-sdk
+sudo systemctl start proxmox-sdk
 ```
 
 ### Behind Reverse Proxy (nginx)

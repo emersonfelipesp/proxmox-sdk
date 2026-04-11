@@ -2,7 +2,7 @@
   "meta": {
     "generated_at": "2026-04-05T01:14:34.729455+00:00",
     "proxmox_invocation": [
-      "/root/nms/proxmox-openapi/.venv/bin/proxmox"
+      "/root/nms/proxmox-sdk/.venv/bin/proxmox"
     ]
   },
   "runs": [

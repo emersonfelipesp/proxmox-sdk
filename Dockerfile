@@ -22,7 +22,7 @@ RUN curl -fsSL -o /usr/local/bin/mkcert \
 
 # Build from the local repository so the image always matches the checked-out commit.
 COPY README.md pyproject.toml ./
-COPY proxmox_openapi ./proxmox_openapi
+COPY proxmox_sdk ./proxmox_sdk
 
 RUN uv venv --seed /app/.venv && \
     /app/.venv/bin/python -m pip install --upgrade pip && \
@@ -40,9 +40,9 @@ WORKDIR /app
 ENV PATH="/app/.venv/bin:$PATH" \
     PORT=8000 \
     PYTHONUNBUFFERED=1 \
-    APP_MODULE=proxmox_openapi.main:app
+    APP_MODULE=proxmox_sdk.main:app
 
-# The code in proxmox_openapi uses main:create_app
+# The code in proxmox_sdk uses main:create_app
 # We use main:app (which is app = create_app()) to avoid factory issues.
 
 COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
@@ -75,15 +75,15 @@ RUN apk add --no-cache \
  && rm -f /etc/nginx/conf.d/default.conf
 
 COPY --from=builder /usr/local/bin/mkcert /usr/local/bin/mkcert
-COPY docker/nginx/proxmox-openapi-https.conf.template /etc/proxmox-openapi/nginx-https.conf.template
-COPY docker/nginx/proxmox-openapi-map.conf /etc/nginx/http.d/proxmox-openapi-map.conf
+COPY docker/nginx/proxmox-sdk-https.conf.template /etc/proxmox-sdk/nginx-https.conf.template
+COPY docker/nginx/proxmox-sdk-map.conf /etc/nginx/http.d/proxmox-sdk-map.conf
 COPY docker/supervisor/supervisord.conf /etc/supervisor/supervisord.conf
-COPY docker/supervisor/proxmox-openapi.conf /etc/supervisor/conf.d/proxmox-openapi.conf
+COPY docker/supervisor/proxmox-sdk.conf /etc/supervisor/conf.d/proxmox-sdk.conf
 COPY docker/entrypoint-nginx.sh /usr/local/bin/docker-entrypoint-nginx.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint-nginx.sh \
  && mkdir -p /certs /var/log/supervisor /var/run/supervisor /var/lib/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d /etc/nginx/http.d \
- && chown -R appuser:appgroup /certs /var/log/supervisor /var/run/supervisor /etc/proxmox-openapi /etc/supervisor /var/lib/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d /etc/nginx/http.d \
+ && chown -R appuser:appgroup /certs /var/log/supervisor /var/run/supervisor /etc/proxmox-sdk /etc/supervisor /var/lib/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d /etc/nginx/http.d \
  && sed -i 's/user nginx;/#user nginx;/' /etc/nginx/nginx.conf \
  && sed -i 's/pid \/run\/nginx.pid;/pid \/var\/run\/nginx\/nginx.pid;/' /etc/nginx/nginx.conf \
  && chmod -R 777 /var/lib/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d /etc/nginx/http.d

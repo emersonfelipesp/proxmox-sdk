@@ -47,7 +47,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
 ## Phase 5: Advanced Features - COMPLETE ✓
 
 ### 5.1 Shell Completion System
-- **File**: `proxmox_openapi/proxmox_cli/completion.py`
+- **File**: `proxmox_sdk/proxmox_cli/completion.py`
 - **Features**:
   - Bash completion script generation
   - Zsh completion script generation
@@ -60,7 +60,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   ```
 
 ### 5.2 Batch Operations
-- **File**: `proxmox_openapi/proxmox_cli/batch.py`
+- **File**: `proxmox_sdk/proxmox_cli/batch.py`
 - **Features**:
   - Execute multiple operations from JSON files
   - Dry-run mode for preview without execution
@@ -81,7 +81,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   ```
 
 ### 5.3 Response Caching
-- **File**: `proxmox_openapi/proxmox_cli/cache.py`
+- **File**: `proxmox_sdk/proxmox_cli/cache.py`
 - **Features**:
   - TTL-based caching (default 5 minutes)
   - Automatic cache invalidation on write operations
@@ -93,7 +93,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   - `CacheableSDKBridge`: Transparent caching wrapper
 
 ### 5.4 Performance Profiling
-- **File**: `proxmox_openapi/proxmox_cli/performance.py`
+- **File**: `proxmox_sdk/proxmox_cli/performance.py`
 - **Features**:
   - Benchmark individual operations
   - Multi-iteration performance testing
@@ -115,7 +115,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   ```
 
 ### 5.5 Configuration Management Commands
-- **File**: `proxmox_openapi/proxmox_cli/config_commands.py`
+- **File**: `proxmox_sdk/proxmox_cli/config_commands.py`
 - **Commands**:
   - `config-list`: Display all profiles
   - `config-show`: Show profile details
@@ -129,7 +129,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   - SSL verification, timeout settings
 
 ### 5.6 Output Themes
-- **File**: `proxmox_openapi/proxmox_cli/themes/themes.py`
+- **File**: `proxmox_sdk/proxmox_cli/themes/themes.py`
 - **Built-in Themes**:
   - `dark`: Dark terminal theme with bright colors
   - `light`: Light theme with muted colors
@@ -140,7 +140,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   - `list_themes()`: Get available theme names
 
 ### 5.7 Error Suggestions
-- **File**: `proxmox_openapi/proxmox_cli/error_suggestions.py`
+- **File**: `proxmox_sdk/proxmox_cli/error_suggestions.py`
 - **Classes**: `ErrorSuggester` with methods:
   - `suggest_for_path_error()`: Suggest similar paths
   - `suggest_for_auth_error()`: Suggest auth fixes
@@ -155,7 +155,7 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
 ## Phase 6: Final Polish & Release - COMPLETE ✓
 
 ### 6.1 Installation Script
-- **File**: `proxmox_openapi/proxmox_cli/install.py`
+- **File**: `proxmox_sdk/proxmox_cli/install.py`
 - **Functionality**:
   - Automated installation with dependency verification
   - Development environment setup
@@ -163,11 +163,11 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
   - CLI entry point registration
 - **Usage**:
   ```bash
-  python -m proxmox_openapi.proxmox_cli.install
+  python -m proxmox_sdk.proxmox_cli.install
   ```
 
 ### 6.2 Release Script
-- **File**: `proxmox_openapi/proxmox_cli/release.py`
+- **File**: `proxmox_sdk/proxmox_cli/release.py`
 - **Features**:
   - Pre-release checks (tests, linting, type checking)
   - Version extraction from pyproject.toml
@@ -237,14 +237,14 @@ Successfully completed comprehensive implementation of Phases 4-6 for Proxmox CL
 
 ### Module Imports Verification
 ```python
-✓ proxmox_openapi.proxmox_cli.cli
-✓ proxmox_openapi.proxmox_cli.batch
-✓ proxmox_openapi.proxmox_cli.config_commands
-✓ proxmox_openapi.proxmox_cli.completion
-✓ proxmox_openapi.proxmox_cli.performance
-✓ proxmox_openapi.proxmox_cli.cache
-✓ proxmox_openapi.proxmox_cli.error_suggestions
-✓ proxmox_openapi.proxmox_cli.themes
+✓ proxmox_sdk.proxmox_cli.cli
+✓ proxmox_sdk.proxmox_cli.batch
+✓ proxmox_sdk.proxmox_cli.config_commands
+✓ proxmox_sdk.proxmox_cli.completion
+✓ proxmox_sdk.proxmox_cli.performance
+✓ proxmox_sdk.proxmox_cli.cache
+✓ proxmox_sdk.proxmox_cli.error_suggestions
+✓ proxmox_sdk.proxmox_cli.themes
 ```
 
 ## Feature Hierarchy

@@ -60,7 +60,7 @@ curl -X POST "https://pve.example.com:8006/api2/json/access/users/automation@pve
 ### Step 2: Use API Token in SDK
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -87,7 +87,7 @@ Then load in code:
 
 ```python
 import os
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host=os.getenv("PROXMOX_HOST"),
@@ -122,7 +122,7 @@ Load in code:
 ```python
 import json
 from pathlib import Path
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 creds = json.loads(Path.home().joinpath(".proxmox/credentials.json").read_text())
 
@@ -149,7 +149,7 @@ Then load from mounted secret:
 
 ```python
 import json
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 creds = json.loads(Path("/var/run/secrets/proxmox-credentials").read_text())
 
@@ -179,7 +179,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install SDK
-        run: pip install proxmox-openapi
+        run: pip install proxmox-sdk
 
       - name: Deploy VM
         env:
@@ -191,7 +191,7 @@ jobs:
           python -c "
           import asyncio
           import os
-          from proxmox_openapi import ProxmoxSDK
+          from proxmox_sdk import ProxmoxSDK
 
           async def main():
               async with ProxmoxSDK(
@@ -220,7 +220,7 @@ Simple but less secure. Use for manual scripts or testing only.
 ### Basic Usage
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -234,7 +234,7 @@ async with ProxmoxSDK(
 
 ```python
 import getpass
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -248,7 +248,7 @@ async with ProxmoxSDK(
 
 ```python
 import os
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -271,13 +271,13 @@ Connect via SSH instead of HTTPS. Useful for remote automation or when HTTPS is 
 pip install paramiko
 
 # Or install with SSH extra
-pip install proxmox-openapi[ssh]
+pip install proxmox-sdk[ssh]
 ```
 
 ### SSH Key-Based Auth
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -291,7 +291,7 @@ async with ProxmoxSDK(
 ### SSH with Password
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -307,7 +307,7 @@ async with ProxmoxSDK(
 Enable SSH agent forwarding (uses your local agent):
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -321,7 +321,7 @@ async with ProxmoxSDK(
 ### SSH with Custom Identity File
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -337,7 +337,7 @@ async with ProxmoxSDK(
 ```python
 # proxmox_plugin.py
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 class ProxmoxPlugin:
     def __init__(self, host, user, key_file):
@@ -375,7 +375,7 @@ Use when running scripts **directly on a Proxmox host**. No authentication requi
 ### Usage
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     backend="local",
@@ -389,7 +389,7 @@ async with ProxmoxSDK(
 ```python
 # Run this script on the Proxmox host itself
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def monitor_nodes():
     async with ProxmoxSDK(backend="local", service="PVE") as proxmox:
@@ -419,7 +419,7 @@ If your Proxmox account has 2FA enabled:
 ### Use TOTP with SDK
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async with ProxmoxSDK(
     host="pve.example.com",
@@ -442,7 +442,7 @@ pip install pyotp
 ```python
 import asyncio
 import pyotp
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def with_dynamic_totp():
     # Your TOTP secret (from setup QR code)
@@ -486,7 +486,7 @@ async def batch_operations():
 ### Sync Wrapper for Scripts
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 def automation_script():
     with ProxmoxSDK.sync(
@@ -505,7 +505,7 @@ def automation_script():
 ### Synchronous Context Manager with Error Handling
 
 ```python
-from proxmox_openapi import ProxmoxSDK, AuthenticationError, ResourceException
+from proxmox_sdk import ProxmoxSDK, AuthenticationError, ResourceException
 
 try:
     with ProxmoxSDK.sync(
@@ -576,7 +576,7 @@ Set up quarterly rotation in your automation:
 
 ```python
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def rotate_token():
     async with ProxmoxSDK(

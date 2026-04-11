@@ -9,8 +9,8 @@ Demonstrates:
 
 import asyncio
 
-from proxmox_openapi.sdk import ProxmoxSDK
-from proxmox_openapi.sdk.exceptions import ResourceException
+from proxmox_sdk.sdk import ProxmoxSDK
+from proxmox_sdk.sdk.exceptions import ResourceException
 
 
 async def main() -> None:

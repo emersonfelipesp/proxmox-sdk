@@ -1,6 +1,6 @@
 import pytest
 
-from proxmox_openapi.proxmox_codegen.security import (
+from proxmox_sdk.proxmox_codegen.security import (
     SSRFProtectionError,
     validate_source_url,
     validate_version_tag,

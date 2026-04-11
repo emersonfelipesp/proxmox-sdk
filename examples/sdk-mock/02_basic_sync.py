@@ -7,7 +7,7 @@ Demonstrates:
 - Same API as async version but blocks
 """
 
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 
 def main() -> None:

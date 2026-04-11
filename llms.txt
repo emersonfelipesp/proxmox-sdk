@@ -1,4 +1,4 @@
-# proxmox-openapi - LLM Project Guide
+# proxmox-sdk - LLM Project Guide
 
 Schema-driven FastAPI package for Proxmox VE API workflows.
 
@@ -6,7 +6,7 @@ This guide is for LLMs, coding agents, and automation tools that need reliable c
 
 ## Project Summary
 
-proxmox-openapi provides a dual-mode API server:
+proxmox-sdk provides a dual-mode API server:
 
 1. Mock mode (default): generated Proxmox-like endpoints with in-memory CRUD and schema validation.
 2. Real mode: validated proxy to a real Proxmox VE API server.
@@ -21,7 +21,7 @@ Core capabilities:
 
 ## Package Identity
 
-- Package name: proxmox-openapi
+- Package name: proxmox-sdk
 - Current version: 0.0.1
 - Python: >= 3.11
 - License: MIT
@@ -57,28 +57,28 @@ Behavior:
 
 ## Key Entry Points
 
-- proxmox_openapi/main.py
+- proxmox_sdk/main.py
   - Main app with mode switching.
-- proxmox_openapi/mock_main.py
+- proxmox_sdk/mock_main.py
   - Mock-only server entrypoint.
-- proxmox_openapi/mock/routes.py
+- proxmox_sdk/mock/routes.py
   - Dynamic mock route registration and mutation logic.
-- proxmox_openapi/mock/state.py
+- proxmox_sdk/mock/state.py
   - Shared in-memory state store.
-- proxmox_openapi/mock/schema_helpers.py
+- proxmox_sdk/mock/schema_helpers.py
   - Schema-based seeded value generation and merge helpers.
-- proxmox_openapi/proxmox/client.py
+- proxmox_sdk/proxmox/client.py
   - Real Proxmox API client.
-- proxmox_openapi/proxmox/routes.py
+- proxmox_sdk/proxmox/routes.py
   - Real mode route registration.
-- proxmox_openapi/proxmox_codegen/pipeline.py
+- proxmox_sdk/proxmox_codegen/pipeline.py
   - Code generation pipeline orchestration.
 
 ## Repository Layout (high-value paths)
 
-- proxmox_openapi/
+- proxmox_sdk/
   - Runtime package implementation.
-- proxmox_openapi/generated/proxmox/latest/
+- proxmox_sdk/generated/proxmox/latest/
   - Package-bundled generated schema artifacts.
 - generated/proxmox/latest/
   - Top-level generated schema artifacts used in development workflows.
@@ -139,9 +139,9 @@ Custom data override:
 
 Defined in pyproject.toml:
 
-- proxmox-openapi-codegen
+- proxmox-sdk-codegen
   - Runs code generation tooling.
-- proxmox-openapi-mock
+- proxmox-sdk-mock
   - Runs standalone mock server.
 
 ## Developer Commands
@@ -149,7 +149,7 @@ Defined in pyproject.toml:
 Install and run:
 
 - uv sync --extra test
-- uvicorn proxmox_openapi.main:app --reload
+- uvicorn proxmox_sdk.main:app --reload
 
 Quality checks:
 

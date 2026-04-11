@@ -1,6 +1,6 @@
 # Using the Proxmox SDK with Mock Data
 
-The `proxmox-openapi` SDK provides built-in mock support for **zero-setup testing and development** — no real Proxmox server required!
+The `proxmox-sdk` SDK provides built-in mock support for **zero-setup testing and development** — no real Proxmox server required!
 
 ---
 
@@ -9,7 +9,7 @@ The `proxmox-openapi` SDK provides built-in mock support for **zero-setup testin
 ### Async Usage
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 # Create a mock SDK instance
 async with ProxmoxSDK.mock() as proxmox:
@@ -29,7 +29,7 @@ async with ProxmoxSDK.mock() as proxmox:
 ### Sync Usage (No async/await)
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 # Create a mock SDK instance (blocking)
 with ProxmoxSDK.sync_mock() as proxmox:
@@ -60,7 +60,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 ### Async with Context Manager (Recommended)
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 async with ProxmoxSDK.mock() as proxmox:
     # proxmox is the root ProxmoxResource
@@ -72,7 +72,7 @@ async with ProxmoxSDK.mock() as proxmox:
 ### Async Manual Lifecycle
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 proxmox_sdk = ProxmoxSDK.mock()
 proxmox = proxmox_sdk._root  # Access the root resource
@@ -86,7 +86,7 @@ finally:
 ### Sync with Context Manager (Recommended)
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 with ProxmoxSDK.sync_mock() as proxmox:
     nodes = proxmox.nodes.get()
@@ -98,7 +98,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 ### Sync Manual Lifecycle
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 proxmox = ProxmoxSDK.sync_mock()
 
@@ -116,7 +116,7 @@ finally:
 ### Listing Resources
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 with ProxmoxSDK.sync_mock() as proxmox:
     # List nodes
@@ -193,7 +193,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 Control which Proxmox OpenAPI schema to use:
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 # Use latest version (default)
 async with ProxmoxSDK.mock() as proxmox:
@@ -217,7 +217,7 @@ with ProxmoxSDK.sync_mock(schema_version="8.0") as proxmox:
 Create mock instances for different Proxmox services:
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 # Proxmox VE (default)
 async with ProxmoxSDK.mock(service="PVE") as proxmox:
@@ -242,7 +242,7 @@ async with ProxmoxSDK.mock(service="PBS") as proxmox:
 
 ```python
 import pytest
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 @pytest.mark.asyncio
 async def test_node_listing():
@@ -341,8 +341,8 @@ For persistent mock data across sessions, see [Custom Mock Data (FastAPI Mode)](
 The SDK raises `ResourceException` for API errors:
 
 ```python
-from proxmox_openapi.sdk import ProxmoxSDK
-from proxmox_openapi.sdk.exceptions import ResourceException
+from proxmox_sdk.sdk import ProxmoxSDK
+from proxmox_sdk.sdk.exceptions import ResourceException
 
 with ProxmoxSDK.sync_mock() as proxmox:
     try:

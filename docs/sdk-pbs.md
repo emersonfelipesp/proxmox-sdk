@@ -41,7 +41,7 @@ All examples below assume a connection object named `pbs`. Replace credentials w
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def main():
         async with ProxmoxSDK(
@@ -60,7 +60,7 @@ All examples below assume a connection object named `pbs`. Replace credentials w
 === "Sync (Blocking)"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     with ProxmoxSDK.sync(
         host="pbs.example.com",
@@ -81,7 +81,7 @@ API tokens are preferred for automation: they do not expire and support fine-gra
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def main():
         async with ProxmoxSDK(
@@ -101,7 +101,7 @@ API tokens are preferred for automation: they do not expire and support fine-gra
 === "Sync (Blocking)"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     with ProxmoxSDK.sync(
         host="pbs.example.com",
@@ -296,8 +296,8 @@ Garbage collection (GC) reclaims disk space from deleted or pruned backup chunks
 === "Async"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async def run_garbage_collection(store: str):
         async with ProxmoxSDK(
@@ -326,8 +326,8 @@ Garbage collection (GC) reclaims disk space from deleted or pruned backup chunks
 === "Sync"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     with ProxmoxSDK.sync(
         host="pbs.example.com",
@@ -349,8 +349,8 @@ Verification confirms that all backup chunks for a datastore are intact and read
 === "Async"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async def verify_datastore(store: str, ignore_verified: bool = True):
         """Run a verification job on a PBS datastore."""
@@ -380,7 +380,7 @@ Verification confirms that all backup chunks for a datastore are intact and read
 === "Sync"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     with ProxmoxSDK.sync(
         host="pbs.example.com",
@@ -404,8 +404,8 @@ Pruning removes old snapshots from a datastore according to a retention policy. 
 === "Async"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async def prune_vm_backups(store: str, vmid: int):
         """Prune backups for a specific VM, keeping recent copies."""
@@ -443,7 +443,7 @@ Pruning removes old snapshots from a datastore according to a retention policy. 
 === "Sync"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     with ProxmoxSDK.sync(
         host="pbs.example.com",
@@ -604,7 +604,7 @@ Use the built-in `Tasks` tool to poll until a task finishes:
 === "Async"
 
     ```python
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk.sdk.tools import Tasks
 
     async with ProxmoxSDK(..., service="PBS", port=8007) as pbs:
         # Start a GC job
@@ -716,8 +716,8 @@ Run garbage collection, verify, and prune in sequence for all datastores:
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async def maintenance_all_datastores():
         """Run GC → verify → prune on every datastore."""
@@ -793,7 +793,7 @@ Generate a summary of datastore usage and snapshot counts:
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def datastore_health_report():
         async with ProxmoxSDK(

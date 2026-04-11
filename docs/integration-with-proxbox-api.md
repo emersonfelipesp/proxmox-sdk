@@ -1,6 +1,6 @@
 # Integration: proxbox-api
 
-This page documents exactly how `proxbox-api` consumes the `proxmox-openapi` SDK — with real code snippets and explanations. It is a practical guide for anyone building a similar integration or extending the existing one.
+This page documents exactly how `proxbox-api` consumes the `proxmox-sdk` SDK — with real code snippets and explanations. It is a practical guide for anyone building a similar integration or extending the existing one.
 
 !!! info "Code source"
     All snippets are taken directly from the `proxbox-api` codebase at `/root/nms/proxbox-api/`. File paths and line references are accurate at the time of writing.
@@ -9,14 +9,14 @@ This page documents exactly how `proxbox-api` consumes the `proxmox-openapi` SDK
 
 ## Overview
 
-`proxbox-api` sits between NetBox and Proxmox VE. It uses the `proxmox-openapi` SDK to query Proxmox data, transforms that data into NetBox objects, and streams sync progress back to the plugin.
+`proxbox-api` sits between NetBox and Proxmox VE. It uses the `proxmox-sdk` SDK to query Proxmox data, transforms that data into NetBox objects, and streams sync progress back to the plugin.
 
 ```mermaid
 flowchart TD
     NB["NetBox Plugin\n(netbox-proxbox)"]
     API["proxbox-api\n(FastAPI)"]
     SESSION["ProxmoxSession\nsession wrapper"]
-    SDK["ProxmoxSDK\nproxmox-openapi"]
+    SDK["ProxmoxSDK\nproxmox-sdk"]
     BACK["HttpsBackend\nor MockBackend"]
     PVE["Proxmox VE\nREST API :8006"]
 
@@ -34,7 +34,7 @@ flowchart TD
 `proxbox-api` does not call `ProxmoxSDK()` directly. Instead it goes through a compatibility wrapper that auto-detects whether to use mock mode:
 
 ```python title="proxbox_api/session/proxmox.py"
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 
 def _should_use_mock() -> bool:
@@ -396,7 +396,7 @@ def _dual_mode(async_fn):
 `proxbox-api` catches `ResourceException` from the SDK and wraps it in `ProxboxException` to add structured error detail for SSE/JSON responses:
 
 ```python title="proxbox_api/routes/proxmox/__init__.py"
-from proxmox_openapi.sdk.exceptions import ResourceException
+from proxmox_sdk.sdk.exceptions import ResourceException
 
 # Version check endpoint
 try:
@@ -451,7 +451,7 @@ For integration tests, `proxbox-api` ships `MockProxmoxContext` in `proxbox_api/
 
 ```python title="proxbox_api/testing/proxmox_mock.py (pattern)"
 async def __aenter__(self) -> Any:
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
     backend, host = self._detect_backend()   # "mock" if TESTING=1 or env var set
     self._sdk = ProxmoxSDK(host=host, backend=backend, user="root@pam", password="test")
     return self._sdk

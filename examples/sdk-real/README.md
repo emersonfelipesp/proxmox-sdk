@@ -51,7 +51,7 @@ Here you'll find practical examples for real-world use cases:
 ### With Mock Backend (No credentials)
 
 ```bash
-cd /root/nms/proxmox-openapi
+cd /root/nms/proxmox-sdk
 python examples/sdk-real/01_authentication.py
 ```
 
@@ -94,7 +94,7 @@ python 05_advanced_operations.py
 
 ```python
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def main():
     async with ProxmoxSDK.mock() as proxmox:
@@ -108,7 +108,7 @@ asyncio.run(main())
 ### Sync (Blocking)
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 with ProxmoxSDK.sync(mock=True) as proxmox:
     nodes = proxmox.nodes.get()

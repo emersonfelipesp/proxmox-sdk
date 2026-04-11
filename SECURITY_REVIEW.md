@@ -1,4 +1,4 @@
-# Security Review: proxmox-openapi
+# Security Review: proxmox-sdk
 
 **Date:** April 2026
 **Status:** Post-hardening review with 10 initial fixes applied
@@ -16,7 +16,7 @@ This document outlines remaining security vulnerabilities and issues identified 
 ### 1. SSRF Vulnerability in /codegen/generate Endpoint
 
 **Severity:** CRITICAL
-**File:** `proxmox_openapi/routes/codegen.py` (lines 17-58) and `proxmox_openapi/proxmox_codegen/crawler.py` (line 54)
+**File:** `proxmox_sdk/routes/codegen.py` (lines 17-58) and `proxmox_sdk/proxmox_codegen/crawler.py` (line 54)
 **Status:** ⚠️ NOT FIXED
 
 **Problem:**
@@ -83,7 +83,7 @@ If the codegen endpoint is only used by trusted administrators in development, r
 ### 2. Missing SSRF Protection on Custom Version Tags
 
 **Severity:** CRITICAL
-**File:** `proxmox_openapi/proxmox_codegen/pipeline.py` (lines 71-73)
+**File:** `proxmox_sdk/proxmox_codegen/pipeline.py` (lines 71-73)
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -118,7 +118,7 @@ def _validate_source_for_version_tag(source_url: str, version_tag: str) -> None:
 ### 3. Missing CORS Configuration
 
 **Severity:** HIGH
-**File:** `proxmox_openapi/main.py`
+**File:** `proxmox_sdk/main.py`
 **Status:** ⚠️ NOT FIXED
 
 **Problem:**
@@ -155,7 +155,7 @@ CORS_ORIGINS=https://your-domain.com,https://api.your-domain.com
 ### 4. Directory Traversal in version_tag Parameter
 
 **Severity:** HIGH
-**File:** `proxmox_openapi/proxmox_codegen/pipeline.py` (line 220)
+**File:** `proxmox_sdk/proxmox_codegen/pipeline.py` (line 220)
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -202,7 +202,7 @@ cleaned_version_tag = _validate_version_tag(version_tag)
 ### 5. Unauthenticated Access to /codegen/generate Endpoint
 
 **Severity:** HIGH
-**File:** `proxmox_openapi/routes/codegen.py`
+**File:** `proxmox_sdk/routes/codegen.py`
 **Status:** ⚠️ NOT FIXED
 
 **Problem:**
@@ -247,7 +247,7 @@ if os.environ.get("PROXMOX_API_MODE") != "development":
 ### 6. No Rate Limiting on Resource-Intensive Endpoints
 
 **Severity:** MEDIUM
-**File:** `proxmox_openapi/routes/codegen.py`, `proxmox_openapi/routes/mock.py`
+**File:** `proxmox_sdk/routes/codegen.py`, `proxmox_sdk/routes/mock.py`
 **Status:** ⚠️ NOT FIXED
 
 **Problem:**
@@ -279,7 +279,7 @@ dependencies = [
 ### 7. Proxy Authentication Credentials in Environment Variables
 
 **Severity:** MEDIUM
-**File:** `proxmox_openapi/sdk/backends/https.py` and proxy handling
+**File:** `proxmox_sdk/sdk/backends/https.py` and proxy handling
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -317,7 +317,7 @@ def load_proxy_config() -> dict | None:
 ### 8. Missing Authentication on Mock Endpoints
 
 **Severity:** MEDIUM
-**File:** `proxmox_openapi/routes/mock.py`
+**File:** `proxmox_sdk/routes/mock.py`
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -349,7 +349,7 @@ Error responses may leak internal structure (file paths, Python stack traces, in
 **Example:**
 ```
 $ curl https://api.example.com/codegen/generate?source_url=invalid
-{"detail": "Traceback (most recent call last):\n  File \"/root/nms/proxmox-openapi/..."}
+{"detail": "Traceback (most recent call last):\n  File \"/root/nms/proxmox-sdk/..."}
 ```
 
 **Recommended Fix:**
@@ -379,7 +379,7 @@ if os.environ.get("DEBUG", "false").lower() == "true":
 ### 10. Credentials Visible in Environment Variables
 
 **Severity:** MEDIUM
-**File:** `proxmox_openapi/main.py` and `proxmox_openapi/proxmox/config.py`
+**File:** `proxmox_sdk/main.py` and `proxmox_sdk/proxmox/config.py`
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -416,7 +416,7 @@ logger.warning("Sensitive environment variables detected. Consider using .env fi
 ### 11. No Timeout on Playwright Browser Operations
 
 **Severity:** LOW
-**File:** `proxmox_openapi/proxmox_codegen/crawler.py` (line 56)
+**File:** `proxmox_sdk/proxmox_codegen/crawler.py` (line 56)
 **Status:** ⚠️ NOT FIXED
 
 **Problem:**
@@ -433,7 +433,7 @@ page.wait_for_selector("nav", timeout=10_000)  # 10 seconds
 ### 12. No Validation of JSON in Config Files
 
 **Severity:** LOW
-**File:** `proxmox_openapi/proxmox_cli/config.py` (line 104)
+**File:** `proxmox_sdk/proxmox_cli/config.py` (line 104)
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -463,7 +463,7 @@ def load_config() -> ConfigManager:
 ### 13. Potential Symlink Attack on Config Directory
 
 **Severity:** LOW
-**File:** `proxmox_openapi/proxmox_cli/config.py` (lines 200-220)
+**File:** `proxmox_sdk/proxmox_cli/config.py` (lines 200-220)
 **Status:** ⚠️ PARTIALLY MITIGATED
 
 **Problem:**
@@ -527,7 +527,7 @@ async def generate_viewer_codegen_artifacts(request: Request, ...):
 ### 15. No Health Check Authentication
 
 **Severity:** LOW
-**File:** `proxmox_openapi/main.py` (lines 61-62)
+**File:** `proxmox_sdk/main.py` (lines 61-62)
 **Status:** ⚠️ NOT FIXED
 
 **Problem:**

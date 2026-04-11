@@ -1515,11 +1515,11 @@ except ResourceException as e:
 
 ---
 
-## Comparison with proxmox-openapi
+## Comparison with proxmox-sdk
 
 ### Architectural Approach
 
-| Aspect | proxmoxer | proxmox-openapi |
+| Aspect | proxmoxer | proxmox-sdk |
 |--------|-----------|-----------------|
 | **API Discovery** | Dynamic (runtime) | Static (code generation) |
 | **Type Safety** | Minimal (duck typing) | Strong (Pydantic models) |
@@ -1538,7 +1538,7 @@ except ResourceException as e:
 - Minimal code, maximum flexibility
 - Trade-off: limited type checking
 
-**proxmox-openapi**:
+**proxmox-sdk**:
 - Compile-time code generation from OpenAPI spec
 - Type-safe, IDE-friendly
 - Explicit models and operations
@@ -1554,7 +1554,7 @@ except ResourceException as e:
 - Dynamic/exploratory API usage
 - Legacy Proxmox versions without OpenAPI
 
-**Choose proxmox-openapi when:**
+**Choose proxmox-sdk when:**
 - Building production applications
 - Type safety is critical
 - Team development (autocomplete helps onboarding)
@@ -1566,10 +1566,10 @@ except ResourceException as e:
 
 **Complementary Usage:**
 
-1. **proxmoxer for runtime, proxmox-openapi for types**:
+1. **proxmoxer for runtime, proxmox-sdk for types**:
    ```python
-   # Use proxmox-openapi models for validation
-   from proxmox_openapi.models import VMConfig
+   # Use proxmox-sdk models for validation
+   from proxmox_sdk.models import VMConfig
    from proxmoxer import ProxmoxAPI
 
    config = VMConfig(name="test", memory=4096, cores=2)
@@ -1577,21 +1577,21 @@ except ResourceException as e:
    proxmox.nodes('pve1').qemu.post(**config.dict())
    ```
 
-2. **proxmoxer for backends, proxmox-openapi for API**:
+2. **proxmoxer for backends, proxmox-sdk for API**:
    ```python
-   # Use proxmoxer's SSH backend with proxmox-openapi's models
+   # Use proxmoxer's SSH backend with proxmox-sdk's models
    # (would require adapter layer)
    ```
 
 3. **Testing and Development**:
    ```python
    # Use proxmoxer for quick tests/scripts
-   # Use proxmox-openapi for production code
+   # Use proxmox-sdk for production code
    ```
 
 ### Feature Matrix
 
-| Feature | proxmoxer | proxmox-openapi |
+| Feature | proxmoxer | proxmox-sdk |
 |---------|-----------|-----------------|
 | HTTPS Backend | ✅ | ✅ |
 | SSH Backends | ✅ (2 types) | ❌ |
@@ -1701,4 +1701,4 @@ except ResourceException as e:
 - Regular releases
 - MIT licensed (permissive)
 
-For projects requiring strong typing and IDE support, consider **proxmox-openapi** as a complementary or alternative approach. Both libraries can coexist and serve different use cases in the Proxmox ecosystem.
+For projects requiring strong typing and IDE support, consider **proxmox-sdk** as a complementary or alternative approach. Both libraries can coexist and serve different use cases in the Proxmox ecosystem.

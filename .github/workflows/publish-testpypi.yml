@@ -1,4 +1,4 @@
-name: Release proxmox-openapi
+name: Release proxmox-sdk
 
 on:
   release:
@@ -43,9 +43,9 @@ jobs:
           version = data['project']['version']
           event = os.getenv('GITHUB_EVENT_NAME', '')
           release_tag = os.getenv('RELEASE_TAG_NAME', '') or ''
-          if project_name != 'proxmox-openapi':
+          if project_name != 'proxmox-sdk':
               raise SystemExit(
-                  f'Expected project name proxmox-openapi, got {project_name!r}'
+                  f'Expected project name proxmox-sdk, got {project_name!r}'
               )
           if event == 'release' and release_tag != f'v{version}':
               raise SystemExit(
@@ -133,21 +133,21 @@ jobs:
           uv run ruff format --check .
 
       - name: Run ty type checks
-        run: uv run ty check proxmox_openapi tests --output-format concise
+        run: uv run ty check proxmox_sdk tests --output-format concise
 
       - name: Compile package
-        run: uv run python -m compileall proxmox_openapi
+        run: uv run python -m compileall proxmox_sdk
 
       - name: Import smoke checks
         run: |
-          uv run python -c "import proxmox_openapi.main"
-          uv run python -c "import proxmox_openapi.mock_main"
+          uv run python -c "import proxmox_sdk.main"
+          uv run python -c "import proxmox_sdk.mock_main"
 
       - name: Run test suite
-        run: uv run pytest -n auto --cov=proxmox_openapi --cov-report=term-missing --cov-report=xml tests
+        run: uv run pytest -n auto --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
 
   publish-docker:
-    name: publish proxmox-openapi Docker image
+    name: publish proxmox-sdk Docker image
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     needs: [prepare-release, validate-testpypi]
     runs-on: ubuntu-latest
@@ -177,10 +177,10 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
-            APP_MODULE=proxmox_openapi.mock_main:app
+            APP_MODULE=proxmox_sdk.mock_main:app
           tags: |
-            emersonfelipesp/proxmox-openapi:${{ needs.prepare-release.outputs.version }}
-            emersonfelipesp/proxmox-openapi:latest
+            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}
+            emersonfelipesp/proxmox-sdk:latest
 
   publish-pypi:
     name: publish to PyPI

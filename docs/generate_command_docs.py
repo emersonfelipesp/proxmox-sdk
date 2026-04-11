@@ -19,7 +19,7 @@ def main() -> int:
     parser.add_argument("--max-chars", type=int, default=120_000)
     args = parser.parse_args()
 
-    from proxmox_openapi.proxmox_cli.docgen_capture import (
+    from proxmox_sdk.proxmox_cli.docgen_capture import (
         generate_command_capture_docs,
         resolve_capture_paths,
     )

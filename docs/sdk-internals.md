@@ -1,12 +1,12 @@
 # SDK Internals
 
-This page explains how the `proxmox-openapi` SDK works under the hood — the attribute-based resource navigation engine, the backend abstraction layer, the two authentication strategies, and the performance patterns that make every part fast.
+This page explains how the `proxmox-sdk` SDK works under the hood — the attribute-based resource navigation engine, the backend abstraction layer, the two authentication strategies, and the performance patterns that make every part fast.
 
 ---
 
 ## Resource Navigation Engine
 
-The core of the SDK is `ProxmoxResource` in `proxmox_openapi/sdk/resource.py`. It implements a fluent builder pattern where every attribute access or call extends a URL path and returns a new resource — with zero actual HTTP traffic until you call an HTTP method.
+The core of the SDK is `ProxmoxResource` in `proxmox_sdk/sdk/resource.py`. It implements a fluent builder pattern where every attribute access or call extends a URL path and returns a new resource — with zero actual HTTP traffic until you call an HTTP method.
 
 ```mermaid
 flowchart LR
@@ -30,7 +30,7 @@ flowchart LR
 
 `ProxmoxResource` uses `__slots__` and overrides `__getattr__` so that every attribute that doesn't start with `_` creates a new resource with the attribute name appended to the path:
 
-```python title="proxmox_openapi/sdk/resource.py"
+```python title="proxmox_sdk/sdk/resource.py"
 class ProxmoxResource:
     __slots__ = ("_path", "_backend")
 
@@ -49,7 +49,7 @@ Each new `ProxmoxResource` shares the same `_backend` reference (no copy), so th
 
 Calling a resource adds a dynamic ID segment. The call accepts strings, ints, lists, and slash-separated strings:
 
-```python title="proxmox_openapi/sdk/resource.py"
+```python title="proxmox_sdk/sdk/resource.py"
 def __call__(
     self,
     resource_id: str | int | list | tuple | None = None,
@@ -83,7 +83,7 @@ proxmox.nodes(["pve1", "qemu", "100"]).config
 
 The internal `_url_join()` function uses `posixpath.join` with percent-encoding for path segments. It has a fast path that avoids `urlsplit`/`urlunsplit` for the common case of relative paths (no `://`):
 
-```python title="proxmox_openapi/sdk/resource.py"
+```python title="proxmox_sdk/sdk/resource.py"
 def _url_join(base: str, *args: str) -> str:
     if "://" not in base:
         return posixpath.join(base or "/", *[quote(str(a), safe="") for a in args])
@@ -97,7 +97,7 @@ def _url_join(base: str, *args: str) -> str:
 
 All five HTTP verbs plus two proxmoxer-compatible aliases are implemented on `ProxmoxResource`. Each method calls the backend's `request()` with the correct verb:
 
-```python title="proxmox_openapi/sdk/resource.py"
+```python title="proxmox_sdk/sdk/resource.py"
 async def get(self, *path_args: str, **params: Any) -> Any:
     resource = self._extend(*path_args)
     return await resource._backend.request(
@@ -208,7 +208,7 @@ sequenceDiagram
 
 The backend caches `(scheme, netloc, base_path)` in `__init__` to avoid parsing the base URL on every request:
 
-```python title="proxmox_openapi/sdk/backends/https.py"
+```python title="proxmox_sdk/sdk/backends/https.py"
 _parsed = urlsplit(self._base_url)
 self._base_scheme = _parsed.scheme
 self._base_netloc = _parsed.netloc
@@ -223,7 +223,7 @@ def _url_for(self, path: str) -> str:
 
 Proxmox API responses always wrap data in `{"data": ...}`. The backend extracts this automatically so callers receive the unwrapped value:
 
-```python title="proxmox_openapi/sdk/backends/https.py"
+```python title="proxmox_sdk/sdk/backends/https.py"
 async def _handle_response(self, resp, method, path) -> Any:
     raw = await resp.json(content_type=None)
     if resp.status >= 400:
@@ -248,7 +248,7 @@ The SDK provides two concrete `AuthStrategy` implementations that are selected a
 
 API token authentication is stateless — no pre-request HTTP call needed. `TokenAuth.build_headers()` returns an `Authorization` header with the `PVEAPIToken` scheme:
 
-```python title="proxmox_openapi/sdk/auth/token.py (pattern)"
+```python title="proxmox_sdk/sdk/auth/token.py (pattern)"
 # Header format: PVEAPIToken=user@realm!token-name=uuid
 headers["Authorization"] = f"PVEAPIToken={user}@{realm}!{token_name}={token_value}"
 ```
@@ -284,7 +284,7 @@ sequenceDiagram
 
 The backend factory in `ProxmoxSDK._create_backend()` decides which auth class to use based on which credentials are supplied:
 
-```python title="proxmox_openapi/sdk/api.py"
+```python title="proxmox_sdk/sdk/api.py"
 if token_name and token_value:
     auth = TokenAuth(user=user, token_name=token_name, token_value=token_value, ...)
 elif user and password:
@@ -299,10 +299,10 @@ else:
 
 The `MockBackend` implements `AbstractBackend` using an in-memory `SharedMemoryMockStore`. It loads the pre-generated Proxmox VE 8.1 OpenAPI schema and generates mock responses that satisfy the schema's property definitions.
 
-```python title="proxmox_openapi/sdk/api.py (class method)"
+```python title="proxmox_sdk/sdk/api.py (class method)"
 @classmethod
 def mock(cls, schema_version: str = "latest", service: str = "PVE") -> ProxmoxSDK:
-    from proxmox_openapi.sdk.backends.mock import MockBackend
+    from proxmox_sdk.sdk.backends.mock import MockBackend
     backend = MockBackend(schema_version=schema_version, api_path_prefix=svc.api_path_prefix)
     instance._root = ProxmoxResource(path=svc.api_path_prefix, backend=backend)
     return instance
@@ -331,7 +331,7 @@ Service selection determines which backends are available and which endpoints th
 
 ## Task Monitoring
 
-The SDK ships `proxmox_openapi.sdk.tools.tasks.Tasks` for polling Proxmox task UPIDs until they complete. The polling loop uses **exponential backoff** to avoid hammering the API:
+The SDK ships `proxmox_sdk.sdk.tools.tasks.Tasks` for polling Proxmox task UPIDs until they complete. The polling loop uses **exponential backoff** to avoid hammering the API:
 
 ```
 Poll interval: 1s → 2s → 4s → 8s → 16s → 30s (cap)
@@ -351,7 +351,7 @@ The `HttpsBackend` automatically detects file uploads when the `data` dict conta
 
 `SyncProxmoxSDK` wraps `ProxmoxSDK` with a dedicated `asyncio` event loop so that blocking (non-`async`) code can use the SDK:
 
-```python title="proxmox_openapi/sdk/sync.py (pattern)"
+```python title="proxmox_sdk/sdk/sync.py (pattern)"
 with ProxmoxSDK.sync(host="pve.example.com", user="admin@pam", password="secret") as proxmox:
     nodes = proxmox.nodes.get()       # blocks — no await needed
     vms = proxmox.nodes("pve1").qemu.get()

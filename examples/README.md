@@ -8,7 +8,7 @@ Production-ready examples demonstrating the Proxmox OpenAPI SDK for real-world u
 
 ```bash
 # Navigate to repository
-cd /root/nms/proxmox-openapi
+cd /root/nms/proxmox-sdk
 
 # Install dependencies
 pip install -e .
@@ -205,7 +205,7 @@ async with ProxmoxSDK(**config) as proxmox:
 
 ```python
 import asyncio
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 async def main():
     async with ProxmoxSDK(...) as proxmox:
@@ -217,7 +217,7 @@ asyncio.run(main())
 ### Sync Wrapper (Blocking)
 
 ```python
-from proxmox_openapi import ProxmoxSDK
+from proxmox_sdk import ProxmoxSDK
 
 with ProxmoxSDK.sync(...) as proxmox:
     nodes = proxmox.nodes.get()  # Blocking call
@@ -226,7 +226,7 @@ with ProxmoxSDK.sync(...) as proxmox:
 ### Error Handling
 
 ```python
-from proxmox_openapi import (
+from proxmox_sdk import (
     ProxmoxSDK,
     ResourceException,
     AuthenticationError,
@@ -244,7 +244,7 @@ except ResourceException as e:
 ### Task Monitoring
 
 ```python
-from proxmox_openapi.sdk.tools import Tasks
+from proxmox_sdk.sdk.tools import Tasks
 
 async with ProxmoxSDK(...) as proxmox:
     result = await proxmox.nodes("pve").qemu.post(vmid=100, name="vm")
@@ -289,7 +289,7 @@ For detailed information, see the SDK documentation:
 
 ## Troubleshooting
 
-### "ModuleNotFoundError: No module named 'proxmox_openapi'"
+### "ModuleNotFoundError: No module named 'proxmox_sdk'"
 
 Install the SDK:
 ```bash
@@ -335,6 +335,6 @@ Example naming convention:
 
 ## See Also
 
-- [proxmox-openapi Repository](https://github.com/emersonfelipesp/proxmox-openapi)
+- [proxmox-sdk Repository](https://github.com/emersonfelipesp/proxmox-sdk)
 - [Proxmox API Documentation](https://pve.proxmox.com/pve-docs/api-viewer/)
 - [Official Proxmox Documentation](https://pve.proxmox.com/wiki/)

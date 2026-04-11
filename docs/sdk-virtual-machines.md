@@ -25,7 +25,7 @@ All examples use this basic session setup. Adjust credentials as needed:
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def main():
         async with ProxmoxSDK(
@@ -43,7 +43,7 @@ All examples use this basic session setup. Adjust credentials as needed:
 === "Sync (Blocking)"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     with ProxmoxSDK.sync(
         host="pve.example.com",
@@ -390,8 +390,8 @@ VM creation and many other operations return a **Task ID** because they run asyn
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async with ProxmoxSDK(...) as proxmox:
         # Create VM (returns task)
@@ -420,8 +420,8 @@ VM creation and many other operations return a **Task ID** because they run asyn
 === "Sync"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
     import time
 
     with ProxmoxSDK.sync(...) as proxmox:
@@ -554,8 +554,8 @@ VM creation and many other operations return a **Task ID** because they run asyn
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async def create_vms_batch():
         """Create multiple VMs in parallel."""
@@ -603,7 +603,7 @@ VM creation and many other operations return a **Task ID** because they run asyn
 === "Async"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
     import asyncio
 
     async def vm_lifecycle_demo():
@@ -655,7 +655,7 @@ VM creation and many other operations return a **Task ID** because they run asyn
 === "Async"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
     import asyncio
 
     async def generate_inventory_report():

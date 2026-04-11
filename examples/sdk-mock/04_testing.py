@@ -9,7 +9,7 @@ Demonstrates:
 
 import asyncio
 
-from proxmox_openapi.sdk import ProxmoxSDK
+from proxmox_sdk.sdk import ProxmoxSDK
 
 
 async def test_node_listing() -> None:

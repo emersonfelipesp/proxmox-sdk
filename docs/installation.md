@@ -9,16 +9,16 @@
 
 ## Install from PyPI
 
-The easiest way to install proxmox-openapi:
+The easiest way to install proxmox-sdk:
 
 ```bash
-pip install proxmox-openapi
+pip install proxmox-sdk
 ```
 
 Or using `uv` (recommended for faster installation):
 
 ```bash
-uv pip install proxmox-openapi
+uv pip install proxmox-sdk
 ```
 
 ---
@@ -29,8 +29,8 @@ For development or to get the latest unreleased features:
 
 ```bash
 # Clone the repository
-git clone https://github.com/emersonfelipesp/proxmox-openapi.git
-cd proxmox-openapi
+git clone https://github.com/emersonfelipesp/proxmox-sdk.git
+cd proxmox-sdk
 
 # Install with uv (recommended)
 uv sync
@@ -56,8 +56,8 @@ All Docker images are **Alpine-based** (smaller footprint). Three variants are a
 Simplest option. No proxy in front, plain HTTP. Ideal for local development or behind your own reverse proxy.
 
 ```bash
-docker pull emersonfelipesp/proxmox-openapi:latest
-docker run -d -p 8000:8000 --name proxmox-openapi emersonfelipesp/proxmox-openapi:latest
+docker pull emersonfelipesp/proxmox-sdk:latest
+docker run -d -p 8000:8000 --name proxmox-sdk emersonfelipesp/proxmox-sdk:latest
 ```
 
 Service URL:
@@ -69,9 +69,9 @@ Service URL:
 nginx terminates HTTPS using auto-generated [mkcert](https://github.com/FiloSottile/mkcert) certificates and proxies to uvicorn inside the container.
 
 ```bash
-docker pull emersonfelipesp/proxmox-openapi:latest-nginx
-docker run -d -p 8443:8000 --name proxmox-openapi-nginx \
-  emersonfelipesp/proxmox-openapi:latest-nginx
+docker pull emersonfelipesp/proxmox-sdk:latest-nginx
+docker run -d -p 8443:8000 --name proxmox-sdk-nginx \
+  emersonfelipesp/proxmox-sdk:latest-nginx
 ```
 
 Service URL:
@@ -83,9 +83,9 @@ Service URL:
 [Granian](https://github.com/emmett-framework/granian) is a Rust-based ASGI server with native TLS and HTTP/2. A single process handles everything — no nginx or supervisord required.
 
 ```bash
-docker pull emersonfelipesp/proxmox-openapi:latest-granian
-docker run -d -p 8443:8000 --name proxmox-openapi-granian \
-  emersonfelipesp/proxmox-openapi:latest-granian
+docker pull emersonfelipesp/proxmox-sdk:latest-granian
+docker run -d -p 8443:8000 --name proxmox-sdk-granian \
+  emersonfelipesp/proxmox-sdk:latest-granian
 ```
 
 Service URL:
@@ -102,36 +102,36 @@ Available for the `nginx` and `granian` images:
 | `MKCERT_CERT_DIR` | `/certs` | Directory where certificates are stored |
 | `MKCERT_EXTRA_NAMES` | — | Extra SANs (comma or space separated), e.g. `proxmox-api.lan,10.0.0.5` |
 | `CAROOT` | — | Mount a volume here to persist the local CA across restarts |
-| `APP_MODULE` | `proxmox_openapi.mock_main:app` | ASGI app (change to `proxmox_openapi.main:app` for real mode) |
+| `APP_MODULE` | `proxmox_sdk.mock_main:app` | ASGI app (change to `proxmox_sdk.main:app` for real mode) |
 
 Example with extra SANs:
 
 ```bash
-docker run -d -p 8443:8000 --name proxmox-openapi-tls \
+docker run -d -p 8443:8000 --name proxmox-sdk-tls \
   -e MKCERT_EXTRA_NAMES='myhost.local,192.168.1.10' \
-  emersonfelipesp/proxmox-openapi:latest-nginx
+  emersonfelipesp/proxmox-sdk:latest-nginx
 ```
 
 Example with real Proxmox mode:
 
 ```bash
-docker run -d -p 8443:8000 --name proxmox-openapi-real \
-  -e APP_MODULE='proxmox_openapi.main:app' \
+docker run -d -p 8443:8000 --name proxmox-sdk-real \
+  -e APP_MODULE='proxmox_sdk.main:app' \
   -e PROXMOX_API_MODE=real \
   -e PROXMOX_URL=https://pve.example.com:8006 \
   -e PROXMOX_API_TOKEN=PVEAPIToken=user@pam!mytoken=your-secret \
-  emersonfelipesp/proxmox-openapi:latest-granian
+  emersonfelipesp/proxmox-sdk:latest-granian
 ```
 
 ### Build from source
 
 ```bash
-git clone https://github.com/emersonfelipesp/proxmox-openapi.git
-cd proxmox-openapi
+git clone https://github.com/emersonfelipesp/proxmox-sdk.git
+cd proxmox-sdk
 
-docker build -t proxmox-openapi:raw .                          # raw (default)
-docker build --target nginx -t proxmox-openapi:nginx .         # nginx
-docker build --target granian -t proxmox-openapi:granian .     # granian
+docker build -t proxmox-sdk:raw .                          # raw (default)
+docker build --target nginx -t proxmox-sdk:nginx .         # nginx
+docker build --target granian -t proxmox-sdk:granian .     # granian
 ```
 
 ---
@@ -140,10 +140,10 @@ docker build --target granian -t proxmox-openapi:granian .     # granian
 
 ```bash
 # Check installed version
-python -c "import proxmox_openapi; print(proxmox_openapi.__version__)"
+python -c "import proxmox_sdk; print(proxmox_sdk.__version__)"
 
 # Run the mock API
-proxmox-openapi-mock
+proxmox-sdk-mock
 ```
 
 Visit `http://localhost:8000/docs` to confirm the API is running.
@@ -155,7 +155,7 @@ Visit `http://localhost:8000/docs` to confirm the API is running.
 ### For Development
 
 ```bash
-pip install proxmox-openapi[test]
+pip install proxmox-sdk[test]
 ```
 
 Includes:
@@ -166,7 +166,7 @@ Includes:
 ### For Documentation
 
 ```bash
-pip install proxmox-openapi[docs]
+pip install proxmox-sdk[docs]
 ```
 
 Includes:

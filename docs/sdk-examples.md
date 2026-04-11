@@ -12,7 +12,7 @@ Real-world examples for common Proxmox operations including backups, clustering,
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def list_backup_storage():
         async with ProxmoxSDK(...) as proxmox:
@@ -33,8 +33,8 @@ Real-world examples for common Proxmox operations including backups, clustering,
 === "Async"
 
     ```python
-    from proxmox_openapi import ProxmoxSDK
-    from proxmox_openapi.sdk.tools import Tasks
+    from proxmox_sdk import ProxmoxSDK
+    from proxmox_sdk.sdk.tools import Tasks
 
     async def backup_vm(node, vmid, storage="local"):
         async with ProxmoxSDK(...) as proxmox:
@@ -337,7 +337,7 @@ Real-world examples for common Proxmox operations including backups, clustering,
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def monitor_vm_health(node, vmid, interval=5, duration=60):
         """Monitor a VM's health for a duration."""
@@ -412,7 +412,7 @@ Real-world examples for common Proxmox operations including backups, clustering,
 
     ```python
     import json
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def export_vm_configs():
         """Export all VM configs to JSON for disaster recovery."""
@@ -449,7 +449,7 @@ Real-world examples for common Proxmox operations including backups, clustering,
 
     ```python
     import json
-    from proxmox_openapi import ProxmoxSDK
+    from proxmox_sdk import ProxmoxSDK
 
     async def restore_vms_from_config(config_file):
         """Recreate VMs from saved configuration."""
@@ -568,7 +568,7 @@ Real-world examples for common Proxmox operations including backups, clustering,
 
     ```python
     import asyncio
-    from proxmox_openapi import ProxmoxSDK, ResourceException
+    from proxmox_sdk import ProxmoxSDK, ResourceException
 
     async def create_vm_with_retries(node, vmid, name, max_retries=3):
         """Create VM with automatic retry on failure."""

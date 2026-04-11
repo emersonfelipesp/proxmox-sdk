@@ -206,7 +206,7 @@ pvesh set cluster/options -console html5 --quiet 1
 pvesh get /nodes --output-format text --noborder 1 --noheader 1
 ```
 
-## Relevance to proxmox-openapi
+## Relevance to proxmox-sdk
 
 For this project, `pvesh` is useful as a practical validation and cross-check interface when comparing generated OpenAPI artifacts against live Proxmox behavior on a host.
 
@@ -230,4 +230,4 @@ When evaluating endpoint coverage or generated schema quality:
 
 `pvesh` is a powerful, direct administrative interface for Proxmox VE API access on the host. Its strengths are transparency, introspection, and operational speed. Its main constraints are privilege requirements and the need for API-path literacy.
 
-For automation and tooling ecosystems such as proxmox-openapi, `pvesh` is best treated as a high-fidelity local probe for endpoint discovery and behavior verification.
+For automation and tooling ecosystems such as proxmox-sdk, `pvesh` is best treated as a high-fidelity local probe for endpoint discovery and behavior verification.

@@ -1,6 +1,6 @@
 # Architecture
 
-This page describes the internal architecture of `proxmox-openapi` — covering the package layers, the dual-mode FastAPI server, the standalone SDK, and the key design decisions behind each component.
+This page describes the internal architecture of `proxmox-sdk` — covering the package layers, the dual-mode FastAPI server, the standalone SDK, and the key design decisions behind each component.
 
 ---
 
@@ -11,7 +11,7 @@ The project is organized into five distinct layers, each independently usable:
 ```mermaid
 flowchart TD
     CLI["proxmox_cli/\nTyper CLI + Textual TUI\n(interactive use)"]
-    SERVER["proxmox_openapi/main.py\nDual-mode FastAPI server\n(mock OR real API proxy)"]
+    SERVER["proxmox_sdk/main.py\nDual-mode FastAPI server\n(mock OR real API proxy)"]
     CODEGEN["proxmox_codegen/\nPlaywright crawler → OpenAPI + Pydantic\n(schema generation pipeline)"]
     SDK["sdk/\nStandalone async Python SDK\n(production integrations)"]
     MOCK["mock/\nIn-memory CRUD state store\n(test infrastructure)"]
@@ -28,9 +28,9 @@ flowchart TD
 
 | Layer | Entry point | Standalone? | Description |
 |---|---|---|---|
-| `sdk/` | `proxmox_openapi.ProxmoxSDK` | Yes | Async + sync Python SDK with 5 backends |
-| `mock/` | `proxmox_openapi.mock_main` | Yes | FastAPI mock server only |
-| `proxmox_openapi/main.py` | `proxmox_openapi.main` | Yes | Dual-mode FastAPI server |
+| `sdk/` | `proxmox_sdk.ProxmoxSDK` | Yes | Async + sync Python SDK with 5 backends |
+| `mock/` | `proxmox_sdk.mock_main` | Yes | FastAPI mock server only |
+| `proxmox_sdk/main.py` | `proxmox_sdk.main` | Yes | Dual-mode FastAPI server |
 | `proxmox_codegen/` | `proxmox codegen` CLI | Yes | Schema generation pipeline |
 | `proxmox_cli/` | `proxmox` / `pbx` CLI | Yes | Typer CLI and Textual TUI |
 
@@ -150,7 +150,7 @@ flowchart LR
     NORM["normalize.py"]
     OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 646 ops"]
     PYD["PydanticBuilder\n→ pydantic_models.py"]
-    USE1["proxmox-openapi\nMock routes"]
+    USE1["proxmox-sdk\nMock routes"]
     USE2["proxbox-api\nResponse validation"]
 
     PVE --> CRAWL
@@ -232,7 +232,7 @@ See [Security](security.md) for the full reference.
 
 Key optimizations:
 
-- **Lazy package imports** — `import proxmox_openapi` does not construct any FastAPI app
+- **Lazy package imports** — `import proxmox_sdk` does not construct any FastAPI app
 - **Cached URL components** — `HttpsBackend` caches `(scheme, netloc, base_path)` to skip per-request URL parsing
 - **Shared read locks** — concurrent GETs on mock state do not block each other
 - **Schema fingerprint caching** — `ProxmoxSchemaValue.fingerprint` is a `@cached_property`
