@@ -17,7 +17,6 @@ from proxmox_sdk.sdk.exceptions import (
 )
 from proxmox_sdk.sdk.services import SERVICES
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -150,8 +149,9 @@ async def test_request_raises_proxmox_timeout_error_on_timeout() -> None:
     cm.__aenter__ = AsyncMock(side_effect=asyncio.TimeoutError())
     cm.__aexit__ = AsyncMock(return_value=False)
 
-    with patch.object(backend, "_ensure_session") as mock_sess, patch.object(
-        backend, "_ensure_authenticated"
+    with (
+        patch.object(backend, "_ensure_session") as mock_sess,
+        patch.object(backend, "_ensure_authenticated"),
     ):
         session = AsyncMock()
         session.request = MagicMock(return_value=cm)
@@ -165,8 +165,9 @@ async def test_request_raises_proxmox_timeout_error_on_timeout() -> None:
 async def test_request_raises_proxmox_connection_error_on_connector_error() -> None:
     backend = _make_https_backend()
 
-    with patch.object(backend, "_ensure_session") as mock_sess, patch.object(
-        backend, "_ensure_authenticated"
+    with (
+        patch.object(backend, "_ensure_session") as mock_sess,
+        patch.object(backend, "_ensure_authenticated"),
     ):
         session = AsyncMock()
 
@@ -188,8 +189,9 @@ async def test_request_raises_proxmox_connection_error_on_connector_error() -> N
 async def test_request_raises_proxmox_connection_error_on_generic_client_error() -> None:
     backend = _make_https_backend()
 
-    with patch.object(backend, "_ensure_session") as mock_sess, patch.object(
-        backend, "_ensure_authenticated"
+    with (
+        patch.object(backend, "_ensure_session") as mock_sess,
+        patch.object(backend, "_ensure_authenticated"),
     ):
         session = AsyncMock()
 
@@ -227,8 +229,9 @@ async def test_get_retries_on_503_up_to_max_retries() -> None:
         cm.__aexit__ = AsyncMock(return_value=False)
         return cm
 
-    with patch.object(backend, "_ensure_session") as mock_sess, patch.object(
-        backend, "_ensure_authenticated"
+    with (
+        patch.object(backend, "_ensure_session") as mock_sess,
+        patch.object(backend, "_ensure_authenticated"),
     ):
         session = AsyncMock()
         session.request = MagicMock(side_effect=lambda **_: _make_503_cm())
@@ -260,8 +263,9 @@ async def test_post_does_not_retry_on_503() -> None:
         cm.__aexit__ = AsyncMock(return_value=False)
         return cm
 
-    with patch.object(backend, "_ensure_session") as mock_sess, patch.object(
-        backend, "_ensure_authenticated"
+    with (
+        patch.object(backend, "_ensure_session") as mock_sess,
+        patch.object(backend, "_ensure_authenticated"),
     ):
         session = AsyncMock()
         session.request = MagicMock(side_effect=lambda **_: _make_503_cm())
@@ -298,8 +302,9 @@ async def test_get_succeeds_after_transient_503() -> None:
         cm.__aexit__ = AsyncMock(return_value=False)
         return cm
 
-    with patch.object(backend, "_ensure_session") as mock_sess, patch.object(
-        backend, "_ensure_authenticated"
+    with (
+        patch.object(backend, "_ensure_session") as mock_sess,
+        patch.object(backend, "_ensure_authenticated"),
     ):
         session = AsyncMock()
         session.request = MagicMock(side_effect=lambda **_: _make_cm())
@@ -316,8 +321,8 @@ async def test_get_succeeds_after_transient_503() -> None:
 
 def test_https_backend_connect_timeout_in_client_timeout() -> None:
     """connect_timeout must be passed to aiohttp.ClientTimeout.connect."""
-    from proxmox_sdk.sdk.backends.https import HttpsBackend
     from proxmox_sdk.sdk.auth.token import TokenAuth
+    from proxmox_sdk.sdk.backends.https import HttpsBackend
 
     auth = TokenAuth(
         user="admin@pam",
