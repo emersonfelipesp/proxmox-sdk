@@ -1447,6 +1447,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#request-retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Retry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Request Retry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-retries-occur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When retries occur
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backoff-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backoff strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#config-loading" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1894,6 +1944,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#request-retry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request Retry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Request Retry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-retries-occur" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When retries occur
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backoff-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backoff strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#config-loading" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2112,12 +2212,70 @@
 </span></code></pre></div>
 <p>Timeout tracking uses <code>time.monotonic()</code> for accurate wall-clock measurement instead of cumulative addition (which underestimates actual elapsed time by the duration of each HTTP request).</p>
 <hr />
+<h2 id="request-retry">Request Retry<a class="headerlink" href="#request-retry" title="Permanent link">&para;</a></h2>
+<p><code>HttpsBackend.request()</code> supports opt-in automatic retry for transient failures.</p>
+<h3 id="when-retries-occur">When retries occur<a class="headerlink" href="#when-retries-occur" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Retried?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP 502, 503, 504</td>
+<td>Yes (GET/HEAD only)</td>
+</tr>
+<tr>
+<td><code>asyncio.TimeoutError</code></td>
+<td>Yes (GET/HEAD only)</td>
+</tr>
+<tr>
+<td><code>aiohttp.ClientError</code> (DNS, refused, etc.)</td>
+<td>Yes (GET/HEAD only)</td>
+</tr>
+<tr>
+<td>SSL error</td>
+<td>Never (not transient)</td>
+</tr>
+<tr>
+<td>HTTP 4xx (client error)</td>
+<td>Never</td>
+</tr>
+<tr>
+<td>POST / PUT / DELETE</td>
+<td>Never (not safe to duplicate)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="backoff-strategy">Backoff strategy<a class="headerlink" href="#backoff-strategy" title="Permanent link">&para;</a></h3>
+<p>Retries use exponential backoff:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>attempt 1: backoff * 2⁰  → 0.5s
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>attempt 2: backoff * 2¹  → 1.0s
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>attempt 3: backoff * 2²  → 2.0s
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>…                          (capped at 30s)
+</span></code></pre></div>
+<p>Default <code>max_retries=0</code> preserves existing behaviour with no delay or overhead on the hot path.</p>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>       <span class="c1"># 3 retries = 4 total attempts</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">retry_backoff</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>   <span class="c1"># 0.5s, 1.0s, 2.0s</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Or via environment:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nv">PROXMOX_API_RETRIES</span><span class="o">=</span><span class="m">3</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nv">PROXMOX_API_RETRY_BACKOFF</span><span class="o">=</span><span class="m">0</span>.5
+</span></code></pre></div>
+<hr />
 <h2 id="config-loading">Config Loading<a class="headerlink" href="#config-loading" title="Permanent link">&para;</a></h2>
 <p><code>ProxmoxConfig.from_env()</code> previously copied the entire <code>os.environ</code> dict (50–200+ keys) on every call. It now reads only the ~20 specific keys it needs:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">_KEYS</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="s2">&quot;PROXMOX_API_MODE&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_TOKEN_ID&quot;</span><span class="p">,</span> <span class="o">...</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">)</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">env_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_KEYS</span> <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">_KEYS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="s2">&quot;PROXMOX_API_MODE&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_TOKEN_ID&quot;</span><span class="p">,</span> <span class="o">...</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">)</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">env_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_KEYS</span> <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </span></code></pre></div>
 <p><code>yaml</code> (PyYAML) is only imported when a YAML config file is actually present, avoiding a heavy import on every startup.</p>
 <hr />
@@ -2126,7 +2284,7 @@
 <hr />
 <h2 id="regex-pre-compilation">Regex Pre-compilation<a class="headerlink" href="#regex-pre-compilation" title="Permanent link">&para;</a></h2>
 <p>The pattern <code>r"(^|_)name$"</code> used in semantic mock value generation was previously compiled on every call via <code>re.search(pattern, hint)</code>. It is now compiled once at module load:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">_RE_NAME_HINT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(^|_)name$&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">_RE_NAME_HINT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(^|_)name$&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 <h2 id="performance-characteristics-updated">Performance Characteristics (Updated)<a class="headerlink" href="#performance-characteristics-updated" title="Permanent link">&para;</a></h2>
@@ -2210,26 +2368,26 @@
 <hr />
 <h2 id="profiling-tips">Profiling Tips<a class="headerlink" href="#profiling-tips" title="Permanent link">&para;</a></h2>
 <p>To measure startup time:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="s2">import time</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="s2">t0 = time.perf_counter()</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="s2">from proxmox_sdk.main import app</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s2">print(f&#39;app ready in {time.perf_counter() - t0:.3f}s&#39;)</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s2">&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="s2">import time</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="s2">t0 = time.perf_counter()</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="s2">from proxmox_sdk.main import app</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="s2">print(f&#39;app ready in {time.perf_counter() - t0:.3f}s&#39;)</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="s2">&quot;</span>
 </span></code></pre></div>
 <p>To measure mock route registration specifically:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="s2">import time, json</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="s2">from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="s2">from proxmox_sdk.schema import load_proxmox_generated_openapi</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="s2">from fastapi import FastAPI</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="s2">doc = load_proxmox_generated_openapi()</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="s2">app = FastAPI()</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="s2">t0 = time.perf_counter()</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="s2">register_generated_proxmox_mock_routes(app, openapi_document=doc)</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="s2">print(f&#39;route registration: {time.perf_counter() - t0:.3f}s&#39;)</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="s2">&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="s2">import time, json</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="s2">from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="s2">from proxmox_sdk.schema import load_proxmox_generated_openapi</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="s2">from fastapi import FastAPI</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="s2">doc = load_proxmox_generated_openapi()</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="s2">app = FastAPI()</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="s2">t0 = time.perf_counter()</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="s2">register_generated_proxmox_mock_routes(app, openapi_document=doc)</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="s2">print(f&#39;route registration: {time.perf_counter() - t0:.3f}s&#39;)</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="s2">&quot;</span>
 </span></code></pre></div>
 
 

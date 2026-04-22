@@ -1339,6 +1339,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#exception-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exception Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1987,6 +1998,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#exception-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exception Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2259,7 +2281,7 @@
     note over T: Subsequent requests (within TTL)
     B-&gt;&gt;T: ensure_ready()
     T--&gt;&gt;B: ok (no HTTP call — ticket still valid)</code></pre>
-<p><code>TicketAuth</code> receives the same SSL context as the main HTTPS backend, so <code>verify_ssl=False</code> applies consistently to both the auth call and all subsequent API requests.</p>
+<p><code>TicketAuth</code> receives the same SSL context <strong>and the same proxy</strong> as the main HTTPS backend, so <code>verify_ssl=False</code> and <code>proxies=</code> apply consistently to the auth call and all subsequent API requests. This ensures the SDK works correctly in proxy-only networks where the authentication POST would otherwise bypass the proxy.</p>
 <h3 id="auth-selection-in-proxmoxsdk">Auth Selection in <code>ProxmoxSDK</code><a class="headerlink" href="#auth-selection-in-proxmoxsdk" title="Permanent link">&para;</a></h3>
 <p>The backend factory in <code>ProxmoxSDK._create_backend()</code> decides which auth class to use based on which credentials are supplied:</p>
 <div class="language-python highlight"><span class="filename">proxmox_sdk/sdk/api.py</span><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">if</span> <span class="n">token_name</span> <span class="ow">and</span> <span class="n">token_value</span><span class="p">:</span>
@@ -2339,6 +2361,58 @@
 <p class="admonition-title">Do not mix sync and async</p>
 <p><code>SyncProxmoxSDK</code> creates its own event loop. Using it inside an already-running async context will raise <code>RuntimeError: This event loop is already running</code>. Use <code>ProxmoxSDK</code> (async) in FastAPI, asyncio scripts, and pytest-asyncio tests.</p>
 </div>
+<hr />
+<h2 id="exception-hierarchy">Exception Hierarchy<a class="headerlink" href="#exception-hierarchy" title="Permanent link">&para;</a></h2>
+<p>All SDK exceptions live in <code>proxmox_sdk.sdk.exceptions</code> and are re-exported from the top-level <code>proxmox_sdk</code> package.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ProxmoxSDKError (base)
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├── ResourceException          HTTP ≥ 400 from the Proxmox API
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>│   ├── ProxmoxTimeoutError    Request exceeded timeout (status_code=504)
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>│   └── ProxmoxConnectionError TCP refused, DNS failure, SSL error (status_code=503)
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>├── AuthenticationError        Bad credentials, NeedTFA without OTP, or auth timeout
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>└── BackendNotAvailableError   Optional backend dep (paramiko, openssh_wrapper) missing
+</span></code></pre></div>
+<p><code>ProxmoxTimeoutError</code> and <code>ProxmoxConnectionError</code> subclass <code>ResourceException</code> so existing <code>except ResourceException</code> handlers continue to work without modification. Catch the specific subtype first when you need to distinguish a timeout from a server-side error:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxTimeoutError</span><span class="p">,</span> <span class="n">ProxmoxConnectionError</span><span class="p">,</span> <span class="n">ResourceException</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="k">except</span> <span class="n">ProxmoxTimeoutError</span><span class="p">:</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="c1"># retry or back off</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="o">...</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="k">except</span> <span class="n">ProxmoxConnectionError</span><span class="p">:</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="c1"># host unreachable or SSL misconfigured</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="o">...</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="k">except</span> <span class="n">ResourceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="c1"># Proxmox returned 4xx/5xx</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>HttpsBackend.request()</code> maps <code>aiohttp</code> exceptions to these types:</p>
+<table>
+<thead>
+<tr>
+<th><code>aiohttp</code> exception</th>
+<th>SDK exception</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>asyncio.TimeoutError</code></td>
+<td><code>ProxmoxTimeoutError</code></td>
+</tr>
+<tr>
+<td><code>aiohttp.ClientConnectorError</code></td>
+<td><code>ProxmoxConnectionError</code></td>
+</tr>
+<tr>
+<td><code>aiohttp.ClientSSLError</code></td>
+<td><code>ProxmoxConnectionError</code></td>
+</tr>
+<tr>
+<td>other <code>aiohttp.ClientError</code></td>
+<td><code>ProxmoxConnectionError</code></td>
+</tr>
+</tbody>
+</table>
 
 
 
