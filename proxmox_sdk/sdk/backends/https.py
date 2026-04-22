@@ -153,7 +153,8 @@ class HttpsBackend(AbstractBackend):
         self._auth = auth
         self._ssl = _build_ssl_context(verify_ssl, cert)
         self._timeout = aiohttp.ClientTimeout(total=timeout, connect=connect_timeout)
-        self._proxy = (proxies or {}).get("https") or (proxies or {}).get("http")
+        _proxies = proxies or {}
+        self._proxy = _proxies.get("https") or _proxies.get("http")
         self._max_retries = max_retries
         self._retry_backoff = retry_backoff
 
@@ -190,6 +191,7 @@ class HttpsBackend(AbstractBackend):
         clean_params = (_filter_none(params) or None) if params else None
         clean_data = _filter_none(data) if data else None
 
+        method = method.upper()
         url = self._url_for(path)
         headers = {
             "Accept": "application/json",
@@ -205,8 +207,8 @@ class HttpsBackend(AbstractBackend):
             )
 
         # Regular JSON request
-        json_body = clean_data if method.upper() not in ("GET", "DELETE") else None
-        if method.upper() in ("GET", "DELETE") and clean_data:
+        json_body = clean_data if method not in ("GET", "DELETE") else None
+        if method in ("GET", "DELETE") and clean_data:
             # For GET/DELETE, merge data into params (edge cases)
             if clean_params:
                 clean_params.update(clean_data)
@@ -215,7 +217,7 @@ class HttpsBackend(AbstractBackend):
             json_body = None
 
         # Only safe methods are retried to avoid accidental double-mutation.
-        is_safe = method.upper() in ("GET", "HEAD")
+        is_safe = method in ("GET", "HEAD")
         attempts = self._max_retries + 1 if is_safe else 1
         last_exc: ResourceException | None = None
 
