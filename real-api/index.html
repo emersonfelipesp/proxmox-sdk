@@ -359,7 +359,7 @@
           
   
   
-  Reference
+  CLI Reference
 
         </a>
       </li>
@@ -1833,7 +1833,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    CLI Reference
   
 
     
@@ -1849,7 +1849,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    CLI Reference
   
 
           </label>
@@ -2637,13 +2637,13 @@
 <td><code>PROXMOX_API_TOKEN_ID</code></td>
 <td>If using tokens</td>
 <td>—</td>
-<td>API token ID</td>
+<td>API token ID (<code>user@realm!tokenid</code>)</td>
 </tr>
 <tr>
 <td><code>PROXMOX_API_TOKEN_SECRET</code></td>
 <td>If using tokens</td>
 <td>—</td>
-<td>API token secret</td>
+<td>API token secret UUID</td>
 </tr>
 <tr>
 <td><code>PROXMOX_API_USERNAME</code></td>
@@ -2662,6 +2662,36 @@
 <td>No</td>
 <td><code>true</code></td>
 <td>Verify SSL certificates</td>
+</tr>
+<tr>
+<td><code>PROXMOX_API_SERVICE</code></td>
+<td>No</td>
+<td><code>PVE</code></td>
+<td>Service type: <code>PVE</code>, <code>PMG</code>, or <code>PBS</code></td>
+</tr>
+<tr>
+<td><code>PROXMOX_API_BACKEND</code></td>
+<td>No</td>
+<td><code>https</code></td>
+<td>Transport: <code>https</code>, <code>local</code>, <code>ssh_paramiko</code>, <code>openssh</code></td>
+</tr>
+<tr>
+<td><code>PROXMOX_API_PATH_PREFIX</code></td>
+<td>No</td>
+<td><code>""</code></td>
+<td>Reverse-proxy path prefix</td>
+</tr>
+<tr>
+<td><code>PROXMOX_API_OTP</code></td>
+<td>No</td>
+<td>—</td>
+<td>OTP/TOTP code for 2FA</td>
+</tr>
+<tr>
+<td><code>PROXMOX_API_OTPTYPE</code></td>
+<td>No</td>
+<td><code>totp</code></td>
+<td>OTP type</td>
 </tr>
 <tr>
 <td><code>PROXMOX_API_TIMEOUT</code></td>
@@ -2700,6 +2730,12 @@
 <td>HTTPS proxy URL (overrides <code>HTTPS_PROXY</code>)</td>
 </tr>
 <tr>
+<td><code>PROXMOX_CONFIG_FILE</code></td>
+<td>No</td>
+<td>—</td>
+<td>Path to YAML/JSON config file</td>
+</tr>
+<tr>
 <td><code>HOST</code></td>
 <td>No</td>
 <td><code>0.0.0.0</code></td>
@@ -2710,6 +2746,24 @@
 <td>No</td>
 <td><code>8000</code></td>
 <td>Server bind port</td>
+</tr>
+<tr>
+<td><code>LOG_LEVEL</code></td>
+<td>No</td>
+<td><code>INFO</code></td>
+<td>Logging level</td>
+</tr>
+<tr>
+<td><code>CORS_ORIGINS</code></td>
+<td>No</td>
+<td>—</td>
+<td>Comma-separated allowed CORS origins</td>
+</tr>
+<tr>
+<td><code>CODEGEN_API_KEY</code></td>
+<td>No</td>
+<td>—</td>
+<td>Bearer token for <code>/codegen/*</code> endpoints</td>
 </tr>
 </tbody>
 </table>
@@ -2920,6 +2974,10 @@
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>curl<span class="w"> </span>http://localhost:8000/health
 </span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="c1"># {&quot;status&quot;: &quot;ready&quot;}</span>
 </span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Localhost only</p>
+<p><code>/health</code> returns <code>404</code> for requests coming from outside <code>localhost</code>. Use it only from within the same host or in test environments with <code>TESTING=1</code>.</p>
+</div>
 <h3 id="mode-information">Mode Information<a class="headerlink" href="#mode-information" title="Permanent link">&para;</a></h3>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>curl<span class="w"> </span>http://localhost:8000/mode
 </span></code></pre></div>

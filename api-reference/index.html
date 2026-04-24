@@ -359,7 +359,7 @@
           
   
   
-  Reference
+  CLI Reference
 
         </a>
       </li>
@@ -1642,7 +1642,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    CLI Reference
   
 
     
@@ -1658,7 +1658,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    CLI Reference
   
 
           </label>
@@ -2381,6 +2381,10 @@
 <td>Not Found - Resource doesn't exist</td>
 </tr>
 <tr>
+<td><code>422</code></td>
+<td>Unprocessable Entity - Pydantic request validation failed</td>
+</tr>
+<tr>
 <td><code>500</code></td>
 <td>Internal Server Error</td>
 </tr>
@@ -2434,7 +2438,30 @@
 </ul>
 <p>See the <a href="../mock-api/">Mock API Guide</a> and <a href="../real-api/">Real API Guide</a> for mode-specific details.</p>
 <h2 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
-<p>Currently, no rate limiting is implemented. This may be added in future versions.</p>
+<p>Proxmox API proxy endpoints have no rate limiting. The <code>/codegen/*</code> endpoints are rate-limited via SlowAPI:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST /codegen/generate</code></td>
+<td>1 / hour</td>
+</tr>
+<tr>
+<td><code>GET /codegen/pydantic</code></td>
+<td>5 / hour</td>
+</tr>
+<tr>
+<td><code>GET /codegen/openapi</code></td>
+<td>5 / hour</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="../security/">Security</a> for details.</p>
 <h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h2>
 <p>The API follows the Proxmox VE API versioning scheme. The current implementation is based on <strong>Proxmox VE 8.1</strong>.</p>
 <p>For the most up-to-date endpoint reference, always check the Swagger UI at <code>/docs</code> when running the server.</p>

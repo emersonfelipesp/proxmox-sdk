@@ -359,7 +359,7 @@
           
   
   
-  Reference
+  CLI Reference
 
         </a>
       </li>
@@ -1554,7 +1554,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    CLI Reference
   
 
     
@@ -1570,7 +1570,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    CLI Reference
   
 
           </label>
@@ -2164,7 +2164,7 @@
 <h3 id="mock-mode">Mock Mode<a class="headerlink" href="#mock-mode" title="Permanent link">&para;</a></h3>
 <ul>
 <li>No authentication by default — safe for development environments</li>
-<li>Rate-limited at the FastAPI level (<code>PROXMOX_RATE_LIMIT</code>)</li>
+<li>Rate limiting is applied only on codegen endpoints via SlowAPI (hardcoded in <code>rate_limit.py</code>)</li>
 <li>Codegen endpoints require <code>CODEGEN_API_KEY</code> Bearer token</li>
 </ul>
 <h3 id="real-mode">Real Mode<a class="headerlink" href="#real-mode" title="Permanent link">&para;</a></h3>

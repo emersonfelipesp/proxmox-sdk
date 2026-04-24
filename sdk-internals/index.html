@@ -359,7 +359,7 @@
           
   
   
-  Reference
+  CLI Reference
 
         </a>
       </li>
@@ -1293,6 +1293,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Mock Backend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from_configconfig-construct-from-proxmoxconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from_config(config) — construct from ProxmoxConfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync_mockkwargs-synchronous-mock-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sync_mock(**kwargs) — synchronous mock instance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1599,7 +1627,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    CLI Reference
   
 
     
@@ -1615,7 +1643,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    CLI Reference
   
 
           </label>
@@ -1951,6 +1979,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Mock Backend">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#from_configconfig-construct-from-proxmoxconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        from_config(config) — construct from ProxmoxConfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync_mockkwargs-synchronous-mock-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sync_mock(**kwargs) — synchronous mock instance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2306,6 +2362,17 @@
 <p class="admonition-title">Mock state persistence</p>
 <p>Mock state is per-process and resets on restart. For test isolation, reset state between tests using <code>POST /mock/reset</code> on the FastAPI server, or create a new <code>ProxmoxSDK.mock()</code> instance per test.</p>
 </div>
+<h3 id="from_configconfig-construct-from-proxmoxconfig"><code>from_config(config)</code> — construct from ProxmoxConfig<a class="headerlink" href="#from_configconfig-construct-from-proxmoxconfig" title="Permanent link">&para;</a></h3>
+<p><code>ProxmoxSDK.from_config()</code> accepts a <code>ProxmoxConfig</code> dataclass (loaded from env vars or a YAML file) and constructs the matching SDK instance — either a real HTTPS backend or a mock backend, based on <code>config.api_mode</code>:</p>
+<div class="language-python highlight"><span class="filename">proxmox_sdk/sdk/api.py</span><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">config</span> <span class="o">=</span> <span class="n">ProxmoxConfig</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>      <span class="c1"># reads PROXMOX_API_* env vars</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">proxmox</span> <span class="o">=</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</span></code></pre></div>
+<p>This is the recommended construction path when using the FastAPI server's configuration layer.</p>
+<h3 id="sync_mockkwargs-synchronous-mock-instance"><code>sync_mock(**kwargs)</code> — synchronous mock instance<a class="headerlink" href="#sync_mockkwargs-synchronous-mock-instance" title="Permanent link">&para;</a></h3>
+<p><code>ProxmoxSDK.sync_mock()</code> returns a <code>SyncProxmoxSDK</code> backed by the in-memory mock, without requiring a real Proxmox host. Useful for scripting and tests in non-async contexts:</p>
+<div class="language-python highlight"><span class="filename">proxmox_sdk/sdk/api.py</span><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync_mock</span><span class="p">()</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>   <span class="c1"># blocking, no await</span>
+</span></code></pre></div>
 <hr />
 <h2 id="services-layer">Services Layer<a class="headerlink" href="#services-layer" title="Permanent link">&para;</a></h2>
 <p>Three Proxmox services are supported, each with their own API path prefix and default port:</p>
@@ -2343,7 +2410,7 @@
 <hr />
 <h2 id="task-monitoring">Task Monitoring<a class="headerlink" href="#task-monitoring" title="Permanent link">&para;</a></h2>
 <p>The SDK ships <code>proxmox_sdk.sdk.tools.tasks.Tasks</code> for polling Proxmox task UPIDs until they complete. The polling loop uses <strong>exponential backoff</strong> to avoid hammering the API:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Poll interval: 1s → 2s → 4s → 8s → 16s → 30s (cap)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Poll interval: 1s → 2s → 4s → 8s → 16s → 30s (cap)
 </span></code></pre></div>
 <p><code>blocking_status()</code> uses <code>time.monotonic()</code> for accurate timeout tracking independent of system clock adjustments.</p>
 <hr />
@@ -2352,9 +2419,9 @@
 <hr />
 <h2 id="sync-wrapper">Sync Wrapper<a class="headerlink" href="#sync-wrapper" title="Permanent link">&para;</a></h2>
 <p><code>SyncProxmoxSDK</code> wraps <code>ProxmoxSDK</code> with a dedicated <code>asyncio</code> event loop so that blocking (non-<code>async</code>) code can use the SDK:</p>
-<div class="language-python highlight"><span class="filename">proxmox_sdk/sdk/sync.py (pattern)</span><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>       <span class="c1"># blocks — no await needed</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="n">vms</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<div class="language-python highlight"><span class="filename">proxmox_sdk/sdk/sync.py (pattern)</span><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>       <span class="c1"># blocks — no await needed</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="n">vms</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span></code></pre></div>
 <p><code>SyncProxmoxResource</code> intercepts every async call and runs it synchronously on the embedded loop via <code>loop.run_until_complete()</code>.</p>
 <div class="admonition warning">
@@ -2364,27 +2431,27 @@
 <hr />
 <h2 id="exception-hierarchy">Exception Hierarchy<a class="headerlink" href="#exception-hierarchy" title="Permanent link">&para;</a></h2>
 <p>All SDK exceptions live in <code>proxmox_sdk.sdk.exceptions</code> and are re-exported from the top-level <code>proxmox_sdk</code> package.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ProxmoxSDKError (base)
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├── ResourceException          HTTP ≥ 400 from the Proxmox API
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>│   ├── ProxmoxTimeoutError    Request exceeded timeout (status_code=504)
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>│   └── ProxmoxConnectionError TCP refused, DNS failure, SSL error (status_code=503)
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>├── AuthenticationError        Bad credentials, NeedTFA without OTP, or auth timeout
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>└── BackendNotAvailableError   Optional backend dep (paramiko, openssh_wrapper) missing
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>ProxmoxSDKError (base)
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>├── ResourceException          HTTP ≥ 400 from the Proxmox API
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>│   ├── ProxmoxTimeoutError    Request exceeded timeout (status_code=504)
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>│   └── ProxmoxConnectionError TCP refused, DNS failure, SSL error (status_code=503)
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>├── AuthenticationError        Bad credentials, NeedTFA without OTP, or auth timeout
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>└── BackendNotAvailableError   Optional backend dep (paramiko, openssh_wrapper) missing
 </span></code></pre></div>
 <p><code>ProxmoxTimeoutError</code> and <code>ProxmoxConnectionError</code> subclass <code>ResourceException</code> so existing <code>except ResourceException</code> handlers continue to work without modification. Catch the specific subtype first when you need to distinguish a timeout from a server-side error:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxTimeoutError</span><span class="p">,</span> <span class="n">ProxmoxConnectionError</span><span class="p">,</span> <span class="n">ResourceException</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">try</span><span class="p">:</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="k">except</span> <span class="n">ProxmoxTimeoutError</span><span class="p">:</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="c1"># retry or back off</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="o">...</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="k">except</span> <span class="n">ProxmoxConnectionError</span><span class="p">:</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="c1"># host unreachable or SSL misconfigured</span>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>    <span class="o">...</span>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="k">except</span> <span class="n">ResourceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="c1"># Proxmox returned 4xx/5xx</span>
-</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxTimeoutError</span><span class="p">,</span> <span class="n">ProxmoxConnectionError</span><span class="p">,</span> <span class="n">ResourceException</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="k">except</span> <span class="n">ProxmoxTimeoutError</span><span class="p">:</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="c1"># retry or back off</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    <span class="o">...</span>
+</span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="k">except</span> <span class="n">ProxmoxConnectionError</span><span class="p">:</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>    <span class="c1"># host unreachable or SSL misconfigured</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>    <span class="o">...</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="k">except</span> <span class="n">ResourceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>    <span class="c1"># Proxmox returned 4xx/5xx</span>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
 </span></code></pre></div>
 <p><code>HttpsBackend.request()</code> maps <code>aiohttp</code> exceptions to these types:</p>
 <table>
