@@ -45,3 +45,11 @@ To ship a new version to PyPI and Docker Hub:
 7. Update dependents — bump `proxmox-sdk==<new-version>` in `proxbox-api/pyproject.toml` and any other consumers, commit, and push.
 
 The GitHub release triggers `publish-testpypi.yml` which validates, publishes to PyPI, and pushes all three Docker image variants (`raw`, `nginx`, `granian`) with both `<version>` and `latest` tags.
+
+## CLAUDE.md Index
+
+Read the nearest scoped guide for the code you are changing.
+
+- [.github/CLAUDE.md](.github/CLAUDE.md)
+- [CLAUDE.md](CLAUDE.md)
+- [docker/CLAUDE.md](docker/CLAUDE.md)
