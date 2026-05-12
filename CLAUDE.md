@@ -1,5 +1,14 @@
 # proxmox-sdk Agent Index
 
+## Workspace Context
+
+This file lives at `/root/personal-context/nmulticloud-context/proxmox-sdk/CLAUDE.md` inside the `personal-context` workspace.
+Workspace guidance: `/root/personal-context/CLAUDE.md`.
+Per-repo deep-dive: `/root/personal-context/claude-reference/proxmox-sdk.md`.
+Submodule layout and cross-repo links: `/root/personal-context/claude-reference/dependency-map.md`.
+
+---
+
 ## Overview
 
 `proxmox-sdk` is a schema-driven FastAPI package for Proxmox API that provides:
