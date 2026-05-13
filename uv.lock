@@ -1776,7 +1776,7 @@ wheels = [
 
 [[package]]
 name = "proxmox-sdk"
-version = "0.0.3.post1"
+version = "0.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -1787,6 +1787,7 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+pbs = []
 all = [
     { name = "openssh-wrapper" },
     { name = "paramiko" },
@@ -1878,7 +1879,7 @@ requires-dist = [
     { name = "typer", extras = ["all"], marker = "extra == 'all'", specifier = ">=0.12.3" },
     { name = "typer", extras = ["all"], marker = "extra == 'cli'", specifier = ">=0.12.3" },
 ]
-provides-extras = ["ssh", "cli", "all", "test", "playwright", "docs", "granian", "dev"]
+provides-extras = ["pbs", "ssh", "cli", "all", "test", "playwright", "docs", "granian", "dev"]
 
 [package.metadata.requires-dev]
 dev = [

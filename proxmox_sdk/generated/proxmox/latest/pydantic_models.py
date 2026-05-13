@@ -10,9 +10,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 GENERATED_FOR_PROXMOX_VERSION = "latest"
-GENERATED_SOURCE_SHA256 = (
-    "45f8e0721ca8090700acbc3ac79bd7a9d8d918be39c6995a47fb22f95a0ca6bf"
-)
+GENERATED_SOURCE_SHA256 = "45f8e0721ca8090700acbc3ac79bd7a9d8d918be39c6995a47fb22f95a0ca6bf"
 GENERATED_AT = "2026-04-11T00:44:11Z"
 
 
