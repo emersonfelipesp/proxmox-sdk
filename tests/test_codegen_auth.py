@@ -2,56 +2,43 @@ import os
 from unittest.mock import patch
 
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
+from fastapi import HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
 
-from proxmox_sdk.routes.codegen import router
-
-app = FastAPI()
-app.include_router(router, prefix="/codegen")
-
-client = TestClient(app)
+from proxmox_sdk.routes.codegen import verify_codegen_auth
 
 
 def test_codegen_generate_missing_api_key_env():
-    with patch.dict(os.environ, clear=True):
-        response = client.post("/codegen/generate")
-        assert response.status_code == 403
-        assert "CODEGEN_API_KEY environment variable must be set" in response.json()["detail"]
+    with patch.dict(os.environ, {"CODEGEN_API_KEY": ""}):
+        with pytest.raises(HTTPException) as exc_info:
+            verify_codegen_auth(None)
+
+        assert exc_info.value.status_code == 403
+        assert "CODEGEN_API_KEY environment variable must be set" in exc_info.value.detail
 
 
 def test_codegen_generate_missing_auth_header():
     with patch.dict(os.environ, {"CODEGEN_API_KEY": "secret-key"}):
-        response = client.post("/codegen/generate")
-        assert response.status_code == 401
-        assert "Invalid or missing API key" in response.json()["detail"]
+        with pytest.raises(HTTPException) as exc_info:
+            verify_codegen_auth(None)
+
+        assert exc_info.value.status_code == 401
+        assert "Invalid or missing API key" in exc_info.value.detail
 
 
 def test_codegen_generate_invalid_auth_header():
     with patch.dict(os.environ, {"CODEGEN_API_KEY": "secret-key"}):
-        response = client.post("/codegen/generate", headers={"Authorization": "Bearer wrong-key"})
-        assert response.status_code == 401
-        assert "Invalid or missing API key" in response.json()["detail"]
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="wrong-key")
+
+        with pytest.raises(HTTPException) as exc_info:
+            verify_codegen_auth(credentials)
+
+        assert exc_info.value.status_code == 401
+        assert "Invalid or missing API key" in exc_info.value.detail
 
 
-@pytest.mark.asyncio
-async def test_codegen_generate_valid_auth_header():
+def test_codegen_generate_valid_auth_header():
     with patch.dict(os.environ, {"CODEGEN_API_KEY": "secret-key"}):
-        # We won't actually run the generate pipeline, just test the auth bypass
-        # But wait, calling /codegen/generate will try to run Playwright.
-        # We can just check if auth passes by mocking the pipeline function.
-        with patch(
-            "proxmox_sdk.routes.codegen.generate_proxmox_codegen_bundle_async"
-        ) as mock_generate:
-            mock_generate.return_value.capture = {}
-            mock_generate.return_value.source_url = "test"
-            mock_generate.return_value.version_tag = "test"
-            mock_generate.return_value.generated_at = "test"
-            mock_generate.return_value.endpoint_count = 0
-            mock_generate.return_value.operation_count = 0
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials="secret-key")
 
-            response = client.post(
-                "/codegen/generate", headers={"Authorization": "Bearer secret-key"}
-            )
-            assert response.status_code == 200
-            assert response.json()["message"] == "Generation completed"
+        assert verify_codegen_auth(credentials) is None
