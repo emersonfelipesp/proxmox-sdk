@@ -12,13 +12,13 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-sdk/codegen-pipeline/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-sdk/ssh/">
       
       
-        <link rel="prev" href="../sdk-internals/">
+        <link rel="prev" href="../integration-with-proxbox-api/">
       
       
-        <link rel="next" href="../ide-support/">
+        <link rel="next" href="../node-hardware/">
       
       
         
@@ -29,7 +29,7 @@
     
     
       
-        <title>Code Generation Pipeline - Proxmox OpenAPI</title>
+        <title>SSH Primitive - Proxmox OpenAPI</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#code-generation-pipeline" class="md-skip">
+        <a href="#ssh-primitive-proxmox_sdkssh" class="md-skip">
           Skip to content
         </a>
       
@@ -120,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Code Generation Pipeline
+              SSH Primitive
             
           </span>
         </div>
@@ -309,12 +309,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../architecture/" class="md-tabs__link">
           
   
@@ -331,11 +329,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../ssh/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -979,31 +979,28 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1021,7 +1018,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1092,37 +1089,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Code Generation Pipeline
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../codegen-pipeline/" class="md-nav__link">
         
   
   
@@ -1138,192 +1108,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#pipeline-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipeline Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stage-1-crawler-proxmoxcrawler" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stage 1: Crawler (ProxmoxCrawler)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stage-2-parser-apidoc_parserpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stage 2: Parser (apidoc_parser.py)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stage-3-normalization-normalizepy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stage 3: Normalization (normalize.py)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stage-4-openapi-builder-openapi_generatorpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stage 4: OpenAPI Builder (openapi_generator.py)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stage-5-pydantic-generator-pydantic_generatorpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stage 5: Pydantic Generator (pydantic_generator.py)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Stage 5: Pydantic Generator (pydantic_generator.py)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-proxbox-api-uses-generated-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How proxbox-api Uses Generated Models
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#triggering-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Triggering the Pipeline
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#security-controls" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Security Controls
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Security Controls">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ssrf-protection" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SSRF Protection
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#api-key-auth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API Key Auth
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rate-limiting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rate Limiting
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#versioning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Versioning
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#updating-the-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Updating the Schema
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1396,28 +1180,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -1435,7 +1222,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1450,10 +1237,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../ssh/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSH Primitive
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1469,6 +1283,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#security-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Construction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fingerprint-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fingerprint workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exception-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exception hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commandresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CommandResult
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threading-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Threading model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1853,10 +1764,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#pipeline-overview" class="md-nav__link">
+  <a href="#security-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pipeline Overview
+        Security model
       
     </span>
   </a>
@@ -1864,10 +1775,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stage-1-crawler-proxmoxcrawler" class="md-nav__link">
+  <a href="#construction" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stage 1: Crawler (ProxmoxCrawler)
+        Construction
       
     </span>
   </a>
@@ -1875,10 +1786,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stage-2-parser-apidoc_parserpy" class="md-nav__link">
+  <a href="#fingerprint-workflow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stage 2: Parser (apidoc_parser.py)
+        Fingerprint workflow
       
     </span>
   </a>
@@ -1886,10 +1797,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stage-3-normalization-normalizepy" class="md-nav__link">
+  <a href="#exception-hierarchy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stage 3: Normalization (normalize.py)
+        Exception hierarchy
       
     </span>
   </a>
@@ -1897,10 +1808,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stage-4-openapi-builder-openapi_generatorpy" class="md-nav__link">
+  <a href="#commandresult" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stage 4: OpenAPI Builder (openapi_generator.py)
+        CommandResult
       
     </span>
   </a>
@@ -1908,38 +1819,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stage-5-pydantic-generator-pydantic_generatorpy" class="md-nav__link">
+  <a href="#threading-model" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stage 5: Pydantic Generator (pydantic_generator.py)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Stage 5: Pydantic Generator (pydantic_generator.py)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#how-proxbox-api-uses-generated-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How proxbox-api Uses Generated Models
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#triggering-the-pipeline" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Triggering the Pipeline
+        Threading model
       
     </span>
   </a>
@@ -1947,71 +1830,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security-controls" class="md-nav__link">
+  <a href="#testing" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Security Controls
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Security Controls">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ssrf-protection" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        SSRF Protection
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#api-key-auth" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        API Key Auth
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#rate-limiting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rate Limiting
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#versioning" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Versioning
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#updating-the-schema" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Updating the Schema
+        Testing
       
     </span>
   </a>
@@ -2038,276 +1860,134 @@
   
 
 
-<h1 id="code-generation-pipeline">Code Generation Pipeline<a class="headerlink" href="#code-generation-pipeline" title="Permanent link">&para;</a></h1>
-<p>The <code>proxmox-sdk</code> project ships a complete pipeline that crawls the Proxmox VE API Viewer and converts it into an OpenAPI 3.1 schema and Pydantic v2 models. The generated artifacts are checked into <code>proxmox_sdk/generated/</code> so users never need to run the pipeline themselves.</p>
-<hr />
-<h2 id="pipeline-overview">Pipeline Overview<a class="headerlink" href="#pipeline-overview" title="Permanent link">&para;</a></h2>
-<pre class="mermaid"><code>flowchart TD
-    PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
-
-    CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n646 endpoints\npaths + methods + parameters"]
-    NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
-    OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n646 operations · 428 paths"]
-    PYDANTIC_GEN["PydanticBuilder\nParse response schemas\nGenerate typed classes\nAdd validators"]
-    PYDANTIC["pydantic_models.py\nRequest + Response models\nUsed by proxbox-api for validation"]
-
-    PVE --&gt;|"Playwright browser"| CRAWL
-    CRAWL --&gt; RAW
-    RAW --&gt; NORM
-    NORM --&gt; OPENAPI_GEN
-    OPENAPI_GEN --&gt; OPENAPI
-    OPENAPI --&gt; PYDANTIC_GEN
-    PYDANTIC_GEN --&gt; PYDANTIC</code></pre>
-<p>All pipeline stages are orchestrated by <code>ProxmoxCodegenPipeline</code> in <code>proxmox_codegen/pipeline.py</code>.</p>
-<hr />
-<h2 id="stage-1-crawler-proxmoxcrawler">Stage 1: Crawler (<code>ProxmoxCrawler</code>)<a class="headerlink" href="#stage-1-crawler-proxmoxcrawler" title="Permanent link">&para;</a></h2>
-<p><code>proxmox_codegen/crawler.py</code> uses <strong>Playwright</strong> to drive a headless browser against the Proxmox API Viewer web application. The Proxmox API Viewer renders its endpoint tree from an embedded <code>apidoc.js</code> file rather than serving plain JSON, so a browser is required to execute the JavaScript.</p>
-<p>The crawler:</p>
-<ol>
-<li>Navigates to the Proxmox API Viewer at <code>https://&lt;host&gt;:8006</code></li>
-<li>Waits for <code>apidoc.js</code> to load and the tree to render</li>
-<li>Recursively expands every tree node</li>
-<li>For each endpoint, captures: path, HTTP methods, parameters, request/response schemas, descriptions</li>
-</ol>
-<pre class="mermaid"><code>sequenceDiagram
-    participant CLI as proxmox-cli codegen
-    participant CW as ProxmoxCrawler
-    participant PW as Playwright (headless Chromium)
-    participant PVE as Proxmox VE API Viewer
-
-    CLI-&gt;&gt;CW: crawl(url, output_path)
-    CW-&gt;&gt;PW: launch()
-    PW-&gt;&gt;PVE: GET https://pve:8006/
-    PVE--&gt;&gt;PW: HTML + apidoc.js
-    PW-&gt;&gt;PW: Execute apidoc.js, render tree
-    loop For each tree node
-        CW-&gt;&gt;PW: click tree item
-        PW-&gt;&gt;CW: endpoint metadata
-    end
-    CW-&gt;&gt;CLI: raw_capture.json (646 items)</code></pre>
-<div class="admonition warning">
-<p class="admonition-title">Crawler requires a real Proxmox host</p>
-<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 8.1. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
-</div>
-<hr />
-<h2 id="stage-2-parser-apidoc_parserpy">Stage 2: Parser (<code>apidoc_parser.py</code>)<a class="headerlink" href="#stage-2-parser-apidoc_parserpy" title="Permanent link">&para;</a></h2>
-<p><code>proxmox_codegen/apidoc_parser.py</code> post-processes the raw capture. It:</p>
-<ul>
-<li>Normalizes path parameter syntax (<code>{vmid}</code> → <code>{vmid: integer}</code>)</li>
-<li>Extracts inline schemas from parameter definitions</li>
-<li>Resolves enum values for string parameters</li>
-<li>Handles Proxmox-specific documentation quirks (e.g., undocumented query params)</li>
-</ul>
-<hr />
-<h2 id="stage-3-normalization-normalizepy">Stage 3: Normalization (<code>normalize.py</code>)<a class="headerlink" href="#stage-3-normalization-normalizepy" title="Permanent link">&para;</a></h2>
-<p><code>proxmox_codegen/normalize.py</code> deduplicates endpoints and enriches metadata:</p>
-<ul>
-<li><strong>Deduplication</strong>: Some Proxmox API paths appear in multiple tree branches; the normalizer collapses them</li>
-<li><strong>Type enrichment</strong>: Proxmox uses custom type annotations; these are mapped to JSON Schema types</li>
-<li><strong>Tag assignment</strong>: Groups endpoints by resource category (nodes, storage, cluster, etc.)</li>
-<li><strong>Operation ID generation</strong>: Creates unique <code>operationId</code> values for each operation</li>
-</ul>
-<hr />
-<h2 id="stage-4-openapi-builder-openapi_generatorpy">Stage 4: OpenAPI Builder (<code>openapi_generator.py</code>)<a class="headerlink" href="#stage-4-openapi-builder-openapi_generatorpy" title="Permanent link">&para;</a></h2>
-<p><code>proxmox_codegen/openapi_generator.py</code> produces an <strong>OpenAPI 3.1</strong> JSON document:</p>
+<h1 id="ssh-primitive-proxmox_sdkssh">SSH Primitive (<code>proxmox_sdk.ssh</code>)<a class="headerlink" href="#ssh-primitive-proxmox_sdkssh" title="Permanent link">&para;</a></h1>
+<p><code>RemoteSSHClient</code> is the single source of truth for SSH access used across the
+proxmox-sdk workspace and its downstream consumers (notably proxbox-api's
+hardware discovery flow). It is intentionally <strong>Proxmox-agnostic</strong>: nothing
+about Proxmox VE, <code>pvesh</code>, or NetBox is baked in.</p>
+<blockquote>
+<p><strong>Where this lives.</strong> The class is exported as
+<code>from proxmox_sdk.ssh import RemoteSSHClient</code>. Consumers must depend on this
+module rather than importing <code>paramiko</code> directly.</p>
+</blockquote>
+<h2 id="security-model">Security model<a class="headerlink" href="#security-model" title="Permanent link">&para;</a></h2>
+<p>Every constructor argument enforces a security property. None of these are
+opt-in.</p>
 <table>
 <thead>
 <tr>
-<th>Stat</th>
-<th>Value</th>
+<th>Property</th>
+<th>Mechanism</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Operations</td>
-<td>646</td>
+<td>Host-key pinning</td>
+<td><code>known_host_fingerprint=</code> (required). The SHA256 of the remote host key is compared via <code>hashlib.sha256(key.asbytes())</code>, base64-encoded with the <code>SHA256:</code> prefix. Mismatch raises <code>HostKeyMismatch</code> <strong>before</strong> auth.</td>
 </tr>
 <tr>
-<td>Paths</td>
-<td>428</td>
+<td>No TOFU</td>
+<td>A custom <code>_RejectAlwaysPolicy</code> is installed alongside the explicit fingerprint check. <code>AutoAddPolicy</code> and <code>WarningPolicy</code> are never used.</td>
 </tr>
 <tr>
-<td>File size</td>
-<td>~5.2 MB</td>
+<td>Algorithm pinning</td>
+<td>The paramiko <code>Transport</code>'s security options are rewritten before <code>start_client()</code> to prefer curve25519-sha256, ChaCha20-Poly1305 / AES-256-GCM, ETM SHA-512/256 MACs, and rsa-sha2-512/256 + ssh-ed25519 host keys.</td>
 </tr>
 <tr>
-<td>Format</td>
-<td>OpenAPI 3.1</td>
+<td>argv-list only</td>
+<td><code>run()</code> accepts <code>list[str]</code> exclusively. Passing a <code>str</code> raises <code>TypeError</code>. Internally <code>shlex.join()</code> is used to form the remote command, so shell metacharacters in argv elements cannot escape word boundaries.</td>
 </tr>
 <tr>
-<td>Security schemes</td>
-<td><code>ApiToken</code> (API token), <code>TicketAuth</code> (password/ticket)</td>
+<td>Optional allowlist</td>
+<td><code>command_allowlist=["dmidecode", "ip", "ethtool"]</code> refuses any other <code>argv[0]</code> with <code>CommandNotAllowed</code>. The basename of an absolute path is used for the check, so sudoers-pinned <code>/usr/sbin/dmidecode</code> still matches.</td>
+</tr>
+<tr>
+<td>Bounded output</td>
+<td><code>output_cap_bytes</code> (default 256 KiB) caps combined stdout + stderr per <code>run()</code>. Overflow raises <code>OutputTooLarge</code> and closes the channel.</td>
+</tr>
+<tr>
+<td>Bounded time</td>
+<td><code>connect_timeout</code> (default 10 s) bounds the TCP handshake explicitly via <code>socket.create_connection</code>; <code>exec_timeout</code> (default 30 s) bounds each <code>run()</code> call via <code>asyncio.wait_for</code> plus paramiko channel timeout.</td>
+</tr>
+<tr>
+<td>Log redaction</td>
+<td><code>_RedactingFilter</code> is installed on the module logger. The default patterns cover <code>password=…</code>, <code>token=…</code>, <code>BEGIN OPENSSH PRIVATE KEY</code> blocks, and Fernet-shaped tokens. Override via <code>log_redactors=</code>.</td>
 </tr>
 </tbody>
 </table>
-<p>The builder adds:</p>
+<h2 id="construction">Construction<a class="headerlink" href="#construction" title="Permanent link">&para;</a></h2>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.ssh</span><span class="w"> </span><span class="kn">import</span> <span class="n">RemoteSSHClient</span><span class="p">,</span> <span class="n">fingerprint_sha256</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">async</span> <span class="k">with</span> <span class="n">RemoteSSHClient</span><span class="p">(</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;10.0.0.1&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">port</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;proxbox-discovery&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">known_host_fingerprint</span><span class="o">=</span><span class="s2">&quot;SHA256:abc…&quot;</span><span class="p">,</span>          <span class="c1"># required</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">private_key</span><span class="o">=</span><span class="n">client_key_pem</span><span class="p">,</span>                    <span class="c1"># OpenSSH PEM string</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">exec_timeout</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">output_cap_bytes</span><span class="o">=</span><span class="mi">256</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">command_allowlist</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;dmidecode&quot;</span><span class="p">,</span> <span class="s2">&quot;ip&quot;</span><span class="p">,</span> <span class="s2">&quot;ethtool&quot;</span><span class="p">],</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span> <span class="k">as</span> <span class="n">ssh</span><span class="p">:</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">ssh</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;dmidecode&quot;</span><span class="p">,</span> <span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">exit_code</span><span class="p">)</span>
+</span></code></pre></div>
+<p>Credentials are <strong>plaintext in memory only</strong>. Downstream consumers (proxbox-api,
+netbox-proxbox) store key material Fernet-encrypted at rest and decrypt just
+long enough to construct the client. Passphrase-protected keys are not
+supported here — keep the secret store as the only confidentiality boundary.</p>
+<h2 id="fingerprint-workflow">Fingerprint workflow<a class="headerlink" href="#fingerprint-workflow" title="Permanent link">&para;</a></h2>
+<p><code>fingerprint_sha256(key)</code> returns the canonical <code>SHA256:&lt;base64&gt;</code> form (no
+trailing <code>=</code> padding) for either a <code>paramiko.PKey</code> instance or raw key bytes.
+Use it to populate the pin in your credential store after a one-time admin
+"trust on first connect" probe:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">fp</span> <span class="o">=</span> <span class="n">fingerprint_sha256</span><span class="p">(</span><span class="n">remote_host_key_bytes</span><span class="p">)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="c1"># Persist `fp` only after explicit operator confirmation in the UI.</span>
+</span></code></pre></div>
+<p><code>_normalize_fingerprint</code> is applied to constructor input; it accepts the
+canonical form, a lowercase <code>sha256:</code> prefix, padded base64, or a bare base64
+value, and rejects <code>MD5:</code> (legacy/weak) and empty strings.</p>
+<h2 id="exception-hierarchy">Exception hierarchy<a class="headerlink" href="#exception-hierarchy" title="Permanent link">&para;</a></h2>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>SshError
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── HostKeyMismatch         pinned fingerprint did not match
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── SshAuthFailed           paramiko refused the supplied credentials
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>├── SshTimeout              connect or exec timeout fired
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>├── OutputTooLarge          stdout+stderr exceeded output_cap_bytes
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>└── CommandNotAllowed       argv[0] outside command_allowlist
+</span></code></pre></div>
+<p>All five subclass <code>SshError</code>, so callers can pin a single <code>except SshError</code> if
+they want to convert any failure into a warning frame.</p>
+<h2 id="commandresult"><code>CommandResult</code><a class="headerlink" href="#commandresult" title="Permanent link">&para;</a></h2>
+<p><code>run()</code> returns a frozen dataclass:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">CommandResult</span><span class="p">:</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">argv</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">stderr</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">duration_s</span><span class="p">:</span> <span class="nb">float</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">truncated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</span></code></pre></div>
+<p><code>truncated</code> is reserved for future buffered-cap support; with the current
+<code>OutputTooLarge</code> semantics it is always <code>False</code> on success.</p>
+<h2 id="threading-model">Threading model<a class="headerlink" href="#threading-model" title="Permanent link">&para;</a></h2>
+<p><code>RemoteSSHClient</code> is an <code>async</code> context manager. Internally it runs paramiko's
+blocking primitives on the default executor via <code>loop.run_in_executor</code>,
+bounded by <code>asyncio.wait_for(..., timeout=...)</code>. Per-call timeouts mean a
+stalled remote cannot strand executor threads beyond <code>exec_timeout</code>.</p>
+<h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
+<p>Two test files cover this module:</p>
 <ul>
-<li>Path item objects with all supported HTTP methods</li>
-<li>Parameter objects for path, query, and body parameters</li>
-<li>Response schemas with Proxmox <code>data</code> envelope</li>
-<li>Reusable component schemas for shared types</li>
-<li>Security requirement declarations per operation</li>
+<li><code>tests/test_remote_ssh_client.py</code> — unit tests for argv validation, the
+  allowlist, fingerprint normalisation, log redaction, and <code>CommandResult</code>
+  shape. No socket is opened.</li>
+<li><code>tests/test_remote_ssh_client_integration.py</code> — drives the real client
+  against an in-process <code>paramiko.ServerInterface</code> running in a background
+  thread. Covers the happy path, fingerprint mismatch, output cap, and exec
+  timeout. No external SSH server is required.</li>
 </ul>
-<hr />
-<h2 id="stage-5-pydantic-generator-pydantic_generatorpy">Stage 5: Pydantic Generator (<code>pydantic_generator.py</code>)<a class="headerlink" href="#stage-5-pydantic-generator-pydantic_generatorpy" title="Permanent link">&para;</a></h2>
-<p><code>proxmox_codegen/pydantic_generator.py</code> converts the OpenAPI response schemas into <strong>Pydantic v2</strong> model classes. These models are used by <code>proxbox-api</code> to validate SDK responses against the expected schema.</p>
-<h3 id="how-proxbox-api-uses-generated-models">How proxbox-api Uses Generated Models<a class="headerlink" href="#how-proxbox-api-uses-generated-models" title="Permanent link">&para;</a></h3>
-<p>Generated models live at:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxbox_api/generated/proxmox/latest/pydantic_models.py
-</span></code></pre></div></p>
-<p>Every typed helper in <code>proxbox_api/services/proxmox_helpers.py</code> imports and uses these models:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxbox_api.generated.proxmox.latest</span><span class="w"> </span><span class="kn">import</span> <span class="n">pydantic_models</span> <span class="k">as</span> <span class="n">generated_models</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># After SDK call:</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">validated</span> <span class="o">=</span> <span class="n">generated_models</span><span class="o">.</span><span class="n">GetClusterStatusResponse</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Returns typed List[GetClusterStatusResponseItem] — validated against schema</span>
-</span></code></pre></div>
-<p>The naming convention follows the OpenAPI <code>operationId</code>:</p>
-<table>
-<thead>
-<tr>
-<th>Proxmox endpoint</th>
-<th>Generated model</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GET /cluster/status</code></td>
-<td><code>GetClusterStatusResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /cluster/resources</code></td>
-<td><code>GetClusterResourcesResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /nodes/{node}/qemu/{vmid}/config</code></td>
-<td><code>GetNodesNodeQemuVmidConfigResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /nodes/{node}/lxc/{vmid}/config</code></td>
-<td><code>GetNodesNodeLxcVmidConfigResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /storage</code></td>
-<td><code>GetStorageResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /storage/{storage}</code></td>
-<td><code>GetStorageStorageResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /nodes/{node}/storage/{storage}/content</code></td>
-<td><code>GetNodesNodeStorageStorageContentResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /nodes/{node}/tasks</code></td>
-<td><code>GetNodesNodeTasksResponse</code></td>
-</tr>
-<tr>
-<td><code>GET /nodes/{node}/tasks/{upid}/status</code></td>
-<td><code>GetNodesNodeTasksUpidStatusResponse</code></td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="triggering-the-pipeline">Triggering the Pipeline<a class="headerlink" href="#triggering-the-pipeline" title="Permanent link">&para;</a></h2>
-<p>The codegen pipeline is exposed as a protected API endpoint on the FastAPI server and as CLI commands:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">REST API</label><label for="__tabbed_1_2">CLI</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Generate schema from Proxmox API Viewer (rate-limited: 1/hour)</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://your-proxbox-api/codegen/generate<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$CODEGEN_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;proxmox_url&quot;: &quot;https://pve.example.com:8006&quot;}&#39;</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># Retrieve generated OpenAPI schema</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$CODEGEN_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span>https://your-proxbox-api/codegen/openapi
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="c1"># Retrieve generated Pydantic models (rate-limited: 5/hour)</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$CODEGEN_API_KEY</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span>https://your-proxbox-api/codegen/pydantic
-</span></code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Run full pipeline against a Proxmox host</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>proxmox<span class="w"> </span>codegen<span class="w"> </span>generate<span class="w"> </span>--url<span class="w"> </span>https://pve.example.com:8006
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># List available generated versions</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>proxmox<span class="w"> </span>codegen<span class="w"> </span>versions
-</span></code></pre></div>
-</div>
-</div>
-</div>
-<hr />
-<h2 id="security-controls">Security Controls<a class="headerlink" href="#security-controls" title="Permanent link">&para;</a></h2>
-<p>The codegen pipeline has strict security controls because it makes outbound HTTP requests to user-supplied URLs.</p>
-<h3 id="ssrf-protection">SSRF Protection<a class="headerlink" href="#ssrf-protection" title="Permanent link">&para;</a></h3>
-<p><code>proxmox_codegen/security.py</code> validates all user-supplied URLs before any outbound request:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">validate_source_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">allow_any_domain</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-</span></code></pre></div>
-<p>Blocked addresses:
-- Private IPv4 ranges (RFC 1918): <code>10.x.x.x</code>, <code>172.16-31.x.x</code>, <code>192.168.x.x</code>
-- Loopback: <code>127.x.x.x</code>, <code>::1</code>
-- Private IPv6
-- IPv4-mapped IPv6 (<code>::ffff:...</code>)
-- 6to4 addresses (<code>2002::/16</code>)</p>
-<p>Only addresses that resolve to public Proxmox VE API endpoints are allowed by default.</p>
-<h3 id="api-key-auth">API Key Auth<a class="headerlink" href="#api-key-auth" title="Permanent link">&para;</a></h3>
-<p>All codegen endpoints require <code>Authorization: Bearer &lt;CODEGEN_API_KEY&gt;</code>. The key is set via the <code>CODEGEN_API_KEY</code> environment variable at server startup.</p>
-<h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Endpoint</th>
-<th>Rate limit</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>POST /codegen/generate</code></td>
-<td>1 request / hour</td>
-</tr>
-<tr>
-<td><code>GET /codegen/pydantic</code></td>
-<td>5 requests / hour</td>
-</tr>
-<tr>
-<td><code>GET /codegen/openapi</code></td>
-<td>5 requests / hour</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h2>
-<p>Generated artifacts are stored under <code>generated/proxmox/&lt;version&gt;/</code>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>proxmox_sdk/
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>└── generated/
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    └── proxmox/
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        ├── latest/       ← symlink to most recent version
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        │   ├── openapi.json
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        │   └── pydantic_models.py
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        └── 8.1.0/
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            ├── openapi.json
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            └── pydantic_models.py
-</span></code></pre></div>
-<p>The SDK reads the version to use from <code>PROXMOX_MOCK_SCHEMA_VERSION</code> (default: <code>"latest"</code>). Multiple versions can coexist; <code>GET /versions/</code> lists all available versions.</p>
-<hr />
-<h2 id="updating-the-schema">Updating the Schema<a class="headerlink" href="#updating-the-schema" title="Permanent link">&para;</a></h2>
-<p>To update to a new Proxmox VE version:</p>
-<ol>
-<li>Run the codegen pipeline against the new Proxmox version</li>
-<li>Store the new artifacts in <code>generated/proxmox/&lt;new-version&gt;/</code></li>
-<li>Update the <code>latest</code> symlink</li>
-<li>Re-run <code>proxbox-api</code> to pick up the new models</li>
-</ol>
-<div class="admonition note">
-<p class="admonition-title">proxbox-api model imports</p>
-<p><code>proxbox-api</code> always imports from <code>proxbox_api.generated.proxmox.latest</code>. If you update the <code>latest</code> version, regenerate the proxbox-api generated models by running the proxbox-api codegen pipeline as well. The two generated artifact sets must be in sync.</p>
-</div>
+<p>The integration test fixture is reusable as a pattern for any downstream
+project that wants to test against a known-good local SSH server.</p>
 
 
 
