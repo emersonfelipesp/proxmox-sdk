@@ -65,6 +65,7 @@ nav:
       - Architecture: architecture.md
       - SDK Internals: sdk-internals.md
       - Code Generation Pipeline: codegen-pipeline.md
+      - IDE Support: ide-support.md
       - Integration with proxbox-api: integration-with-proxbox-api.md
   - Reference:
       - Contributing: development.md

@@ -155,7 +155,15 @@ Quality checks:
 
 - ruff check .
 - ruff format --check .
+- uv run ty check proxmox_sdk tests --output-format concise
+- uv run pyright proxmox_sdk
 - pytest
+
+IDE/type support:
+
+- proxmox_sdk ships a py.typed PEP 561 marker.
+- VS Code should use Pylance plus Ruff with the committed .vscode settings.
+- Pyright mirrors Pylance at basic mode and reports current typing debt as warnings.
 
 ## Testing Guidance
 

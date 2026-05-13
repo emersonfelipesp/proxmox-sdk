@@ -133,6 +133,14 @@ uv run pre-commit run --all-files
 ruff check .
 ruff format --check .
 
+# Run type checks
+uv run ty check proxmox_sdk tests --output-format concise
+uv run pyright proxmox_sdk
+
+# IDE support
+# proxmox_sdk ships a py.typed PEP 561 marker. Pyright mirrors Pylance at
+# typeCheckingMode = "basic"; current typing debt is surfaced as warnings.
+
 # Compile package
 uv run python -m compileall proxmox_sdk
 
