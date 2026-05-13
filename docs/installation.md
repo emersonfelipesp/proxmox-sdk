@@ -39,6 +39,15 @@ uv sync
 pip install -e .
 ```
 
+## IDE type hints
+
+The installed package ships a PEP 561 `py.typed` marker. Pylance, Pyright,
+PyCharm, and other PEP 561-aware editors resolve `proxmox_sdk` types from the
+installed wheel without extra consumer-side configuration.
+
+For contributor workspace setup and the dual `ty` plus `pyright` gates, see
+[IDE Support](ide-support.md).
+
 ---
 
 ## Docker Installation
@@ -155,10 +164,14 @@ Visit `http://localhost:8000/docs` to confirm the API is running.
 ### For Development
 
 ```bash
-pip install proxmox-sdk[test]
+pip install proxmox-sdk[dev,test]
 ```
 
 Includes:
+- `ruff` - Linting and formatting
+- `ty` - Fast project type checking
+- `pyright` - Pylance-compatible type checking
+- `pre-commit` - Git hook runner
 - `pytest` - Testing framework
 - `httpx` - HTTP client for testing
 - `playwright` - Browser automation for API Viewer crawling

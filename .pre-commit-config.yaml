@@ -7,7 +7,9 @@ repos:
       - id: check-yaml
         args: [--unsafe]
       - id: end-of-file-fixer
+        exclude: ^docs/reference/command-capture/
       - id: trailing-whitespace
+        exclude: ^docs/reference/command-capture/
       - id: debug-statements
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -22,5 +24,10 @@ repos:
       - id: ty-check
         name: ty-check
         entry: uv run ty check proxmox_sdk tests --output-format concise
+        language: system
+        pass_filenames: false
+      - id: pyright-check
+        name: pyright-check
+        entry: uv run pyright proxmox_sdk
         language: system
         pass_filenames: false

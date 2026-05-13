@@ -71,6 +71,7 @@ ruff format .
 ruff check .
 ruff check --fix .
 uv run ty check proxmox_sdk tests --output-format concise
+uv run pyright proxmox_sdk
 ```
 
 ### 4. Run Tests

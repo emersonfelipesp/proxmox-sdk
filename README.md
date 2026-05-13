@@ -86,6 +86,7 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 - **[Real API](https://emersonfelipesp.github.io/proxmox-sdk/real-api/)** - Real Proxmox integration guide
 - **[API Reference](https://emersonfelipesp.github.io/proxmox-sdk/api-reference/)** - Endpoint documentation
 - **[Development](https://emersonfelipesp.github.io/proxmox-sdk/development/)** - Contributing guide
+- **[IDE Support](https://emersonfelipesp.github.io/proxmox-sdk/ide-support/)** - VS Code, Pylance, and type-checking setup
 - **[Architecture](https://emersonfelipesp.github.io/proxmox-sdk/architecture/)** - How it works internally
 - **[FAQ](https://emersonfelipesp.github.io/proxmox-sdk/faq/)** - Frequently asked questions
 
@@ -120,6 +121,25 @@ pytest
 # Run linting
 ruff check .
 ruff format --check .
+
+# Run type checks
+uv run ty check proxmox_sdk tests --output-format concise
+uv run pyright proxmox_sdk
+```
+
+## IDE Support
+
+Open the repository in VS Code. When prompted, install the recommended
+extensions (`ms-python.vscode-pylance`, `ms-python.python`,
+`charliermarsh.ruff`). Pylance picks up types from the installed package
+automatically because `proxmox_sdk` ships a `py.typed` PEP 561 marker.
+
+Type checking uses two gates: `ty` for fast project checks and `pyright` for
+Pylance-compatible diagnostics. Both run at `typeCheckingMode = "basic"`:
+
+```bash
+uv run ty check proxmox_sdk tests --output-format concise
+uv run pyright proxmox_sdk
 ```
 
 ## Docker

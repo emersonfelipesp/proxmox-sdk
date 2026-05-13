@@ -5,6 +5,14 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["proxmox_sdk*"]
 
+[tool.setuptools.package-data]
+proxmox_sdk = [
+    "py.typed",
+    "generated/proxmox/latest/*.json",
+    "proxmox_cli/*.json",
+    "proxmox_cli/*.md",
+]
+
 [project]
 name = "proxmox-sdk"
 version = "0.0.3.post1"
@@ -56,11 +64,20 @@ docs = [
 granian = [
     "granian>=2.7.0",
 ]
+dev = [
+    "ruff>=0.15.8",
+    "ty>=0.0.29",
+    "pyright>=1.1.380",
+    "pre-commit>=4.3.0",
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]
 
 [dependency-groups]
 dev = [
     "ruff>=0.15.8",
     "ty>=0.0.29",
+    "pyright>=1.1.380",
     "pre-commit>=4.3.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
@@ -93,6 +110,10 @@ default-groups = ["dev"]
 [tool.ruff]
 target-version = "py311"
 line-length = 100
+extend-exclude = [
+    "generated/**",
+    "proxmox_sdk/generated/**",
+]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "ANN201", "D103", "W"]
@@ -122,3 +143,23 @@ no-matching-overload = "ignore"
 invalid-type-form = "ignore"
 not-iterable = "ignore"
 unused-type-ignore-comment = "ignore"
+
+[tool.pyright]
+include = ["proxmox_sdk"]
+exclude = [
+    "proxmox_sdk/generated/**",
+    "tests/**",
+]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+venvPath = "."
+venv = ".venv"
+reportAttributeAccessIssue = "warning"
+reportArgumentType = "warning"
+reportReturnType = "warning"
+reportMissingImports = "warning"
+reportGeneralTypeIssues = "warning"
+reportOperatorIssue = "warning"
+reportOptionalSubscript = "warning"
+reportOptionalMemberAccess = "warning"
+reportUnsupportedDunderAll = "warning"
