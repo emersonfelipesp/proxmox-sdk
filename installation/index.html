@@ -621,6 +621,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ide-type-hints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IDE type hints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#docker-installation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1316,6 +1327,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../ide-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDE Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../integration-with-proxbox-api/" class="md-nav__link">
         
   
@@ -1721,6 +1760,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ide-type-hints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IDE type hints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#docker-installation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1900,6 +1950,12 @@
 </span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Or with pip</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </span></code></pre></div>
+<h2 id="ide-type-hints">IDE type hints<a class="headerlink" href="#ide-type-hints" title="Permanent link">&para;</a></h2>
+<p>The installed package ships a PEP 561 <code>py.typed</code> marker. Pylance, Pyright,
+PyCharm, and other PEP 561-aware editors resolve <code>proxmox_sdk</code> types from the
+installed wheel without extra consumer-side configuration.</p>
+<p>For contributor workspace setup and the dual <code>ty</code> plus <code>pyright</code> gates, see
+<a href="../ide-support/">IDE Support</a>.</p>
 <hr />
 <h2 id="docker-installation">Docker Installation<a class="headerlink" href="#docker-installation" title="Permanent link">&para;</a></h2>
 <p>All Docker images are <strong>Alpine-based</strong> (smaller footprint). Three variants are available:</p>
@@ -2029,9 +2085,13 @@
 <hr />
 <h2 id="optional-dependencies">Optional Dependencies<a class="headerlink" href="#optional-dependencies" title="Permanent link">&para;</a></h2>
 <h3 id="for-development">For Development<a class="headerlink" href="#for-development" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-sdk<span class="o">[</span>test<span class="o">]</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>install<span class="w"> </span>proxmox-sdk<span class="o">[</span>dev,test<span class="o">]</span>
 </span></code></pre></div>
 <p>Includes:
+- <code>ruff</code> - Linting and formatting
+- <code>ty</code> - Fast project type checking
+- <code>pyright</code> - Pylance-compatible type checking
+- <code>pre-commit</code> - Git hook runner
 - <code>pytest</code> - Testing framework
 - <code>httpx</code> - HTTP client for testing
 - <code>playwright</code> - Browser automation for API Viewer crawling</p>

@@ -12,27 +12,31 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-sdk/reference/command-capture/top-level/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-sdk/ide-support/">
       
       
+        <link rel="prev" href="../codegen-pipeline/">
+      
+      
+        <link rel="next" href="../integration-with-proxbox-api/">
       
       
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Top-level - Proxmox OpenAPI</title>
+        <title>IDE Support - Proxmox OpenAPI</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,7 +55,7 @@
       
     
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#top-level" class="md-skip">
+        <a href="#ide-support" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +100,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="Proxmox OpenAPI" class="md-header__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
+    <a href=".." title="Proxmox OpenAPI" class="md-header__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -116,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Top-level
+              IDE Support
             
           </span>
         </div>
@@ -228,7 +232,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -249,7 +253,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../installation/" class="md-tabs__link">
+        <a href="../installation/" class="md-tabs__link">
           
   
   
@@ -269,7 +273,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../sdk-guide/" class="md-tabs__link">
+        <a href="../sdk-guide/" class="md-tabs__link">
           
   
   
@@ -289,7 +293,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../sdk-mock/" class="md-tabs__link">
+        <a href="../sdk-mock/" class="md-tabs__link">
           
   
   
@@ -305,11 +309,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../architecture/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../architecture/" class="md-tabs__link">
           
   
   
@@ -329,7 +335,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../development/" class="md-tabs__link">
+        <a href="../development/" class="md-tabs__link">
           
   
   
@@ -349,7 +355,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../" class="md-tabs__link">
+        <a href="../reference/command-capture/" class="md-tabs__link">
           
   
   
@@ -367,7 +373,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../faq/" class="md-tabs__link">
+      <a href="../faq/" class="md-tabs__link">
         
   
   
@@ -408,7 +414,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="Proxmox OpenAPI" class="md-nav__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
+    <a href=".." title="Proxmox OpenAPI" class="md-nav__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -438,7 +444,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -519,7 +525,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -547,7 +553,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quickstart/" class="md-nav__link">
+      <a href="../quickstart/" class="md-nav__link">
         
   
   
@@ -636,7 +642,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-guide/" class="md-nav__link">
+      <a href="../sdk-guide/" class="md-nav__link">
         
   
   
@@ -664,7 +670,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-authentication/" class="md-nav__link">
+      <a href="../sdk-authentication/" class="md-nav__link">
         
   
   
@@ -692,7 +698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-virtual-machines/" class="md-nav__link">
+      <a href="../sdk-virtual-machines/" class="md-nav__link">
         
   
   
@@ -720,7 +726,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-pbs/" class="md-nav__link">
+      <a href="../sdk-pbs/" class="md-nav__link">
         
   
   
@@ -748,7 +754,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-examples/" class="md-nav__link">
+      <a href="../sdk-examples/" class="md-nav__link">
         
   
   
@@ -837,7 +843,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-mock/" class="md-nav__link">
+      <a href="../sdk-mock/" class="md-nav__link">
         
   
   
@@ -865,7 +871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../mock-api/" class="md-nav__link">
+      <a href="../mock-api/" class="md-nav__link">
         
   
   
@@ -893,7 +899,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../real-api/" class="md-nav__link">
+      <a href="../real-api/" class="md-nav__link">
         
   
   
@@ -921,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api-reference/" class="md-nav__link">
+      <a href="../api-reference/" class="md-nav__link">
         
   
   
@@ -953,28 +959,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   
@@ -992,7 +1001,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1010,7 +1019,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -1038,7 +1047,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-internals/" class="md-nav__link">
+      <a href="../sdk-internals/" class="md-nav__link">
         
   
   
@@ -1066,7 +1075,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../codegen-pipeline/" class="md-nav__link">
+      <a href="../codegen-pipeline/" class="md-nav__link">
         
   
   
@@ -1091,10 +1100,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../ide-support/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IDE Support
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1110,6 +1146,81 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#vs-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VS Code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#type-checking-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Checking Gates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#excluded-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Excluded Paths
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-severity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule Severity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consumers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consumers
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1122,7 +1233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integration-with-proxbox-api/" class="md-nav__link">
+      <a href="../integration-with-proxbox-api/" class="md-nav__link">
         
   
   
@@ -1211,7 +1322,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/" class="md-nav__link">
+      <a href="../development/" class="md-nav__link">
         
   
   
@@ -1239,7 +1350,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../security/" class="md-nav__link">
+      <a href="../security/" class="md-nav__link">
         
   
   
@@ -1267,7 +1378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../performance/" class="md-nav__link">
+      <a href="../performance/" class="md-nav__link">
         
   
   
@@ -1356,7 +1467,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../reference/command-capture/" class="md-nav__link">
         
   
   
@@ -1384,7 +1495,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../PVESH/" class="md-nav__link">
+      <a href="../reference/PVESH/" class="md-nav__link">
         
   
   
@@ -1412,7 +1523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../proxmoxer/" class="md-nav__link">
+      <a href="../reference/proxmoxer/" class="md-nav__link">
         
   
   
@@ -1447,7 +1558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -1494,10 +1605,54 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#proxmox-help" class="md-nav__link">
+  <a href="#vs-code" class="md-nav__link">
     <span class="md-ellipsis">
       
-        proxmox --help
+        VS Code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#type-checking-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Type Checking Gates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#excluded-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Excluded Paths
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-severity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule Severity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#consumers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consumers
       
     </span>
   </a>
@@ -1524,70 +1679,61 @@
   
 
 
-<h1 id="top-level">Top-level<a class="headerlink" href="#top-level" title="Permanent link">&para;</a></h1>
-<h3 id="proxmox-help"><code>proxmox --help</code><a class="headerlink" href="#proxmox-help" title="Permanent link">&para;</a></h3>
-<p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxmox<span class="w"> </span>--help
+<h1 id="ide-support">IDE Support<a class="headerlink" href="#ide-support" title="Permanent link">&para;</a></h1>
+<p><code>proxmox_sdk</code> ships a <a href="https://peps.python.org/pep-0561/">PEP 561</a> <code>py.typed</code>
+marker and includes it in the wheel package data. Editors that read PEP 561,
+including VS Code through Pylance, PyCharm, and Pyright on the command line,
+resolve types from an installed <code>proxmox-sdk</code> without extra configuration.</p>
+<h2 id="vs-code">VS Code<a class="headerlink" href="#vs-code" title="Permanent link">&para;</a></h2>
+<p>The repository commits a minimal workspace under <code>.vscode/</code> so a fresh clone
+gets a working Python IDE on first open. When VS Code prompts to install the
+recommended extensions, accept:</p>
+<ul>
+<li><code>ms-python.python</code></li>
+<li><code>ms-python.vscode-pylance</code></li>
+<li><code>charliermarsh.ruff</code></li>
+</ul>
+<p><code>.vscode/settings.json</code> points the interpreter to
+<code>${workspaceFolder}/.venv/bin/python</code>, enables Pylance indexing and import
+completions, enables pytest discovery for <code>tests</code>, and uses Ruff as the Python
+formatter on save. <code>python.analysis.typeCheckingMode</code> is set to <code>basic</code> to
+match <code>[tool.pyright]</code> in <code>pyproject.toml</code>.</p>
+<h2 id="type-checking-gates">Type Checking Gates<a class="headerlink" href="#type-checking-gates" title="Permanent link">&para;</a></h2>
+<p>Two type checkers run over the same source tree:</p>
+<ul>
+<li><code>ty</code> checks <code>proxmox_sdk</code> plus <code>tests</code> and remains the fast project gate.</li>
+<li><code>pyright</code> checks <code>proxmox_sdk</code> with diagnostics aligned to Pylance.</li>
+</ul>
+<p>Run them manually with:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>check<span class="w"> </span>proxmox_sdk<span class="w"> </span>tests<span class="w"> </span>--output-format<span class="w"> </span>concise
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pyright<span class="w"> </span>proxmox_sdk
 </span></code></pre></div>
-<p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a> Usage: proxmox [OPTIONS] COMMAND [ARGS]...                                     
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> Proxmox VE, PMG, and PBS CLI - A pvesh-like interface for Proxmox API          
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│ --version                                    Show version and exit           │
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│ --verbose             -v                     Enable verbose logging          │
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│ --quiet               -q                     Suppress non-essential output   │
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│ --config              -c      TEXT           Path to configuration file      │
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│ --backend             -b      TEXT           Backend to use (https,          │
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│                                              ssh_paramiko, openssh, local,   │
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│                                              mock)                           │
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│ --host                -H      TEXT           Proxmox host address            │
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│ --user                -U      TEXT           Username or token name          │
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│ --password            -P      TEXT           Password (insecure, prefer      │
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│                                              token)                          │
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│ --token-value                 TEXT           API token value                 │
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│ --port                        INTEGER        API port (default: 8006)        │
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│ --service             -S      [PVE|PMG|PBS]  Proxmox service type            │
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│                                              [default: PVE]                  │
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│ --output              -o      TEXT           Output format (human, json,     │
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│                                              yaml, markdown, table, text,    │
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│                                              raw)                            │
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│ --json                                       Shortcut for --output json      │
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│ --yaml                                       Shortcut for --output yaml      │
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│ --markdown                                   Shortcut for --output markdown  │
-</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│ --install-completion                         Install completion for the      │
-</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│                                              current shell.                  │
-</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│ --show-completion                            Show completion for the current │
-</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│                                              shell, to copy it or customize  │
-</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│                                              the installation.               │
-</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│ --help                                       Show this message and exit.     │
-</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>╭─ Commands ───────────────────────────────────────────────────────────────────╮
-</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│ batch               Execute batch operations from a JSON file.               │
-</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│ create              Create new resources in the Proxmox API.                 │
-</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│ delete              Delete resources from the Proxmox API.                   │
-</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│ get                 Retrieve resources from the Proxmox API.                 │
-</span><span id="__span-1-39"><a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│ help-cmd            Show help for API endpoints.                             │
-</span><span id="__span-1-40"><a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│ ls                  List child resources at a given API path.                │
-</span><span id="__span-1-41"><a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│ set-cmd             Update (PUT/PATCH) resources in the Proxmox API.         │
-</span><span id="__span-1-42"><a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│ tui                 Launch interactive Proxmox TUI for resource navigation   │
-</span><span id="__span-1-43"><a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│                     and management.                                          │
-</span><span id="__span-1-44"><a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>│ usage               Show API schema and usage information for an endpoint.   │
-</span><span id="__span-1-45"><a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>│ completion-install  Install shell completion for proxmox CLI.                │
-</span><span id="__span-1-46"><a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>│ init                Initialize CLI config for production and mock TUI usage. │
-</span><span id="__span-1-47"><a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>│ config-list         List all available configuration profiles.               │
-</span><span id="__span-1-48"><a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>│ config-show         Show configuration for a specific profile.               │
-</span><span id="__span-1-49"><a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>│ config-add          Add a new configuration profile.                         │
-</span><span id="__span-1-50"><a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>│ config-remove       Remove a configuration profile.                          │
-</span><span id="__span-1-51"><a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>│ config-set-default  Set the default profile.                                 │
-</span><span id="__span-1-52"><a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>│ benchmark           Benchmark API performance.                               │
-</span><span id="__span-1-53"><a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>│ perf-test           Run performance tests.                                   │
-</span><span id="__span-1-54"><a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>│ docs                Generate CLI documentation artifacts for MkDocs.         │
-</span><span id="__span-1-55"><a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.318</code></p>
-<hr />
+<p>The <code>pyright-check</code> hook sits next to <code>ty-check</code> in <code>.pre-commit-config.yaml</code>,
+so <code>uv run pre-commit run --all-files</code> exercises both gates.</p>
+<h2 id="excluded-paths">Excluded Paths<a class="headerlink" href="#excluded-paths" title="Permanent link">&para;</a></h2>
+<p>Generated bindings and tests are excluded from Pyright to keep the Pylance gate
+focused on the importable package surface:</p>
+<ul>
+<li><code>proxmox_sdk/generated/**</code></li>
+<li><code>tests/**</code></li>
+</ul>
+<p><code>ty</code> still checks <code>tests</code> with the repo's existing rule configuration.</p>
+<h2 id="rule-severity">Rule Severity<a class="headerlink" href="#rule-severity" title="Permanent link">&para;</a></h2>
+<p><code>[tool.pyright]</code> downgrades the current typing debt to warnings so diagnostics
+remain visible in the editor without failing the pre-commit gate. The warnings
+mostly come from dynamic FastAPI route construction, schema dictionaries typed
+as <code>object</code>, optional dependency imports, and CLI renderable return types.</p>
+<p>Fixing those warnings is a separate typing-hardening task. Do not mix it into
+unrelated feature work unless the feature directly touches the affected code.</p>
+<h2 id="consumers">Consumers<a class="headerlink" href="#consumers" title="Permanent link">&para;</a></h2>
+<p>If you install <code>proxmox-sdk</code> from PyPI into another project, Pylance and other
+PEP 561-aware tools pick up the bundled type hints automatically. The wheel
+includes:</p>
+<ul>
+<li><code>proxmox_sdk/py.typed</code></li>
+</ul>
+<p>Hovering public SDK imports such as <code>ProxmoxSDK</code> and <code>SyncProxmoxSDK</code> resolves
+to the package's real type information.</p>
 
 
 
@@ -1674,10 +1820,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
