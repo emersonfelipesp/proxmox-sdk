@@ -1,0 +1,14 @@
+# dmidecode 3.3
+Getting SMBIOS data from sysfs.
+SMBIOS 3.2.1 present.
+
+Handle 0x0100, DMI type 1, 27 bytes
+System Information
+	Manufacturer: Dell Inc.
+	Product Name: PowerEdge R740
+	Version: Not Specified
+	Serial Number: 7XQZ1Y3
+	UUID: 4c4c4544-0058-5110-805a-c2c04f315933
+	Wake-up Type: Power Switch
+	SKU Number: SKU=NotProvided;ModelName=PowerEdge R740
+	Family: PowerEdge

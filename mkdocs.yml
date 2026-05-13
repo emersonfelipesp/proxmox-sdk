@@ -67,6 +67,9 @@ nav:
       - Code Generation Pipeline: codegen-pipeline.md
       - IDE Support: ide-support.md
       - Integration with proxbox-api: integration-with-proxbox-api.md
+  - Node Operations:
+      - SSH Primitive: ssh.md
+      - Hardware Discovery: node-hardware.md
   - Reference:
       - Contributing: development.md
       - Security: security.md
