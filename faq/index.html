@@ -2863,13 +2863,34 @@
 </ul>
 <p>If you want to connect to a real Proxmox server, switch to real mode by setting <code>PROXMOX_API_MODE=real</code>.</p>
 <h3 id="what-proxmox-ve-version-is-supported">What Proxmox VE version is supported?<a class="headerlink" href="#what-proxmox-ve-version-is-supported" title="Permanent link">&para;</a></h3>
-<p>The current schema is based on <strong>Proxmox VE 8.1</strong>, but it should work with:</p>
-<ul>
-<li>✅ <strong>Proxmox VE 8.x</strong> (fully supported)</li>
-<li>✅ <strong>Proxmox VE 7.x</strong> (mostly compatible)</li>
-<li>⚠️ <strong>Proxmox VE 6.x</strong> (some endpoints may differ)</li>
-</ul>
-<p>You can regenerate schemas for different versions using the code generation pipeline.</p>
+<p>The current schema is captured from <strong>Proxmox VE 9.1.11</strong>. Both the
+<code>9.1.11/</code> and <code>latest/</code> schema directories ship the same content, and CI
+exercises both tags in parallel.</p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Status</th>
+<th>Schema directory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9.1.11</td>
+<td>Primary (CI-tested)</td>
+<td><code>proxmox_sdk/generated/proxmox/9.1.11/</code></td>
+</tr>
+<tr>
+<td>latest</td>
+<td>Alias for 9.1.11 (CI-tested)</td>
+<td><code>proxmox_sdk/generated/proxmox/latest/</code></td>
+</tr>
+</tbody>
+</table>
+<p>Older releases (8.x, 7.x) may still work for endpoints whose shapes have not
+changed, but they are no longer in the CI matrix. To certify another version,
+run <code>proxmox-sdk-codegen</code> against your node and pass
+<code>--version-tag &lt;your-version&gt;</code> to ship a local schema.</p>
 <h3 id="is-this-an-official-proxmox-project">Is this an official Proxmox project?<a class="headerlink" href="#is-this-an-official-proxmox-project" title="Permanent link">&para;</a></h3>
 <p><strong>No.</strong> This is an independent, community-driven project. It's not affiliated with or endorsed by Proxmox Server Solutions GmbH.</p>
 <p>The project uses publicly available Proxmox VE API documentation and generates OpenAPI schemas from live API exploration.</p>
@@ -3045,7 +3066,7 @@
 </span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
 </span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="k">await</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run_full_pipeline</span><span class="p">(</span>
 </span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;8.1&quot;</span><span class="p">,</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.1.11&quot;</span><span class="p">,</span>
 </span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>This generates:

@@ -2089,7 +2089,7 @@
     CW-&gt;&gt;CLI: raw_capture.json (646 items)</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">Crawler requires a real Proxmox host</p>
-<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 8.1. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
+<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.1.11. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
 </div>
 <hr />
 <h2 id="stage-2-parser-apidoc_parserpy">Stage 2: Parser (<code>apidoc_parser.py</code>)<a class="headerlink" href="#stage-2-parser-apidoc_parserpy" title="Permanent link">&para;</a></h2>
@@ -2287,10 +2287,10 @@
 <div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>proxmox_sdk/
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>└── generated/
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    └── proxmox/
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        ├── latest/       ← symlink to most recent version
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        ├── latest/       ← refreshed alongside the newest tagged version
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        │   ├── openapi.json
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        │   └── pydantic_models.py
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        └── 8.1.0/
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        └── 9.1.11/
 </span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            ├── openapi.json
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            └── pydantic_models.py
 </span></code></pre></div>

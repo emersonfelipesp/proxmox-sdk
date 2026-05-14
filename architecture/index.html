@@ -2317,7 +2317,7 @@
 <h3 id="2-dynamic-route-generation">2. Dynamic Route Generation<a class="headerlink" href="#2-dynamic-route-generation" title="Permanent link">&para;</a></h3>
 <p>Rather than hardcoding 646 routes, the server registers them at startup from the OpenAPI schema. This means schema updates automatically produce new routes with zero manual work. Startup takes ~1 second for schema loading plus route generation.</p>
 <h3 id="3-pre-generated-schemas">3. Pre-Generated Schemas<a class="headerlink" href="#3-pre-generated-schemas" title="Permanent link">&para;</a></h3>
-<p>The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., <code>8.1.0</code>) is stored independently under <code>generated/proxmox/</code>.</p>
+<p>The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., <code>9.1.11</code>) is stored independently under <code>generated/proxmox/</code>; CI ships both <code>9.1.11/</code> and a <code>latest/</code> mirror.</p>
 <h3 id="4-full-requestresponse-validation">4. Full Request/Response Validation<a class="headerlink" href="#4-full-requestresponse-validation" title="Permanent link">&para;</a></h3>
 <p>Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.</p>
 <h3 id="5-in-memory-mock-state">5. In-Memory Mock State<a class="headerlink" href="#5-in-memory-mock-state" title="Permanent link">&para;</a></h3>
