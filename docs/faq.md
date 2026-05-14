@@ -26,13 +26,19 @@ If you want to connect to a real Proxmox server, switch to real mode by setting 
 
 ### What Proxmox VE version is supported?
 
-The current schema is based on **Proxmox VE 8.1**, but it should work with:
+The current schema is captured from **Proxmox VE 9.1.11**. Both the
+`9.1.11/` and `latest/` schema directories ship the same content, and CI
+exercises both tags in parallel.
 
-- ✅ **Proxmox VE 8.x** (fully supported)
-- ✅ **Proxmox VE 7.x** (mostly compatible)
-- ⚠️ **Proxmox VE 6.x** (some endpoints may differ)
+| Version | Status | Schema directory |
+|---|---|---|
+| 9.1.11 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
+| latest | Alias for 9.1.11 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
 
-You can regenerate schemas for different versions using the code generation pipeline.
+Older releases (8.x, 7.x) may still work for endpoints whose shapes have not
+changed, but they are no longer in the CI matrix. To certify another version,
+run `proxmox-sdk-codegen` against your node and pass
+`--version-tag <your-version>` to ship a local schema.
 
 ### Is this an official Proxmox project?
 
@@ -289,7 +295,7 @@ pipeline = ProxmoxCodegenPipeline(
 
 await pipeline.run_full_pipeline(
     output_dir="./output",
-    version_tag="8.1",
+    version_tag="9.1.11",
 )
 ```
 

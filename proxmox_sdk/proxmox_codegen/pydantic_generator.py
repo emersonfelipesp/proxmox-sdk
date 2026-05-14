@@ -8,6 +8,7 @@ from proxmox_sdk.proxmox_codegen.utils import (
     extract_path_params,
     pascal_case,
     slugify_identifier,
+    utc_now_iso,
 )
 
 
@@ -165,15 +166,42 @@ def _request_schema_for_operation(
     return schema
 
 
-def generate_pydantic_models_from_openapi(openapi: dict[str, object]) -> str:  # noqa: C901
-    """Generate a Python module with Pydantic v2 schemas for request/response payloads."""
+def generate_pydantic_models_from_openapi(  # noqa: C901
+    openapi: dict[str, object],
+    *,
+    version_tag: str | None = None,
+    source_sha256: str | None = None,
+    generated_at: str | None = None,
+) -> str:
+    """Generate a Python module with Pydantic v2 schemas for request/response payloads.
+
+    When ``version_tag``, ``source_sha256``, and ``generated_at`` are supplied,
+    they are embedded as ``GENERATED_FOR_PROXMOX_VERSION``,
+    ``GENERATED_SOURCE_SHA256``, and ``GENERATED_AT`` module constants that
+    ``tests/test_generated_integrity.py`` uses to detect drift.
+    """
+
+    info = openapi.get("info") if isinstance(openapi, dict) else None
+    resolved_version = (
+        version_tag or (info.get("version") if isinstance(info, dict) else None) or "latest"
+    )
+    resolved_at = generated_at or utc_now_iso()
 
     lines: list[str] = [
-        '"""Generated Pydantic v2 schemas from Proxmox OpenAPI output."""',
+        '"""Generated Pydantic v2 schemas from Proxmox OpenAPI output.',
+        "",
+        "Do not edit by hand. The integrity guard below pins this artifact to the",
+        "``openapi.json`` it was generated from; ``tests/test_generated_integrity.py``",
+        "re-hashes the source spec on every run and fails if the two drift.",
+        '"""',
         "",
         "from __future__ import annotations",
         "",
         "from pydantic import BaseModel, ConfigDict, Field, RootModel",
+        "",
+        f'GENERATED_FOR_PROXMOX_VERSION = "{resolved_version}"',
+        f'GENERATED_SOURCE_SHA256 = "{source_sha256 or ""}"',
+        f'GENERATED_AT = "{resolved_at}"',
         "",
         "",
         "class ProxmoxBaseModel(BaseModel):",

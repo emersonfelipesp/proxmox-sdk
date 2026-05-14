@@ -17,7 +17,7 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 2. **Standalone Python SDK** - Production-ready SDK without FastAPI server (async + sync)
 3. **CLI + TUI** - Typer CLI and Textual terminal UI for interactive use
 4. **Codegen pipeline** - Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
-5. **646 endpoints** - Pre-generated Proxmox VE 8.1 API with full OpenAPI schema
+5. **646 endpoints** - Pre-generated Proxmox VE 9.1.11 API with full OpenAPI schema
 6. **Rate limiting** - Built-in protection via SlowAPI
 
 ## Package Structure

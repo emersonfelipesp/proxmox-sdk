@@ -289,7 +289,7 @@ pipeline = ProxmoxCodegenPipeline(
 # Run full pipeline
 await pipeline.run_full_pipeline(
     output_dir="./output",
-    version_tag="8.1",
+    version_tag="9.1.11",
 )
 
 # Output:
@@ -342,7 +342,7 @@ async def test_proxmox_client_auth(mock_proxmox_server):
     client = ProxmoxClient(config)
     result = await client.request("GET", "/version")
 
-    assert result["version"] == "8.1"
+    assert result["version"] == "9.1.11"
 ```
 
 ### Running Tests

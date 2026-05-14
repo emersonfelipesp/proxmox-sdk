@@ -2,7 +2,7 @@
   "info": {
     "description": "Generated from Proxmox API Viewer raw endpoint definitions.",
     "title": "Proxmox VE API (Generated from API Viewer)",
-    "version": "latest"
+    "version": "9.1.11"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -64,6 +64,20 @@ def build_parser() -> argparse.ArgumentParser:
             "NOT recommended for production use."
         ),
     )
+    parser.add_argument(
+        "--allow-private-ips",
+        action="store_true",
+        default=False,
+        help=(
+            "Permit a private/loopback/link-local IP literal in --source-url. "
+            "Intended for lab-driven schema captures against a trusted Proxmox "
+            "node on a private network (e.g. certifying a release before "
+            "pve.proxmox.com is updated). Also relaxes the reserved-'latest'-tag "
+            "check so the lab capture can be tagged 'latest'. "
+            "NEVER enable this for production codegen or in a service that "
+            "accepts arbitrary user input."
+        ),
+    )
     return parser
 
 
@@ -83,6 +97,7 @@ def main() -> int:
         retry_backoff_seconds=max(0.0, args.retry_backoff),
         checkpoint_every=max(1, args.checkpoint_every),
         allow_insecure_ssl=args.allow_insecure_ssl,
+        allow_private_ips=args.allow_private_ips,
     )
     viewer_capture = bundle.capture.get("viewer", {})
     completeness = bundle.capture.get("completeness", {})

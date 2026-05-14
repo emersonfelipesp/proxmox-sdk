@@ -101,13 +101,16 @@ jobs:
             dist/*
 
   validate-testpypi:
-    name: validate TestPyPI / py${{ matrix.python-version }}
+    name: validate TestPyPI / py${{ matrix.python-version }} / schema=${{ matrix.proxmox_schema }}
     needs: [prepare-release, publish-testpypi]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.11', '3.12', '3.13']
+        proxmox_schema: [latest, "9.1.11"]
+    env:
+      PROXMOX_MOCK_SCHEMA_VERSION: ${{ matrix.proxmox_schema }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -143,7 +146,7 @@ jobs:
           uv run python -c "import proxmox_sdk.main"
           uv run python -c "import proxmox_sdk.mock_main"
 
-      - name: Run test suite
+      - name: Run test suite (schema=${{ matrix.proxmox_schema }})
         run: uv run pytest -n auto --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
 
   publish-docker:

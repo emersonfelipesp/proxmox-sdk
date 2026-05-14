@@ -297,7 +297,7 @@ else:
 
 ## Mock Backend
 
-The `MockBackend` implements `AbstractBackend` using an in-memory `SharedMemoryMockStore`. It loads the pre-generated Proxmox VE 8.1 OpenAPI schema and generates mock responses that satisfy the schema's property definitions.
+The `MockBackend` implements `AbstractBackend` using an in-memory `SharedMemoryMockStore`. It loads the pre-generated Proxmox VE 9.1.11 OpenAPI schema and generates mock responses that satisfy the schema's property definitions.
 
 ```python title="proxmox_sdk/sdk/api.py (class method)"
 @classmethod

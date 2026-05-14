@@ -58,6 +58,12 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        proxmox_schema: [latest, "9.1.11"]
+    env:
+      PROXMOX_MOCK_SCHEMA_VERSION: ${{ matrix.proxmox_schema }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -71,13 +77,13 @@ jobs:
       - name: Sync dependencies
         run: uv sync --frozen --extra test --group dev
 
-      - name: Run mocked schema-driven tests
+      - name: Run mocked schema-driven tests (schema=${{ matrix.proxmox_schema }})
         run: uv run pytest -n auto --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
         with:
-          name: proxmox-sdk-coverage
+          name: proxmox-sdk-coverage-${{ matrix.proxmox_schema }}
           path: coverage.xml
 
   # Publish Docker images:

@@ -49,7 +49,7 @@ Returns Proxmox VE API version information.
 **Response:**
 ```json
 {
-  "version": "8.1",
+  "version": "9.1.11",
   "release": "1",
   "repoid": "abc123"
 }
@@ -403,6 +403,6 @@ See [Security](security.md) for details.
 
 ## Versioning
 
-The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 8.1**.
+The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 9.1.11** (with `latest` mirroring 9.1.11).
 
 For the most up-to-date endpoint reference, always check the Swagger UI at `/docs` when running the server.
