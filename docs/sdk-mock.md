@@ -200,11 +200,11 @@ async with ProxmoxSDK.mock() as proxmox:
     nodes = await proxmox.nodes.get()
 
 # Use a specific version
-async with ProxmoxSDK.mock(schema_version="8.1") as proxmox:
+async with ProxmoxSDK.mock(schema_version="9.1.11") as proxmox:
     nodes = await proxmox.nodes.get()
 
 # Sync version
-with ProxmoxSDK.sync_mock(schema_version="8.0") as proxmox:
+with ProxmoxSDK.sync_mock(schema_version="9.1.11") as proxmox:
     nodes = proxmox.nodes.get()
 ```
 

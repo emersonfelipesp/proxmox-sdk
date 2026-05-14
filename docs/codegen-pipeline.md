@@ -62,7 +62,7 @@ sequenceDiagram
 ```
 
 !!! warning "Crawler requires a real Proxmox host"
-    The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 8.1. Re-running the crawler requires `PROXMOX_URL`, valid credentials, and network access.
+    The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.1.11. Re-running the crawler requires `PROXMOX_URL`, valid credentials, and network access.
 
 ---
 
@@ -224,10 +224,10 @@ Generated artifacts are stored under `generated/proxmox/<version>/`:
 proxmox_sdk/
 └── generated/
     └── proxmox/
-        ├── latest/       ← symlink to most recent version
+        ├── latest/       ← refreshed alongside the newest tagged version
         │   ├── openapi.json
         │   └── pydantic_models.py
-        └── 8.1.0/
+        └── 9.1.11/
             ├── openapi.json
             └── pydantic_models.py
 ```

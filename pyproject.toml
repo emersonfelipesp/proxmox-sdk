@@ -96,6 +96,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
+markers = [
+    "live: tests that hit a real Proxmox node (require PROXMOX_API_URL + token env vars); excluded from CI by default",
+]
 
 [tool.coverage.run]
 source = ["proxmox_sdk"]

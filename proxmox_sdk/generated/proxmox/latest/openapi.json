@@ -8201,6 +8201,23 @@
             }
           },
           {
+            "description": "Verify that the ticket is valid for this port.",
+            "in": "query",
+            "name": "port",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Verify that the ticket is valid for this port.",
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer>"
+              }
+            }
+          },
+          {
             "description": "Verify ticket, and check if user have access 'privs' on 'path'",
             "in": "query",
             "name": "privs",
@@ -8252,6 +8269,12 @@
                     "maxLength": 64,
                     "type": "string",
                     "typetext": "<string>"
+                  },
+                  "port": {
+                    "description": "Verify that the ticket is valid for this port.",
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer>"
                   },
                   "privs": {
                     "description": "Verify ticket, and check if user have access 'privs' on 'path'",
@@ -9206,6 +9229,7 @@
                           "he",
                           "he_ddns",
                           "hetzner",
+                          "hetznercloud",
                           "hexonet",
                           "hostingde",
                           "huaweicloud",
@@ -9260,6 +9284,7 @@
                           "one",
                           "online",
                           "openprovider",
+                          "openprovider_rest",
                           "openstack",
                           "opnsense",
                           "ovh",
@@ -9278,6 +9303,7 @@
                           "selfhost",
                           "servercow",
                           "simply",
+                          "spaceship",
                           "technitium",
                           "tele3",
                           "tencent",
@@ -9460,6 +9486,7 @@
                 "he",
                 "he_ddns",
                 "hetzner",
+                "hetznercloud",
                 "hexonet",
                 "hostingde",
                 "huaweicloud",
@@ -9514,6 +9541,7 @@
                 "one",
                 "online",
                 "openprovider",
+                "openprovider_rest",
                 "openstack",
                 "opnsense",
                 "ovh",
@@ -9532,6 +9560,7 @@
                 "selfhost",
                 "servercow",
                 "simply",
+                "spaceship",
                 "technitium",
                 "tele3",
                 "tencent",
@@ -9624,6 +9653,7 @@
                   "he",
                   "he_ddns",
                   "hetzner",
+                  "hetznercloud",
                   "hexonet",
                   "hostingde",
                   "huaweicloud",
@@ -9678,6 +9708,7 @@
                   "one",
                   "online",
                   "openprovider",
+                  "openprovider_rest",
                   "openstack",
                   "opnsense",
                   "ovh",
@@ -9696,6 +9727,7 @@
                   "selfhost",
                   "servercow",
                   "simply",
+                  "spaceship",
                   "technitium",
                   "tele3",
                   "tencent",
@@ -9912,6 +9944,7 @@
                       "he",
                       "he_ddns",
                       "hetzner",
+                      "hetznercloud",
                       "hexonet",
                       "hostingde",
                       "huaweicloud",
@@ -9966,6 +9999,7 @@
                       "one",
                       "online",
                       "openprovider",
+                      "openprovider_rest",
                       "openstack",
                       "opnsense",
                       "ovh",
@@ -9984,6 +10018,7 @@
                       "selfhost",
                       "servercow",
                       "simply",
+                      "spaceship",
                       "technitium",
                       "tele3",
                       "tencent",
@@ -10291,6 +10326,7 @@
                         "he",
                         "he_ddns",
                         "hetzner",
+                        "hetznercloud",
                         "hexonet",
                         "hostingde",
                         "huaweicloud",
@@ -10345,6 +10381,7 @@
                         "one",
                         "online",
                         "openprovider",
+                        "openprovider_rest",
                         "openstack",
                         "opnsense",
                         "ovh",
@@ -10363,6 +10400,7 @@
                         "selfhost",
                         "servercow",
                         "simply",
+                        "spaceship",
                         "technitium",
                         "tele3",
                         "tencent",
@@ -10567,6 +10605,7 @@
                 "he",
                 "he_ddns",
                 "hetzner",
+                "hetznercloud",
                 "hexonet",
                 "hostingde",
                 "huaweicloud",
@@ -10621,6 +10660,7 @@
                 "one",
                 "online",
                 "openprovider",
+                "openprovider_rest",
                 "openstack",
                 "opnsense",
                 "ovh",
@@ -10639,6 +10679,7 @@
                 "selfhost",
                 "servercow",
                 "simply",
+                "spaceship",
                 "technitium",
                 "tele3",
                 "tencent",
@@ -10731,6 +10772,7 @@
                   "he",
                   "he_ddns",
                   "hetzner",
+                  "hetznercloud",
                   "hexonet",
                   "hostingde",
                   "huaweicloud",
@@ -10785,6 +10827,7 @@
                   "one",
                   "online",
                   "openprovider",
+                  "openprovider_rest",
                   "openstack",
                   "opnsense",
                   "ovh",
@@ -10803,6 +10846,7 @@
                   "selfhost",
                   "servercow",
                   "simply",
+                  "spaceship",
                   "technitium",
                   "tele3",
                   "tencent",
@@ -11016,6 +11060,7 @@
                       "he",
                       "he_ddns",
                       "hetzner",
+                      "hetznercloud",
                       "hexonet",
                       "hostingde",
                       "huaweicloud",
@@ -11070,6 +11115,7 @@
                       "one",
                       "online",
                       "openprovider",
+                      "openprovider_rest",
                       "openstack",
                       "opnsense",
                       "ovh",
@@ -11088,6 +11134,7 @@
                       "selfhost",
                       "servercow",
                       "simply",
+                      "spaceship",
                       "technitium",
                       "tele3",
                       "tencent",
@@ -11279,11 +11326,342 @@
                 "schema": {
                   "items": {
                     "properties": {
+                      "all": {
+                        "default": 0,
+                        "description": "Backup all known guest systems on this host.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "bwlimit": {
+                        "default": 0,
+                        "description": "Limit I/O bandwidth (in KiB/s).",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "comment": {
+                        "description": "Description for the Job.",
+                        "maxLength": 512,
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "compress": {
+                        "default": "0",
+                        "description": "Compress dump file.",
+                        "enum": [
+                          "0",
+                          "1",
+                          "gzip",
+                          "lzo",
+                          "zstd"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "dumpdir": {
+                        "description": "Store resulting files to specified directory.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "enabled": {
+                        "default": "1",
+                        "description": "Enable or disable the job.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "exclude": {
+                        "description": "Exclude specified guest systems (assumes --all)",
+                        "format": "pve-vmid-list",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "exclude-path": {
+                        "description": "Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "optional": 1,
+                        "type": "array"
+                      },
+                      "fleecing": {
+                        "description": "Options for backup fleecing (VM only).",
+                        "optional": 1,
+                        "properties": {
+                          "enabled": {
+                            "default": 0,
+                            "default_key": 1,
+                            "description": "Enable backup fleecing. Cache backup data from blocks where new guest writes happen on specified storage instead of copying them directly to the backup target. This can help guest IO performance and even prevent hangs, at the cost of requiring more storage space.",
+                            "optional": 1,
+                            "type": "boolean"
+                          },
+                          "storage": {
+                            "description": "Use this storage to storage fleecing images. For efficient space usage, it's best to use a local storage that supports discard and either thin provisioning or sparse files.",
+                            "format": "pve-storage-id",
+                            "format_description": "storage ID",
+                            "optional": 1,
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
                       "id": {
                         "description": "The job ID.",
                         "maxLength": 50,
                         "pattern": "\\S+",
                         "type": "string"
+                      },
+                      "ionice": {
+                        "default": 7,
+                        "description": "Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.",
+                        "maximum": 8,
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "lockwait": {
+                        "default": 180,
+                        "description": "Maximal time to wait for the global lock (minutes).",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "mailnotification": {
+                        "default": "always",
+                        "description": "Deprecated: use notification targets/matchers instead. Specify when to send a notification mail",
+                        "enum": [
+                          "always",
+                          "failure"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "mailto": {
+                        "description": "Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.",
+                        "format": "email-or-username-list",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "maxfiles": {
+                        "description": "Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.",
+                        "minimum": 1,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "mode": {
+                        "default": "snapshot",
+                        "description": "Backup mode.",
+                        "enum": [
+                          "snapshot",
+                          "suspend",
+                          "stop"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "next-run": {
+                        "description": "UNIX timestamp when this backup job will be executed next",
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "node": {
+                        "description": "Only run if executed on this node.",
+                        "format": "pve-node",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "notes-template": {
+                        "description": "Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.",
+                        "maxLength": 1024,
+                        "optional": 1,
+                        "requires": "storage",
+                        "type": "string"
+                      },
+                      "notification-mode": {
+                        "default": "auto",
+                        "description": "Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.",
+                        "enum": [
+                          "auto",
+                          "legacy-sendmail",
+                          "notification-system"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "pbs-change-detection-mode": {
+                        "description": "PBS mode used to detect file changes and switch encoding format for container backups.",
+                        "enum": [
+                          "legacy",
+                          "data",
+                          "metadata"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "performance": {
+                        "description": "Other performance-related settings.",
+                        "optional": 1,
+                        "properties": {
+                          "max-workers": {
+                            "default": 16,
+                            "description": "Applies to VMs. Allow up to this many IO workers at the same time.",
+                            "maximum": 256,
+                            "minimum": 1,
+                            "optional": 1,
+                            "type": "integer"
+                          },
+                          "pbs-entries-max": {
+                            "default": 1048576,
+                            "description": "Applies to container backups sent to PBS. Limits the number of entries allowed in memory at a given time to avoid unintended OOM situations. Increase it to enable backups of containers with a large amount of files.",
+                            "minimum": 1,
+                            "optional": 1,
+                            "type": "integer"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "pigz": {
+                        "default": 0,
+                        "description": "Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.",
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "pool": {
+                        "description": "Backup all known guest systems included in the specified pool.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "protected": {
+                        "description": "If true, mark backup(s) as protected.",
+                        "optional": 1,
+                        "requires": "storage",
+                        "type": "boolean"
+                      },
+                      "prune-backups": {
+                        "description": "Use these retention options instead of those from the storage configuration.",
+                        "optional": 1,
+                        "properties": {
+                          "keep-all": {
+                            "description": "Keep all backups. Conflicts with the other options when true.",
+                            "optional": 1,
+                            "type": "boolean"
+                          },
+                          "keep-daily": {
+                            "description": "Keep backups for the last <N> different days. If there is morethan one backup for a single day, only the latest one is kept.",
+                            "format_description": "N",
+                            "minimum": "0",
+                            "optional": 1,
+                            "type": "integer"
+                          },
+                          "keep-hourly": {
+                            "description": "Keep backups for the last <N> different hours. If there is morethan one backup for a single hour, only the latest one is kept.",
+                            "format_description": "N",
+                            "minimum": "0",
+                            "optional": 1,
+                            "type": "integer"
+                          },
+                          "keep-last": {
+                            "description": "Keep the last <N> backups.",
+                            "format_description": "N",
+                            "minimum": "0",
+                            "optional": 1,
+                            "type": "integer"
+                          },
+                          "keep-monthly": {
+                            "description": "Keep backups for the last <N> different months. If there is morethan one backup for a single month, only the latest one is kept.",
+                            "format_description": "N",
+                            "minimum": "0",
+                            "optional": 1,
+                            "type": "integer"
+                          },
+                          "keep-weekly": {
+                            "description": "Keep backups for the last <N> different weeks. If there is morethan one backup for a single week, only the latest one is kept.",
+                            "format_description": "N",
+                            "minimum": "0",
+                            "optional": 1,
+                            "type": "integer"
+                          },
+                          "keep-yearly": {
+                            "description": "Keep backups for the last <N> different years. If there is morethan one backup for a single year, only the latest one is kept.",
+                            "format_description": "N",
+                            "minimum": "0",
+                            "optional": 1,
+                            "type": "integer"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "quiet": {
+                        "default": 0,
+                        "description": "Be quiet.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "remove": {
+                        "default": 1,
+                        "description": "Prune older backups according to 'prune-backups'.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "repeat-missed": {
+                        "default": 0,
+                        "description": "If true, the job will be run as soon as possible if it was missed while the scheduler was not running.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "schedule": {
+                        "description": "Backup schedule. The format is a subset of `systemd` calendar events.",
+                        "format": "pve-calendar-event",
+                        "maxLength": 128,
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "script": {
+                        "description": "Use specified hook script.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "stdexcludes": {
+                        "default": 1,
+                        "description": "Exclude temporary files and logs.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "stop": {
+                        "default": 0,
+                        "description": "Stop running backup jobs on this host.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "stopwait": {
+                        "default": 10,
+                        "description": "Maximal time to wait until a guest system is stopped (minutes).",
+                        "minimum": 0,
+                        "optional": 1,
+                        "type": "integer"
+                      },
+                      "storage": {
+                        "description": "Store resulting file to this storage.",
+                        "format": "pve-storage-id",
+                        "format_description": "storage ID",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "tmpdir": {
+                        "description": "Store temporary files to specified directory.",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "vmid": {
+                        "description": "The ID of the guest system you want to backup.",
+                        "format": "pve-vmid-list",
+                        "optional": 1,
+                        "type": "string"
+                      },
+                      "zstd": {
+                        "default": 1,
+                        "description": "Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.",
+                        "optional": 1,
+                        "type": "integer"
                       }
                     },
                     "type": "object"
@@ -11419,7 +11797,7 @@
             }
           },
           {
-            "description": "Day of week selection.",
+            "description": "Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.",
             "in": "query",
             "name": "dow",
             "required": false,
@@ -11430,7 +11808,7 @@
             "x-proxmox": {
               "raw": {
                 "default": "mon,tue,wed,thu,fri,sat,sun",
-                "description": "Day of week selection.",
+                "description": "Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                 "format": "pve-day-of-week-list",
                 "optional": 1,
                 "requires": "starttime",
@@ -11961,7 +12339,7 @@
             }
           },
           {
-            "description": "Job Start time.",
+            "description": "Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.",
             "in": "query",
             "name": "starttime",
             "required": false,
@@ -11971,7 +12349,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Job Start time.",
+                "description": "Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                 "optional": 1,
                 "pattern": "\\d{1,2}:\\d{1,2}",
                 "type": "string",
@@ -12155,7 +12533,7 @@
                   },
                   "dow": {
                     "default": "mon,tue,wed,thu,fri,sat,sun",
-                    "description": "Day of week selection.",
+                    "description": "Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                     "format": "pve-day-of-week-list",
                     "optional": 1,
                     "requires": "starttime",
@@ -12364,7 +12742,7 @@
                     "typetext": "<string>"
                   },
                   "starttime": {
-                    "description": "Job Start time.",
+                    "description": "Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                     "optional": 1,
                     "pattern": "\\d{1,2}:\\d{1,2}",
                     "type": "string",
@@ -12702,6 +13080,348 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "properties": {
+                    "all": {
+                      "default": 0,
+                      "description": "Backup all known guest systems on this host.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "bwlimit": {
+                      "default": 0,
+                      "description": "Limit I/O bandwidth (in KiB/s).",
+                      "minimum": 0,
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "comment": {
+                      "description": "Description for the Job.",
+                      "maxLength": 512,
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "compress": {
+                      "default": "0",
+                      "description": "Compress dump file.",
+                      "enum": [
+                        "0",
+                        "1",
+                        "gzip",
+                        "lzo",
+                        "zstd"
+                      ],
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "dumpdir": {
+                      "description": "Store resulting files to specified directory.",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "default": "1",
+                      "description": "Enable or disable the job.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "exclude": {
+                      "description": "Exclude specified guest systems (assumes --all)",
+                      "format": "pve-vmid-list",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "exclude-path": {
+                      "description": "Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "optional": 1,
+                      "type": "array"
+                    },
+                    "fleecing": {
+                      "description": "Options for backup fleecing (VM only).",
+                      "optional": 1,
+                      "properties": {
+                        "enabled": {
+                          "default": 0,
+                          "default_key": 1,
+                          "description": "Enable backup fleecing. Cache backup data from blocks where new guest writes happen on specified storage instead of copying them directly to the backup target. This can help guest IO performance and even prevent hangs, at the cost of requiring more storage space.",
+                          "optional": 1,
+                          "type": "boolean"
+                        },
+                        "storage": {
+                          "description": "Use this storage to storage fleecing images. For efficient space usage, it's best to use a local storage that supports discard and either thin provisioning or sparse files.",
+                          "format": "pve-storage-id",
+                          "format_description": "storage ID",
+                          "optional": 1,
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "id": {
+                      "description": "The job ID.",
+                      "maxLength": 50,
+                      "pattern": "\\S+",
+                      "type": "string"
+                    },
+                    "ionice": {
+                      "default": 7,
+                      "description": "Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.",
+                      "maximum": 8,
+                      "minimum": 0,
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "lockwait": {
+                      "default": 180,
+                      "description": "Maximal time to wait for the global lock (minutes).",
+                      "minimum": 0,
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "mailnotification": {
+                      "default": "always",
+                      "description": "Deprecated: use notification targets/matchers instead. Specify when to send a notification mail",
+                      "enum": [
+                        "always",
+                        "failure"
+                      ],
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "mailto": {
+                      "description": "Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.",
+                      "format": "email-or-username-list",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "maxfiles": {
+                      "description": "Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.",
+                      "minimum": 1,
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "default": "snapshot",
+                      "description": "Backup mode.",
+                      "enum": [
+                        "snapshot",
+                        "suspend",
+                        "stop"
+                      ],
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "next-run": {
+                      "description": "UNIX timestamp when this backup job will be executed next",
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "node": {
+                      "description": "Only run if executed on this node.",
+                      "format": "pve-node",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "notes-template": {
+                      "description": "Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.",
+                      "maxLength": 1024,
+                      "optional": 1,
+                      "requires": "storage",
+                      "type": "string"
+                    },
+                    "notification-mode": {
+                      "default": "auto",
+                      "description": "Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.",
+                      "enum": [
+                        "auto",
+                        "legacy-sendmail",
+                        "notification-system"
+                      ],
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "pbs-change-detection-mode": {
+                      "description": "PBS mode used to detect file changes and switch encoding format for container backups.",
+                      "enum": [
+                        "legacy",
+                        "data",
+                        "metadata"
+                      ],
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "performance": {
+                      "description": "Other performance-related settings.",
+                      "optional": 1,
+                      "properties": {
+                        "max-workers": {
+                          "default": 16,
+                          "description": "Applies to VMs. Allow up to this many IO workers at the same time.",
+                          "maximum": 256,
+                          "minimum": 1,
+                          "optional": 1,
+                          "type": "integer"
+                        },
+                        "pbs-entries-max": {
+                          "default": 1048576,
+                          "description": "Applies to container backups sent to PBS. Limits the number of entries allowed in memory at a given time to avoid unintended OOM situations. Increase it to enable backups of containers with a large amount of files.",
+                          "minimum": 1,
+                          "optional": 1,
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "pigz": {
+                      "default": 0,
+                      "description": "Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.",
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "pool": {
+                      "description": "Backup all known guest systems included in the specified pool.",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "protected": {
+                      "description": "If true, mark backup(s) as protected.",
+                      "optional": 1,
+                      "requires": "storage",
+                      "type": "boolean"
+                    },
+                    "prune-backups": {
+                      "description": "Use these retention options instead of those from the storage configuration.",
+                      "optional": 1,
+                      "properties": {
+                        "keep-all": {
+                          "description": "Keep all backups. Conflicts with the other options when true.",
+                          "optional": 1,
+                          "type": "boolean"
+                        },
+                        "keep-daily": {
+                          "description": "Keep backups for the last <N> different days. If there is morethan one backup for a single day, only the latest one is kept.",
+                          "format_description": "N",
+                          "minimum": "0",
+                          "optional": 1,
+                          "type": "integer"
+                        },
+                        "keep-hourly": {
+                          "description": "Keep backups for the last <N> different hours. If there is morethan one backup for a single hour, only the latest one is kept.",
+                          "format_description": "N",
+                          "minimum": "0",
+                          "optional": 1,
+                          "type": "integer"
+                        },
+                        "keep-last": {
+                          "description": "Keep the last <N> backups.",
+                          "format_description": "N",
+                          "minimum": "0",
+                          "optional": 1,
+                          "type": "integer"
+                        },
+                        "keep-monthly": {
+                          "description": "Keep backups for the last <N> different months. If there is morethan one backup for a single month, only the latest one is kept.",
+                          "format_description": "N",
+                          "minimum": "0",
+                          "optional": 1,
+                          "type": "integer"
+                        },
+                        "keep-weekly": {
+                          "description": "Keep backups for the last <N> different weeks. If there is morethan one backup for a single week, only the latest one is kept.",
+                          "format_description": "N",
+                          "minimum": "0",
+                          "optional": 1,
+                          "type": "integer"
+                        },
+                        "keep-yearly": {
+                          "description": "Keep backups for the last <N> different years. If there is morethan one backup for a single year, only the latest one is kept.",
+                          "format_description": "N",
+                          "minimum": "0",
+                          "optional": 1,
+                          "type": "integer"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "quiet": {
+                      "default": 0,
+                      "description": "Be quiet.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "remove": {
+                      "default": 1,
+                      "description": "Prune older backups according to 'prune-backups'.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "repeat-missed": {
+                      "default": 0,
+                      "description": "If true, the job will be run as soon as possible if it was missed while the scheduler was not running.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "schedule": {
+                      "description": "Backup schedule. The format is a subset of `systemd` calendar events.",
+                      "format": "pve-calendar-event",
+                      "maxLength": 128,
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "script": {
+                      "description": "Use specified hook script.",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "stdexcludes": {
+                      "default": 1,
+                      "description": "Exclude temporary files and logs.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "stop": {
+                      "default": 0,
+                      "description": "Stop running backup jobs on this host.",
+                      "optional": 1,
+                      "type": "boolean"
+                    },
+                    "stopwait": {
+                      "default": 10,
+                      "description": "Maximal time to wait until a guest system is stopped (minutes).",
+                      "minimum": 0,
+                      "optional": 1,
+                      "type": "integer"
+                    },
+                    "storage": {
+                      "description": "Store resulting file to this storage.",
+                      "format": "pve-storage-id",
+                      "format_description": "storage ID",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "tmpdir": {
+                      "description": "Store temporary files to specified directory.",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "vmid": {
+                      "description": "The ID of the guest system you want to backup.",
+                      "format": "pve-vmid-list",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "zstd": {
+                      "default": 1,
+                      "description": "Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.",
+                      "optional": 1,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
                   "type": "object"
                 }
               }
@@ -12871,7 +13591,7 @@
             }
           },
           {
-            "description": "Day of week selection.",
+            "description": "Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.",
             "in": "query",
             "name": "dow",
             "required": false,
@@ -12880,7 +13600,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Day of week selection.",
+                "description": "Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                 "format": "pve-day-of-week-list",
                 "optional": 1,
                 "requires": "starttime",
@@ -13393,7 +14113,7 @@
             }
           },
           {
-            "description": "Job Start time.",
+            "description": "Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.",
             "in": "query",
             "name": "starttime",
             "required": false,
@@ -13403,7 +14123,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Job Start time.",
+                "description": "Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                 "optional": 1,
                 "pattern": "\\d{1,2}:\\d{1,2}",
                 "type": "string",
@@ -13593,7 +14313,7 @@
                     "typetext": "<string>"
                   },
                   "dow": {
-                    "description": "Day of week selection.",
+                    "description": "Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                     "format": "pve-day-of-week-list",
                     "optional": 1,
                     "requires": "starttime",
@@ -13801,7 +14521,7 @@
                     "typetext": "<string>"
                   },
                   "starttime": {
-                    "description": "Job Start time.",
+                    "description": "Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.",
                     "optional": 1,
                     "pattern": "\\d{1,2}:\\d{1,2}",
                     "type": "string",
@@ -14125,21 +14845,48 @@
         "operationId": "post_cluster_bulk_action_guest_migrate",
         "parameters": [
           {
-            "description": "How many parallel tasks at maximum should be started.",
+            "description": "Defines the maximum number of tasks running concurrently.",
             "in": "query",
-            "name": "maxworkers",
+            "name": "max-workers",
             "required": false,
             "schema": {
               "default": 1,
+              "maximum": 64,
+              "minimum": 1,
               "type": "integer"
             },
             "x-proxmox": {
               "raw": {
                 "default": 1,
-                "description": "How many parallel tasks at maximum should be started.",
+                "description": "Defines the maximum number of tasks running concurrently.",
+                "maximum": 64,
+                "minimum": 1,
                 "optional": 1,
                 "type": "integer",
-                "typetext": "<integer>"
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
+            "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+            "in": "query",
+            "name": "maxworkers",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 1,
+                "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
               }
             }
           },
@@ -14225,12 +14972,23 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "maxworkers": {
+                  "max-workers": {
                     "default": 1,
-                    "description": "How many parallel tasks at maximum should be started.",
+                    "description": "Defines the maximum number of tasks running concurrently.",
+                    "maximum": 64,
+                    "minimum": 1,
                     "optional": 1,
                     "type": "integer",
-                    "typetext": "<integer>"
+                    "typetext": "<integer> (1 - 64)"
+                  },
+                  "maxworkers": {
+                    "default": 1,
+                    "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "online": {
                     "description": "Enable live migration for VMs and restart migration for CTs.",
@@ -14330,21 +15088,48 @@
             }
           },
           {
-            "description": "How many parallel tasks at maximum should be started.",
+            "description": "Defines the maximum number of tasks running concurrently.",
             "in": "query",
-            "name": "maxworkers",
+            "name": "max-workers",
             "required": false,
             "schema": {
-              "default": 1,
+              "default": 4,
+              "maximum": 64,
+              "minimum": 1,
               "type": "integer"
             },
             "x-proxmox": {
               "raw": {
-                "default": 1,
-                "description": "How many parallel tasks at maximum should be started.",
+                "default": 4,
+                "description": "Defines the maximum number of tasks running concurrently.",
+                "maximum": 64,
+                "minimum": 1,
                 "optional": 1,
                 "type": "integer",
-                "typetext": "<integer>"
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
+            "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+            "in": "query",
+            "name": "maxworkers",
+            "required": false,
+            "schema": {
+              "default": 4,
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 4,
+                "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
               }
             }
           },
@@ -14405,12 +15190,23 @@
                     "type": "boolean",
                     "typetext": "<boolean>"
                   },
-                  "maxworkers": {
-                    "default": 1,
-                    "description": "How many parallel tasks at maximum should be started.",
+                  "max-workers": {
+                    "default": 4,
+                    "description": "Defines the maximum number of tasks running concurrently.",
+                    "maximum": 64,
+                    "minimum": 1,
                     "optional": 1,
                     "type": "integer",
-                    "typetext": "<integer>"
+                    "typetext": "<integer> (1 - 64)"
+                  },
+                  "maxworkers": {
+                    "default": 4,
+                    "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "timeout": {
                     "default": 180,
@@ -14477,21 +15273,48 @@
         "operationId": "post_cluster_bulk_action_guest_start",
         "parameters": [
           {
-            "description": "How many parallel tasks at maximum should be started.",
+            "description": "Defines the maximum number of tasks running concurrently.",
             "in": "query",
-            "name": "maxworkers",
+            "name": "max-workers",
             "required": false,
             "schema": {
-              "default": 1,
+              "default": 4,
+              "maximum": 64,
+              "minimum": 1,
               "type": "integer"
             },
             "x-proxmox": {
               "raw": {
-                "default": 1,
-                "description": "How many parallel tasks at maximum should be started.",
+                "default": 4,
+                "description": "Defines the maximum number of tasks running concurrently.",
+                "maximum": 64,
+                "minimum": 1,
                 "optional": 1,
                 "type": "integer",
-                "typetext": "<integer>"
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
+            "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+            "in": "query",
+            "name": "maxworkers",
+            "required": false,
+            "schema": {
+              "default": 4,
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 4,
+                "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
               }
             }
           },
@@ -14543,12 +15366,23 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "maxworkers": {
-                    "default": 1,
-                    "description": "How many parallel tasks at maximum should be started.",
+                  "max-workers": {
+                    "default": 4,
+                    "description": "Defines the maximum number of tasks running concurrently.",
+                    "maximum": 64,
+                    "minimum": 1,
                     "optional": 1,
                     "type": "integer",
-                    "typetext": "<integer>"
+                    "typetext": "<integer> (1 - 64)"
+                  },
+                  "maxworkers": {
+                    "default": 4,
+                    "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "timeout": {
                     "description": "Default start timeout in seconds. Only valid for VMs. (default depends on the guest configuration).",
@@ -14614,21 +15448,48 @@
         "operationId": "post_cluster_bulk_action_guest_suspend",
         "parameters": [
           {
-            "description": "How many parallel tasks at maximum should be started.",
+            "description": "Defines the maximum number of tasks running concurrently.",
             "in": "query",
-            "name": "maxworkers",
+            "name": "max-workers",
             "required": false,
             "schema": {
-              "default": 1,
+              "default": 4,
+              "maximum": 64,
+              "minimum": 1,
               "type": "integer"
             },
             "x-proxmox": {
               "raw": {
-                "default": 1,
-                "description": "How many parallel tasks at maximum should be started.",
+                "default": 4,
+                "description": "Defines the maximum number of tasks running concurrently.",
+                "maximum": 64,
+                "minimum": 1,
                 "optional": 1,
                 "type": "integer",
-                "typetext": "<integer>"
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
+            "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+            "in": "query",
+            "name": "maxworkers",
+            "required": false,
+            "schema": {
+              "default": 4,
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 4,
+                "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
               }
             }
           },
@@ -14702,12 +15563,23 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "maxworkers": {
-                    "default": 1,
-                    "description": "How many parallel tasks at maximum should be started.",
+                  "max-workers": {
+                    "default": 4,
+                    "description": "Defines the maximum number of tasks running concurrently.",
+                    "maximum": 64,
+                    "minimum": 1,
                     "optional": 1,
                     "type": "integer",
-                    "typetext": "<integer>"
+                    "typetext": "<integer> (1 - 64)"
+                  },
+                  "maxworkers": {
+                    "default": 4,
+                    "description": "Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "statestorage": {
                     "description": "The storage for the VM state.",
@@ -15912,6 +16784,27 @@
             }
           },
           {
+            "description": "Coefficient used to determine Corosync's token timeout. See the corosync.conf(5) manual for more details.",
+            "in": "query",
+            "name": "token-coefficient",
+            "required": false,
+            "schema": {
+              "default": 125,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 125,
+                "description": "Coefficient used to determine Corosync's token timeout. See the corosync.conf(5) manual for more details.",
+                "minimum": 0,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (0 - N)"
+              }
+            }
+          },
+          {
             "description": "Number of votes for this node.",
             "in": "query",
             "name": "votes",
@@ -15973,6 +16866,14 @@
                     "optional": 1,
                     "type": "integer",
                     "typetext": "<integer> (1 - N)"
+                  },
+                  "token-coefficient": {
+                    "default": 125,
+                    "description": "Coefficient used to determine Corosync's token timeout. See the corosync.conf(5) manual for more details.",
+                    "minimum": 0,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (0 - N)"
                   },
                   "votes": {
                     "description": "Number of votes for this node.",
@@ -23347,7 +24248,7 @@
             }
           },
           {
-            "description": "Maximal number of service relocate tries when a service failes to start.",
+            "description": "Maximal number of resource relocate tries when a resource fails to start.",
             "in": "query",
             "name": "max_relocate",
             "required": false,
@@ -23359,7 +24260,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 1,
-                "description": "Maximal number of service relocate tries when a service failes to start.",
+                "description": "Maximal number of resource relocate tries when a resource fails to start.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -23368,7 +24269,7 @@
             }
           },
           {
-            "description": "Maximal number of tries to restart the service on a node after its start failed.",
+            "description": "Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.",
             "in": "query",
             "name": "max_restart",
             "required": false,
@@ -23380,7 +24281,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 1,
-                "description": "Maximal number of tries to restart the service on a node after its start failed.",
+                "description": "Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -23434,7 +24335,7 @@
                 ],
                 "optional": 1,
                 "type": "string",
-                "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while there source is in this state. The resource will not get relocated\non node failures.\n\n"
+                "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while the resource is in this state. The resource will not get relocated\non node failures.\n\n"
               }
             }
           },
@@ -23492,7 +24393,7 @@
                   },
                   "max_relocate": {
                     "default": 1,
-                    "description": "Maximal number of service relocate tries when a service failes to start.",
+                    "description": "Maximal number of resource relocate tries when a resource fails to start.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -23500,7 +24401,7 @@
                   },
                   "max_restart": {
                     "default": 1,
-                    "description": "Maximal number of tries to restart the service on a node after its start failed.",
+                    "description": "Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -23524,7 +24425,7 @@
                     ],
                     "optional": 1,
                     "type": "string",
-                    "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while there source is in this state. The resource will not get relocated\non node failures.\n\n"
+                    "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while the resource is in this state. The resource will not get relocated\non node failures.\n\n"
                   },
                   "type": {
                     "description": "Resource type.",
@@ -23755,7 +24656,7 @@
                       "type": "string"
                     },
                     "max_relocate": {
-                      "description": "Maximal number of service relocate tries when a service failes to start.",
+                      "description": "Maximal number of service relocate tries when a service fails to start.",
                       "optional": 1,
                       "type": "integer"
                     },
@@ -23945,7 +24846,7 @@
             }
           },
           {
-            "description": "Maximal number of service relocate tries when a service failes to start.",
+            "description": "Maximal number of resource relocate tries when a resource fails to start.",
             "in": "query",
             "name": "max_relocate",
             "required": false,
@@ -23957,7 +24858,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 1,
-                "description": "Maximal number of service relocate tries when a service failes to start.",
+                "description": "Maximal number of resource relocate tries when a resource fails to start.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -23966,7 +24867,7 @@
             }
           },
           {
-            "description": "Maximal number of tries to restart the service on a node after its start failed.",
+            "description": "Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.",
             "in": "query",
             "name": "max_restart",
             "required": false,
@@ -23978,7 +24879,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 1,
-                "description": "Maximal number of tries to restart the service on a node after its start failed.",
+                "description": "Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -24015,7 +24916,7 @@
                 ],
                 "optional": 1,
                 "type": "string",
-                "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while there source is in this state. The resource will not get relocated\non node failures.\n\n"
+                "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while the resource is in this state. The resource will not get relocated\non node failures.\n\n"
               }
             }
           }
@@ -24064,7 +24965,7 @@
                   },
                   "max_relocate": {
                     "default": 1,
-                    "description": "Maximal number of service relocate tries when a service failes to start.",
+                    "description": "Maximal number of resource relocate tries when a resource fails to start.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -24072,7 +24973,7 @@
                   },
                   "max_restart": {
                     "default": 1,
-                    "description": "Maximal number of tries to restart the service on a node after its start failed.",
+                    "description": "Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -24096,7 +24997,7 @@
                     ],
                     "optional": 1,
                     "type": "string",
-                    "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while there source is in this state. The resource will not get relocated\non node failures.\n\n"
+                    "verbose_description": "Requested resource state. The CRM reads this state and acts accordingly.\nPlease note that `enabled` is just an alias for `started`.\n\n`started`;;\n\nThe CRM tries to start the resource. Service state is\nset to `started` after successful start. On node failures, or when start\nfails, it tries to recover the resource.  If everything fails, service\nstate it set to `error`.\n\n`stopped`;;\n\nThe CRM tries to keep the resource in `stopped` state, but it\nstill tries to relocate the resources on node failures.\n\n`disabled`;;\n\nThe CRM tries to put the resource in `stopped` state, but does not try\nto relocate the resources on node failures. The main purpose of this\nstate is error recovery, because it is the only way to move a resource out\nof the `error` state.\n\n`ignored`;;\n\nThe resource gets removed from the manager status and so the CRM and the LRM do\nnot touch the resource anymore. All {pve} API calls affecting this resource\nwill be executed, directly bypassing the HA stack. CRM commands will be thrown\naway while the resource is in this state. The resource will not get relocated\non node failures.\n\n"
                   }
                 },
                 "required": [
@@ -24303,7 +25204,7 @@
     },
     "/cluster/ha/resources/{sid}/relocate": {
       "post": {
-        "description": "Request resource relocatzion to another node. This stops the service on the old node, and restarts it on the target node.",
+        "description": "Request resource relocation to another node. This stops the service on the old node, and restarts it on the target node.",
         "operationId": "post_cluster_ha_resources_sid_relocate",
         "parameters": [
           {
@@ -24456,7 +25357,7 @@
           "unstable": null,
           "viewer_sections": {
             "description": null,
-            "short_description": "Request resource relocatzion to another node. This stops the service on the old node, and restarts it on the target node.",
+            "short_description": "Request resource relocation to another node. This stops the service on the old node, and restarts it on the target node.",
             "usage": null
           }
         }
@@ -25437,9 +26338,50 @@
         }
       }
     },
+    "/cluster/ha/status/arm-ha": {
+      "post": {
+        "description": "Request re-arming the HA stack after it was disarmed.",
+        "operationId": "post_cluster_ha_status_arm_ha",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "summary": "arm-ha",
+        "x-proxmox": {
+          "allowtoken": 1,
+          "permissions": {
+            "check": [
+              "perm",
+              "/",
+              [
+                "Sys.Console"
+              ]
+            ]
+          },
+          "protected": 1,
+          "raw_sections": [],
+          "source": "apidoc-fallback",
+          "unstable": null,
+          "viewer_sections": {
+            "description": null,
+            "short_description": "Request re-arming the HA stack after it was disarmed.",
+            "usage": null
+          }
+        }
+      }
+    },
     "/cluster/ha/status/current": {
       "get": {
-        "description": "Get HA manger status.",
+        "description": "Get HA manager status.",
         "operationId": "get_cluster_ha_status_current",
         "parameters": [],
         "responses": {
@@ -25449,6 +26391,17 @@
                 "schema": {
                   "items": {
                     "properties": {
+                      "armed-state": {
+                        "description": "For type 'fencing'. Whether HA is armed, on standby, disarming or disarmed.",
+                        "enum": [
+                          "armed",
+                          "standby",
+                          "disarming",
+                          "disarmed"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
                       "crm_state": {
                         "description": "For type 'service'. Service state as seen by the CRM.",
                         "optional": 1,
@@ -25488,6 +26441,15 @@
                         "optional": 1,
                         "type": "string"
                       },
+                      "resource_mode": {
+                        "description": "For type 'fencing'. How resources are handled while disarmed.",
+                        "enum": [
+                          "freeze",
+                          "ignore"
+                        ],
+                        "optional": 1,
+                        "type": "string"
+                      },
                       "sid": {
                         "description": "For type 'service'. Service ID.",
                         "optional": 1,
@@ -25513,7 +26475,8 @@
                           "quorum",
                           "master",
                           "lrm",
-                          "service"
+                          "service",
+                          "fencing"
                         ]
                       }
                     },
@@ -25544,7 +26507,96 @@
           "unstable": null,
           "viewer_sections": {
             "description": null,
-            "short_description": "Get HA manger status.",
+            "short_description": "Get HA manager status.",
+            "usage": null
+          }
+        }
+      }
+    },
+    "/cluster/ha/status/disarm-ha": {
+      "post": {
+        "description": "Request disarming the HA stack, releasing all watchdogs cluster-wide.",
+        "operationId": "post_cluster_ha_status_disarm_ha",
+        "parameters": [
+          {
+            "description": "Controls how HA managed resources are handled while disarmed. The current state of resources is not affected. 'freeze': new commands and state changes are not applied. 'ignore': resources are removed from HA tracking and can be managed as if they were not HA managed.",
+            "in": "query",
+            "name": "resource-mode",
+            "required": true,
+            "schema": {
+              "enum": [
+                "freeze",
+                "ignore"
+              ],
+              "type": "string"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Controls how HA managed resources are handled while disarmed. The current state of resources is not affected. 'freeze': new commands and state changes are not applied. 'ignore': resources are removed from HA tracking and can be managed as if they were not HA managed.",
+                "enum": [
+                  "freeze",
+                  "ignore"
+                ],
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "resource-mode": {
+                    "description": "Controls how HA managed resources are handled while disarmed. The current state of resources is not affected. 'freeze': new commands and state changes are not applied. 'ignore': resources are removed from HA tracking and can be managed as if they were not HA managed.",
+                    "enum": [
+                      "freeze",
+                      "ignore"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "resource-mode"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "null"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "summary": "disarm-ha",
+        "x-proxmox": {
+          "allowtoken": 1,
+          "permissions": {
+            "check": [
+              "perm",
+              "/",
+              [
+                "Sys.Console"
+              ]
+            ]
+          },
+          "protected": 1,
+          "raw_sections": [],
+          "source": "apidoc-fallback",
+          "unstable": null,
+          "viewer_sections": {
+            "description": null,
+            "short_description": "Request disarming the HA stack, releasing all watchdogs cluster-wide.",
             "usage": null
           }
         }
@@ -25552,7 +26604,7 @@
     },
     "/cluster/ha/status/manager_status": {
       "get": {
-        "description": "Get full HA manger status, including LRM status.",
+        "description": "Get full HA manager status, including LRM status.",
         "operationId": "get_cluster_ha_status_manager_status",
         "parameters": [],
         "responses": {
@@ -25585,7 +26637,7 @@
           "unstable": null,
           "viewer_sections": {
             "description": null,
-            "short_description": "Get full HA manger status, including LRM status.",
+            "short_description": "Get full HA manager status, including LRM status.",
             "usage": null
           }
         }
@@ -36356,11 +37408,53 @@
                     "description": "Use this resource scheduler mode for HA.",
                     "enum": [
                       "basic",
-                      "static"
+                      "static",
+                      "dynamic"
                     ],
                     "optional": 1,
                     "type": "string",
-                    "verbose_description": "Configures how the HA manager should select nodes to start or recover services. With 'basic', only the number of services is used, with 'static', static CPU and memory configuration of services is considered."
+                    "verbose_description": "Configures how the HA Manager should select nodes to start or recover services:\n\n- with 'basic', only the number of services is used,\n- with 'static', static CPU and memory configuration of services are considered,\n- with 'dynamic', static and dynamic CPU and memory usage of services are considered.\n"
+                  },
+                  "ha-auto-rebalance": {
+                    "default": 0,
+                    "description": "Whether to use CRS for balancing HA resources automatically depending on the current node imbalance.",
+                    "optional": 1,
+                    "type": "boolean"
+                  },
+                  "ha-auto-rebalance-hold-duration": {
+                    "default": 3,
+                    "description": "The number of HA rounds for which the cluster node imbalance threshold must be exceeded before triggering an automatic resource balancing migration.",
+                    "minimum": 0,
+                    "optional": 1,
+                    "requires": "ha-auto-rebalance",
+                    "type": "number"
+                  },
+                  "ha-auto-rebalance-margin": {
+                    "default": 0.1,
+                    "description": "The minimum relative improvement in cluster node imbalance to commit to a resource balancing migration.",
+                    "minimum": 0,
+                    "optional": 1,
+                    "requires": "ha-auto-rebalance",
+                    "type": "number"
+                  },
+                  "ha-auto-rebalance-method": {
+                    "default": "bruteforce",
+                    "description": "The method to use for the scoring of balancing migrations.",
+                    "enum": [
+                      "bruteforce",
+                      "topsis"
+                    ],
+                    "optional": 1,
+                    "requires": "ha-auto-rebalance",
+                    "type": "string"
+                  },
+                  "ha-auto-rebalance-threshold": {
+                    "default": 0.3,
+                    "description": "The threshold for the cluster node imbalance, which will trigger the automatic resource balancing system if its value is exceeded.",
+                    "minimum": 0,
+                    "optional": 1,
+                    "requires": "ha-auto-rebalance",
+                    "type": "number"
                   },
                   "ha-rebalance-on-start": {
                     "default": 0,
@@ -36371,7 +37465,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[ha=<basic|static>] [,ha-rebalance-on-start=<1|0>]"
+                "typetext": "[ha=<basic|static|dynamic>] [,ha-auto-rebalance=<1|0>] [,ha-auto-rebalance-hold-duration=<number>] [,ha-auto-rebalance-margin=<number>] [,ha-auto-rebalance-method=<bruteforce|topsis>] [,ha-auto-rebalance-threshold=<number>] [,ha-rebalance-on-start=<1|0>]"
               }
             }
           },
@@ -37143,11 +38237,53 @@
                         "description": "Use this resource scheduler mode for HA.",
                         "enum": [
                           "basic",
-                          "static"
+                          "static",
+                          "dynamic"
                         ],
                         "optional": 1,
                         "type": "string",
-                        "verbose_description": "Configures how the HA manager should select nodes to start or recover services. With 'basic', only the number of services is used, with 'static', static CPU and memory configuration of services is considered."
+                        "verbose_description": "Configures how the HA Manager should select nodes to start or recover services:\n\n- with 'basic', only the number of services is used,\n- with 'static', static CPU and memory configuration of services are considered,\n- with 'dynamic', static and dynamic CPU and memory usage of services are considered.\n"
+                      },
+                      "ha-auto-rebalance": {
+                        "default": 0,
+                        "description": "Whether to use CRS for balancing HA resources automatically depending on the current node imbalance.",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
+                      "ha-auto-rebalance-hold-duration": {
+                        "default": 3,
+                        "description": "The number of HA rounds for which the cluster node imbalance threshold must be exceeded before triggering an automatic resource balancing migration.",
+                        "minimum": 0,
+                        "optional": 1,
+                        "requires": "ha-auto-rebalance",
+                        "type": "number"
+                      },
+                      "ha-auto-rebalance-margin": {
+                        "default": 0.1,
+                        "description": "The minimum relative improvement in cluster node imbalance to commit to a resource balancing migration.",
+                        "minimum": 0,
+                        "optional": 1,
+                        "requires": "ha-auto-rebalance",
+                        "type": "number"
+                      },
+                      "ha-auto-rebalance-method": {
+                        "default": "bruteforce",
+                        "description": "The method to use for the scoring of balancing migrations.",
+                        "enum": [
+                          "bruteforce",
+                          "topsis"
+                        ],
+                        "optional": 1,
+                        "requires": "ha-auto-rebalance",
+                        "type": "string"
+                      },
+                      "ha-auto-rebalance-threshold": {
+                        "default": 0.3,
+                        "description": "The threshold for the cluster node imbalance, which will trigger the automatic resource balancing system if its value is exceeded.",
+                        "minimum": 0,
+                        "optional": 1,
+                        "requires": "ha-auto-rebalance",
+                        "type": "number"
                       },
                       "ha-rebalance-on-start": {
                         "default": 0,
@@ -37158,7 +38294,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[ha=<basic|static>] [,ha-rebalance-on-start=<1|0>]"
+                    "typetext": "[ha=<basic|static|dynamic>] [,ha-auto-rebalance=<1|0>] [,ha-auto-rebalance-hold-duration=<number>] [,ha-auto-rebalance-margin=<number>] [,ha-auto-rebalance-method=<bruteforce|topsis>] [,ha-auto-rebalance-threshold=<number>] [,ha-rebalance-on-start=<1|0>]"
                   },
                   "delete": {
                     "description": "A list of settings you want to delete.",
@@ -38782,6 +39918,11 @@
                         "optional": 1,
                         "type": "string"
                       },
+                      "shared": {
+                        "description": "Determines whether the storage is shared",
+                        "optional": 1,
+                        "type": "boolean"
+                      },
                       "status": {
                         "description": "Resource type dependent status.",
                         "optional": 1,
@@ -38942,7 +40083,7 @@
             }
           },
           {
-            "description": "When lock-token has been provided and configuration successfully commited, release the lock automatically afterwards",
+            "description": "When lock-token has been provided and configuration successfully committed, release the lock automatically afterwards",
             "in": "query",
             "name": "release-lock",
             "required": false,
@@ -38953,7 +40094,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 1,
-                "description": "When lock-token has been provided and configuration successfully commited, release the lock automatically afterwards",
+                "description": "When lock-token has been provided and configuration successfully committed, release the lock automatically afterwards",
                 "optional": 1,
                 "type": "boolean",
                 "typetext": "<boolean>"
@@ -38975,7 +40116,7 @@
                   },
                   "release-lock": {
                     "default": 1,
-                    "description": "When lock-token has been provided and configuration successfully commited, release the lock automatically afterwards",
+                    "description": "When lock-token has been provided and configuration successfully committed, release the lock automatically afterwards",
                     "optional": 1,
                     "type": "boolean",
                     "typetext": "<boolean>"
@@ -41268,6 +42409,77 @@
           "viewer_sections": {
             "description": null,
             "short_description": "Update sdn dns object configuration.",
+            "usage": null
+          }
+        }
+      }
+    },
+    "/cluster/sdn/dry-run": {
+      "get": {
+        "description": "Dry-run the SDN apply action and return the difference between the current configuration and the pending configuration",
+        "operationId": "get_cluster_sdn_dry_run",
+        "parameters": [
+          {
+            "description": "The cluster node name.",
+            "in": "query",
+            "name": "node",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "The cluster node name.",
+                "format": "pve-node",
+                "type": "string",
+                "typetext": "<string>"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "frr-diff": {
+                      "description": "The difference between the current and pending FRR configuration.",
+                      "optional": 1,
+                      "type": "string"
+                    },
+                    "interfaces-diff": {
+                      "description": "The difference between the current and pending /etc/network/interfaces.d/sdn configuration.",
+                      "optional": 1,
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "summary": "dry-run",
+        "x-proxmox": {
+          "allowtoken": 1,
+          "permissions": {
+            "check": [
+              "perm",
+              "/nodes/{node}",
+              [
+                "Sys.Audit"
+              ]
+            ]
+          },
+          "protected": 1,
+          "raw_sections": [],
+          "source": "apidoc-fallback",
+          "unstable": null,
+          "viewer_sections": {
+            "description": null,
+            "short_description": "Dry-run the SDN apply action and return the difference between the current configuration and the pending configuration",
             "usage": null
           }
         }
@@ -52940,13 +54152,14 @@
             "name": "name",
             "required": true,
             "schema": {
+              "pattern": "(?^:[a-z0-9][-+.a-z0-9:]+)",
               "type": "string"
             },
             "x-proxmox": {
               "raw": {
                 "description": "Package name.",
-                "type": "string",
-                "typetext": "<string>"
+                "pattern": "(?^:[a-z0-9][-+.a-z0-9:]+)",
+                "type": "string"
               }
             }
           },
@@ -54160,6 +55373,30 @@
                 "type": "object"
               }
             }
+          },
+          {
+            "description": "Virtual processor architecture. Defaults to the host architecture.",
+            "in": "query",
+            "name": "arch",
+            "required": false,
+            "schema": {
+              "enum": [
+                "x86_64",
+                "aarch64"
+              ],
+              "type": "string"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Virtual processor architecture. Defaults to the host architecture.",
+                "enum": [
+                  "x86_64",
+                  "aarch64"
+                ],
+                "optional": 1,
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -54246,6 +55483,30 @@
                 "type": "object"
               }
             }
+          },
+          {
+            "description": "Virtual processor architecture. Defaults to the host architecture.",
+            "in": "query",
+            "name": "arch",
+            "required": false,
+            "schema": {
+              "enum": [
+                "x86_64",
+                "aarch64"
+              ],
+              "type": "string"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Virtual processor architecture. Defaults to the host architecture.",
+                "enum": [
+                  "x86_64",
+                  "aarch64"
+                ],
+                "optional": 1,
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -54319,6 +55580,30 @@
                   "node"
                 ],
                 "type": "object"
+              }
+            }
+          },
+          {
+            "description": "Virtual processor architecture. Defaults to the host architecture.",
+            "in": "query",
+            "name": "arch",
+            "required": false,
+            "schema": {
+              "enum": [
+                "x86_64",
+                "aarch64"
+              ],
+              "type": "string"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Virtual processor architecture. Defaults to the host architecture.",
+                "enum": [
+                  "x86_64",
+                  "aarch64"
+                ],
+                "optional": 1,
+                "type": "string"
               }
             }
           }
@@ -69684,6 +70969,13 @@
                     "type": "boolean",
                     "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
                   },
+                  "keepattrs": {
+                    "default": 0,
+                    "description": "Inherit ownership and permissions from the mount point directory.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "verbose_description": "Inherit UID, GID and access mode from the mount point directory, if it exists already."
+                  },
                   "mountoptions": {
                     "description": "Extra mount options for rootfs/mps.",
                     "format_description": "opt[;opt...]",
@@ -69738,7 +71030,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+                "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,keepattrs=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
               }
             }
           },
@@ -69799,7 +71091,7 @@
                     "type": "string"
                   },
                   "host-managed": {
-                    "description": "Whether this interface's IP configuration should be managed by the host.",
+                    "description": "Whether this interface's IP configuration should be managed by the host. When enabled, the host (rather than the container) is responsible for the interface's IP configuration. The container should not run its own DHCP client or network manager on this interface. This is useful for containers that lack an internal network management stack, like many application containers.",
                     "optional": 1,
                     "type": "boolean"
                   },
@@ -70633,6 +71925,13 @@
                         "type": "boolean",
                         "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
                       },
+                      "keepattrs": {
+                        "default": 0,
+                        "description": "Inherit ownership and permissions from the mount point directory.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Inherit UID, GID and access mode from the mount point directory, if it exists already."
+                      },
                       "mountoptions": {
                         "description": "Extra mount options for rootfs/mps.",
                         "format_description": "opt[;opt...]",
@@ -70687,7 +71986,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+                    "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,keepattrs=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
                   },
                   "nameserver": {
                     "description": "Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
@@ -70726,7 +72025,7 @@
                         "type": "string"
                       },
                       "host-managed": {
-                        "description": "Whether this interface's IP configuration should be managed by the host.",
+                        "description": "Whether this interface's IP configuration should be managed by the host. When enabled, the host (rather than the container) is responsible for the interface's IP configuration. The container should not run its own DHCP client or network manager on this interface. This is useful for containers that lack an internal network management stack, like many application containers.",
                         "optional": 1,
                         "type": "boolean"
                       },
@@ -72101,6 +73400,13 @@
                           "type": "boolean",
                           "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
                         },
+                        "keepattrs": {
+                          "default": 0,
+                          "description": "Inherit ownership and permissions from the mount point directory.",
+                          "optional": 1,
+                          "type": "boolean",
+                          "verbose_description": "Inherit UID, GID and access mode from the mount point directory, if it exists already."
+                        },
                         "mountoptions": {
                           "description": "Extra mount options for rootfs/mps.",
                           "format_description": "opt[;opt...]",
@@ -72192,7 +73498,7 @@
                           "type": "string"
                         },
                         "host-managed": {
-                          "description": "Whether this interface's IP configuration should be managed by the host.",
+                          "description": "Whether this interface's IP configuration should be managed by the host. When enabled, the host (rather than the container) is responsible for the interface's IP configuration. The container should not run its own DHCP client or network manager on this interface. This is useful for containers that lack an internal network management stack, like many application containers.",
                           "optional": 1,
                           "type": "boolean"
                         },
@@ -73002,6 +74308,13 @@
                     "type": "boolean",
                     "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
                   },
+                  "keepattrs": {
+                    "default": 0,
+                    "description": "Inherit ownership and permissions from the mount point directory.",
+                    "optional": 1,
+                    "type": "boolean",
+                    "verbose_description": "Inherit UID, GID and access mode from the mount point directory, if it exists already."
+                  },
                   "mountoptions": {
                     "description": "Extra mount options for rootfs/mps.",
                     "format_description": "opt[;opt...]",
@@ -73056,7 +74369,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+                "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,keepattrs=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
               }
             }
           },
@@ -73117,7 +74430,7 @@
                     "type": "string"
                   },
                   "host-managed": {
-                    "description": "Whether this interface's IP configuration should be managed by the host.",
+                    "description": "Whether this interface's IP configuration should be managed by the host. When enabled, the host (rather than the container) is responsible for the interface's IP configuration. The container should not run its own DHCP client or network manager on this interface. This is useful for containers that lack an internal network management stack, like many application containers.",
                     "optional": 1,
                     "type": "boolean"
                   },
@@ -73790,6 +75103,13 @@
                         "type": "boolean",
                         "verbose_description": "Whether to include the mount point in backups (only used for volume mount points)."
                       },
+                      "keepattrs": {
+                        "default": 0,
+                        "description": "Inherit ownership and permissions from the mount point directory.",
+                        "optional": 1,
+                        "type": "boolean",
+                        "verbose_description": "Inherit UID, GID and access mode from the mount point directory, if it exists already."
+                      },
                       "mountoptions": {
                         "description": "Extra mount options for rootfs/mps.",
                         "format_description": "opt[;opt...]",
@@ -73844,7 +75164,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
+                    "typetext": "[volume=]<volume> ,mp=<Path> [,acl=<1|0>] [,backup=<1|0>] [,keepattrs=<1|0>] [,mountoptions=<opt[;opt...]>] [,quota=<1|0>] [,replicate=<1|0>] [,ro=<1|0>] [,shared=<1|0>] [,size=<DiskSize>]"
                   },
                   "nameserver": {
                     "description": "Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.",
@@ -73883,7 +75203,7 @@
                         "type": "string"
                       },
                       "host-managed": {
-                        "description": "Whether this interface's IP configuration should be managed by the host.",
+                        "description": "Whether this interface's IP configuration should be managed by the host. When enabled, the host (rather than the container) is responsible for the interface's IP configuration. The container should not run its own DHCP client or network manager on this interface. This is useful for containers that lack an internal network management stack, like many application containers.",
                         "optional": 1,
                         "type": "boolean"
                       },
@@ -88805,6 +90125,11 @@
                     "cert": {
                       "type": "string"
                     },
+                    "password": {
+                      "description": "Password used for authentication within the VNC protocol. Consists of printable ASCII characters ('!' .. '~').",
+                      "optional": 1,
+                      "type": "string"
+                    },
                     "port": {
                       "type": "integer"
                     },
@@ -89032,19 +90357,42 @@
           {
             "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!",
             "in": "query",
-            "name": "maxworkers",
+            "name": "max-workers",
             "required": false,
             "schema": {
+              "maximum": 64,
               "minimum": 1,
               "type": "integer"
             },
             "x-proxmox": {
               "raw": {
                 "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!",
+                "maximum": 64,
                 "minimum": 1,
                 "optional": 1,
                 "type": "integer",
-                "typetext": "<integer> (1 - N)"
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
+            "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!Deprecated, use 'max-workers' instead.",
+            "in": "query",
+            "name": "maxworkers",
+            "required": false,
+            "schema": {
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!Deprecated, use 'max-workers' instead.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
               }
             }
           },
@@ -89107,12 +90455,21 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "maxworkers": {
+                  "max-workers": {
                     "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!",
+                    "maximum": 64,
                     "minimum": 1,
                     "optional": 1,
                     "type": "integer",
-                    "typetext": "<integer> (1 - N)"
+                    "typetext": "<integer> (1 - 64)"
+                  },
+                  "maxworkers": {
+                    "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!Deprecated, use 'max-workers' instead.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "node": {
                     "description": "The cluster node name.",
@@ -92047,13 +93404,13 @@
                         "type": "integer"
                       },
                       "mem": {
-                        "description": "Currently used memory in bytes.",
+                        "description": "Currently used memory in bytes. Does not take into account kernel same-page merging (KSM). Uses information from ballooning when available.",
                         "optional": 1,
                         "renderer": "bytes",
                         "type": "integer"
                       },
                       "memhost": {
-                        "description": "Current memory usage on the host.",
+                        "description": "Current memory usage on the host. Does not take into account kernel same-page merging (KSM).",
                         "optional": 1,
                         "renderer": "bytes",
                         "type": "integer"
@@ -92281,17 +93638,24 @@
                     "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                     "type": "boolean"
                   },
-                  "freeze-fs-on-backup": {
+                  "freeze-fs": {
                     "default": 1,
-                    "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                    "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                     "optional": 1,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                  },
+                  "freeze-fs-on-backup": {
+                    "alias": "freeze-fs"
                   },
                   "fstrim_cloned_disks": {
                     "default": 0,
                     "description": "Run fstrim after moving a disk or migrating the VM.",
                     "optional": 1,
                     "type": "boolean"
+                  },
+                  "guest-fsfreeze": {
+                    "alias": "freeze-fs"
                   },
                   "type": {
                     "default": "virtio",
@@ -92306,7 +93670,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
+                "typetext": "[enabled=]<1|0> [,freeze-fs=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
               }
             }
           },
@@ -92348,7 +93712,7 @@
             }
           },
           {
-            "description": "Virtual processor architecture. Defaults to the host.",
+            "description": "Virtual processor architecture. Defaults to the host architecture.",
             "in": "query",
             "name": "arch",
             "required": false,
@@ -92361,7 +93725,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Virtual processor architecture. Defaults to the host.",
+                "description": "Virtual processor architecture. Defaults to the host architecture.",
                 "enum": [
                   "x86_64",
                   "aarch64"
@@ -92465,7 +93829,7 @@
             }
           },
           {
-            "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+            "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
             "in": "query",
             "name": "balloon",
             "required": false,
@@ -92475,7 +93839,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -92838,10 +94202,12 @@
                   },
                   "ms-cert": {
                     "default": "2011",
-                    "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                    "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                     "enum": [
                       "2011",
-                      "2023"
+                      "2023",
+                      "2023w",
+                      "2023k"
                     ],
                     "optional": 1,
                     "type": "string"
@@ -92865,7 +94231,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<2011|2023>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
+                "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
               }
             }
           },
@@ -93674,7 +95040,7 @@
             }
           },
           {
-            "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+            "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
             "in": "query",
             "name": "migrate_downtime",
             "required": false,
@@ -93686,7 +95052,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 0.1,
-                "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                 "minimum": 0,
                 "optional": 1,
                 "type": "number",
@@ -95334,7 +96700,7 @@
                 "description": "Configure the VGA hardware.",
                 "format": {
                   "clipboard": {
-                    "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                    "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                     "enum": [
                       "vnc"
                     ],
@@ -95854,17 +97220,24 @@
                         "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                         "type": "boolean"
                       },
-                      "freeze-fs-on-backup": {
+                      "freeze-fs": {
                         "default": 1,
-                        "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                        "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                         "optional": 1,
-                        "type": "boolean"
+                        "type": "boolean",
+                        "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                      },
+                      "freeze-fs-on-backup": {
+                        "alias": "freeze-fs"
                       },
                       "fstrim_cloned_disks": {
                         "default": 0,
                         "description": "Run fstrim after moving a disk or migrating the VM.",
                         "optional": 1,
                         "type": "boolean"
+                      },
+                      "guest-fsfreeze": {
+                        "alias": "freeze-fs"
                       },
                       "type": {
                         "default": "virtio",
@@ -95879,7 +97252,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
+                    "typetext": "[enabled=]<1|0> [,freeze-fs=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
                   },
                   "allow-ksm": {
                     "default": 1,
@@ -95896,7 +97269,7 @@
                     "typetext": "[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
                   },
                   "arch": {
-                    "description": "Virtual processor architecture. Defaults to the host.",
+                    "description": "Virtual processor architecture. Defaults to the host architecture.",
                     "enum": [
                       "x86_64",
                       "aarch64"
@@ -95953,7 +97326,7 @@
                     "typetext": "<boolean>"
                   },
                   "balloon": {
-                    "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                    "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -96118,10 +97491,12 @@
                       },
                       "ms-cert": {
                         "default": "2011",
-                        "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                        "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                         "enum": [
                           "2011",
-                          "2023"
+                          "2023",
+                          "2023w",
+                          "2023k"
                         ],
                         "optional": 1,
                         "type": "string"
@@ -96145,7 +97520,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<2011|2023>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
+                    "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
                   },
                   "force": {
                     "description": "Allow to overwrite existing VM.",
@@ -96685,7 +98060,7 @@
                   },
                   "migrate_downtime": {
                     "default": 0.1,
-                    "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                    "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                     "minimum": 0,
                     "optional": 1,
                     "type": "number",
@@ -97873,7 +99248,7 @@
                     "description": "Configure the VGA hardware.",
                     "format": {
                       "clipboard": {
-                        "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                        "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                         "enum": [
                           "vnc"
                         ],
@@ -99352,6 +100727,48 @@
             }
           },
           {
+            "description": "Number of bytes to read.",
+            "in": "query",
+            "name": "count",
+            "required": false,
+            "schema": {
+              "default": "16777216",
+              "maximum": "16777216",
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": "16777216",
+                "description": "Number of bytes to read.",
+                "maximum": "16777216",
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 16777216)"
+              }
+            }
+          },
+          {
+            "description": "Data received from the QEMU Guest-Agent is base64 encoded. If this is set to true, the data is decoded. Otherwise the content is forwarded with base64 encoding. Defaults to true.",
+            "in": "query",
+            "name": "decode",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "type": "boolean"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 1,
+                "description": "Data received from the QEMU Guest-Agent is base64 encoded. If this is set to true, the data is decoded. Otherwise the content is forwarded with base64 encoding. Defaults to true.",
+                "optional": 1,
+                "type": "boolean",
+                "typetext": "<boolean>"
+              }
+            }
+          },
+          {
             "description": "The path to the file",
             "in": "query",
             "name": "file",
@@ -99364,6 +100781,27 @@
                 "description": "The path to the file",
                 "type": "string",
                 "typetext": "<string>"
+              }
+            }
+          },
+          {
+            "description": "Offset to start reading at",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "default": 0,
+                "description": "Offset to start reading at",
+                "minimum": 0,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (0 - N)"
               }
             }
           }
@@ -99380,7 +100818,7 @@
                       "type": "string"
                     },
                     "truncated": {
-                      "description": "If set to 1, the output is truncated and not complete",
+                      "description": "If set to 1, the read did not reach the end of the file.",
                       "optional": 1,
                       "type": "boolean"
                     }
@@ -103020,17 +104458,24 @@
                           "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                           "type": "boolean"
                         },
-                        "freeze-fs-on-backup": {
+                        "freeze-fs": {
                           "default": 1,
-                          "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                          "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                           "optional": 1,
-                          "type": "boolean"
+                          "type": "boolean",
+                          "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                        },
+                        "freeze-fs-on-backup": {
+                          "alias": "freeze-fs"
                         },
                         "fstrim_cloned_disks": {
                           "default": 0,
                           "description": "Run fstrim after moving a disk or migrating the VM.",
                           "optional": 1,
                           "type": "boolean"
+                        },
+                        "guest-fsfreeze": {
+                          "alias": "freeze-fs"
                         },
                         "type": {
                           "default": "virtio",
@@ -103059,7 +104504,7 @@
                       "type": "string"
                     },
                     "arch": {
-                      "description": "Virtual processor architecture. Defaults to the host.",
+                      "description": "Virtual processor architecture. Defaults to the host architecture.",
                       "enum": [
                         "x86_64",
                         "aarch64"
@@ -103106,7 +104551,7 @@
                       "type": "boolean"
                     },
                     "balloon": {
-                      "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                      "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                       "minimum": 0,
                       "optional": 1,
                       "type": "integer"
@@ -103249,10 +104694,12 @@
                         },
                         "ms-cert": {
                           "default": "2011",
-                          "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                          "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                           "enum": [
                             "2011",
-                            "2023"
+                            "2023",
+                            "2023w",
+                            "2023k"
                           ],
                           "optional": 1,
                           "type": "string"
@@ -103786,7 +105233,7 @@
                     },
                     "migrate_downtime": {
                       "default": 0.1,
-                      "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                      "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                       "minimum": 0,
                       "optional": 1,
                       "type": "number"
@@ -104959,7 +106406,7 @@
                       "description": "Configure the VGA hardware.",
                       "format": {
                         "clipboard": {
-                          "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                          "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                           "enum": [
                             "vnc"
                           ],
@@ -105510,17 +106957,24 @@
                     "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                     "type": "boolean"
                   },
-                  "freeze-fs-on-backup": {
+                  "freeze-fs": {
                     "default": 1,
-                    "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                    "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                     "optional": 1,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                  },
+                  "freeze-fs-on-backup": {
+                    "alias": "freeze-fs"
                   },
                   "fstrim_cloned_disks": {
                     "default": 0,
                     "description": "Run fstrim after moving a disk or migrating the VM.",
                     "optional": 1,
                     "type": "boolean"
+                  },
+                  "guest-fsfreeze": {
+                    "alias": "freeze-fs"
                   },
                   "type": {
                     "default": "virtio",
@@ -105535,7 +106989,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
+                "typetext": "[enabled=]<1|0> [,freeze-fs=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
               }
             }
           },
@@ -105577,7 +107031,7 @@
             }
           },
           {
-            "description": "Virtual processor architecture. Defaults to the host.",
+            "description": "Virtual processor architecture. Defaults to the host architecture.",
             "in": "query",
             "name": "arch",
             "required": false,
@@ -105590,7 +107044,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Virtual processor architecture. Defaults to the host.",
+                "description": "Virtual processor architecture. Defaults to the host architecture.",
                 "enum": [
                   "x86_64",
                   "aarch64"
@@ -105697,7 +107151,7 @@
             }
           },
           {
-            "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+            "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
             "in": "query",
             "name": "balloon",
             "required": false,
@@ -105707,7 +107161,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -106085,10 +107539,12 @@
                   },
                   "ms-cert": {
                     "default": "2011",
-                    "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                    "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                     "enum": [
                       "2011",
-                      "2023"
+                      "2023",
+                      "2023w",
+                      "2023k"
                     ],
                     "optional": 1,
                     "type": "string"
@@ -106112,7 +107568,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<2011|2023>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
+                "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
               }
             }
           },
@@ -106885,7 +108341,7 @@
             }
           },
           {
-            "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+            "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
             "in": "query",
             "name": "migrate_downtime",
             "required": false,
@@ -106897,7 +108353,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 0.1,
-                "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                 "minimum": 0,
                 "optional": 1,
                 "type": "number",
@@ -108506,7 +109962,7 @@
                 "description": "Configure the VGA hardware.",
                 "format": {
                   "clipboard": {
-                    "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                    "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                     "enum": [
                       "vnc"
                     ],
@@ -109005,17 +110461,24 @@
                         "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                         "type": "boolean"
                       },
-                      "freeze-fs-on-backup": {
+                      "freeze-fs": {
                         "default": 1,
-                        "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                        "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                         "optional": 1,
-                        "type": "boolean"
+                        "type": "boolean",
+                        "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                      },
+                      "freeze-fs-on-backup": {
+                        "alias": "freeze-fs"
                       },
                       "fstrim_cloned_disks": {
                         "default": 0,
                         "description": "Run fstrim after moving a disk or migrating the VM.",
                         "optional": 1,
                         "type": "boolean"
+                      },
+                      "guest-fsfreeze": {
+                        "alias": "freeze-fs"
                       },
                       "type": {
                         "default": "virtio",
@@ -109030,7 +110493,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
+                    "typetext": "[enabled=]<1|0> [,freeze-fs=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
                   },
                   "allow-ksm": {
                     "default": 1,
@@ -109047,7 +110510,7 @@
                     "typetext": "[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
                   },
                   "arch": {
-                    "description": "Virtual processor architecture. Defaults to the host.",
+                    "description": "Virtual processor architecture. Defaults to the host architecture.",
                     "enum": [
                       "x86_64",
                       "aarch64"
@@ -109105,7 +110568,7 @@
                     "typetext": "<integer> (1 - 30)"
                   },
                   "balloon": {
-                    "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                    "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -109276,10 +110739,12 @@
                       },
                       "ms-cert": {
                         "default": "2011",
-                        "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                        "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                         "enum": [
                           "2011",
-                          "2023"
+                          "2023",
+                          "2023w",
+                          "2023k"
                         ],
                         "optional": 1,
                         "type": "string"
@@ -109303,7 +110768,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<2011|2023>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
+                    "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
                   },
                   "force": {
                     "description": "Force physical removal. Without this, we simple remove the disk from the config file and create an additional configuration entry called 'unused[n]', which contains the volume ID. Unlink of unused[n] always cause physical removal.",
@@ -109830,7 +111295,7 @@
                   },
                   "migrate_downtime": {
                     "default": 0.1,
-                    "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                    "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                     "minimum": 0,
                     "optional": 1,
                     "type": "number",
@@ -111002,7 +112467,7 @@
                     "description": "Configure the VGA hardware.",
                     "format": {
                       "clipboard": {
-                        "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                        "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                         "enum": [
                           "vnc"
                         ],
@@ -111589,17 +113054,24 @@
                     "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                     "type": "boolean"
                   },
-                  "freeze-fs-on-backup": {
+                  "freeze-fs": {
                     "default": 1,
-                    "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                    "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                     "optional": 1,
-                    "type": "boolean"
+                    "type": "boolean",
+                    "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                  },
+                  "freeze-fs-on-backup": {
+                    "alias": "freeze-fs"
                   },
                   "fstrim_cloned_disks": {
                     "default": 0,
                     "description": "Run fstrim after moving a disk or migrating the VM.",
                     "optional": 1,
                     "type": "boolean"
+                  },
+                  "guest-fsfreeze": {
+                    "alias": "freeze-fs"
                   },
                   "type": {
                     "default": "virtio",
@@ -111614,7 +113086,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
+                "typetext": "[enabled=]<1|0> [,freeze-fs=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
               }
             }
           },
@@ -111656,7 +113128,7 @@
             }
           },
           {
-            "description": "Virtual processor architecture. Defaults to the host.",
+            "description": "Virtual processor architecture. Defaults to the host architecture.",
             "in": "query",
             "name": "arch",
             "required": false,
@@ -111669,7 +113141,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Virtual processor architecture. Defaults to the host.",
+                "description": "Virtual processor architecture. Defaults to the host architecture.",
                 "enum": [
                   "x86_64",
                   "aarch64"
@@ -111755,7 +113227,7 @@
             }
           },
           {
-            "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+            "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
             "in": "query",
             "name": "balloon",
             "required": false,
@@ -111765,7 +113237,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                 "minimum": 0,
                 "optional": 1,
                 "type": "integer",
@@ -112143,10 +113615,12 @@
                   },
                   "ms-cert": {
                     "default": "2011",
-                    "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                    "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                     "enum": [
                       "2011",
-                      "2023"
+                      "2023",
+                      "2023w",
+                      "2023k"
                     ],
                     "optional": 1,
                     "type": "string"
@@ -112170,7 +113644,7 @@
                 },
                 "optional": 1,
                 "type": "string",
-                "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<2011|2023>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
+                "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
               }
             }
           },
@@ -112924,7 +114398,7 @@
             }
           },
           {
-            "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+            "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
             "in": "query",
             "name": "migrate_downtime",
             "required": false,
@@ -112936,7 +114410,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 0.1,
-                "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                 "minimum": 0,
                 "optional": 1,
                 "type": "number",
@@ -114545,7 +116019,7 @@
                 "description": "Configure the VGA hardware.",
                 "format": {
                   "clipboard": {
-                    "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                    "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                     "enum": [
                       "vnc"
                     ],
@@ -115044,17 +116518,24 @@
                         "description": "Enable/disable communication with a QEMU Guest Agent (QGA) running in the VM.",
                         "type": "boolean"
                       },
-                      "freeze-fs-on-backup": {
+                      "freeze-fs": {
                         "default": 1,
-                        "description": "Freeze/thaw guest filesystems on backup for consistency.",
+                        "description": "Freeze guest filesystems through QGA for consistent disk state on operations such as snapshots, backups, replications and clones.",
                         "optional": 1,
-                        "type": "boolean"
+                        "type": "boolean",
+                        "verbose_description": "Whether to issue the guest-fsfreeze-freeze and guest-fsfreeze-thaw QEMU guest agent commands. Backups in snapshot mode, clones, snapshots without RAM, importing disks from a running guest, and replications normally issue a guest-fsfreeze-freeze and a respective thaw command when the QEMU Guest agent option is enabled in the guest's configuration and the agent is running inside of the guest.\n\nThe deprecated 'freeze-fs-on-backup' setting is treated as an alias for this setting."
+                      },
+                      "freeze-fs-on-backup": {
+                        "alias": "freeze-fs"
                       },
                       "fstrim_cloned_disks": {
                         "default": 0,
                         "description": "Run fstrim after moving a disk or migrating the VM.",
                         "optional": 1,
                         "type": "boolean"
+                      },
+                      "guest-fsfreeze": {
+                        "alias": "freeze-fs"
                       },
                       "type": {
                         "default": "virtio",
@@ -115069,7 +116550,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[enabled=]<1|0> [,freeze-fs-on-backup=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
+                    "typetext": "[enabled=]<1|0> [,freeze-fs=<1|0>] [,fstrim_cloned_disks=<1|0>] [,type=<virtio|isa>]"
                   },
                   "allow-ksm": {
                     "default": 1,
@@ -115086,7 +116567,7 @@
                     "typetext": "[type=]<sev-type> [,allow-smt=<1|0>] [,kernel-hashes=<1|0>] [,no-debug=<1|0>] [,no-key-sharing=<1|0>]"
                   },
                   "arch": {
-                    "description": "Virtual processor architecture. Defaults to the host.",
+                    "description": "Virtual processor architecture. Defaults to the host architecture.",
                     "enum": [
                       "x86_64",
                       "aarch64"
@@ -115136,7 +116617,7 @@
                     "typetext": "<boolean>"
                   },
                   "balloon": {
-                    "description": "Amount of target RAM for the VM in MiB. Using zero disables the ballon driver.",
+                    "description": "Amount of target RAM for the VM in MiB. The balloon driver is enabled by default, unless it is explicitly disabled by setting the value to zero.",
                     "minimum": 0,
                     "optional": 1,
                     "type": "integer",
@@ -115307,10 +116788,12 @@
                       },
                       "ms-cert": {
                         "default": "2011",
-                        "description": "Informational marker indicating the version of the latest Microsof UEFI certificate that has been enrolled by Proxmox VE.",
+                        "description": "Informational marker indicating the version of the latest Microsoft UEFI certificates that have been enrolled by Proxmox VE. The value '2023k' means that the 'Microsoft UEFI CA 2023', the 'Windows UEFI CA 2023' and the 'Microsoft Corporation KEK 2K CA 2023' certificates are included. The values '2023' and '2023w' are deprecated and for compatibility only.",
                         "enum": [
                           "2011",
-                          "2023"
+                          "2023",
+                          "2023w",
+                          "2023k"
                         ],
                         "optional": 1,
                         "type": "string"
@@ -115334,7 +116817,7 @@
                     },
                     "optional": 1,
                     "type": "string",
-                    "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<2011|2023>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
+                    "typetext": "[file=]<volume> [,efitype=<2m|4m>] [,format=<enum>] [,import-from=<source volume>] [,ms-cert=<enum>] [,pre-enrolled-keys=<1|0>] [,size=<DiskSize>]"
                   },
                   "force": {
                     "description": "Force physical removal. Without this, we simple remove the disk from the config file and create an additional configuration entry called 'unused[n]', which contains the volume ID. Unlink of unused[n] always cause physical removal.",
@@ -115853,7 +117336,7 @@
                   },
                   "migrate_downtime": {
                     "default": 0.1,
-                    "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge.",
+                    "description": "Set maximum tolerated downtime (in seconds) for migrations. Should the migration not be able to converge in the very end, because too much newly dirtied RAM needs to be transferred, the limit will be increased automatically step-by-step until migration can converge. Will be capped to 2000 seconds (maximum in QEMU).",
                     "minimum": 0,
                     "optional": 1,
                     "type": "number",
@@ -117025,7 +118508,7 @@
                     "description": "Configure the VGA hardware.",
                     "format": {
                       "clipboard": {
-                        "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Migration with VNC clipboard is not yet supported!",
+                        "description": "Enable a specific clipboard. If not set, depending on the display type the SPICE one will be added. Live migration with a VNC clipboard is not possible with QEMU machine version < 10.1.",
                         "enum": [
                           "vnc"
                         ],
@@ -129332,13 +130815,13 @@
                       "type": "integer"
                     },
                     "mem": {
-                      "description": "Currently used memory in bytes.",
+                      "description": "Currently used memory in bytes. Does not take into account kernel same-page merging (KSM). Uses information from ballooning when available.",
                       "optional": 1,
                       "renderer": "bytes",
                       "type": "integer"
                     },
                     "memhost": {
-                      "description": "Current memory usage on the host.",
+                      "description": "Current memory usage on the host. Does not take into account kernel same-page merging (KSM).",
                       "optional": 1,
                       "renderer": "bytes",
                       "type": "integer"
@@ -131888,7 +133371,7 @@
             }
           },
           {
-            "description": "Generates a random password to be used as ticket instead of the API ticket.",
+            "description": "Deprecated, do not use. Password is generated when required.",
             "in": "query",
             "name": "generate-password",
             "required": false,
@@ -131899,7 +133382,7 @@
             "x-proxmox": {
               "raw": {
                 "default": 0,
-                "description": "Generates a random password to be used as ticket instead of the API ticket.",
+                "description": "Deprecated, do not use. Password is generated when required.",
                 "optional": 1,
                 "type": "boolean",
                 "typetext": "<boolean>"
@@ -131932,7 +133415,7 @@
                 "properties": {
                   "generate-password": {
                     "default": 0,
-                    "description": "Generates a random password to be used as ticket instead of the API ticket.",
+                    "description": "Deprecated, do not use. Password is generated when required.",
                     "optional": 1,
                     "type": "boolean",
                     "typetext": "<boolean>"
@@ -131979,7 +133462,7 @@
                       "type": "string"
                     },
                     "password": {
-                      "description": "Returned if requested with 'generate-password' param. Consists of printable ASCII characters ('!' .. '~').",
+                      "description": "Password used for authentication within the VNC protocol. Consists of printable ASCII characters ('!' .. '~').",
                       "optional": 1,
                       "type": "string"
                     },
@@ -137006,6 +138489,27 @@
             }
           },
           {
+            "description": "Defines the maximum number of tasks running concurrently. If not set, uses 'max_workers' from datacenter.cfg, and if that's not set, the available CPU threads, clamped to a maximum of 8, are used.",
+            "in": "query",
+            "name": "max-workers",
+            "required": false,
+            "schema": {
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Defines the maximum number of tasks running concurrently. If not set, uses 'max_workers' from datacenter.cfg, and if that's not set, the available CPU threads, clamped to a maximum of 8, are used.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
             "description": "Only consider guests from this comma separated list of VMIDs.",
             "in": "query",
             "name": "vms",
@@ -137036,6 +138540,14 @@
                     "optional": 1,
                     "type": "boolean",
                     "typetext": "<boolean>"
+                  },
+                  "max-workers": {
+                    "description": "Defines the maximum number of tasks running concurrently. If not set, uses 'max_workers' from datacenter.cfg, and if that's not set, the available CPU threads, clamped to a maximum of 8, are used.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "node": {
                     "description": "The cluster node name.",
@@ -137463,6 +138975,27 @@
             }
           },
           {
+            "description": "Defines the maximum number of tasks running concurrently. If  not set, uses 'max_workers' from datacenter.cfg, and if that's not set, the available CPU threads, clamped to a maximum of 8, are used.",
+            "in": "query",
+            "name": "max-workers",
+            "required": false,
+            "schema": {
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Defines the maximum number of tasks running concurrently. If  not set, uses 'max_workers' from datacenter.cfg, and if that's not set, the available CPU threads, clamped to a maximum of 8, are used.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
             "description": "Timeout for each guest shutdown task. Depending on `force-stop`, the shutdown gets then simply aborted or a hard-stop is forced.",
             "in": "query",
             "name": "timeout",
@@ -137516,6 +139049,14 @@
                     "optional": 1,
                     "type": "boolean",
                     "typetext": "<boolean>"
+                  },
+                  "max-workers": {
+                    "description": "Defines the maximum number of tasks running concurrently. If  not set, uses 'max_workers' from datacenter.cfg, and if that's not set, the available CPU threads, clamped to a maximum of 8, are used.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
                   },
                   "node": {
                     "description": "The cluster node name.",
@@ -141764,6 +143305,27 @@
             }
           },
           {
+            "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg, and if that's not set the available'\n                    .' CPU threads, clamped to a maximum of 8, are used.",
+            "in": "query",
+            "name": "max-workers",
+            "required": false,
+            "schema": {
+              "maximum": 64,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "x-proxmox": {
+              "raw": {
+                "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg, and if that's not set the available'\n                    .' CPU threads, clamped to a maximum of 8, are used.",
+                "maximum": 64,
+                "minimum": 1,
+                "optional": 1,
+                "type": "integer",
+                "typetext": "<integer> (1 - 64)"
+              }
+            }
+          },
+          {
             "description": "Only consider Guests with these IDs.",
             "in": "query",
             "name": "vms",
@@ -141788,6 +143350,14 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "max-workers": {
+                    "description": "Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg, and if that's not set the available'\n                    .' CPU threads, clamped to a maximum of 8, are used.",
+                    "maximum": 64,
+                    "minimum": 1,
+                    "optional": 1,
+                    "type": "integer",
+                    "typetext": "<integer> (1 - 64)"
+                  },
                   "node": {
                     "description": "The cluster node name.",
                     "format": "pve-node",
@@ -142251,6 +143821,7 @@
                     "properties": {
                       "endtime": {
                         "optional": 1,
+                        "renderer": "timestamp",
                         "title": "Endtime",
                         "type": "integer"
                       },
@@ -142270,6 +143841,7 @@
                         "type": "integer"
                       },
                       "starttime": {
+                        "renderer": "timestamp",
                         "title": "Starttime",
                         "type": "integer"
                       },
@@ -143502,6 +145074,11 @@
                     "cert": {
                       "type": "string"
                     },
+                    "password": {
+                      "description": "Password used for authentication within the VNC protocol. Consists of printable ASCII characters ('!' .. '~').",
+                      "optional": 1,
+                      "type": "string"
+                    },
                     "port": {
                       "type": "integer"
                     },
@@ -143585,7 +145162,7 @@
             }
           },
           {
-            "description": "Port number returned by previous vncproxy call.",
+            "description": "Port number returned by previous 'vncshell' call.",
             "in": "query",
             "name": "port",
             "required": true,
@@ -143596,7 +145173,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Port number returned by previous vncproxy call.",
+                "description": "Port number returned by previous 'vncshell' call.",
                 "maximum": 5999,
                 "minimum": 5900,
                 "type": "integer",
@@ -143605,7 +145182,7 @@
             }
           },
           {
-            "description": "Ticket from previous call to vncproxy.",
+            "description": "Ticket from previous call to 'vncshell'.",
             "in": "query",
             "name": "vncticket",
             "required": true,
@@ -143614,7 +145191,7 @@
             },
             "x-proxmox": {
               "raw": {
-                "description": "Ticket from previous call to vncproxy.",
+                "description": "Ticket from previous call to 'vncshell'.",
                 "maxLength": 512,
                 "type": "string",
                 "typetext": "<string>"

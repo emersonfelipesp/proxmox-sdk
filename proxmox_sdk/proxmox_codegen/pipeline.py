@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
@@ -69,10 +71,20 @@ def _viewer_apidoc_js_url(source_url: str) -> str:
     return urlunparse((parsed.scheme, parsed.netloc, apidoc_path, "", "", ""))
 
 
-def _validate_source_for_version_tag(source_url: str, version_tag: str) -> None:
-    """Reject non-official viewer URLs when using the reserved latest tag."""
-    validate_source_url(source_url)
+def _validate_source_for_version_tag(
+    source_url: str, version_tag: str, *, allow_private_ips: bool = False
+) -> None:
+    """Reject non-official viewer URLs when using the reserved latest tag.
+
+    When ``allow_private_ips`` is True, the lab-IP SSRF guard is relaxed AND the
+    reserved-``latest``-tag check is relaxed so a private Proxmox node can act
+    as the source of truth (e.g. for a release certified before
+    ``pve.proxmox.com`` is updated).
+    """
+    validate_source_url(source_url, allow_private_ips=allow_private_ips)
     if version_tag != LATEST_VERSION_TAG:
+        return
+    if allow_private_ips:
         return
     if _normalized_viewer_url(source_url) != _normalized_viewer_url(PROXMOX_API_VIEWER_URL):
         raise ValueError("Version tag 'latest' is reserved for official Proxmox API viewer URL.")
@@ -191,6 +203,7 @@ def generate_proxmox_codegen_bundle(
     retry_backoff_seconds: float = 0.35,
     checkpoint_every: int = 50,
     allow_insecure_ssl: bool = False,
+    allow_private_ips: bool = False,
 ) -> GenerationBundle:
     """Sync wrapper for async generation pipeline."""
 
@@ -204,6 +217,7 @@ def generate_proxmox_codegen_bundle(
             retry_backoff_seconds=retry_backoff_seconds,
             checkpoint_every=checkpoint_every,
             allow_insecure_ssl=allow_insecure_ssl,
+            allow_private_ips=allow_private_ips,
         )
     )
 
@@ -218,11 +232,16 @@ async def generate_proxmox_codegen_bundle_async(
     retry_backoff_seconds: float = 0.35,
     checkpoint_every: int = 50,
     allow_insecure_ssl: bool = False,
+    allow_private_ips: bool = False,
 ) -> GenerationBundle:
     """Run full generation pipeline and optionally persist artifacts."""
 
     cleaned_version_tag = validate_version_tag(version_tag)
-    _validate_source_for_version_tag(source_url=source_url, version_tag=cleaned_version_tag)
+    _validate_source_for_version_tag(
+        source_url=source_url,
+        version_tag=cleaned_version_tag,
+        allow_private_ips=allow_private_ips,
+    )
 
     if _check_playwright_available():
         viewer_capture = await crawl_proxmox_api_viewer_async(
@@ -236,6 +255,7 @@ async def generate_proxmox_codegen_bundle_async(
                 else None
             ),
             checkpoint_every=checkpoint_every,
+            allow_insecure_ssl=allow_insecure_ssl,
         )
     else:
         viewer_capture = {
@@ -267,12 +287,21 @@ async def generate_proxmox_codegen_bundle_async(
         server_url="/api2/json",
     )
 
-    models_code = generate_pydantic_models_from_openapi(openapi)
+    openapi_canonical = json.dumps(openapi, indent=2, sort_keys=True)
+    source_sha256 = hashlib.sha256(openapi_canonical.encode("utf-8")).hexdigest()
+    generated_at = utc_now_iso()
+
+    models_code = generate_pydantic_models_from_openapi(
+        openapi,
+        version_tag=cleaned_version_tag,
+        source_sha256=source_sha256,
+        generated_at=generated_at,
+    )
 
     bundle = GenerationBundle(
         source_url=source_url,
         version_tag=cleaned_version_tag,
-        generated_at=utc_now_iso(),
+        generated_at=generated_at,
         endpoint_count=len(merged_capture),
         operation_count=len(operations),
         capture={
@@ -292,7 +321,8 @@ async def generate_proxmox_codegen_bundle_async(
         models_path = base / "pydantic_models.py"
 
         dump_json(raw_path, bundle.capture)
-        dump_json(openapi_path, bundle.openapi)
+        ensure_parent(openapi_path)
+        openapi_path.write_text(openapi_canonical, encoding="utf-8")
         ensure_parent(models_path)
         models_path.write_text(bundle.pydantic_models_code, encoding="utf-8")
 

@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import importlib.util
+import logging
 
 _playwright_sync_api_available: bool | None = None
+
+_logger = logging.getLogger(__name__)
 
 
 def _check_playwright_sync_api_available() -> bool:
@@ -23,6 +26,7 @@ async def crawl_proxmox_api_viewer_async(
     retry_backoff_seconds: float = 0.35,
     checkpoint_path: str | None = None,
     checkpoint_every: int = 50,
+    allow_insecure_ssl: bool = False,
 ) -> dict[str, object]:
     """Crawl Proxmox API viewer to capture endpoint definitions."""
 
@@ -46,27 +50,46 @@ async def crawl_proxmox_api_viewer_async(
         nonlocal discovered_navigation_items
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until="networkidle", timeout=30000)
-            page.wait_for_selector("nav", timeout=10000)
-
-            nav = page.locator("nav")
-            items = nav.locator("a").all()
-            discovered_navigation_items = len(items)
-
-            for item in items:
+            try:
+                context = browser.new_context(ignore_https_errors=allow_insecure_ssl)
+                page = context.new_page()
                 try:
-                    href = item.get_attribute("href")
-                    if href:
-                        endpoints[href] = {
-                            "path": href,
-                            "text": item.text_content(),
-                            "methods": {},
-                        }
-                except Exception:
-                    failed_endpoints.append(item.text_content() or "")
+                    page.goto(url, wait_until="networkidle", timeout=30000)
+                except Exception as goto_error:
+                    _logger.warning(
+                        "Playwright goto failed for %s (%s); apidoc.js fallback will cover the schema.",
+                        url,
+                        goto_error,
+                    )
+                    return
+                try:
+                    page.wait_for_selector("nav", timeout=10000)
+                except Exception as selector_error:
+                    _logger.warning(
+                        "Proxmox API viewer at %s did not expose a <nav> selector (%s); "
+                        "apidoc.js fallback will cover the schema.",
+                        url,
+                        selector_error,
+                    )
+                    return
 
-            browser.close()
+                nav = page.locator("nav")
+                items = nav.locator("a").all()
+                discovered_navigation_items = len(items)
+
+                for item in items:
+                    try:
+                        href = item.get_attribute("href")
+                        if href:
+                            endpoints[href] = {
+                                "path": href,
+                                "text": item.text_content(),
+                                "methods": {},
+                            }
+                    except Exception:
+                        failed_endpoints.append(item.text_content() or "")
+            finally:
+                browser.close()
 
     await asyncio.to_thread(run_crawler)
 

@@ -186,7 +186,7 @@ Rather than hardcoding 646 routes, the server registers them at startup from the
 
 ### 3. Pre-Generated Schemas
 
-The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., `8.1.0`) is stored independently under `generated/proxmox/`.
+The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., `9.1.11`) is stored independently under `generated/proxmox/`; CI ships both `9.1.11/` and a `latest/` mirror.
 
 ### 4. Full Request/Response Validation
 

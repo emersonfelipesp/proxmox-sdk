@@ -41,7 +41,11 @@ ALLOWED_DOMAINS = [
 
 
 def validate_source_url(
-    url: str, *, allow_http: bool = False, allow_any_domain: bool = False
+    url: str,
+    *,
+    allow_http: bool = False,
+    allow_any_domain: bool = False,
+    allow_private_ips: bool = False,
 ) -> str:
     """Validate that a source URL is safe for external requests (SSRF protection).
 
@@ -50,21 +54,18 @@ def validate_source_url(
         allow_http: Whether to allow HTTP (default: False, HTTPS only)
         allow_any_domain: Whether to allow domains outside the Proxmox allowlist
             (default: False, non-Proxmox domains are rejected)
+        allow_private_ips: Whether to permit private/loopback/link-local IP ranges
+            (default: False). Intended for trusted lab-only schema captures against
+            a known Proxmox node on a private network. Implies ``allow_any_domain``
+            for IP literals since private IPs cannot be in the public Proxmox
+            allowlist. NEVER enable this for production codegen or in a service
+            that accepts arbitrary user input.
 
     Returns:
         The validated URL (normalized)
 
     Raises:
         SSRFProtectionError: If the URL fails validation
-
-    Security checks:
-        1. Must use HTTPS (or HTTP if explicitly allowed)
-        2. Must not target private IP ranges
-        3. Must not target localhost/loopback
-        4. Must not target link-local addresses (AWS metadata, etc.)
-        5. Must not use file:// or other dangerous schemes
-        6. Domain must be in the official Proxmox allowlist (unless allow_any_domain=True)
-        7. IPv4-mapped IPv6 addresses (::ffff:x.x.x.x) are checked against private IPv4 ranges
     """
     if not url or not isinstance(url, str):
         raise SSRFProtectionError("URL must be a non-empty string")
@@ -100,31 +101,41 @@ def validate_source_url(
         ip_addr = None
 
     if ip_addr is not None:
-        # Check against private IPv4 ranges
-        if isinstance(ip_addr, ipaddress.IPv4Address):
-            for private_range in PRIVATE_IP_RANGES:
-                if ip_addr in private_range:
-                    raise SSRFProtectionError(
-                        f"SSRF attempt blocked: URL targets private IP range {private_range}: {url}"
-                    )
+        if allow_private_ips:
+            import logging
 
-        # Check against private IPv6 ranges
-        elif isinstance(ip_addr, ipaddress.IPv6Address):
-            for private_range in PRIVATE_IPV6_RANGES:
-                if ip_addr in private_range:
-                    raise SSRFProtectionError(
-                        f"SSRF attempt blocked: URL targets private IPv6 range {private_range}: {url}"
-                    )
-            # Check IPv4-mapped (::ffff:x.x.x.x) and 6to4 (2002::/16) addresses —
-            # these embed an IPv4 address that must also be checked against private ranges.
-            embedded_ipv4 = ip_addr.ipv4_mapped or ip_addr.sixtofour
-            if embedded_ipv4 is not None:
+            logging.getLogger(__name__).warning(
+                "Source URL targets an IP literal %s with allow_private_ips=True; "
+                "private-range SSRF guard bypassed. URL: %s",
+                ip_addr,
+                url,
+            )
+        else:
+            # Check against private IPv4 ranges
+            if isinstance(ip_addr, ipaddress.IPv4Address):
                 for private_range in PRIVATE_IP_RANGES:
-                    if embedded_ipv4 in private_range:
+                    if ip_addr in private_range:
                         raise SSRFProtectionError(
-                            f"SSRF attempt blocked: URL targets private IP via IPv6-mapped "
-                            f"address ({ip_addr} → {embedded_ipv4}): {url}"
+                            f"SSRF attempt blocked: URL targets private IP range {private_range}: {url}"
                         )
+
+            # Check against private IPv6 ranges
+            elif isinstance(ip_addr, ipaddress.IPv6Address):
+                for private_range in PRIVATE_IPV6_RANGES:
+                    if ip_addr in private_range:
+                        raise SSRFProtectionError(
+                            f"SSRF attempt blocked: URL targets private IPv6 range {private_range}: {url}"
+                        )
+                # Check IPv4-mapped (::ffff:x.x.x.x) and 6to4 (2002::/16) addresses —
+                # these embed an IPv4 address that must also be checked against private ranges.
+                embedded_ipv4 = ip_addr.ipv4_mapped or ip_addr.sixtofour
+                if embedded_ipv4 is not None:
+                    for private_range in PRIVATE_IP_RANGES:
+                        if embedded_ipv4 in private_range:
+                            raise SSRFProtectionError(
+                                f"SSRF attempt blocked: URL targets private IP via IPv6-mapped "
+                                f"address ({ip_addr} → {embedded_ipv4}): {url}"
+                            )
     else:
         # Not an IP address, it's a domain name - validate domain
 
