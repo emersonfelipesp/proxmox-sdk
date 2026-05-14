@@ -30,7 +30,7 @@ dependencies = [
 [project.optional-dependencies]
 pbs = []
 ssh = [
-    "paramiko>=3.0",
+    "paramiko>=5.0.0",
     "openssh-wrapper>=0.4",
 ]
 cli = [
@@ -40,7 +40,7 @@ cli = [
     "pyyaml>=6.0",
 ]
 all = [
-    "paramiko>=3.0",
+    "paramiko>=5.0.0",
     "openssh-wrapper>=0.4",
     "typer[all]>=0.12.3",
     "rich>=13.0.0",
@@ -63,7 +63,7 @@ docs = [
     "mkdocs-material>=9.7.6",
 ]
 granian = [
-    "granian>=2.7.0",
+    "granian>=2.7.4",
 ]
 dev = [
     "ruff>=0.15.8",
@@ -110,6 +110,10 @@ show_missing = true
 
 [tool.uv]
 default-groups = ["dev"]
+constraint-dependencies = [
+    "python-multipart>=0.0.27",
+    "urllib3>=2.7.0",
+]
 
 [tool.ruff]
 target-version = "py311"
