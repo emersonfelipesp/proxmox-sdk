@@ -14,7 +14,9 @@ For more information, see: https://emersonfelipesp.github.io/proxmox-sdk/
 
 from __future__ import annotations
 
-__version__ = "0.0.2"
+from proxmox_sdk._version import get_version
+
+__version__ = get_version()
 
 __all__ = [
     "__version__",

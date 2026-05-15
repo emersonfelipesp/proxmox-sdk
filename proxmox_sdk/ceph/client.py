@@ -15,7 +15,7 @@ from proxmox_sdk.ceph import models as m
 from proxmox_sdk.ceph.domains.cluster import ClusterCeph
 from proxmox_sdk.ceph.domains.nodes import NodeCeph
 from proxmox_sdk.sdk.api import ProxmoxSDK
-from proxmox_sdk.sdk.services import SERVICES
+from proxmox_sdk.sdk.sync_adapter import BlockingDomainProxy
 
 
 class CephClient:
@@ -63,7 +63,7 @@ class CephClient:
     @classmethod
     def from_sdk(cls, sdk: ProxmoxSDK) -> CephClient:
         """Wrap an existing :class:`ProxmoxSDK` instance (service must be PVE)."""
-        if sdk._service_config is not SERVICES["PVE"]:  # noqa: SLF001 - read-only check
+        if sdk.service != "PVE":
             raise ValueError("CephClient requires a ProxmoxSDK instance with service='PVE'")
         return cls(_sdk=sdk)
 
@@ -109,27 +109,9 @@ class SyncCephClient:
         return self._loop.run_until_complete(self._client.status())
 
     @property
-    def cluster(self) -> _SyncDomain:
-        return _SyncDomain(self._loop, self._client.cluster)
+    def cluster(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.cluster)
 
     @property
-    def nodes(self) -> _SyncDomain:
-        return _SyncDomain(self._loop, self._client.nodes)
-
-
-class _SyncDomain:
-    """Reflect async methods of a domain helper as blocking calls."""
-
-    def __init__(self, loop: Any, target: Any) -> None:
-        self._loop = loop
-        self._target = target
-
-    def __getattr__(self, name: str) -> Any:
-        attr = getattr(self._target, name)
-        if not callable(attr):
-            return attr
-
-        def _wrapped(*args: Any, **kwargs: Any) -> Any:
-            return self._loop.run_until_complete(attr(*args, **kwargs))
-
-        return _wrapped
+    def nodes(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.nodes)

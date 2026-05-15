@@ -11,18 +11,13 @@ This helper normalises the four job-config endpoints into a single
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from proxmox_sdk.pbs import models as m
+from proxmox_sdk.pbs._utils import normalize_list
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK
-
-
-def _unwrap(data: Any) -> Any:
-    if isinstance(data, dict) and set(data.keys()) == {"data"}:
-        return data["data"]
-    return data
 
 
 _JOB_PATHS: dict[m.JobType, str] = {
@@ -48,8 +43,7 @@ class Jobs:
         out: list[m.PBSJob] = []
         for jt in wanted:
             resource = self._sdk(_JOB_PATHS[jt])
-            data = _unwrap(await resource.get())
-            for item in data or []:
+            for item in normalize_list(await resource.get()):
                 payload = dict(item)
                 payload["job_type"] = jt
                 out.append(m.PBSJob.model_validate(payload))

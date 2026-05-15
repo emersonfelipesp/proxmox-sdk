@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import aiohttp
 import pytest
 
+from proxmox_sdk.sdk.api import ProxmoxSDK
 from proxmox_sdk.sdk.auth.ticket import TicketAuth
 from proxmox_sdk.sdk.exceptions import (
     AuthenticationError,
@@ -340,3 +341,30 @@ def test_https_backend_connect_timeout_in_client_timeout() -> None:
     )
     assert backend._timeout.connect == 5
     assert backend._timeout.total == 30
+
+
+@pytest.mark.anyio
+async def test_sdk_exposes_service_and_backend_name() -> None:
+    sdk = ProxmoxSDK.mock(service="PBS")
+    try:
+        assert sdk.service == "PBS"
+        assert sdk.backend_name == "mock"
+    finally:
+        await sdk.close()
+
+
+@pytest.mark.anyio
+async def test_ssh_paramiko_backend_receives_configured_port() -> None:
+    pytest.importorskip("paramiko")
+
+    sdk = ProxmoxSDK(
+        host="pve.example.com",
+        user="root",
+        backend="ssh_paramiko",
+        port=2222,
+    )
+    try:
+        assert sdk.backend_name == "ssh_paramiko"
+        assert sdk._backend._port == 2222  # noqa: SLF001 - transport wiring assertion
+    finally:
+        await sdk.close()

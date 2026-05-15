@@ -1,6 +1,7 @@
 """Test that all modules can be imported successfully."""
 
 import importlib
+from importlib.metadata import version as metadata_version
 
 import pytest
 
@@ -55,3 +56,12 @@ import pytest
 def test_import(module_path: str) -> None:
     mod = importlib.import_module(module_path)
     assert mod is not None
+
+
+def test_package_and_cli_versions_match_distribution_metadata() -> None:
+    import proxmox_sdk
+    from proxmox_sdk.proxmox_cli import __version__ as cli_version
+
+    expected = metadata_version("proxmox-sdk")
+    assert proxmox_sdk.__version__ == expected
+    assert cli_version == expected

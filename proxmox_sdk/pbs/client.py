@@ -18,12 +18,13 @@ from __future__ import annotations
 from typing import Any
 
 from proxmox_sdk.pbs import models as m
+from proxmox_sdk.pbs._utils import unwrap_data
 from proxmox_sdk.pbs.domains.datastores import Datastores
 from proxmox_sdk.pbs.domains.jobs import Jobs
 from proxmox_sdk.pbs.domains.nodes import Nodes
 from proxmox_sdk.pbs.domains.snapshots import Snapshots
 from proxmox_sdk.sdk.api import ProxmoxSDK
-from proxmox_sdk.sdk.services import SERVICES
+from proxmox_sdk.sdk.sync_adapter import BlockingDomainProxy
 
 
 class PBSClient:
@@ -67,7 +68,7 @@ class PBSClient:
     @classmethod
     def from_sdk(cls, sdk: ProxmoxSDK) -> PBSClient:
         """Wrap an existing :class:`ProxmoxSDK` instance (service must be PBS)."""
-        if sdk._service_config is not SERVICES["PBS"]:  # noqa: SLF001 — read-only check
+        if sdk.service != "PBS":
             raise ValueError("PBSClient requires a ProxmoxSDK instance with service='PBS'")
         return cls(_sdk=sdk)
 
@@ -92,7 +93,7 @@ class PBSClient:
 
     async def version(self) -> m.PBSVersion:
         data: Any = await self._sdk.version.get()
-        return m.PBSVersion.model_validate(_unwrap(data))
+        return m.PBSVersion.model_validate(unwrap_data(data))
 
 
 class SyncPBSClient:
@@ -120,42 +121,17 @@ class SyncPBSClient:
         return self._loop.run_until_complete(self._client.version())
 
     @property
-    def datastores(self) -> _SyncDomain:
-        return _SyncDomain(self._loop, self._client.datastores)
+    def datastores(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.datastores)
 
     @property
-    def snapshots(self) -> _SyncDomain:
-        return _SyncDomain(self._loop, self._client.snapshots)
+    def snapshots(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.snapshots)
 
     @property
-    def jobs(self) -> _SyncDomain:
-        return _SyncDomain(self._loop, self._client.jobs)
+    def jobs(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.jobs)
 
     @property
-    def nodes(self) -> _SyncDomain:
-        return _SyncDomain(self._loop, self._client.nodes)
-
-
-class _SyncDomain:
-    """Reflects async methods of a domain helper as blocking calls."""
-
-    def __init__(self, loop: Any, target: Any) -> None:
-        self._loop = loop
-        self._target = target
-
-    def __getattr__(self, name: str) -> Any:
-        attr = getattr(self._target, name)
-        if not callable(attr):
-            return attr
-
-        def _wrapped(*args: Any, **kwargs: Any) -> Any:
-            return self._loop.run_until_complete(attr(*args, **kwargs))
-
-        return _wrapped
-
-
-def _unwrap(data: Any) -> Any:
-    """PBS responses often live under ``{"data": ...}``; pass through otherwise."""
-    if isinstance(data, dict) and set(data.keys()) == {"data"}:
-        return data["data"]
-    return data
+    def nodes(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.nodes)

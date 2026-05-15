@@ -2,18 +2,25 @@
 
 from __future__ import annotations
 
-import logging
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.sync import SyncProxmoxSDK
 
 from proxmox_sdk.sdk.auth.token import parse_token_id
 from proxmox_sdk.sdk.backends.base import AbstractBackend
+from proxmox_sdk.sdk.backends.factory import BackendConfig, BackendFactory
 from proxmox_sdk.sdk.resource import ProxmoxResource
 from proxmox_sdk.sdk.services import SERVICES, ServiceConfig
 
-logger = logging.getLogger(__name__)
+ServiceName = Literal["PVE", "PMG", "PBS"]
+
+
+def _normalize_service_name(service: Any) -> ServiceName:
+    service_upper = str(service).upper()
+    if service_upper not in SERVICES:
+        raise ValueError(f"Unknown service '{service}'. Supported: {list(SERVICES.keys())}")
+    return cast(ServiceName, service_upper)
 
 
 class ProxmoxSDK:
@@ -78,7 +85,7 @@ class ProxmoxSDK:
         token_value: str | None = None,
         otp: str | None = None,
         otptype: str = "totp",
-        service: Literal["PVE", "PMG", "PBS"] = "PVE",
+        service: ServiceName = "PVE",
         backend: str = "https",
         port: int | None = None,
         path_prefix: str = "",
@@ -95,13 +102,12 @@ class ProxmoxSDK:
         forward_ssh_agent: bool = False,
         config_file: str | None = None,
     ) -> None:
-        service_upper = service.upper()
-        if service_upper not in SERVICES:
-            raise ValueError(f"Unknown service '{service}'. Supported: {list(SERVICES.keys())}")
+        service_upper = _normalize_service_name(service)
         svc: ServiceConfig = SERVICES[service_upper]
 
         if _backend is not None:
             # Caller-supplied backend — skip factory entirely (e.g. for testing).
+            self._service_name = service_upper
             self._service_config = svc
             self._backend_name = "custom"
             self._backend = _backend
@@ -114,37 +120,56 @@ class ProxmoxSDK:
                 f"Supported backends: {list(svc.supported_backends)}"
             )
 
+        self._service_name = service_upper
         self._service_config = svc
         self._backend_name = backend
-        self._backend = self._create_backend(
-            backend=backend,
-            host=host,
-            user=user,
-            password=password,
-            token_name=token_name,
-            token_value=token_value,
-            otp=otp,
-            otptype=otptype,
-            service_config=svc,
-            port=port,
-            path_prefix=path_prefix,
-            verify_ssl=verify_ssl,
-            cert=cert,
-            timeout=timeout,
-            connect_timeout=connect_timeout,
-            proxies=proxies,
-            max_retries=max_retries,
-            retry_backoff=retry_backoff,
-            sudo=sudo,
-            private_key_file=private_key_file,
-            identity_file=identity_file,
-            forward_ssh_agent=forward_ssh_agent,
-            config_file=config_file,
+        self._backend = BackendFactory().create(
+            BackendConfig(
+                backend=backend,
+                service_config=svc,
+                host=host,
+                user=user,
+                password=password,
+                token_name=token_name,
+                token_value=token_value,
+                otp=otp,
+                otptype=otptype,
+                port=port,
+                path_prefix=path_prefix,
+                verify_ssl=verify_ssl,
+                cert=cert,
+                timeout=timeout,
+                connect_timeout=connect_timeout,
+                proxies=proxies,
+                max_retries=max_retries,
+                retry_backoff=retry_backoff,
+                sudo=sudo,
+                private_key_file=private_key_file,
+                identity_file=identity_file,
+                forward_ssh_agent=forward_ssh_agent,
+                config_file=config_file,
+            )
         )
         self._root: ProxmoxResource = ProxmoxResource(
             path=svc.api_path_prefix,
             backend=self._backend,
         )
+
+    @property
+    def service(self) -> str:
+        """Return the Proxmox service name this SDK instance targets."""
+        service_name = getattr(self, "_service_name", None)
+        if isinstance(service_name, str):
+            return service_name
+        for name, config in SERVICES.items():
+            if config is self._service_config:
+                return name
+        return "custom"
+
+    @property
+    def backend_name(self) -> str:
+        """Return the configured transport backend name."""
+        return self._backend_name
 
     # ------------------------------------------------------------------
     # Context manager
@@ -208,7 +233,7 @@ class ProxmoxSDK:
     def mock(
         cls,
         schema_version: str = "latest",
-        service: Literal["PVE", "PMG", "PBS"] = "PVE",
+        service: ServiceName = "PVE",
     ) -> ProxmoxSDK:
         """Create a ProxmoxSDK instance backed by the in-memory mock.
 
@@ -220,11 +245,13 @@ class ProxmoxSDK:
                 nodes = await proxmox.nodes.get()
         """
         instance = object.__new__(cls)
-        svc = SERVICES[service.upper()]
 
         from proxmox_sdk.sdk.backends.mock import MockBackend
 
+        service_upper = _normalize_service_name(service)
+        svc = SERVICES[service_upper]
         backend = MockBackend(schema_version=schema_version, api_path_prefix=svc.api_path_prefix)
+        instance._service_name = service_upper
         instance._service_config = svc
         instance._backend_name = "mock"
         instance._backend = backend
@@ -243,7 +270,7 @@ class ProxmoxSDK:
             config = ProxmoxConfig.from_env()
             proxmox = ProxmoxSDK.from_config(config)
         """
-        service = getattr(config, "service", "PVE")
+        service = _normalize_service_name(getattr(config, "service", "PVE"))
         backend_name = getattr(config, "backend", "https")
 
         if backend_name == "mock" or getattr(config, "api_mode", "real") == "mock":
@@ -310,7 +337,7 @@ class ProxmoxSDK:
     def sync_mock(
         cls,
         schema_version: str = "latest",
-        service: Literal["PVE", "PMG", "PBS"] = "PVE",
+        service: ServiceName = "PVE",
     ) -> "SyncProxmoxSDK":
         """Create a synchronous mock SDK instance.
 
@@ -341,131 +368,6 @@ class ProxmoxSDK:
 
         instance._root = SyncProxmoxResource(instance._sdk._root, instance._loop)
         return instance
-
-    # ------------------------------------------------------------------
-    # Internal: backend factory
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def _create_backend(  # noqa: C901
-        *,
-        backend: str,
-        host: str | None,
-        user: str | None,
-        password: str | None,
-        token_name: str | None,
-        token_value: str | None,
-        otp: str | None,
-        otptype: str,
-        service_config: ServiceConfig,
-        port: int | None,
-        path_prefix: str,
-        verify_ssl: bool,
-        cert: str | None,
-        timeout: int,
-        connect_timeout: int | None,
-        proxies: dict[str, str] | None,
-        max_retries: int,
-        retry_backoff: float,
-        sudo: bool,
-        private_key_file: str | None,
-        identity_file: str | None,
-        forward_ssh_agent: bool,
-        config_file: str | None,
-    ) -> Any:
-        if backend == "mock":
-            from proxmox_sdk.sdk.backends.mock import MockBackend
-
-            return MockBackend(api_path_prefix=service_config.api_path_prefix)
-
-        if backend == "local":
-            from proxmox_sdk.sdk.backends.local import LocalBackend
-
-            return LocalBackend(service_config=service_config, sudo=sudo)
-
-        if backend == "https":
-            from proxmox_sdk.sdk.auth.ticket import TicketAuth
-            from proxmox_sdk.sdk.auth.token import TokenAuth
-            from proxmox_sdk.sdk.backends.https import HttpsBackend
-
-            if not host:
-                raise ValueError("'host' is required for the HTTPS backend")
-
-            if token_name and token_value:
-                auth = TokenAuth(
-                    user=user or "",
-                    token_name=token_name,
-                    token_value=token_value,
-                    service_config=service_config,
-                )
-            elif user and password:
-                auth = TicketAuth(
-                    username=user,
-                    password=password,
-                    service_config=service_config,
-                    otp=otp,
-                    otptype=otptype,
-                )
-            else:
-                raise ValueError(
-                    "HTTPS backend requires either (user + password) "
-                    "or (user + token_name + token_value)"
-                )
-
-            return HttpsBackend(
-                host=host,
-                service_config=service_config,
-                auth=auth,
-                port=port,
-                path_prefix=path_prefix,
-                verify_ssl=verify_ssl,
-                cert=cert,
-                timeout=timeout,
-                connect_timeout=connect_timeout,
-                proxies=proxies,
-                max_retries=max_retries,
-                retry_backoff=retry_backoff,
-            )
-
-        if backend == "ssh_paramiko":
-            from proxmox_sdk.sdk.backends.ssh_paramiko import SshParamikoBackend
-
-            if not host:
-                raise ValueError("'host' is required for the ssh_paramiko backend")
-            if not user:
-                raise ValueError("'user' is required for the ssh_paramiko backend")
-
-            return SshParamikoBackend(
-                host=host,
-                user=user,
-                service_config=service_config,
-                password=password,
-                private_key_file=private_key_file,
-                sudo=sudo,
-            )
-
-        if backend == "openssh":
-            from proxmox_sdk.sdk.backends.openssh import OpenSshBackend
-
-            if not host:
-                raise ValueError("'host' is required for the openssh backend")
-            if not user:
-                raise ValueError("'user' is required for the openssh backend")
-
-            return OpenSshBackend(
-                host=host,
-                user=user,
-                service_config=service_config,
-                password=password,
-                identity_file=identity_file,
-                forward_ssh_agent=forward_ssh_agent,
-                config_file=config_file,
-                sudo=sudo,
-            )
-
-        raise ValueError(
-            f"Unknown backend '{backend}'. Supported: https, ssh_paramiko, openssh, local, mock"
-        )
 
 
 __all__ = ["ProxmoxSDK"]

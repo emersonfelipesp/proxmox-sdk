@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from proxmox_sdk.pbs import models as m
+from proxmox_sdk.pbs._utils import unwrap_data
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK
-
-
-def _unwrap(data: Any) -> Any:
-    if isinstance(data, dict) and set(data.keys()) == {"data"}:
-        return data["data"]
-    return data
 
 
 class Nodes:
@@ -21,5 +16,5 @@ class Nodes:
         self._sdk = sdk
 
     async def status(self, node: str) -> m.PBSNodeStatus:
-        data = _unwrap(await self._sdk.nodes(node).status.get())
+        data = unwrap_data(await self._sdk.nodes(node).status.get())
         return m.PBSNodeStatus.model_validate(data or {})
