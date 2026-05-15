@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 from collections.abc import Awaitable
 from inspect import isawaitable
 from typing import Any, cast
@@ -20,6 +21,7 @@ class BlockingDomainProxy:
         if not callable(attr):
             return attr
 
+        @functools.wraps(attr)
         def _wrapped(*args: Any, **kwargs: Any) -> Any:
             result = attr(*args, **kwargs)
             if not isawaitable(result):

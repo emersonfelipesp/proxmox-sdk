@@ -3,17 +3,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, ClassVar, Literal
 
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.services import ServiceConfig
 
+BackendName = Literal["mock", "local", "https", "ssh_paramiko", "openssh"]
+
 
 @dataclass(frozen=True, kw_only=True)
-class BackendConfig:
-    """Constructor inputs needed to build one concrete SDK backend."""
+class BackendBuildSpec:
+    """Constructor inputs needed to build one concrete SDK backend.
 
-    backend: str
+    Named distinctly from :class:`proxmox_sdk.proxmox_cli.config.BackendConfig`
+    (which models a user-facing CLI profile) so the two cannot be confused.
+    """
+
+    backend: BackendName
     service_config: ServiceConfig
     host: str | None = None
     user: str | None = None
@@ -41,35 +47,30 @@ class BackendConfig:
 class BackendFactory:
     """Create concrete backends without coupling ``ProxmoxSDK`` to transport details."""
 
-    def create(self, config: BackendConfig) -> AbstractBackend:
-        creators: dict[str, Callable[[BackendConfig], AbstractBackend]] = {
-            "mock": self._mock,
-            "local": self._local,
-            "https": self._https,
-            "ssh_paramiko": self._ssh_paramiko,
-            "openssh": self._openssh,
-        }
+    _CREATORS: ClassVar[dict[str, Callable[[BackendBuildSpec], AbstractBackend]]]
+
+    def create(self, config: BackendBuildSpec) -> AbstractBackend:
         try:
-            creator = creators[config.backend]
+            creator = self._CREATORS[config.backend]
         except KeyError as exc:
-            supported = ", ".join(sorted(creators))
+            supported = ", ".join(sorted(self._CREATORS))
             raise ValueError(f"Unknown backend '{config.backend}'. Supported: {supported}") from exc
         return creator(config)
 
     @staticmethod
-    def _mock(config: BackendConfig) -> AbstractBackend:
+    def _mock(config: BackendBuildSpec) -> AbstractBackend:
         from proxmox_sdk.sdk.backends.mock import MockBackend
 
         return MockBackend(api_path_prefix=config.service_config.api_path_prefix)
 
     @staticmethod
-    def _local(config: BackendConfig) -> AbstractBackend:
+    def _local(config: BackendBuildSpec) -> AbstractBackend:
         from proxmox_sdk.sdk.backends.local import LocalBackend
 
         return LocalBackend(service_config=config.service_config, sudo=config.sudo)
 
     @staticmethod
-    def _https(config: BackendConfig) -> AbstractBackend:
+    def _https(config: BackendBuildSpec) -> AbstractBackend:
         from proxmox_sdk.sdk.auth.ticket import TicketAuth
         from proxmox_sdk.sdk.auth.token import TokenAuth
         from proxmox_sdk.sdk.backends.https import HttpsBackend
@@ -114,7 +115,7 @@ class BackendFactory:
         )
 
     @staticmethod
-    def _ssh_paramiko(config: BackendConfig) -> AbstractBackend:
+    def _ssh_paramiko(config: BackendBuildSpec) -> AbstractBackend:
         from proxmox_sdk.sdk.backends.ssh_paramiko import SshParamikoBackend
 
         if not config.host:
@@ -133,7 +134,7 @@ class BackendFactory:
         )
 
     @staticmethod
-    def _openssh(config: BackendConfig) -> AbstractBackend:
+    def _openssh(config: BackendBuildSpec) -> AbstractBackend:
         from proxmox_sdk.sdk.backends.openssh import OpenSshBackend
 
         if not config.host:
@@ -154,4 +155,13 @@ class BackendFactory:
         )
 
 
-__all__ = ["BackendConfig", "BackendFactory"]
+BackendFactory._CREATORS = {
+    "mock": BackendFactory._mock,
+    "local": BackendFactory._local,
+    "https": BackendFactory._https,
+    "ssh_paramiko": BackendFactory._ssh_paramiko,
+    "openssh": BackendFactory._openssh,
+}
+
+
+__all__ = ["BackendBuildSpec", "BackendFactory", "BackendName"]

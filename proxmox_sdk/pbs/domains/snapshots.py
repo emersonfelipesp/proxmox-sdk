@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from proxmox_sdk._response_utils import normalize_list
 from proxmox_sdk.pbs import models as m
-from proxmox_sdk.pbs._utils import normalize_list
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK

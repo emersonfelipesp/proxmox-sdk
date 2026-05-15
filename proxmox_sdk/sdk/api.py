@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 from proxmox_sdk.sdk.auth.token import parse_token_id
 from proxmox_sdk.sdk.backends.base import AbstractBackend
-from proxmox_sdk.sdk.backends.factory import BackendConfig, BackendFactory
+from proxmox_sdk.sdk.backends.factory import BackendBuildSpec, BackendFactory
 from proxmox_sdk.sdk.resource import ProxmoxResource
 from proxmox_sdk.sdk.services import SERVICES, ServiceConfig
 
@@ -124,7 +124,7 @@ class ProxmoxSDK:
         self._service_config = svc
         self._backend_name = backend
         self._backend = BackendFactory().create(
-            BackendConfig(
+            BackendBuildSpec(
                 backend=backend,
                 service_config=svc,
                 host=host,
@@ -158,13 +158,7 @@ class ProxmoxSDK:
     @property
     def service(self) -> str:
         """Return the Proxmox service name this SDK instance targets."""
-        service_name = getattr(self, "_service_name", None)
-        if isinstance(service_name, str):
-            return service_name
-        for name, config in SERVICES.items():
-            if config is self._service_config:
-                return name
-        return "custom"
+        return self._service_name
 
     @property
     def backend_name(self) -> str:

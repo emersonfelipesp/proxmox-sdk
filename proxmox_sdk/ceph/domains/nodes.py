@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from proxmox_sdk._response_utils import normalize_list, unwrap_data
 from proxmox_sdk.ceph import models as m
-from proxmox_sdk.ceph._utils import _normalize_list, _unwrap
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK
@@ -25,31 +25,31 @@ class NodeCeph:
         data = await self._resource(node, segment).get()
         return [
             m.CephDaemon.model_validate({**item, "type": daemon_type})
-            for item in _normalize_list(data)
+            for item in normalize_list(data)
             if isinstance(item, dict)
         ]
 
     async def index(self, node: str) -> list[dict[str, Any]]:
-        return _normalize_list(await self._resource(node).get())
+        return normalize_list(await self._resource(node).get())
 
     async def config_db(self, node: str) -> Any:
-        return _unwrap(await self._resource(node, "cfg", "db").get())
+        return unwrap_data(await self._resource(node, "cfg", "db").get())
 
     async def config_raw(self, node: str) -> Any:
-        return _unwrap(await self._resource(node, "cfg", "raw").get())
+        return unwrap_data(await self._resource(node, "cfg", "raw").get())
 
     async def config_value(self, node: str, **params: Any) -> Any:
-        return _unwrap(await self._resource(node, "cfg", "value").get(**params))
+        return unwrap_data(await self._resource(node, "cfg", "value").get(**params))
 
     async def cmd_safety(self, node: str, **params: Any) -> Any:
-        return _unwrap(await self._resource(node, "cmd-safety").get(**params))
+        return unwrap_data(await self._resource(node, "cmd-safety").get(**params))
 
     async def crush(self, node: str) -> Any:
-        return _unwrap(await self._resource(node, "crush").get())
+        return unwrap_data(await self._resource(node, "crush").get())
 
     async def filesystems(self, node: str) -> list[m.CephFilesystem]:
         data = await self._resource(node, "fs").get()
-        return [m.CephFilesystem.model_validate(item) for item in _normalize_list(data)]
+        return [m.CephFilesystem.model_validate(item) for item in normalize_list(data)]
 
     async def monitors(self, node: str) -> list[m.CephDaemon]:
         return await self._list_daemons(node, "mon", "mon")
@@ -62,35 +62,35 @@ class NodeCeph:
 
     async def osds(self, node: str) -> list[m.CephOSD]:
         data = await self._resource(node, "osd").get()
-        return [m.CephOSD.model_validate(item) for item in _normalize_list(data)]
+        return [m.CephOSD.model_validate(item) for item in normalize_list(data)]
 
     async def osd(self, node: str, osdid: int | str) -> m.CephOSD:
-        data = _unwrap(await self._resource(node, "osd", osdid).get())
+        data = unwrap_data(await self._resource(node, "osd", osdid).get())
         payload = {**(data or {}), "id": osdid} if isinstance(data, dict) else {"id": osdid}
         return m.CephOSD.model_validate(payload)
 
     async def osd_lv_info(self, node: str, osdid: int | str) -> Any:
-        return _unwrap(await self._resource(node, "osd", osdid, "lv-info").get())
+        return unwrap_data(await self._resource(node, "osd", osdid, "lv-info").get())
 
     async def osd_metadata(self, node: str, osdid: int | str) -> Any:
-        return _unwrap(await self._resource(node, "osd", osdid, "metadata").get())
+        return unwrap_data(await self._resource(node, "osd", osdid, "metadata").get())
 
     async def pools(self, node: str) -> list[m.CephPool]:
         data = await self._resource(node, "pool").get()
-        return [m.CephPool.model_validate(item) for item in _normalize_list(data)]
+        return [m.CephPool.model_validate(item) for item in normalize_list(data)]
 
     async def pool(self, node: str, name: str) -> m.CephPool:
-        data = _unwrap(await self._resource(node, "pool", name).get())
+        data = unwrap_data(await self._resource(node, "pool", name).get())
         payload = {**(data or {}), "name": name} if isinstance(data, dict) else {"name": name}
         return m.CephPool.model_validate(payload)
 
     async def pool_status(self, node: str, name: str) -> Any:
-        return _unwrap(await self._resource(node, "pool", name, "status").get())
+        return unwrap_data(await self._resource(node, "pool", name, "status").get())
 
     async def rules(self, node: str) -> list[m.CephCrushRule]:
         data = await self._resource(node, "rules").get()
-        return [m.CephCrushRule.model_validate(item) for item in _normalize_list(data)]
+        return [m.CephCrushRule.model_validate(item) for item in normalize_list(data)]
 
     async def log(self, node: str, **params: Any) -> list[m.CephLogLine]:
         data = await self._resource(node, "log").get(**params)
-        return [m.CephLogLine.model_validate(item) for item in _normalize_list(data)]
+        return [m.CephLogLine.model_validate(item) for item in normalize_list(data)]

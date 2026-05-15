@@ -17,8 +17,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from proxmox_sdk._response_utils import unwrap_data
 from proxmox_sdk.pbs import models as m
-from proxmox_sdk.pbs._utils import unwrap_data
 from proxmox_sdk.pbs.domains.datastores import Datastores
 from proxmox_sdk.pbs.domains.jobs import Jobs
 from proxmox_sdk.pbs.domains.nodes import Nodes
