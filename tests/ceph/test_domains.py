@@ -71,7 +71,7 @@ async def test_cluster_flags_normalize_mapping_payloads():
 async def test_node_daemon_and_pool_paths():
     sdk, backend = _make_sdk(
         {
-            "/api2/json/nodes/pve1/ceph/mon": {"data": [{"name": "pve1"}]},
+            "/api2/json/nodes/pve1/ceph/mon": {"data": [{"name": "pve1", "type": None}]},
             "/api2/json/nodes/pve1/ceph/pool": {
                 "data": [{"pool_name": "rbd", "size": 3, "min_size": 2}]
             },
@@ -89,11 +89,25 @@ async def test_node_daemon_and_pool_paths():
 
 
 async def test_osd_detail_preserves_requested_id():
-    sdk, _ = _make_sdk({"/api2/json/nodes/pve1/ceph/osd/7": {"data": {"up": 1, "in": 1}}})
+    sdk, _ = _make_sdk({"/api2/json/nodes/pve1/ceph/osd/7": {"data": {"id": 99, "up": 1, "in": 1}}})
     ceph = CephClient(_sdk=sdk)
     osd = await ceph.nodes.osd("pve1", 7)
     assert osd.osd_id == 7
     assert osd.in_cluster == 1
+
+
+async def test_pool_detail_preserves_requested_name():
+    sdk, _ = _make_sdk(
+        {
+            "/api2/json/nodes/pve1/ceph/pool/rbd": {
+                "data": {"name": "wrong-pool", "size": 3, "min_size": 2}
+            }
+        }
+    )
+    ceph = CephClient(_sdk=sdk)
+    pool = await ceph.nodes.pool("pve1", "rbd")
+    assert pool.name == "rbd"
+    assert pool.size == 3
 
 
 async def test_from_sdk_rejects_non_pve():

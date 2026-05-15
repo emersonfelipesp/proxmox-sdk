@@ -24,7 +24,7 @@ class NodeCeph:
     async def _list_daemons(self, node: str, segment: str, daemon_type: str) -> list[m.CephDaemon]:
         data = await self._resource(node, segment).get()
         return [
-            m.CephDaemon.model_validate({"type": daemon_type, **item})
+            m.CephDaemon.model_validate({**item, "type": daemon_type})
             for item in _normalize_list(data)
             if isinstance(item, dict)
         ]
@@ -66,7 +66,7 @@ class NodeCeph:
 
     async def osd(self, node: str, osdid: int | str) -> m.CephOSD:
         data = _unwrap(await self._resource(node, "osd", osdid).get())
-        payload = {"id": osdid, **(data or {})} if isinstance(data, dict) else {"id": osdid}
+        payload = {**(data or {}), "id": osdid} if isinstance(data, dict) else {"id": osdid}
         return m.CephOSD.model_validate(payload)
 
     async def osd_lv_info(self, node: str, osdid: int | str) -> Any:
@@ -81,7 +81,7 @@ class NodeCeph:
 
     async def pool(self, node: str, name: str) -> m.CephPool:
         data = _unwrap(await self._resource(node, "pool", name).get())
-        payload = {"name": name, **(data or {})} if isinstance(data, dict) else {"name": name}
+        payload = {**(data or {}), "name": name} if isinstance(data, dict) else {"name": name}
         return m.CephPool.model_validate(payload)
 
     async def pool_status(self, node: str, name: str) -> Any:
