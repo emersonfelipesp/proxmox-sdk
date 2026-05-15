@@ -177,6 +177,8 @@ class ProxmoxTuiApp(App[None]):
             ("/nodes/{node}/qemu", "Virtual Machines"),
             ("/nodes/{node}/lxc", "Containers"),
             ("/cluster", "Cluster"),
+            ("/cluster/ceph/status", "Ceph (cluster)"),
+            ("/nodes/{node}/ceph", "Ceph (node)"),
             ("/storage", "Storage"),
             ("/access", "Access"),
         ]
