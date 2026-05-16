@@ -396,6 +396,7 @@ def tui(
             bridge=bridge,
             mode="mock" if use_mock else "production",
             initial_path=path,
+            initial_module="ceph",
         )
     except ProxmoxCLIError as exc:
         typer.echo(f"Error: {exc.message}", err=True)
