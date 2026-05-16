@@ -91,6 +91,7 @@ proxmox-cli = "proxmox_sdk.proxmox_cli.cli:cli_main"
 pbx = "proxmox_sdk.proxmox_cli.cli:cli_main"
 proxmox-sdk-codegen = "proxmox_sdk.proxmox_codegen.cli:main"
 proxmox-sdk-mock = "proxmox_sdk.mock_main:run"
+proxmox-sdk-pdm-mock = "proxmox_sdk.pdm_mock_main:run"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
