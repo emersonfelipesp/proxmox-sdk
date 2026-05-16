@@ -278,12 +278,14 @@ jobs:
         env:
           VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
-          for i in $(seq 1 12); do
+          for i in $(seq 1 24); do
             if curl -fs "https://pypi.org/pypi/proxmox-sdk/$VERSION/json" >/dev/null 2>&1; then
-              echo "proxmox-sdk==$VERSION available on PyPI"
-              exit 0
+              if pip install --dry-run --quiet "proxmox-sdk==$VERSION" >/dev/null 2>&1; then
+                echo "proxmox-sdk==$VERSION available on PyPI (JSON API + pip confirmed)"
+                exit 0
+              fi
             fi
-            echo "Waiting for proxmox-sdk==$VERSION on PyPI (attempt $i/12)..."
+            echo "Waiting for proxmox-sdk==$VERSION on PyPI (attempt $i/24)..."
             sleep 30
           done
           echo "Timed out waiting for proxmox-sdk==$VERSION on PyPI"
