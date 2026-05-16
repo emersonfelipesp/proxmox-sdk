@@ -11,15 +11,28 @@ from proxmox_sdk import __version__
 from proxmox_sdk.mock.loader import load_mock_data
 from proxmox_sdk.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generated_openapi
 
+# Service variants that have no generated schema yet — return a healthy stub.
+_STUB_SERVICES = frozenset({"pbs", "pdm"})
+
 
 def create_mock_app() -> FastAPI:
-    """Build the standalone Proxmox mock API app."""
+    """Build the standalone Proxmox mock API app.
+
+    Reads PROXMOX_MOCK_SERVICE (default: "all") to select which Proxmox service
+    API variant this instance represents:
+      - "pve" or "all": load the generated PVE OpenAPI schema (full mock).
+      - "pbs" or "pdm": return a healthy stub — schemas not yet generated.
+    """
+    service = os.environ.get("PROXMOX_MOCK_SERVICE", "all").lower().strip()
+
+    if service in _STUB_SERVICES:
+        return _create_stub_app(service)
 
     version_tag = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", DEFAULT_PROXMOX_OPENAPI_TAG)
     openapi_doc = load_proxmox_generated_openapi(version_tag=version_tag)
 
     app = FastAPI(
-        title="Proxmox Mock API",
+        title=f"Proxmox Mock API ({service.upper()})",
         description="Schema-driven in-memory FastAPI mock for the generated Proxmox API.",
         version=__version__,
     )
@@ -28,6 +41,7 @@ def create_mock_app() -> FastAPI:
     async def root() -> dict[str, Any]:
         return {
             "message": "Schema-driven Proxmox mock API",
+            "service": service,
             "schema_version": version_tag,
             "package_version": __version__,
         }
@@ -70,6 +84,40 @@ def create_mock_app() -> FastAPI:
             "error": "No schema loaded",
             "message": f"Run /codegen/generate to generate version '{version_tag}' or use the full API server.",
         }
+
+    return app
+
+
+def _create_stub_app(service: str) -> FastAPI:
+    """Return a healthy FastAPI stub for services without a generated schema yet."""
+    service_upper = service.upper()
+    app = FastAPI(
+        title=f"Proxmox {service_upper} Mock API (stub)",
+        description=(
+            f"Stub mock for Proxmox {service_upper}. "
+            f"A generated OpenAPI schema for {service_upper} does not exist yet. "
+            "The container is healthy and forwards health/version checks; "
+            "API routes will be added when the schema is available."
+        ),
+        version=__version__,
+    )
+
+    @app.get("/")
+    async def root() -> dict[str, Any]:
+        return {
+            "message": f"Proxmox {service_upper} mock stub — schema not yet generated",
+            "service": service,
+            "package_version": __version__,
+            "schema_status": "pending",
+        }
+
+    @app.get("/health")
+    async def health() -> dict[str, str]:
+        return {"status": "ready"}
+
+    @app.get("/version")
+    async def version() -> dict[str, str]:
+        return {"version": __version__}
 
     return app
 
