@@ -246,3 +246,59 @@ jobs:
             --username "$PYPI_USERNAME" \
             --password "$PYPI_TOKEN" \
             dist/*
+
+  publish-service-images:
+    name: publish mock service image (${{ matrix.service }})
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    needs: [prepare-release, publish-pypi]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [all, pve, pbs, pdm]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Wait for PyPI package to be available
+        env:
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          for i in $(seq 1 12); do
+            if pip index versions proxmox-sdk 2>/dev/null | grep -qF "$VERSION"; then
+              echo "proxmox-sdk==$VERSION found on PyPI"
+              exit 0
+            fi
+            echo "Waiting for proxmox-sdk==$VERSION on PyPI (attempt $i/12)..."
+            sleep 30
+          done
+          echo "Timed out waiting for proxmox-sdk==$VERSION on PyPI"
+          exit 1
+
+      - name: Build and publish ${{ matrix.service }} service image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: pypi-raw
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            PROXMOX_SDK_VERSION=${{ needs.prepare-release.outputs.version }}
+            PROXMOX_MOCK_SERVICE=${{ matrix.service }}
+          tags: |
+            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}-${{ matrix.service }}
+            emersonfelipesp/proxmox-sdk:latest-${{ matrix.service }}

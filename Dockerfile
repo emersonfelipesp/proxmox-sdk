@@ -126,5 +126,40 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint-granian.sh"]
 CMD []
 
+# pypi-raw: minimal Alpine image that installs proxmox-sdk from PyPI (not local source).
+# Used by the service-specific mock containers published after a PyPI release.
+# Required build args:
+#   PROXMOX_SDK_VERSION  — exact PyPI version to install (e.g. 0.0.5)
+#   PROXMOX_MOCK_SERVICE — service variant baked into the image (default: all)
+FROM python:3.13-alpine AS pypi-raw
+
+ARG PROXMOX_SDK_VERSION
+ARG PROXMOX_MOCK_SERVICE=all
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PORT=8000 \
+    PYTHONUNBUFFERED=1 \
+    APP_MODULE=proxmox_sdk.mock_main:app \
+    PROXMOX_MOCK_SERVICE=${PROXMOX_MOCK_SERVICE}
+
+RUN python -m venv /app/.venv && \
+    /app/.venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /app/.venv/bin/pip install --no-cache-dir "proxmox-sdk==${PROXMOX_SDK_VERSION}"
+
+RUN chown -R appuser:appgroup /app
+
+EXPOSE 8000
+
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${PORT:-8000}/health || exit 1
+
+CMD ["sh", "-c", "exec uvicorn ${APP_MODULE} --host 0.0.0.0 --port ${PORT:-8000}"]
+
 # `docker build .` without --target uses the raw (uvicorn-only) image.
 FROM raw
