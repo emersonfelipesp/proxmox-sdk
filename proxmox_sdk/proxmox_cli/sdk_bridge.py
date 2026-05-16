@@ -67,13 +67,14 @@ class ProxmoxSDKBridge:
                     service=config.service,
                 )
             else:  # https (default)
+                _default_ports = {"PVE": 8006, "PMG": 8006, "PBS": 8007, "PDM": 8443}
                 sdk = ProxmoxSDK.sync(
                     host=config.host or "localhost",
                     user=config.user,
                     password=config.password,
                     token_name=config.token_name,
                     token_value=config.token_value,
-                    port=config.port or 8006,
+                    port=config.port or _default_ports.get(config.service, 8006),
                     backend="https",
                     verify_ssl=config.verify_ssl,
                     service=config.service,
