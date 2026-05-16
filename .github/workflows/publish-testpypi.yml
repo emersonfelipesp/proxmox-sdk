@@ -279,8 +279,8 @@ jobs:
           VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
           for i in $(seq 1 12); do
-            if pip index versions proxmox-sdk 2>/dev/null | grep -qF "$VERSION"; then
-              echo "proxmox-sdk==$VERSION found on PyPI"
+            if curl -fs "https://pypi.org/pypi/proxmox-sdk/$VERSION/json" >/dev/null 2>&1; then
+              echo "proxmox-sdk==$VERSION available on PyPI"
               exit 0
             fi
             echo "Waiting for proxmox-sdk==$VERSION on PyPI (attempt $i/12)..."
