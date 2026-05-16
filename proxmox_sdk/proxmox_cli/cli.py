@@ -71,7 +71,7 @@ def main(
         "--port",
         help="API port (default: 8006)",
     ),
-    service: Literal["PVE", "PMG", "PBS"] = typer.Option(
+    service: Literal["PVE", "PMG", "PBS", "PDM"] = typer.Option(
         "PVE",
         "--service",
         "-S",
