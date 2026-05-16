@@ -11,7 +11,14 @@ from __future__ import annotations
 
 from typing import Any
 
-from proxmox_sdk.proxmox_cli.pdm_tui_app import (
+import pytest
+
+# The PDM TUI is layered on Textual, which only ships with the `cli` extra.
+# Skip the entire module when textual is not installed (matches the runtime
+# error the CLI produces when launching `proxmox pdm tui` without the extra).
+pytest.importorskip("textual")
+
+from proxmox_sdk.proxmox_cli.pdm_tui_app import (  # noqa: E402
     ConfirmModal,
     PDMActionPanel,
     PDMGuestPanel,
@@ -22,7 +29,6 @@ from proxmox_sdk.proxmox_cli.pdm_tui_app import (
     _as_list,
     run_pdm_tui,
 )
-
 
 # ---------------------------------------------------------------------------
 # Response unwrapping
