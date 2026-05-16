@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from . import ceph as _ceph  # noqa: F401 - side-effect registration
+from . import pbs as _pbs  # noqa: F401 - side-effect registration
 from . import pdm as _pdm  # noqa: F401 - side-effect registration
 from .create import create
 from .delete import delete

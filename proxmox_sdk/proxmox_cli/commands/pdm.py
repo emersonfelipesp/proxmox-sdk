@@ -1137,16 +1137,21 @@ def tui(
         use_mock = mode == "mock"
         backend_cfg = _build_pdm_backend_config(ctx_obj, use_mock=use_mock)
         bridge = ProxmoxSDKBridge.create(backend_cfg)
-        # Lazy-import the PDM TUI module: it lives in a separate Phase 3
-        # deliverable and is optional at runtime.
+        # Lazy-import the TUI runner so missing Textual surfaces a friendly
+        # error instead of an import traceback. The runner enables in-app
+        # view switching to PVE/Ceph/PBS without restarting the process.
         try:
-            from proxmox_sdk.proxmox_cli.pdm_tui_app import run_pdm_tui
+            from proxmox_sdk.proxmox_cli.tui.runner import run_module_tui
         except ImportError:
             raise ProxmoxCLIError(
                 "PDM TUI is not installed. Install with: pip install 'proxmox-sdk[cli]'",
                 exit_code=1,
             )
-        run_pdm_tui(bridge=bridge, mode="mock" if use_mock else "production")
+        run_module_tui(
+            bridge=bridge,
+            mode="mock" if use_mock else "production",
+            initial_module="pdm",
+        )
     except ProxmoxCLIError as exc:
         typer.echo(f"Error: {exc.message}", err=True)
         raise typer.Exit(code=exc.exit_code)
