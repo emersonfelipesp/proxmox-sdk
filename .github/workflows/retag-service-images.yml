@@ -1,0 +1,42 @@
+name: Retag service images
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_version:
+        description: "Source version tag (images already on Docker Hub)"
+        required: true
+        default: "0.0.5.post1"
+      target_version:
+        description: "Target version tag to publish"
+        required: true
+        default: "0.0.5"
+
+jobs:
+  retag:
+    name: retag ${{ inputs.source_version }}-${{ matrix.service }} → ${{ inputs.target_version }}-${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [all, pve, pbs, pdm]
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull, retag, and push
+        env:
+          REPO: emersonfelipesp/proxmox-sdk
+          SRC: ${{ inputs.source_version }}
+          DST: ${{ inputs.target_version }}
+          SVC: ${{ matrix.service }}
+        run: |
+          docker pull "${REPO}:${SRC}-${SVC}"
+          docker tag  "${REPO}:${SRC}-${SVC}" "${REPO}:${DST}-${SVC}"
+          docker tag  "${REPO}:${SRC}-${SVC}" "${REPO}:latest-${SVC}"
+          docker push "${REPO}:${DST}-${SVC}"
+          docker push "${REPO}:latest-${SVC}"
+          echo "Pushed ${REPO}:${DST}-${SVC} and ${REPO}:latest-${SVC}"
