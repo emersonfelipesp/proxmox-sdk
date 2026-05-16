@@ -50,6 +50,16 @@ SERVICES: dict[str, ServiceConfig] = {
         cli_name=None,
         cli_extra_options=(),
     ),
+    "PDM": ServiceConfig(
+        supported_backends=("https", "mock"),
+        supported_auth_methods=("password", "token"),
+        default_port=8443,
+        token_separator=":",
+        auth_cookie_name="PDMAuthCookie",
+        api_path_prefix="/api2/json",
+        cli_name=None,
+        cli_extra_options=(),
+    ),
 }
 
 

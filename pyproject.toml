@@ -29,6 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 pbs = []
+pdm = []
 ssh = [
     "paramiko>=5.0.0",
     "openssh-wrapper>=0.4",

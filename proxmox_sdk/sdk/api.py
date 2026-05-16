@@ -13,7 +13,7 @@ from proxmox_sdk.sdk.backends.factory import BackendBuildSpec, BackendFactory
 from proxmox_sdk.sdk.resource import ProxmoxResource
 from proxmox_sdk.sdk.services import SERVICES, ServiceConfig
 
-ServiceName = Literal["PVE", "PMG", "PBS"]
+ServiceName = Literal["PVE", "PMG", "PBS", "PDM"]
 
 
 def _normalize_service_name(service: Any) -> ServiceName:
