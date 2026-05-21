@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import os
 from copy import deepcopy
 from dataclasses import dataclass
 from types import ModuleType
@@ -68,13 +69,10 @@ from proxmox_sdk.schema import (
 )
 
 _GENERATED_ROUTE_NAME_PREFIX = "generated_proxmox_mock__"
-_GENERATED_ROUTE_STATE: dict[str, object] = {
-    "route_names": set(),
-    "route_count": 0,
-    "path_count": 0,
-    "method_count": 0,
-    "schema_version": DEFAULT_PROXMOX_OPENAPI_TAG,
-}
+
+# Per-version-tag registration stats. Keyed by version_tag so that multiple
+# mock apps (one per schema version) do not clobber each other's metadata.
+_GENERATED_ROUTE_STATES: dict[str, dict[str, object]] = {}
 
 
 @dataclass(frozen=True, slots=True)
@@ -810,6 +808,15 @@ def register_generated_proxmox_mock_routes(
             detail=f"Unable to load version tag '{version_tag}'.",
         )
 
+    # Resolve the shared-state namespace once so all endpoint closures and seed-data
+    # calls share the same value.  The env var still wins; otherwise default to a
+    # per-version-tag name so two mock apps for different schemas never share state.
+    resolved_namespace: str = (
+        namespace
+        or os.environ.get("PROXMOX_MOCK_STATE_NAMESPACE")
+        or f"pmx_{version_tag}"
+    )
+
     model_module = _load_model_module(document, version_tag)
     document_fingerprint = schema_fingerprint(document)
     base_prefix = _server_prefix(document)
@@ -856,14 +863,14 @@ def register_generated_proxmox_mock_routes(
                 request_schema=topology.request_schema,
                 response_model=response_model,
                 schema_key=document_fingerprint,
-                namespace=namespace,
+                namespace=resolved_namespace,
                 owner_pid=owner_pid,
             )
 
             if custom_mock_data and topology.absolute_path_template in custom_mock_data:
                 store = shared_mock_store(
                     document_fingerprint,
-                    namespace=namespace,
+                    namespace=resolved_namespace,
                     owner_pid=owner_pid,
                 )
                 custom_value = custom_mock_data[topology.absolute_path_template]
@@ -893,28 +900,42 @@ def register_generated_proxmox_mock_routes(
             route_count += 1
             method_count += 1
 
-    _GENERATED_ROUTE_STATE["route_names"] = route_names
-    _GENERATED_ROUTE_STATE["route_count"] = route_count
-    _GENERATED_ROUTE_STATE["path_count"] = len(path_items)
-    _GENERATED_ROUTE_STATE["method_count"] = method_count
-    _GENERATED_ROUTE_STATE["schema_version"] = document.get("info", {}).get("version", version_tag)
+    schema_version = document.get("info", {}).get("version", version_tag)
+    _GENERATED_ROUTE_STATES[version_tag] = {
+        "route_names": route_names,
+        "route_count": route_count,
+        "path_count": len(path_items),
+        "method_count": method_count,
+        "schema_version": schema_version,
+    }
     app.openapi_schema = None
 
     return {
         "route_count": route_count,
         "path_count": len(path_items),
         "method_count": method_count,
-        "schema_version": _GENERATED_ROUTE_STATE["schema_version"],
+        "schema_version": schema_version,
         "base_prefix": base_prefix or "/",
     }
 
 
-def generated_proxmox_mock_route_state() -> dict[str, object]:
-    """Return metadata about the currently mounted mock route set."""
+def generated_proxmox_mock_route_state(version_tag: str | None = None) -> dict[str, object]:
+    """Return metadata about a mounted mock route set.
+
+    Args:
+        version_tag: Schema version to query (e.g. ``"9.2"``).  When omitted,
+            returns stats for the most recently registered schema version.
+    """
+    if version_tag is not None:
+        state = _GENERATED_ROUTE_STATES.get(version_tag, {})
+    elif _GENERATED_ROUTE_STATES:
+        state = next(reversed(_GENERATED_ROUTE_STATES.values()))
+    else:
+        state = {}
 
     return {
-        "route_count": _GENERATED_ROUTE_STATE["route_count"],
-        "path_count": _GENERATED_ROUTE_STATE["path_count"],
-        "method_count": _GENERATED_ROUTE_STATE["method_count"],
-        "schema_version": _GENERATED_ROUTE_STATE["schema_version"],
+        "route_count": state.get("route_count", 0),
+        "path_count": state.get("path_count", 0),
+        "method_count": state.get("method_count", 0),
+        "schema_version": state.get("schema_version", DEFAULT_PROXMOX_OPENAPI_TAG),
     }

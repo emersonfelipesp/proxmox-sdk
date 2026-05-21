@@ -54,6 +54,10 @@ def create_mock_app() -> FastAPI:
     async def version() -> dict[str, str]:
         return {"version": __version__}
 
+    # Derive a stable per-version namespace so that two mock app instances for
+    # different schema versions never accidentally share in-memory state.
+    namespace = os.environ.get("PROXMOX_MOCK_STATE_NAMESPACE") or f"pmx_{version_tag}"
+
     custom_mock_data = load_mock_data()
     if custom_mock_data:
         if openapi_doc:
@@ -64,6 +68,7 @@ def create_mock_app() -> FastAPI:
                 version_tag=version_tag,
                 openapi_document=openapi_doc,
                 custom_mock_data=custom_mock_data,
+                namespace=namespace,
             )
             return app
 
@@ -74,7 +79,7 @@ def create_mock_app() -> FastAPI:
         from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes
 
         register_generated_proxmox_mock_routes(
-            app, version_tag=version_tag, openapi_document=openapi_doc
+            app, version_tag=version_tag, openapi_document=openapi_doc, namespace=namespace
         )
         return app
 
