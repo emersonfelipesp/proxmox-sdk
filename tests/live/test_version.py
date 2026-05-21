@@ -66,10 +66,12 @@ async def sdk():
 
 @pytest.fixture
 async def node_name(sdk) -> str:
-    """Return the name of the first available cluster node."""
+    """Return the name of an online cluster node."""
     nodes = await sdk.nodes.get()
     assert nodes, "cluster returned an empty node list"
-    return nodes[0]["node"]
+    online = [n for n in nodes if n.get("status") == "online"]
+    chosen = online[0] if online else nodes[0]
+    return chosen["node"]
 
 
 @pytest.fixture
@@ -299,4 +301,4 @@ async def test_live_access_token_lifecycle(sdk, write_enabled) -> None:
             try:
                 await sdk.access.users(userid).token(tokenid).delete()
             except Exception as exc:
-                print(f"[live] warning: could not delete test token {tokenid!r}: {exc}")
+                pytest.fail(f"could not delete test token {tokenid!r}: {exc}")
