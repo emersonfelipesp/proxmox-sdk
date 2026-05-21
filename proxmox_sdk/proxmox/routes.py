@@ -283,7 +283,16 @@ def register_generated_proxmox_real_routes(
     # Proxmox node version.  Never raises — mismatches are logged as warnings
     # so the server still starts even when node and schema diverge.
     if isinstance(app, FastAPI):
-        _version_prefix = version_tag.split(".")[0] if "." in version_tag else version_tag
+        # Derive the prefix from the schema document's info.version so that "latest"
+        # resolves to its actual version (e.g. "9.2") instead of the literal string
+        # "latest", which would always emit a false-positive mismatch warning.
+        _schema_info_version: str = str(
+            document.get("info", {}).get("version", version_tag)  # type: ignore[union-attr]
+        )
+        _schema_parts = _schema_info_version.split(".")
+        _version_prefix = (
+            ".".join(_schema_parts[:2]) if len(_schema_parts) >= 2 else _schema_info_version
+        )
         _client_ref = proxmox_client
 
         async def _check_node_version() -> None:
