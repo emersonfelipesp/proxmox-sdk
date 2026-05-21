@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Body, FastAPI, Path, Query
@@ -54,6 +55,8 @@ from proxmox_sdk.schema import (
     DEFAULT_PROXMOX_OPENAPI_TAG,
     load_proxmox_generated_openapi,
 )
+
+logger = logging.getLogger(__name__)
 
 _GENERATED_ROUTE_NAME_PREFIX = "generated_proxmox_real__"
 
@@ -275,6 +278,40 @@ def register_generated_proxmox_real_routes(
             method_count += 1
 
     app.openapi_schema = None  # type: ignore[attr-defined]
+
+    # Advisory startup hook: compare loaded schema version against the actual
+    # Proxmox node version.  Never raises — mismatches are logged as warnings
+    # so the server still starts even when node and schema diverge.
+    if isinstance(app, FastAPI):
+        _version_prefix = version_tag.split(".")[0] if "." in version_tag else version_tag
+        _client_ref = proxmox_client
+
+        async def _check_node_version() -> None:
+            try:
+                result = await _client_ref.get("/api2/json/version")
+                node_version = (result or {}).get("version", "")
+                if node_version and not node_version.startswith(_version_prefix):
+                    logger.warning(
+                        "proxmox-sdk real mode: loaded schema for '%s' but node reports "
+                        "version '%s'. Update PROXMOX_MOCK_SCHEMA_VERSION if needed.",
+                        version_tag,
+                        node_version,
+                    )
+                else:
+                    logger.info(
+                        "proxmox-sdk real mode: schema '%s' compatible with node version '%s'.",
+                        version_tag,
+                        node_version or "(unknown)",
+                    )
+            except Exception as exc:
+                logger.debug(
+                    "proxmox-sdk real mode: could not verify node version at startup "
+                    "(schema: '%s'): %s",
+                    version_tag,
+                    exc,
+                )
+
+        app.add_event_handler("startup", _check_node_version)
 
     return {
         "route_count": route_count,
