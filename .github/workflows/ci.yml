@@ -55,6 +55,7 @@ jobs:
         run: |
           uv run python -c "import proxmox_sdk.main"
           uv run python -c "import proxmox_sdk.mock_main"
+          uv run python -c "import proxmox_sdk.pdm_mock_main"
 
   test:
     runs-on: ubuntu-latest
