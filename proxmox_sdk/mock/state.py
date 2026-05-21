@@ -24,7 +24,13 @@ except ImportError:  # pragma: no cover - non-Unix fallback
 _DEFAULT_STATE_BYTES = 8 * 1024 * 1024
 _STATE_HEADER_BYTES = 8
 _STATE_CACHE_LOCK = threading.RLock()
-_STATE_CLIENTS: dict[str, "SharedMemoryMockStore"] = {}
+_STATE_CLIENTS: dict[str, "SharedMemoryMockStore | DictMockStore"] = {}
+
+# Module-level dict store for DictMockStore instances.  Keyed by
+# "{namespace}:{schema_fingerprint}" so multiple processes (or same-process
+# calls with different fingerprints) each get their own fresh bucket while
+# calls within the same process sharing a fingerprint reuse state.
+_DICT_STATE_STORE: dict[str, dict[str, Any]] = {}
 
 
 def _process_exists(pid: int) -> bool:
@@ -287,6 +293,115 @@ class SharedMemoryMockStore:
         return normalized
 
 
+class DictMockStore:
+    """Pure-dict fallback store used when POSIX shared memory is unavailable.
+
+    Suitable for environments such as Vercel serverless where
+    ``multiprocessing.shared_memory`` raises ``OSError`` at creation time.
+    State is held in the module-level ``_DICT_STATE_STORE`` dict so that
+    multiple calls within the same process with the same namespace and schema
+    fingerprint share a single bucket.
+    """
+
+    def __init__(self, *, owner_pid: int, namespace: str) -> None:
+        """Initialize the dict-backed mock store."""
+        self.owner_pid = owner_pid
+        self.namespace = namespace
+        self._current_key: str | None = None
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _state(self) -> dict[str, Any]:
+        """Return the current state bucket (only valid after touch_schema)."""
+        if self._current_key is None:
+            raise RuntimeError("DictMockStore: touch_schema() has not been called yet.")
+        return _DICT_STATE_STORE[self._current_key]
+
+    # ------------------------------------------------------------------
+    # Public interface (mirrors SharedMemoryMockStore)
+    # ------------------------------------------------------------------
+
+    def touch_schema(self, schema_fingerprint: str) -> bool:
+        """Reset state when the schema fingerprint changes.
+
+        Returns True if this is the first call for this fingerprint (fresh
+        state), False if the fingerprint matches an existing bucket.
+        """
+        key = f"{self.namespace}:{schema_fingerprint}"
+        self._current_key = key
+        if key in _DICT_STATE_STORE:
+            return False
+        _DICT_STATE_STORE[key] = {
+            "objects": {},
+            "collections": {},
+            "deleted": set(),
+        }
+        return True
+
+    def reset(self) -> None:
+        """Clear all stored objects, collections, and tombstones."""
+        state = self._state()
+        state["objects"] = {}
+        state["collections"] = {}
+        state["deleted"] = set()
+
+    def get_object(self, key: str) -> Any | None:
+        """Return a deep copy of a stored object by key."""
+        return deepcopy(self._state()["objects"].get(key))
+
+    def set_object(self, key: str, value: Any) -> Any:
+        """Store an object value and return the persisted copy."""
+        state = self._state()
+        state["objects"][key] = deepcopy(value)
+        state["deleted"].discard(key)
+        return deepcopy(value)
+
+    def delete_object(self, key: str) -> None:
+        """Delete an object and mark it as removed."""
+        state = self._state()
+        state["objects"].pop(key, None)
+        state["deleted"].add(key)
+
+    def is_deleted(self, key: str) -> bool:
+        """Return whether a key has been marked as deleted."""
+        return key in self._state()["deleted"]
+
+    def get_collection(self, key: str) -> list[Any] | None:
+        """Return a list copy of a stored collection, or None if absent."""
+        members = self._state()["collections"].get(key)
+        if members is None:
+            return None
+        return [deepcopy(v) for v in members.values()]
+
+    def replace_collection(self, key: str, values: list[Any]) -> list[Any]:
+        """Replace a collection with the provided values."""
+        self._state()["collections"][key] = {
+            f"seed:{index}": deepcopy(value) for index, value in enumerate(values)
+        }
+        return [deepcopy(v) for v in values]
+
+    def upsert_collection_member(self, key: str, member_key: str, value: Any) -> list[Any]:
+        """Insert or replace a member in a stored collection."""
+        state = self._state()
+        members = state["collections"].setdefault(key, {})
+        members[member_key] = deepcopy(value)
+        state["deleted"].discard(member_key)
+        return [deepcopy(item) for item in members.values()]
+
+    def delete_collection_member(self, key: str, member_key: str) -> list[Any]:
+        """Remove a member from a stored collection."""
+        state = self._state()
+        members = state["collections"].setdefault(key, {})
+        members.pop(member_key, None)
+        state["deleted"].add(member_key)
+        return [deepcopy(item) for item in members.values()]
+
+    def close(self, *, unlink: bool = False) -> None:  # noqa: ARG002
+        """No-op — dict state needs no cleanup."""
+
+
 def _cleanup_stale_states(namespace: str, owner_pid: int) -> None:
     """Remove stale shared-memory segments for a namespace."""
     digest = _namespace_digest(namespace)
@@ -366,8 +481,12 @@ def shared_mock_store(
     *,
     namespace: str | None = None,
     owner_pid: int | None = None,
-) -> SharedMemoryMockStore:
-    """Return a reload-safe shared state store for generated mock responses."""
+) -> SharedMemoryMockStore | DictMockStore:
+    """Return a reload-safe shared state store for generated mock responses.
+
+    Falls back to :class:`DictMockStore` when POSIX shared memory is
+    unavailable (e.g. Vercel serverless, some container runtimes).
+    """
 
     resolved_owner = owner_pid or mock_state_owner_pid()
     resolved_namespace = _resolved_namespace(namespace)
@@ -376,8 +495,18 @@ def shared_mock_store(
     with _STATE_CACHE_LOCK:
         cached = _STATE_CLIENTS.get(cache_key)
         if cached is None:
-            _cleanup_stale_states(resolved_namespace, resolved_owner)
-            cached = _create_or_attach_store(resolved_owner, resolved_namespace)
+            try:
+                _cleanup_stale_states(resolved_namespace, resolved_owner)
+                cached = _create_or_attach_store(resolved_owner, resolved_namespace)
+            except (OSError, ImportError):
+                logger.warning(
+                    "POSIX shared memory unavailable; falling back to DictMockStore",
+                    extra={"namespace": resolved_namespace, "owner_pid": resolved_owner},
+                )
+                cached = DictMockStore(
+                    owner_pid=resolved_owner,
+                    namespace=resolved_namespace,
+                )
             _STATE_CLIENTS[cache_key] = cached
         cached.touch_schema(schema_fingerprint)
         return cached
