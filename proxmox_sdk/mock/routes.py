@@ -812,9 +812,7 @@ def register_generated_proxmox_mock_routes(
     # calls share the same value.  The env var still wins; otherwise default to a
     # per-version-tag name so two mock apps for different schemas never share state.
     resolved_namespace: str = (
-        namespace
-        or os.environ.get("PROXMOX_MOCK_STATE_NAMESPACE")
-        or f"pmx_{version_tag}"
+        namespace or os.environ.get("PROXMOX_MOCK_STATE_NAMESPACE") or f"pmx_{version_tag}"
     )
 
     model_module = _load_model_module(document, version_tag)

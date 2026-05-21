@@ -73,7 +73,10 @@ def load_model_module(
     # Return the cached module when the generated code hasn't changed — avoids
     # re-exec on repeated calls with the same schema version.
     existing = sys.modules.get(module_name)
-    if existing is not None and getattr(existing, "__schema_fingerprint__", None) == code_fingerprint:
+    if (
+        existing is not None
+        and getattr(existing, "__schema_fingerprint__", None) == code_fingerprint
+    ):
         return existing
 
     module = ModuleType(module_name)
