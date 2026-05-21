@@ -2562,7 +2562,7 @@
 </span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">resolve_async</span><span class="p">(</span><span class="n">handler</span><span class="p">(</span><span class="o">**</span><span class="n">payload</span><span class="p">))</span>
 </span></code></pre></div>
 <p><code>_render_proxmox_path()</code> converts OpenAPI path templates (<code>/nodes/{node}/qemu/{vmid}/config</code>) into actual paths (<code>/nodes/pve1/qemu/100/config</code>) using the route's path parameter values.</p>
-<p>This means <code>proxbox-api</code> exposes the entire 646-endpoint Proxmox API surface through its own authenticated proxy without writing a single line of per-endpoint handler code.</p>
+<p>This means <code>proxbox-api</code> exposes the entire 675-operation / 449-endpoint Proxmox API surface through its own authenticated proxy without writing a single line of per-endpoint handler code.</p>
 <hr />
 <h2 id="mock-mode-in-tests">Mock Mode in Tests<a class="headerlink" href="#mock-mode-in-tests" title="Permanent link">&para;</a></h2>
 <p>For integration tests, <code>proxbox-api</code> ships <code>MockProxmoxContext</code> in <code>proxbox_api/testing/proxmox_mock.py</code>:</p>

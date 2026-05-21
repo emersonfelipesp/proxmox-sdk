@@ -2849,7 +2849,7 @@
 <h3 id="what-is-proxmox-openapi">What is Proxmox OpenAPI?<a class="headerlink" href="#what-is-proxmox-openapi" title="Permanent link">&para;</a></h3>
 <p>Proxmox OpenAPI is a FastAPI-based server that provides two modes:</p>
 <ol>
-<li><strong>Mock Mode</strong> - In-memory Proxmox VE API simulator with 646 endpoints for development and testing</li>
+<li><strong>Mock Mode</strong> - In-memory Proxmox VE API simulator with 675 operations / 449 endpoints for development and testing</li>
 <li><strong>Real Mode</strong> - Validated proxy to a real Proxmox VE API with full request/response validation</li>
 </ol>
 <p>It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.</p>
@@ -2863,8 +2863,8 @@
 </ul>
 <p>If you want to connect to a real Proxmox server, switch to real mode by setting <code>PROXMOX_API_MODE=real</code>.</p>
 <h3 id="what-proxmox-ve-version-is-supported">What Proxmox VE version is supported?<a class="headerlink" href="#what-proxmox-ve-version-is-supported" title="Permanent link">&para;</a></h3>
-<p>The current schema is captured from <strong>Proxmox VE 9.1.11</strong>. Both the
-<code>9.1.11/</code> and <code>latest/</code> schema directories ship the same content, and CI
+<p>The current schema is captured from <strong>Proxmox VE 9.2</strong>. Both the
+<code>9.2/</code> and <code>latest/</code> schema directories ship the same content (9.1.11 retained for backward compatibility), and CI
 exercises both tags in parallel.</p>
 <table>
 <thead>
@@ -2876,14 +2876,19 @@ exercises both tags in parallel.</p>
 </thead>
 <tbody>
 <tr>
-<td>9.1.11</td>
+<td>9.2</td>
 <td>Primary (CI-tested)</td>
-<td><code>proxmox_sdk/generated/proxmox/9.1.11/</code></td>
+<td><code>proxmox_sdk/generated/proxmox/9.2/</code></td>
 </tr>
 <tr>
 <td>latest</td>
-<td>Alias for 9.1.11 (CI-tested)</td>
+<td>Alias for 9.2 (CI-tested)</td>
 <td><code>proxmox_sdk/generated/proxmox/latest/</code></td>
+</tr>
+<tr>
+<td>9.1.11</td>
+<td>Retained (backward compat)</td>
+<td><code>proxmox_sdk/generated/proxmox/9.1.11/</code></td>
 </tr>
 </tbody>
 </table>
@@ -2941,7 +2946,7 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 <h3 id="what-is-mock-mode">What is mock mode?<a class="headerlink" href="#what-is-mock-mode" title="Permanent link">&para;</a></h3>
 <p>Mock mode provides an in-memory simulation of the Proxmox VE API. It:</p>
 <ul>
-<li>Loads 646 pre-generated endpoints from OpenAPI schema</li>
+<li>Loads 675 operations / 449 pre-generated endpoints from OpenAPI schema</li>
 <li>Provides full CRUD operations (Create, Read, Update, Delete)</li>
 <li>Stores data in memory (resets on restart)</li>
 <li>Requires no Proxmox server</li>
@@ -3066,7 +3071,7 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 </span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
 </span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="k">await</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run_full_pipeline</span><span class="p">(</span>
 </span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.1.11&quot;</span><span class="p">,</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.2&quot;</span><span class="p">,</span>
 </span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>This generates:

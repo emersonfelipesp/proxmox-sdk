@@ -2046,10 +2046,10 @@
     PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
 
     CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n646 endpoints\npaths + methods + parameters"]
+    RAW["raw_capture.json\n675 operations / 449 paths\npaths + methods + parameters"]
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n646 operations · 428 paths"]
+    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 449 paths"]
     PYDANTIC_GEN["PydanticBuilder\nParse response schemas\nGenerate typed classes\nAdd validators"]
     PYDANTIC["pydantic_models.py\nRequest + Response models\nUsed by proxbox-api for validation"]
 
@@ -2086,10 +2086,10 @@
         CW-&gt;&gt;PW: click tree item
         PW-&gt;&gt;CW: endpoint metadata
     end
-    CW-&gt;&gt;CLI: raw_capture.json (646 items)</code></pre>
+    CW-&gt;&gt;CLI: raw_capture.json (675 items)</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">Crawler requires a real Proxmox host</p>
-<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.1.11. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
+<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.2. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
 </div>
 <hr />
 <h2 id="stage-2-parser-apidoc_parserpy">Stage 2: Parser (<code>apidoc_parser.py</code>)<a class="headerlink" href="#stage-2-parser-apidoc_parserpy" title="Permanent link">&para;</a></h2>
@@ -2122,11 +2122,11 @@
 <tbody>
 <tr>
 <td>Operations</td>
-<td>646</td>
+<td>675</td>
 </tr>
 <tr>
 <td>Paths</td>
-<td>428</td>
+<td>449</td>
 </tr>
 <tr>
 <td>File size</td>
@@ -2290,9 +2290,12 @@
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        ├── latest/       ← refreshed alongside the newest tagged version
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        │   ├── openapi.json
 </span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        │   └── pydantic_models.py
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        └── 9.1.11/
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            ├── openapi.json
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            └── pydantic_models.py
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        ├── 9.2/
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        │   ├── openapi.json
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        │   └── pydantic_models.py
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        └── 9.1.11/       ← retained for backward compatibility
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>            ├── openapi.json
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>            └── pydantic_models.py
 </span></code></pre></div>
 <p>The SDK reads the version to use from <code>PROXMOX_MOCK_SCHEMA_VERSION</code> (default: <code>"latest"</code>). Multiple versions can coexist; <code>GET /versions/</code> lists all available versions.</p>
 <hr />

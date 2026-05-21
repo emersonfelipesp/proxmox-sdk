@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-05-14T19:27:30.394660+00:00",
+    "generated_at": "2026-05-21T14:16:05.238003+00:00",
     "proxmox_invocation": [
       "/home/runner/work/proxmox-sdk/proxmox-sdk/.venv/bin/proxmox"
     ]
@@ -13,7 +13,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.329,
+      "elapsed_seconds": 0.828,
       "truncated": false
     },
     {
@@ -24,7 +24,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.232,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -35,7 +35,198 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.224,
+      "elapsed_seconds": 0.73,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph --help",
+      "argv": [
+        "ceph",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.721,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph flag --help",
+      "argv": [
+        "ceph",
+        "flag",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.724,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph flags --help",
+      "argv": [
+        "ceph",
+        "flags",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.743,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph fs --help",
+      "argv": [
+        "ceph",
+        "fs",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.737,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph log --help",
+      "argv": [
+        "ceph",
+        "log",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.745,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph managers --help",
+      "argv": [
+        "ceph",
+        "managers",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.736,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph mds --help",
+      "argv": [
+        "ceph",
+        "mds",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.758,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph metadata --help",
+      "argv": [
+        "ceph",
+        "metadata",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.736,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph monitors --help",
+      "argv": [
+        "ceph",
+        "monitors",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.725,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph osd --help",
+      "argv": [
+        "ceph",
+        "osd",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.732,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph osds --help",
+      "argv": [
+        "ceph",
+        "osds",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.741,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph pool --help",
+      "argv": [
+        "ceph",
+        "pool",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.735,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph pools --help",
+      "argv": [
+        "ceph",
+        "pools",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.737,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph rules --help",
+      "argv": [
+        "ceph",
+        "rules",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.725,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph status --help",
+      "argv": [
+        "ceph",
+        "status",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.719,
+      "truncated": false
+    },
+    {
+      "section": "Ceph",
+      "title": "proxmox ceph tui --help",
+      "argv": [
+        "ceph",
+        "tui",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.719,
       "truncated": false
     },
     {
@@ -46,7 +237,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.221,
+      "elapsed_seconds": 0.71,
       "truncated": false
     },
     {
@@ -57,7 +248,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.238,
+      "elapsed_seconds": 0.724,
       "truncated": false
     },
     {
@@ -68,7 +259,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.223,
+      "elapsed_seconds": 0.718,
       "truncated": false
     },
     {
@@ -79,7 +270,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.235,
+      "elapsed_seconds": 0.734,
       "truncated": false
     },
     {
@@ -90,7 +281,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.22,
+      "elapsed_seconds": 0.735,
       "truncated": false
     },
     {
@@ -101,7 +292,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.219,
+      "elapsed_seconds": 0.724,
       "truncated": false
     },
     {
@@ -112,7 +303,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.225,
+      "elapsed_seconds": 0.726,
       "truncated": false
     },
     {
@@ -123,7 +314,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.224,
+      "elapsed_seconds": 0.723,
       "truncated": false
     },
     {
@@ -134,7 +325,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.217,
+      "elapsed_seconds": 0.726,
       "truncated": false
     },
     {
@@ -146,7 +337,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.227,
+      "elapsed_seconds": 0.73,
       "truncated": false
     },
     {
@@ -157,7 +348,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.234,
+      "elapsed_seconds": 0.741,
       "truncated": false
     },
     {
@@ -168,7 +359,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.226,
+      "elapsed_seconds": 0.736,
       "truncated": false
     },
     {
@@ -179,7 +370,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.223,
+      "elapsed_seconds": 0.752,
       "truncated": false
     },
     {
@@ -190,7 +381,977 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.234,
+      "elapsed_seconds": 0.746,
+      "truncated": false
+    },
+    {
+      "section": "Pbs",
+      "title": "proxmox pbs --help",
+      "argv": [
+        "pbs",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.757,
+      "truncated": false
+    },
+    {
+      "section": "Pbs",
+      "title": "proxmox pbs tui --help",
+      "argv": [
+        "pbs",
+        "tui",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.75,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm --help",
+      "argv": [
+        "pdm",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.727,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access --help",
+      "argv": [
+        "pdm",
+        "access",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.723,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access acl --help",
+      "argv": [
+        "pdm",
+        "access",
+        "acl",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.726,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access acl delete --help",
+      "argv": [
+        "pdm",
+        "access",
+        "acl",
+        "delete",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.75,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access acl list --help",
+      "argv": [
+        "pdm",
+        "access",
+        "acl",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.731,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access acl update --help",
+      "argv": [
+        "pdm",
+        "access",
+        "acl",
+        "update",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.747,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access tfa --help",
+      "argv": [
+        "pdm",
+        "access",
+        "tfa",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.728,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access tfa add --help",
+      "argv": [
+        "pdm",
+        "access",
+        "tfa",
+        "add",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.724,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access tfa delete --help",
+      "argv": [
+        "pdm",
+        "access",
+        "tfa",
+        "delete",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.727,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access tfa list --help",
+      "argv": [
+        "pdm",
+        "access",
+        "tfa",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.712,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access user --help",
+      "argv": [
+        "pdm",
+        "access",
+        "user",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.72,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access user create --help",
+      "argv": [
+        "pdm",
+        "access",
+        "user",
+        "create",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.731,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access user delete --help",
+      "argv": [
+        "pdm",
+        "access",
+        "user",
+        "delete",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.726,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access user list --help",
+      "argv": [
+        "pdm",
+        "access",
+        "user",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.73,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access user passwd --help",
+      "argv": [
+        "pdm",
+        "access",
+        "user",
+        "passwd",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.752,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm access user update --help",
+      "argv": [
+        "pdm",
+        "access",
+        "user",
+        "update",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.742,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm metrics --help",
+      "argv": [
+        "pdm",
+        "metrics",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.728,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm metrics status --help",
+      "argv": [
+        "pdm",
+        "metrics",
+        "status",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.721,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm metrics trigger --help",
+      "argv": [
+        "pdm",
+        "metrics",
+        "trigger",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.72,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.745,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs datastore --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "datastore",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.714,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs datastore list --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "datastore",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.724,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs datastore rrddata --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "datastore",
+        "rrddata",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.727,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs node --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "node",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.722,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs node rrddata --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "node",
+        "rrddata",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.72,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs snapshot --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "snapshot",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.723,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs snapshot list --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "snapshot",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.723,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs tasks --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "tasks",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.781,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs tasks list --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "tasks",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.753,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pbs tasks status --help",
+      "argv": [
+        "pdm",
+        "pbs",
+        "tasks",
+        "status",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.744,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.715,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.718,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc config --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "config",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.729,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc list --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.725,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc migrate --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "migrate",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.742,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc remote-migrate --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "remote-migrate",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.733,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc rrddata --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "rrddata",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.72,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc shutdown --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "shutdown",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.739,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc start --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "start",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.742,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve lxc stop --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "lxc",
+        "stop",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.733,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve node --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "node",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.718,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve node list --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "node",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.74,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve node rrddata --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "node",
+        "rrddata",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.728,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.743,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu config --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "config",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.718,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu list --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.733,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu migrate --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "migrate",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.718,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu remote-migrate --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "remote-migrate",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.722,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu rrddata --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "rrddata",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.721,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu shutdown --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "shutdown",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.717,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu start --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "start",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.725,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve qemu stop --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "qemu",
+        "stop",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.722,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve resources --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "resources",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.726,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm pve tasks --help",
+      "argv": [
+        "pdm",
+        "pve",
+        "tasks",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.727,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm remote --help",
+      "argv": [
+        "pdm",
+        "remote",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.717,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm remote add --help",
+      "argv": [
+        "pdm",
+        "remote",
+        "add",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.728,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm remote list --help",
+      "argv": [
+        "pdm",
+        "remote",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.732,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm remote remove --help",
+      "argv": [
+        "pdm",
+        "remote",
+        "remove",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.737,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm remote update --help",
+      "argv": [
+        "pdm",
+        "remote",
+        "update",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.724,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm remote version --help",
+      "argv": [
+        "pdm",
+        "remote",
+        "version",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.72,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm resources --help",
+      "argv": [
+        "pdm",
+        "resources",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.734,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm resources list --help",
+      "argv": [
+        "pdm",
+        "resources",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.739,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm resources status --help",
+      "argv": [
+        "pdm",
+        "resources",
+        "status",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.716,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm subscriptions --help",
+      "argv": [
+        "pdm",
+        "subscriptions",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.72,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm tui --help",
+      "argv": [
+        "pdm",
+        "tui",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.731,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm views --help",
+      "argv": [
+        "pdm",
+        "views",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.73,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm views create --help",
+      "argv": [
+        "pdm",
+        "views",
+        "create",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.718,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm views delete --help",
+      "argv": [
+        "pdm",
+        "views",
+        "delete",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.714,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm views get --help",
+      "argv": [
+        "pdm",
+        "views",
+        "get",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.73,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm views list --help",
+      "argv": [
+        "pdm",
+        "views",
+        "list",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.724,
+      "truncated": false
+    },
+    {
+      "section": "Pdm",
+      "title": "proxmox pdm views update --help",
+      "argv": [
+        "pdm",
+        "views",
+        "update",
+        "--help"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.725,
       "truncated": false
     },
     {
@@ -201,7 +1362,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.232,
+      "elapsed_seconds": 0.722,
       "truncated": false
     },
     {
@@ -212,7 +1373,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.234,
+      "elapsed_seconds": 0.739,
       "truncated": false
     },
     {
@@ -223,7 +1384,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.234,
+      "elapsed_seconds": 0.722,
       "truncated": false
     },
     {
@@ -234,7 +1395,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.261,
+      "elapsed_seconds": 0.756,
       "truncated": false
     }
   ]
