@@ -52,7 +52,9 @@ def test_remote_update_persists_field(client: TestClient) -> None:
 
 def test_remote_version_endpoint(client: TestClient) -> None:
     body = client.get("/api2/json/remotes/pve-cluster-a/version").json()
-    assert body["data"]["version"] == "9.1.11"
+    assert body["data"]["version"].startswith("9."), (
+        f"expected a 9.x PVE version, got {body['data']['version']!r}"
+    )
 
 
 def test_pve_qemu_list_and_lifecycle(client: TestClient) -> None:

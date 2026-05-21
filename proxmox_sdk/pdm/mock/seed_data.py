@@ -7,7 +7,13 @@ dict without polluting subsequent runs.
 from __future__ import annotations
 
 import copy
+import os
 from typing import Any
+
+# Derive the remote PVE cluster version from the mock schema env var so that
+# CI matrix jobs (schema=latest, 9.2, 9.1.11) each produce consistent seed data.
+_SCHEMA_VERSION = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", "9.1.11")
+_PVE_VERSION = "9.2" if _SCHEMA_VERSION in ("latest", "9.2") else _SCHEMA_VERSION
 
 # The seed mirrors the structure the PDM mock state expects. See
 # :class:`proxmox_sdk.pdm.mock.routes.PDMMockState` for the schema.
@@ -45,8 +51,8 @@ _DEFAULT_SEED: dict[str, Any] = {
         },
     ],
     "remote_versions": {
-        "pve-cluster-a": {"version": "9.1.11", "release": "1"},
-        "pve-cluster-b": {"version": "9.1.11", "release": "1"},
+        "pve-cluster-a": {"version": _PVE_VERSION, "release": "1"},
+        "pve-cluster-b": {"version": _PVE_VERSION, "release": "1"},
         "pbs-main": {"version": "3.4.2", "release": "1"},
     },
     "pve": {
