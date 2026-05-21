@@ -152,7 +152,7 @@ jobs:
 
   publish-docker:
     name: publish proxmox-sdk Docker image
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch'
     needs: [prepare-release, validate-testpypi]
     runs-on: ubuntu-latest
     steps:
@@ -214,7 +214,7 @@ jobs:
 
   publish-pypi:
     name: publish to PyPI
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch'
     needs: [prepare-release, validate-testpypi]
     runs-on: ubuntu-latest
     steps:
@@ -250,7 +250,7 @@ jobs:
 
   publish-service-images:
     name: publish mock service image (${{ matrix.service }})
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch'
     needs: [prepare-release, publish-pypi]
     runs-on: ubuntu-latest
     strategy:

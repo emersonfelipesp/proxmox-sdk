@@ -95,7 +95,7 @@ jobs:
     needs: [lint, syntax, test]
     if: >
       (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/testing')) ||
-      (github.event_name == 'release' && github.event.action == 'published')
+      (github.event_name == 'release' && github.event.action == 'published' && !github.event.release.prerelease)
     uses: ./.github/workflows/docker-hub-publish.yml
     with:
       source_ref: ${{ github.sha }}

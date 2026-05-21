@@ -24,8 +24,22 @@ jobs:
           print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])
           ")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # Skip Docker verification for pre-release versions (rc, alpha, beta, dev)
+          if python3 -c "
+          import re, sys
+          v = '$VERSION'
+          if re.search(r'(a|b|rc|\.dev)\d*', v):
+              print(f'Pre-release {v!r} detected — skipping Docker image verification')
+              sys.exit(0)
+          sys.exit(1)
+          " 2>/dev/null; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Pull release and latest images
+        if: steps.release.outputs.prerelease == 'false'
         run: |
           TAG="${{ steps.release.outputs.version }}"
           docker pull emersonfelipesp/proxmox-sdk:"$TAG"
@@ -36,6 +50,7 @@ jobs:
           docker pull emersonfelipesp/proxmox-sdk:latest-granian
 
       - name: Smoke-test published startup
+        if: steps.release.outputs.prerelease == 'false'
         run: |
           set -eux
           TAG="${{ steps.release.outputs.version }}"
