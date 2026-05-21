@@ -90,9 +90,7 @@ async def test_live_version_is_9_2(sdk) -> None:
     """Version string must start with '9.2' — confirms the node is Proxmox VE 9.2.x."""
     info = await sdk.version.get()
     version = (info or {}).get("version") or ""
-    assert version.startswith("9.2"), (
-        f"expected Proxmox 9.2.x on live node, got {version!r}"
-    )
+    assert version.startswith("9.2"), f"expected Proxmox 9.2.x on live node, got {version!r}"
 
 
 # ---------------------------------------------------------------------------
@@ -123,9 +121,7 @@ async def test_live_cluster_options_crs(sdk) -> None:
     An xfail is raised (not a hard failure) if the key is absent.
     """
     opts = await sdk.cluster.options.get()
-    assert isinstance(opts, dict), (
-        f"expected a dict from /cluster/options, got {type(opts)}"
-    )
+    assert isinstance(opts, dict), f"expected a dict from /cluster/options, got {type(opts)}"
     crs_value = opts.get("crs")
     print(f"\n[live] cluster CRS config: {crs_value!r}")
     if "crs" not in opts:
@@ -170,9 +166,7 @@ async def test_live_ha_groups_deprecated(sdk) -> None:
 async def test_live_ha_rules(sdk) -> None:
     """GET /cluster/ha/rules — new in 9.2, replaces HA groups with affinity rules."""
     rules = await sdk.cluster.ha.rules.get()
-    assert isinstance(rules, list), (
-        f"expected list from /cluster/ha/rules, got {type(rules)}"
-    )
+    assert isinstance(rules, list), f"expected list from /cluster/ha/rules, got {type(rules)}"
     print(f"\n[live] HA affinity rules count: {len(rules)}")
     if rules:
         print(f"[live] sample rule keys: {sorted(rules[0].keys())}")
@@ -197,9 +191,7 @@ async def test_live_node_status(sdk, node_name) -> None:
     assert isinstance(status, dict), (
         f"expected dict from /nodes/{node_name}/status, got {type(status)}"
     )
-    assert "uptime" in status, (
-        f"'uptime' missing from node status keys: {sorted(status.keys())}"
-    )
+    assert "uptime" in status, f"'uptime' missing from node status keys: {sorted(status.keys())}"
 
 
 async def test_live_storage_list(sdk, node_name) -> None:
@@ -215,9 +207,7 @@ async def test_live_storage_list(sdk, node_name) -> None:
 async def test_live_vms_list(sdk, node_name) -> None:
     """GET /nodes/{node}/qemu — QEMU VM list is reachable."""
     vms = await sdk.nodes(node_name).qemu.get()
-    assert isinstance(vms, list), (
-        f"expected list from /nodes/{node_name}/qemu, got {type(vms)}"
-    )
+    assert isinstance(vms, list), f"expected list from /nodes/{node_name}/qemu, got {type(vms)}"
 
 
 async def test_live_lxc_list(sdk, node_name) -> None:
@@ -247,9 +237,7 @@ async def test_live_access_users(sdk) -> None:
 async def test_live_sdn_zones(sdk) -> None:
     """GET /cluster/sdn/zones — zones reachable (9.2 adds them to ACL permission paths)."""
     zones = await sdk.cluster.sdn.zones.get()
-    assert isinstance(zones, list), (
-        f"expected list from /cluster/sdn/zones, got {type(zones)}"
-    )
+    assert isinstance(zones, list), f"expected list from /cluster/sdn/zones, got {type(zones)}"
 
 
 # ---------------------------------------------------------------------------
@@ -264,9 +252,7 @@ async def test_live_write_cluster_options_crs_roundtrip(sdk, write_enabled) -> N
     This exercises the PUT path for cluster options (which includes CRS config fields).
     """
     opts = await sdk.cluster.options.get()
-    assert isinstance(opts, dict), (
-        f"expected dict from GET /cluster/options, got {type(opts)}"
-    )
+    assert isinstance(opts, dict), f"expected dict from GET /cluster/options, got {type(opts)}"
     keyboard = opts.get("keyboard") or "en-us"
     result = await sdk.cluster.options.put(keyboard=keyboard)
     # PUT /cluster/options returns null on success
@@ -286,8 +272,10 @@ async def test_live_access_token_lifecycle(sdk, write_enabled) -> None:
     tokenid = f"sdktest{secrets.token_hex(3)}"  # e.g. sdktestab12cd
     created = None
     try:
-        created = await sdk.access.users(userid).token(tokenid).post(
-            comment="proxmox-sdk live test — auto-deleted"
+        created = (
+            await sdk.access.users(userid)
+            .token(tokenid)
+            .post(comment="proxmox-sdk live test — auto-deleted")
         )
         assert created is not None, "token creation returned nothing"
         assert "value" in created, (
