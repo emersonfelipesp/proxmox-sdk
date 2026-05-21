@@ -1782,7 +1782,7 @@ wheels = [
 
 [[package]]
 name = "proxmox-sdk"
-version = "0.0.6rc1"
+version = "0.0.6"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
