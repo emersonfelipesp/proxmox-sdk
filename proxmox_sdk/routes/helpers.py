@@ -67,9 +67,19 @@ def load_model_module(
     """
     code = generate_pydantic_models_from_openapi(openapi_document)
     sanitised = version_tag.replace(".", "_")
-    module = ModuleType(f"proxmox_sdk.{module_prefix}.generated_{sanitised}")
-    sys.modules[module.__name__] = module
+    module_name = f"proxmox_sdk.{module_prefix}.generated_{sanitised}"
+    code_fingerprint = hash(code)
+
+    # Return the cached module when the generated code hasn't changed — avoids
+    # re-exec on repeated calls with the same schema version.
+    existing = sys.modules.get(module_name)
+    if existing is not None and getattr(existing, "__schema_fingerprint__", None) == code_fingerprint:
+        return existing
+
+    module = ModuleType(module_name)
+    sys.modules[module_name] = module
     exec(code, module.__dict__)  # noqa: S102
+    module.__schema_fingerprint__ = code_fingerprint  # type: ignore[attr-defined]
     for value in module.__dict__.values():
         if (
             isinstance(value, type)
