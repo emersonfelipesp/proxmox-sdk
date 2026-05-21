@@ -17,11 +17,12 @@ GitHub Actions CI/CD workflows for `proxmox-sdk`. All workflows live under `.git
 
 | File | Trigger | What it does |
 |------|---------|--------------|
-| `ci.yml` | Push / PR to any branch | Lint (ruff), compile, import smoke checks, run `tests/` with coverage |
+| `ci.yml` | Push / PR to any branch | Lint (ruff), compile, import smoke checks, run `tests/` with coverage across all schema versions |
 | `ci.yml` docker-images | Push to main/testing or Release published | Builds and pushes Docker images to Docker Hub (dev or release tags) |
 | `docs.yml` | Push to `main` | Builds MkDocs site and deploys to GitHub Pages |
 | `docker-hub-publish.yml` | Called by CI | Builds three Alpine-based Docker images: raw (uvicorn), nginx (nginx+mkcert+uvicorn), granian (granian+mkcert) |
-| `publish-testpypi.yml` | GitHub Release published | Validates release metadata, publishes `proxmox_sdk` to TestPyPI, validates install across Python 3.11–3.13, publishes to PyPI |
+| `publish-testpypi.yml` | GitHub Release published | Validates release metadata, publishes `proxmox_sdk` to TestPyPI, validates install across Python 3.11–3.13 × all schema versions, publishes to PyPI |
+| `schema-update.yml` | Manual (`workflow_dispatch`) or weekly cron (Monday 03:00 UTC) | Detects upstream Proxmox API drift, runs codegen for a new version tag, verifies SHA integrity, opens a PR with a generated schema update |
 | `release-docker-verify.yml` | Release published | Post-release smoke test of all three published Docker images |
 
 ## CI Job Dependencies

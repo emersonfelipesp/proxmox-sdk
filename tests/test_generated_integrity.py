@@ -15,7 +15,7 @@ from types import ModuleType
 
 import pytest
 
-SUPPORTED_TAGS = ["latest", "9.1.11"]
+SUPPORTED_TAGS = ["latest", "9.2", "9.1.11"]
 
 
 def _tag_dir(tag: str) -> Path:

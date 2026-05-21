@@ -8,7 +8,7 @@ Connect proxmox-sdk to actual Proxmox servers with full request/response validat
 
 Real mode transforms proxmox-sdk into a **validated proxy** for your Proxmox API:
 
-- ✅ **646 endpoints** route to real Proxmox server
+- ✅ **675 operations / 449 endpoints** route to real Proxmox server
 - ✅ **Request validation** - Pydantic models ensure correct request format
 - ✅ **Response validation** - Guarantees response data integrity
 - ✅ **Multiple auth methods** - API tokens or username/password

@@ -7,7 +7,7 @@ Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, an
 ## Features
 
 - **Dual Mode**: Mock mode (default) for development, Real mode for production Proxmox integration
-- **646 Endpoints**: Pre-generated Proxmox VE 9.1.11 API with full OpenAPI schema
+- **675 Operations / 449 Endpoints**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
 - **Mock Data**: Automatically generate mock data for all endpoints with in-memory CRUD
 - **Real API Proxy**: Validated proxy to real Proxmox VE API with request/response validation
 - **Code Generation**: Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
@@ -18,11 +18,12 @@ Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, an
 
 | Version | Status | Schema directory |
 |---|---|---|
-| 9.1.11 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
-| latest | Alias for 9.1.11 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
+| 9.2 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.2/` |
+| latest | Alias for 9.2 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
+| 9.1.11 | Previous release (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
 
-Both schema directories ship the same captured surface and CI exercises them
-in parallel via `PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.1.11]`. Older releases
+All three schema directories ship in the package and CI exercises them
+in parallel via `PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]`. Older releases
 (8.x, 7.x) may still work for endpoints whose shapes have not changed, but they
 are no longer in the CI matrix — regenerate locally with
 `proxmox-sdk-codegen --version-tag <your-version>` if you need them.

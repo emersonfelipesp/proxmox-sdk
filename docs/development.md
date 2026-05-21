@@ -241,7 +241,7 @@ pve = ProxmoxSDK.from_config(config)
 
 ### `mock/routes.py` — Mock Route Builder
 
-`register_generated_proxmox_mock_routes()` dynamically generates 646 CRUD endpoints from the bundled OpenAPI schema at startup. Each route operates on `SharedMemoryMockStore`.
+`register_generated_proxmox_mock_routes()` dynamically generates 675 operations / 449 paths CRUD endpoints from the bundled OpenAPI schema at startup. Each route operates on `SharedMemoryMockStore`.
 
 ### `schema.py` — Schema Utilities
 
@@ -258,7 +258,7 @@ Proxmox VE API
       ↓
 [1. Crawler] - Fetch API structure
       ↓
-raw_capture.json (646 endpoints)
+raw_capture.json (675 operations / 449 paths)
       ↓
 [2. Pipeline] - Normalize & enrich
       ↓
@@ -289,7 +289,7 @@ pipeline = ProxmoxCodegenPipeline(
 # Run full pipeline
 await pipeline.run_full_pipeline(
     output_dir="./output",
-    version_tag="9.1.11",
+    version_tag="9.2",
 )
 
 # Output:
@@ -342,7 +342,7 @@ async def test_proxmox_client_auth(mock_proxmox_server):
     client = ProxmoxClient(config)
     result = await client.request("GET", "/version")
 
-    assert result["version"] == "9.1.11"
+    assert result["version"] == "9.2"
 ```
 
 ### Running Tests
