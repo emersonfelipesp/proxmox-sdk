@@ -4,7 +4,7 @@ This page provides a comprehensive reference of all available endpoints in the P
 
 ## Endpoint Overview
 
-The server provides **646 Proxmox VE API endpoints** organized into the following categories:
+The server provides **675 operations / 449 Proxmox VE API endpoints** organized into the following categories:
 
 - **Access Control** - Users, groups, roles, permissions, ACLs
 - **Cluster** - Cluster configuration, HA, resources, firewall
@@ -49,7 +49,7 @@ Returns Proxmox VE API version information.
 **Response:**
 ```json
 {
-  "version": "9.1.11",
+  "version": "9.2",
   "release": "1",
   "repoid": "abc123"
 }
@@ -403,6 +403,6 @@ See [Security](security.md) for details.
 
 ## Versioning
 
-The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 9.1.11** (with `latest` mirroring 9.1.11).
+The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 9.2** (with `latest` mirroring 9.2; 9.1.11 retained).
 
 For the most up-to-date endpoint reference, always check the Swagger UI at `/docs` when running the server.

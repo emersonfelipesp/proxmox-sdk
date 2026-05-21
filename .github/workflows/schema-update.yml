@@ -1,0 +1,264 @@
+name: Schema Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: >
+          Proxmox version tag to generate (e.g. "9.2").
+          Leave blank to auto-detect from pve.proxmox.com.
+        required: false
+        default: ""
+      advance_latest:
+        description: "Also regenerate latest/ to point at this version"
+        type: boolean
+        default: true
+  schedule:
+    # Weekly on Monday at 03:00 UTC — detect upstream API drift
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  detect-version:
+    name: Detect upstream Proxmox API version
+    runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.detect.outputs.version_tag }}
+      should_run: ${{ steps.detect.outputs.should_run }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.13"
+
+      - name: Detect and resolve version tag
+        id: detect
+        env:
+          INPUT_TAG: ${{ inputs.version_tag }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            echo "version_tag=$INPUT_TAG" >> "$GITHUB_OUTPUT"
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            echo "Using manually specified version tag: $INPUT_TAG"
+            exit 0
+          fi
+
+          # Auto-detect: count HTTP methods in apidoc.js as a drift proxy
+          UPSTREAM_METHODS=$(python3 - <<'PY'
+          from urllib.request import urlopen
+          import re
+          with urlopen("https://pve.proxmox.com/pve-docs/api-viewer/apidoc.js", timeout=60) as r:
+              content = r.read().decode("utf-8")
+          methods = re.findall(r'"(GET|POST|PUT|DELETE)" :', content)
+          print(len(methods))
+          PY
+          )
+          echo "Upstream operation count: $UPSTREAM_METHODS"
+
+          # Find highest local version (exclude 'latest')
+          LOCAL=$(ls proxmox_sdk/generated/proxmox/ \
+            | grep -v '^latest$' | sort -V | tail -1)
+          LOCAL_METHODS=$(python3 - <<PY
+          import json, pathlib
+          p = pathlib.Path("proxmox_sdk/generated/proxmox/$LOCAL/openapi.json")
+          doc = json.loads(p.read_text())
+          count = sum(len([m for m in v.keys() if m.upper() in ("GET","POST","PUT","DELETE","PATCH")])
+                      for v in doc.get("paths", {}).values())
+          print(count)
+          PY
+          )
+          echo "Local version: $LOCAL ($LOCAL_METHODS operations)"
+
+          if [ "$UPSTREAM_METHODS" = "$LOCAL_METHODS" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "No API drift detected; skipping regeneration."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "version_tag=$LOCAL" >> "$GITHUB_OUTPUT"
+          else
+            echo "API drift detected (upstream=$UPSTREAM_METHODS, local=$LOCAL_METHODS)."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            # Derive next patch: bump the last segment of the local version
+            NEXT=$(python3 -c "
+          parts = '$LOCAL'.split('.')
+          parts[-1] = str(int(parts[-1]) + 1)
+          print('.'.join(parts))
+          ")
+            echo "Derived next version tag: $NEXT"
+            echo "version_tag=$NEXT" >> "$GITHUB_OUTPUT"
+          fi
+
+  regenerate-schema:
+    name: Regenerate schema (${{ needs.detect-version.outputs.version_tag }})
+    needs: detect-version
+    if: needs.detect-version.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.13"
+
+      - name: Sync dependencies with playwright extras
+        run: uv sync --frozen --extra playwright
+
+      - name: Install Playwright Chromium browser
+        run: uv run playwright install chromium --with-deps
+
+      - name: Run codegen — package-internal tree
+        env:
+          VERSION: ${{ needs.detect-version.outputs.version_tag }}
+        run: |
+          uv run proxmox-sdk-codegen \
+            --version-tag "$VERSION" \
+            --output-dir proxmox_sdk/generated/proxmox \
+            --workers 4
+
+      - name: Run codegen — source-of-record tree
+        env:
+          VERSION: ${{ needs.detect-version.outputs.version_tag }}
+        run: |
+          uv run proxmox-sdk-codegen \
+            --version-tag "$VERSION" \
+            --output-dir generated/proxmox \
+            --workers 4
+
+      - name: Advance latest/ alias (package-internal)
+        if: ${{ inputs.advance_latest != false }}
+        run: |
+          uv run proxmox-sdk-codegen \
+            --version-tag latest \
+            --output-dir proxmox_sdk/generated/proxmox \
+            --workers 4
+
+      - name: Advance latest/ alias (source-of-record)
+        if: ${{ inputs.advance_latest != false }}
+        run: |
+          uv run proxmox-sdk-codegen \
+            --version-tag latest \
+            --output-dir generated/proxmox \
+            --workers 4
+
+      - name: Sync dependencies for test
+        run: uv sync --frozen --extra test
+
+      - name: Verify SHA integrity
+        env:
+          PROXMOX_MOCK_SCHEMA_VERSION: ${{ needs.detect-version.outputs.version_tag }}
+        run: uv run pytest tests/test_generated_integrity.py -v
+
+      - name: Report endpoint count
+        env:
+          VERSION: ${{ needs.detect-version.outputs.version_tag }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          version = os.environ["VERSION"]
+          doc = json.loads(
+              pathlib.Path(f"proxmox_sdk/generated/proxmox/{version}/openapi.json").read_text()
+          )
+          paths = len(doc.get("paths", {}))
+          ops = sum(
+              len([m for m in v if m.upper() in ("GET","POST","PUT","DELETE","PATCH")])
+              for v in doc.get("paths", {}).values()
+          )
+          print(f"Schema version={version}: {paths} paths, {ops} operations")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(f"## Schema {version}\n\n")
+              f.write(f"- Paths: **{paths}**\n- Operations: **{ops}**\n")
+          PY
+
+      - name: Upload generated artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: schema-${{ needs.detect-version.outputs.version_tag }}
+          path: |
+            generated/proxmox/${{ needs.detect-version.outputs.version_tag }}/
+            generated/proxmox/latest/
+            proxmox_sdk/generated/proxmox/${{ needs.detect-version.outputs.version_tag }}/
+            proxmox_sdk/generated/proxmox/latest/
+          if-no-files-found: error
+
+  open-pr:
+    name: Open schema update PR
+    needs: [detect-version, regenerate-schema]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download generated artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: schema-${{ needs.detect-version.outputs.version_tag }}
+
+      - name: Reconstruct artifact paths
+        env:
+          VERSION: ${{ needs.detect-version.outputs.version_tag }}
+        run: |
+          # artifacts land at the path they were uploaded from
+          ls -la generated/proxmox/ proxmox_sdk/generated/proxmox/ || true
+
+      - name: Commit and push branch
+        env:
+          VERSION: ${{ needs.detect-version.outputs.version_tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "schema/$VERSION"
+          git add generated/proxmox/ proxmox_sdk/generated/proxmox/
+          git commit -m "chore(schema): add Proxmox VE $VERSION schema artifacts"
+          git push origin "schema/$VERSION"
+
+      - name: Open pull request
+        env:
+          VERSION: ${{ needs.detect-version.outputs.version_tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ADVANCE_LATEST: ${{ inputs.advance_latest }}
+        run: |
+          ENDPOINT_COUNT=$(python3 - <<'PY'
+          import json, os, pathlib
+          v = os.environ["VERSION"]
+          doc = json.loads(pathlib.Path(f"proxmox_sdk/generated/proxmox/{v}/openapi.json").read_text())
+          print(len(doc.get("paths", {})))
+          PY
+          )
+          OP_COUNT=$(python3 - <<'PY'
+          import json, os, pathlib
+          v = os.environ["VERSION"]
+          doc = json.loads(pathlib.Path(f"proxmox_sdk/generated/proxmox/{v}/openapi.json").read_text())
+          print(sum(len([m for m in vs if m.upper() in ("GET","POST","PUT","DELETE","PATCH")]) for vs in doc.get("paths", {}).values()))
+          PY
+          )
+          gh pr create \
+            --title "chore(schema): Proxmox VE $VERSION support" \
+            --body "## Auto-generated by \`schema-update.yml\`
+
+          | Property | Value |
+          |---|---|
+          | Proxmox VE version | \`$VERSION\` |
+          | Endpoint paths | \`$ENDPOINT_COUNT\` |
+          | Operations | \`$OP_COUNT\` |
+          | \`latest/\` advanced | \`$ADVANCE_LATEST\` |
+          | SHA integrity | ✅ (verified by \`test_generated_integrity.py\`) |
+
+          ### Pre-merge checklist
+          - [ ] Review new/removed endpoint diff vs previous version
+          - [ ] Update \`proxmox_schema\` matrix in \`.github/workflows/ci.yml\` — add \`\"$VERSION\"\`, retire oldest if keeping only two
+          - [ ] Update \`proxmox_schema\` matrix in \`.github/workflows/publish-testpypi.yml\` identically
+          - [ ] Bump \`version\` in \`pyproject.toml\`
+          - [ ] Update \`CLAUDE.md\`, \`AGENTS.md\`, \`proxmox_sdk/CLAUDE.md\`, \`README.md\`, \`llms.txt\` — version/endpoint-count references
+          - [ ] Run \`pytest -n auto\` locally with \`PROXMOX_MOCK_SCHEMA_VERSION=$VERSION\`
+          - [ ] Smoke-test Docker image with new schema version" \
+            --label "automated,schema-update" \
+            --head "schema/$VERSION"

@@ -8,7 +8,7 @@ Frequently Asked Questions about the Proxmox OpenAPI server.
 
 Proxmox OpenAPI is a FastAPI-based server that provides two modes:
 
-1. **Mock Mode** - In-memory Proxmox VE API simulator with 646 endpoints for development and testing
+1. **Mock Mode** - In-memory Proxmox VE API simulator with 675 operations / 449 endpoints for development and testing
 2. **Real Mode** - Validated proxy to a real Proxmox VE API with full request/response validation
 
 It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.
@@ -26,14 +26,15 @@ If you want to connect to a real Proxmox server, switch to real mode by setting 
 
 ### What Proxmox VE version is supported?
 
-The current schema is captured from **Proxmox VE 9.1.11**. Both the
-`9.1.11/` and `latest/` schema directories ship the same content, and CI
+The current schema is captured from **Proxmox VE 9.2**. Both the
+`9.2/` and `latest/` schema directories ship the same content (9.1.11 retained for backward compatibility), and CI
 exercises both tags in parallel.
 
 | Version | Status | Schema directory |
 |---|---|---|
-| 9.1.11 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
-| latest | Alias for 9.1.11 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
+| 9.2 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.2/` |
+| latest | Alias for 9.2 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
+| 9.1.11 | Retained (backward compat) | `proxmox_sdk/generated/proxmox/9.1.11/` |
 
 Older releases (8.x, 7.x) may still work for endpoints whose shapes have not
 changed, but they are no longer in the CI matrix. To certify another version,
@@ -106,7 +107,7 @@ See the [Quick Start Guide](quickstart.md) for more details.
 
 Mock mode provides an in-memory simulation of the Proxmox VE API. It:
 
-- Loads 646 pre-generated endpoints from OpenAPI schema
+- Loads 675 operations / 449 pre-generated endpoints from OpenAPI schema
 - Provides full CRUD operations (Create, Read, Update, Delete)
 - Stores data in memory (resets on restart)
 - Requires no Proxmox server
@@ -295,7 +296,7 @@ pipeline = ProxmoxCodegenPipeline(
 
 await pipeline.run_full_pipeline(
     output_dir="./output",
-    version_tag="9.1.11",
+    version_tag="9.2",
 )
 ```
 

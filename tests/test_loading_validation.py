@@ -10,7 +10,7 @@ from proxmox_sdk import schema as schema_module
 from proxmox_sdk.mock.loader import load_mock_data
 from proxmox_sdk.schema import load_proxmox_generated_openapi
 
-SUPPORTED_TAGS = ["latest", "9.1.11"]
+SUPPORTED_TAGS = ["latest", "9.2", "9.1.11"]
 
 
 def _load_pydantic_models(tag: str) -> ModuleType:

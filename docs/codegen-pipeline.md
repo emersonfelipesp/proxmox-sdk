@@ -11,10 +11,10 @@ flowchart TD
     PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
 
     CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n646 endpoints\npaths + methods + parameters"]
+    RAW["raw_capture.json\n675 operations / 449 paths\npaths + methods + parameters"]
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n646 operations · 428 paths"]
+    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 449 paths"]
     PYDANTIC_GEN["PydanticBuilder\nParse response schemas\nGenerate typed classes\nAdd validators"]
     PYDANTIC["pydantic_models.py\nRequest + Response models\nUsed by proxbox-api for validation"]
 
@@ -58,11 +58,11 @@ sequenceDiagram
         CW->>PW: click tree item
         PW->>CW: endpoint metadata
     end
-    CW->>CLI: raw_capture.json (646 items)
+    CW->>CLI: raw_capture.json (675 items)
 ```
 
 !!! warning "Crawler requires a real Proxmox host"
-    The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.1.11. Re-running the crawler requires `PROXMOX_URL`, valid credentials, and network access.
+    The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.2. Re-running the crawler requires `PROXMOX_URL`, valid credentials, and network access.
 
 ---
 
@@ -94,8 +94,8 @@ sequenceDiagram
 
 | Stat | Value |
 |---|---|
-| Operations | 646 |
-| Paths | 428 |
+| Operations | 675 |
+| Paths | 449 |
 | File size | ~5.2 MB |
 | Format | OpenAPI 3.1 |
 | Security schemes | `ApiToken` (API token), `TicketAuth` (password/ticket) |
@@ -227,7 +227,10 @@ proxmox_sdk/
         ├── latest/       ← refreshed alongside the newest tagged version
         │   ├── openapi.json
         │   └── pydantic_models.py
-        └── 9.1.11/
+        ├── 9.2/
+        │   ├── openapi.json
+        │   └── pydantic_models.py
+        └── 9.1.11/       ← retained for backward compatibility
             ├── openapi.json
             └── pydantic_models.py
 ```

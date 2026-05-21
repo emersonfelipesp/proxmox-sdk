@@ -22,7 +22,7 @@ Core capabilities:
 ## Package Identity
 
 - Package name: proxmox-sdk
-- Current version: 0.0.1
+- Current version: 0.0.6
 - Python: >= 3.11
 - License: MIT
 

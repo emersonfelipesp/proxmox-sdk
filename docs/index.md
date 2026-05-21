@@ -7,13 +7,13 @@
 ## Features
 
 ### 🔄 Auto-Generated OpenAPI Schema
-Crawl the official [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/) and automatically generate complete OpenAPI 3.0 schemas with **646 operations** across **428 endpoints**.
+Crawl the official [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/) and automatically generate complete OpenAPI 3.0 schemas with **675 operations** across **449 endpoints**.
 
 ### 🎭 Mock API Mode (Default)
 Perfect for development and testing:
 
 - **In-memory CRUD operations** - Create, read, update, and delete mock Proxmox resources
-- **Pre-generated 646 endpoints** - Full Proxmox API surface ready to use
+- **Pre-generated 675 operations / 449 endpoints** - Full Proxmox API surface ready to use
 - **Custom mock data loading** - Inject your own test data via JSON/YAML files
 - **State persistence** - Mock data persists across requests during runtime
 - **No Proxmox server required** - Test your code without a real Proxmox cluster
@@ -52,7 +52,7 @@ proxmox-sdk-mock
 uvicorn proxmox_sdk.mock_main:app
 ```
 
-Visit `http://localhost:8000/docs` to see **646 Proxmox API endpoints** ready to use!
+Visit `http://localhost:8000/docs` to see **675 operations / 449 Proxmox API endpoints** ready to use!
 
 ### Connect to Real Proxmox
 
