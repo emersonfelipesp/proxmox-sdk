@@ -22,6 +22,28 @@ ServiceName = Literal["PVE", "PDM", "PBS", "PMG"]
 # Fields that can be overridden from the CLI context object.
 _OVERRIDE_KEYS = ("backend", "host", "user", "password", "token_value", "port", "service")
 
+# HTTP verbs the bridge exposes as methods.
+_DISPATCH_METHODS = frozenset({"get", "post", "put", "delete", "patch"})
+
+
+def dispatch_request(
+    bridge: ProxmoxSDKBridge,
+    method: str,
+    path: str,
+    **kwargs: Any,
+) -> Any:
+    """Dispatch *method* on *bridge* to ``bridge.<verb>(path, **kwargs)``.
+
+    Replaces the duplicated ``if method == "get": ... elif method == "post":``
+    ladders in ``commands/pdm.py`` and ``tui/base.py``. Unknown verbs raise
+    :class:`ProxmoxCLIError` with exit code 2 so callers get a consistent error
+    shape instead of an ``AttributeError``.
+    """
+    verb = method.lower()
+    if verb not in _DISPATCH_METHODS:
+        raise ProxmoxCLIError(f"Unsupported HTTP method: {method}", exit_code=2)
+    return getattr(bridge, verb)(path, **kwargs)
+
 
 def apply_cli_overrides(backend_cfg: BackendConfig, ctx_obj: dict[str, Any]) -> None:
     """Apply CLI global-flag overrides to *backend_cfg* in-place."""

@@ -27,6 +27,8 @@ from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Footer, Header, Input, RichLog, Select, Static, TextArea, Tree
 
+from proxmox_sdk.proxmox_cli.commands._common import dispatch_request
+from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_sdk.proxmox_cli.tui.chrome import (
     VIEW_SELECT_OPTIONS,
@@ -348,19 +350,14 @@ class PathBrowserApp(App[object]):
         log.write(f"$ {method.upper()} {path}")
 
         try:
-            if method == "get":
-                result = self._bridge.get(path)
-            elif method == "ls":
+            if method == "ls":
                 result = self._bridge.list_children(path)
-            elif method == "post":
-                result = self._bridge.post(path)
-            elif method == "put":
-                result = self._bridge.put(path)
-            elif method == "delete":
-                result = self._bridge.delete(path)
             else:
-                log.write(f"Unsupported method: {method}")
-                return
+                try:
+                    result = dispatch_request(self._bridge, method, path)
+                except ProxmoxCLIError as exc:
+                    log.write(exc.message)
+                    return
 
             self._current_data = result
             json_view = self.query_one("#json_view", TextArea)
