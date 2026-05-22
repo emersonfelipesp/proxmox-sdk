@@ -12,6 +12,7 @@ from proxmox_sdk.exception import ProxmoxOpenAPIException
 from proxmox_sdk.proxmox.client import ProxmoxClient
 from proxmox_sdk.proxmox.config import ProxmoxConfig
 from proxmox_sdk.proxmox_codegen.utils import slugify_identifier
+from proxmox_sdk.routes._errors import with_error_translation
 from proxmox_sdk.routes.helpers import (
     SUPPORTED_METHODS as _SUPPORTED_METHODS,
 )
@@ -148,6 +149,11 @@ def _build_generated_endpoint(
             )
         )
 
+    @with_error_translation(
+        method=method,
+        path_template=path_template,
+        message_prefix="Proxmox API request",
+    )
     async def generated_endpoint(**kwargs: Any) -> Any:
         request_body = kwargs.pop("request_body", None)
         path_values = {original: kwargs.pop(python) for python, original in path_param_map.items()}
@@ -159,35 +165,24 @@ def _build_generated_endpoint(
         body_value = _normalize_body_value(request_body)
         concrete_path = _render_path(path_template, path_values)
 
-        try:
-            # Call real Proxmox API
-            result = await proxmox_client.request(
-                method=method,
-                path=concrete_path,
-                params=query_values or None,
-                json=body_value,
-            )
+        result = await proxmox_client.request(
+            method=method,
+            path=concrete_path,
+            params=query_values or None,
+            json=body_value,
+        )
 
-            # Validate response if model exists
-            if response_model is not None:
-                try:
-                    return response_model.model_validate(result)
-                except Exception as error:
-                    raise ProxmoxOpenAPIException(
-                        message=f"Proxmox API response validation failed for {method} {path_template}",
-                        detail="Response does not match generated model schema",
-                        python_exception=str(error),
-                    )
+        if response_model is not None:
+            try:
+                return response_model.model_validate(result)
+            except Exception as error:
+                raise ProxmoxOpenAPIException(
+                    message=f"Proxmox API response validation failed for {method} {path_template}",
+                    detail="Response does not match generated model schema",
+                    python_exception=str(error),
+                )
 
-            return result
-
-        except Exception as error:
-            if hasattr(error, "status_code"):  # Already an HTTPException
-                raise
-            raise ProxmoxOpenAPIException(
-                message=f"Proxmox API request failed for {method} {path_template}",
-                detail=str(error),
-            )
+        return result
 
     generated_endpoint.__name__ = f"{_GENERATED_ROUTE_NAME_PREFIX}{method.lower()}__{operation_id}"
     generated_endpoint.__qualname__ = generated_endpoint.__name__
