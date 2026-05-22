@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from proxmox_sdk.sdk.sync import SyncProxmoxSDK
 
 from proxmox_sdk.sdk.auth.token import parse_token_id
-from proxmox_sdk.sdk.backends.base import AbstractBackend
+from proxmox_sdk.sdk.backends.base import AbstractBackend, TicketCapableBackend
 from proxmox_sdk.sdk.backends.factory import BackendBuildSpec, BackendFactory
 from proxmox_sdk.sdk.resource import ProxmoxResource
 from proxmox_sdk.sdk.services import SERVICES, ServiceConfig
@@ -215,8 +215,13 @@ class ProxmoxSDK:
         Useful when you need to pass Proxmox auth tokens to another system.
 
         Raises:
-            RuntimeError: If not using HTTPS + ticket auth.
+            RuntimeError: If the active backend does not support tickets
+                (e.g. mock, local pvesh, or SSH backends).
         """
+        if not isinstance(self._backend, TicketCapableBackend):
+            raise RuntimeError(
+                "get_tokens() is only available for the HTTPS backend with password auth"
+            )
         return await self._backend.get_tokens()
 
     # ------------------------------------------------------------------

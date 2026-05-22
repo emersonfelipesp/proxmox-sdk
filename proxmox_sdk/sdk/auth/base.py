@@ -1,4 +1,4 @@
-"""Abstract authentication strategy protocol for the Proxmox SDK."""
+"""Abstract authentication strategy protocols for the Proxmox SDK."""
 
 from __future__ import annotations
 
@@ -9,13 +9,18 @@ import aiohttp
 
 @runtime_checkable
 class AuthStrategy(Protocol):
-    """Protocol that all SDK authentication handlers must implement.
+    """Minimal protocol every SDK authentication handler must satisfy.
 
-    There are two concrete implementations:
+    Auth strategies attach credentials to outgoing requests via headers
+    and/or cookies. Strategies that also need an async preparation step
+    (initial login, ticket renewal) implement :class:`EnsurableAuthStrategy`.
+
+    Concrete implementations:
 
     - :class:`~proxmox_sdk.sdk.auth.token.TokenAuth` — stateless API token auth.
-    - :class:`~proxmox_sdk.sdk.auth.ticket.TicketAuth` — stateful ticket/password auth
-      with automatic renewal and 2FA support.
+      Implements only this protocol.
+    - :class:`~proxmox_sdk.sdk.auth.ticket.TicketAuth` — stateful ticket/password
+      auth with renewal. Implements :class:`EnsurableAuthStrategy`.
     """
 
     def build_headers(self, method: str) -> dict[str, str]:
@@ -25,6 +30,17 @@ class AuthStrategy(Protocol):
     def build_cookies(self) -> dict[str, str]:
         """Return cookies required for this auth strategy."""
         ...
+
+
+@runtime_checkable
+class EnsurableAuthStrategy(AuthStrategy, Protocol):
+    """Auth strategy with a pre-request async preparation step.
+
+    Stateful strategies (ticket/password auth) implement this so the
+    backend can perform initial authentication or renewal before each
+    request. Stateless strategies (token auth) should implement only
+    :class:`AuthStrategy` so they are not forced to depend on aiohttp.
+    """
 
     async def ensure_ready(
         self,
@@ -36,10 +52,6 @@ class AuthStrategy(Protocol):
     ) -> None:
         """Ensure authentication state is valid before a request is sent.
 
-        For stateless strategies (token auth) this is a no-op.
-        For stateful strategies (ticket auth) this performs the initial
-        authentication or renews an expiring ticket.
-
         Args:
             session: Active aiohttp session to use for auth requests.
             ticket_url: Full URL for the ``POST /access/ticket`` endpoint.
@@ -49,4 +61,4 @@ class AuthStrategy(Protocol):
         ...
 
 
-__all__ = ["AuthStrategy"]
+__all__ = ["AuthStrategy", "EnsurableAuthStrategy"]
