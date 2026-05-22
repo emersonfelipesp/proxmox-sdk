@@ -15,6 +15,8 @@ from .output import resolve_output_format
 
 logger = logging.getLogger(__name__)
 
+cli = app
+
 
 @app.callback(invoke_without_command=True)
 def main(
