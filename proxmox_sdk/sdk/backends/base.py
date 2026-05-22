@@ -1,9 +1,9 @@
-"""Abstract backend base class for the Proxmox SDK."""
+"""Abstract backend base class and capability protocols for the Proxmox SDK."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 
 class AbstractBackend(ABC):
@@ -44,18 +44,22 @@ class AbstractBackend(ABC):
     async def close(self) -> None:
         """Release held resources (sessions, connections, threads)."""
 
+
+@runtime_checkable
+class TicketCapableBackend(Protocol):
+    """Capability protocol for backends that can expose Proxmox auth tokens.
+
+    Only the HTTPS backend with ticket/password auth satisfies this — other
+    transports (mock, local pvesh, SSH) have no ticket to surface. Callers
+    that need the auth ticket and CSRF token should accept
+    :class:`TicketCapableBackend` (not :class:`AbstractBackend`) and let
+    structural typing exclude the unsupported transports at the type-check
+    boundary, instead of relying on a runtime ``RuntimeError``.
+    """
+
     async def get_tokens(self) -> tuple[str, str]:
-        """Return (ticket, csrf_token) for HTTPS ticket-auth backends.
-
-        The default implementation raises :class:`RuntimeError`.
-        Override in backends that support ticket authentication.
-
-        Raises:
-            RuntimeError: Always, unless overridden.
-        """
-        raise RuntimeError(
-            "get_tokens() is only available for the HTTPS backend with password auth"
-        )
+        """Return ``(ticket, csrf_token)`` for the active Proxmox session."""
+        ...
 
 
-__all__ = ["AbstractBackend"]
+__all__ = ["AbstractBackend", "TicketCapableBackend"]

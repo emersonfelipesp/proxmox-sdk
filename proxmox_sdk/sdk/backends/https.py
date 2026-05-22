@@ -13,7 +13,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import aiohttp
 
-from proxmox_sdk.sdk.auth.base import AuthStrategy
+from proxmox_sdk.sdk.auth.base import AuthStrategy, EnsurableAuthStrategy
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.exceptions import (
     ProxmoxConnectionError,
@@ -378,7 +378,10 @@ class HttpsBackend(AbstractBackend):
         return self._session
 
     async def _ensure_authenticated(self, session: aiohttp.ClientSession) -> None:
-        await self._auth.ensure_ready(session, self._ticket_url, ssl=self._ssl, proxy=self._proxy)
+        if isinstance(self._auth, EnsurableAuthStrategy):
+            await self._auth.ensure_ready(
+                session, self._ticket_url, ssl=self._ssl, proxy=self._proxy
+            )
 
     def _url_for(self, path: str) -> str:
         """Build full URL from a path, respecting path prefix."""
