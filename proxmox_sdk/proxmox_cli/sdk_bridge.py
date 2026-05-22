@@ -14,6 +14,19 @@ from .exceptions import BackendError
 
 logger = logging.getLogger(__name__)
 
+_DEFAULT_HTTPS_PORTS = {"PVE": 8006, "PMG": 8006, "PBS": 8007, "PDM": 8443}
+_SSH_BACKENDS = frozenset({"ssh_paramiko", "openssh"})
+_HOST_REQUIRED_BACKENDS = frozenset({"https", "ssh_paramiko", "openssh"})
+
+
+def _default_port(backend: str, service: str) -> int | None:
+    """Return the conventional default port for *backend* / *service*."""
+    if backend in _SSH_BACKENDS:
+        return 22
+    if backend == "https":
+        return _DEFAULT_HTTPS_PORTS.get(service, 8006)
+    return None
+
 
 class ProxmoxSDKBridge:
     """Wrapper around ProxmoxSDK to provide CLI-friendly operations."""
@@ -31,6 +44,10 @@ class ProxmoxSDKBridge:
     def create(config: BackendConfig) -> ProxmoxSDKBridge:
         """Create a bridge with SDK initialized from config.
 
+        Backend dispatch lives in :class:`~proxmox_sdk.sdk.backends.factory.BackendFactory`
+        (which ``ProxmoxSDK.__init__`` already consults). Adding a new backend
+        only requires registering it in the factory — no edit to this method.
+
         Args:
             config: BackendConfig with connection details
 
@@ -43,48 +60,23 @@ class ProxmoxSDKBridge:
         try:
             from proxmox_sdk.sdk.api import ProxmoxSDK
 
-            # Create SDK based on backend type
-            if config.backend == "mock":
-                sdk = ProxmoxSDK.sync(backend="mock", service=config.service)
-            elif config.backend == "local":
-                sdk = ProxmoxSDK.sync(backend="local", service=config.service)
-            elif config.backend == "ssh_paramiko":
-                sdk = ProxmoxSDK.sync(
-                    host=config.host or "localhost",
-                    user=config.user or "root",
-                    password=config.password,
-                    backend="ssh_paramiko",
-                    port=config.port or 22,
-                    service=config.service,
-                )
-            elif config.backend == "openssh":
-                sdk = ProxmoxSDK.sync(
-                    host=config.host or "localhost",
-                    user=config.user or "root",
-                    password=config.password,
-                    backend="openssh",
-                    port=config.port or 22,
-                    service=config.service,
-                )
-            else:  # https (default)
-                _default_ports = {"PVE": 8006, "PMG": 8006, "PBS": 8007, "PDM": 8443}
-                sdk = ProxmoxSDK.sync(
-                    host=config.host or "localhost",
-                    user=config.user,
-                    password=config.password,
-                    token_name=config.token_name,
-                    token_value=config.token_value,
-                    port=config.port or _default_ports.get(config.service, 8006),
-                    backend="https",
-                    verify_ssl=config.verify_ssl,
-                    service=config.service,
-                    timeout=config.timeout,
-                    connect_timeout=config.connect_timeout,
-                    proxies=config.proxies,
-                    max_retries=config.max_retries,
-                    retry_backoff=config.retry_backoff,
-                )
-
+            sdk = ProxmoxSDK.sync(
+                backend=config.backend,
+                service=config.service,
+                host=config.host
+                or ("localhost" if config.backend in _HOST_REQUIRED_BACKENDS else None),
+                user=config.user or ("root" if config.backend in _SSH_BACKENDS else None),
+                password=config.password,
+                token_name=config.token_name,
+                token_value=config.token_value,
+                port=config.port or _default_port(config.backend, config.service),
+                verify_ssl=config.verify_ssl,
+                timeout=config.timeout,
+                connect_timeout=config.connect_timeout,
+                proxies=config.proxies,
+                max_retries=config.max_retries,
+                retry_backoff=config.retry_backoff,
+            )
             return ProxmoxSDKBridge(sdk)
         except Exception as e:
             raise BackendError(f"Failed to initialize SDK: {e}", backend=config.backend)
