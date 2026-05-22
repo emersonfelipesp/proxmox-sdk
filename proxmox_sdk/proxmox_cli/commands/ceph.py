@@ -8,13 +8,12 @@ from typing import Any, Optional
 import typer
 
 from proxmox_sdk.proxmox_cli.app import app
-from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
 from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.output import get_context_options
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_sdk.proxmox_cli.tui_runner import launch_tui
 
-from ._common import apply_cli_overrides, create_formatter, ensure_service, prepare_command
+from ._common import build_backend_config, create_formatter, ensure_service, prepare_command
 
 logger = logging.getLogger(__name__)
 
@@ -337,19 +336,6 @@ def log_cmd(
 # ----- TUI launcher -----
 
 
-def _build_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> BackendConfig:
-    config_mgr = ConfigManager()
-    config_mgr.load_config(ctx_obj.get("config"))
-    backend_cfg = config_mgr.get_profile()
-    apply_cli_overrides(backend_cfg, ctx_obj)
-    if use_mock:
-        backend_cfg.backend = "mock"
-    elif backend_cfg.backend == "mock":
-        backend_cfg.backend = "https"
-    backend_cfg.service = "PVE"
-    return backend_cfg
-
-
 @ceph_app.command("tui")
 @cli_error_handler
 def tui(
@@ -369,7 +355,7 @@ def tui(
     try:
         ctx_obj = ctx.obj or {}
         use_mock = mode == "mock"
-        backend_cfg = _build_backend_config(ctx_obj, use_mock=use_mock)
+        backend_cfg = build_backend_config(ctx_obj, use_mock=use_mock, service="PVE")
         bridge = ProxmoxSDKBridge.create(backend_cfg)
         launch_tui(
             bridge=bridge,
