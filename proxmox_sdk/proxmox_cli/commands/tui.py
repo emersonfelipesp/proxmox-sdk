@@ -2,35 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Literal
 
 import typer
 
 from proxmox_sdk.proxmox_cli.app import app
-from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
 from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_sdk.proxmox_cli.tui_runner import launch_tui
 from proxmox_sdk.proxmox_cli.utils import validate_api_path
 
-from ._common import apply_cli_overrides
-
-
-def _build_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> BackendConfig:
-    """Build a backend config from profile and CLI global flags."""
-    config_mgr = ConfigManager()
-    config_mgr.load_config(ctx_obj.get("config"))
-    backend_cfg = config_mgr.get_profile()
-    apply_cli_overrides(backend_cfg, ctx_obj)
-
-    if use_mock:
-        backend_cfg.backend = "mock"
-    elif backend_cfg.backend == "mock":
-        # pbx/proxmox tui must target production by default.
-        backend_cfg.backend = "https"
-
-    return backend_cfg
+from ._common import build_backend_config
 
 
 @app.command("tui")
@@ -87,7 +70,7 @@ def tui(
         initial_path = validate_api_path(path)
         use_mock = mode == "mock"
 
-        backend_cfg = _build_backend_config(ctx_obj, use_mock=use_mock)
+        backend_cfg = build_backend_config(ctx_obj, use_mock=use_mock)
         bridge = ProxmoxSDKBridge.create(backend_cfg)
 
         try:

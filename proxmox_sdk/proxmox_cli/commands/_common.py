@@ -30,6 +30,39 @@ def apply_cli_overrides(backend_cfg: BackendConfig, ctx_obj: dict[str, Any]) -> 
             setattr(backend_cfg, key, ctx_obj[key])
 
 
+def build_backend_config(
+    ctx_obj: dict[str, Any],
+    *,
+    use_mock: bool,
+    service: ServiceName | None = None,
+) -> BackendConfig:
+    """Build a ``BackendConfig`` from profile + CLI overrides for TUI launchers.
+
+    Centralises the mock-mode handling that previously lived as three copies in
+    ``ceph.py``, ``pbs.py``, and ``tui.py``:
+
+    - If ``use_mock`` is true, force the mock backend.
+    - Otherwise, if the active profile is mock, fall back to ``https`` so the
+      TUI targets production by default.
+    - If ``service`` is given, pin the profile to that service (Ceph TUI uses
+      this to lock to PVE).
+    """
+    config_mgr = ConfigManager()
+    config_mgr.load_config(ctx_obj.get("config"))
+    backend_cfg = config_mgr.get_profile()
+    apply_cli_overrides(backend_cfg, ctx_obj)
+
+    if use_mock:
+        backend_cfg.backend = "mock"
+    elif backend_cfg.backend == "mock":
+        backend_cfg.backend = "https"
+
+    if service is not None:
+        backend_cfg.service = service
+
+    return backend_cfg
+
+
 def prepare_command(
     ctx_obj: dict[str, Any] | None = None,
 ) -> tuple[ConfigManager, ProxmoxSDKBridge]:
