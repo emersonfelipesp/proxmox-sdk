@@ -12,6 +12,7 @@ from proxmox_sdk import __version__
 from proxmox_sdk.proxmox.config import ProxmoxConfig
 from proxmox_sdk.routes.codegen import router as codegen_router
 from proxmox_sdk.routes.mock import router as mock_router
+from proxmox_sdk.routes.modes import MODE_REGISTRARS
 from proxmox_sdk.routes.versions import router as versions_router
 from proxmox_sdk.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generated_openapi
 
@@ -120,42 +121,19 @@ def _register_mode_routes(
     version_tag: str,
     openapi_doc: Any,
 ) -> None:
-    """Register Proxmox API routes for the configured mode (mock or real)."""
+    """Dispatch route registration to the registrar for ``config.api_mode``.
+
+    Adding a new mode is done by registering it in
+    :mod:`proxmox_sdk.routes.modes`; this function does not need to change.
+    """
     if not openapi_doc:
         return
 
-    if config.is_mock_mode():
-        from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes
+    registrar = MODE_REGISTRARS.get(config.api_mode)
+    if registrar is None:
+        return
 
-        route_info.update(
-            register_generated_proxmox_mock_routes(
-                app,
-                version_tag=version_tag,
-                openapi_document=openapi_doc,
-            )
-        )
-    elif config.is_real_mode():
-        try:
-            config.validate_for_real_mode()
-            from proxmox_sdk.proxmox.routes import register_generated_proxmox_real_routes
-
-            route_info.update(
-                register_generated_proxmox_real_routes(
-                    app,
-                    version_tag=version_tag,
-                    openapi_document=openapi_doc,
-                    proxmox_config=config,
-                )
-            )
-        except ValueError as config_error:
-            error_message = str(config_error)
-
-            @app.get("/api2/json")
-            async def config_error_endpoint() -> dict[str, str]:
-                return {
-                    "error": "Invalid configuration for real API mode",
-                    "detail": error_message,
-                }
+    route_info.update(registrar(app, config, version_tag=version_tag, openapi_document=openapi_doc))
 
 
 def create_app() -> FastAPI:
