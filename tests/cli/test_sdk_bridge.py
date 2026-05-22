@@ -70,7 +70,9 @@ def _capture_sync_kwargs(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
 
         return _Stub()
 
-    monkeypatch.setattr(api_module.ProxmoxSDK, "sync", classmethod(lambda cls, **kw: fake_sync(**kw)))
+    monkeypatch.setattr(
+        api_module.ProxmoxSDK, "sync", classmethod(lambda cls, **kw: fake_sync(**kw))
+    )
     return captured
 
 
