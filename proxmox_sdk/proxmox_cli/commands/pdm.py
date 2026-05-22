@@ -37,9 +37,8 @@ from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.output import get_context_options
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
-from proxmox_sdk.sdk.services import SERVICES
 
-from ._common import apply_cli_overrides, create_formatter, prepare_command
+from ._common import apply_cli_overrides, create_formatter, ensure_service, prepare_command
 
 logger = logging.getLogger(__name__)
 
@@ -103,18 +102,6 @@ pdm_app.add_typer(views_app, name="views")
 # ---------------------------------------------------------------------------
 
 
-def _require_pdm(bridge: ProxmoxSDKBridge) -> None:
-    inner = getattr(bridge.sdk, "_sdk", bridge.sdk)
-    service = getattr(inner, "_service_config", None)
-    if service is None or service is SERVICES["PDM"]:
-        return
-    detected = next((name for name, cfg in SERVICES.items() if cfg is service), "unknown")
-    raise ProxmoxCLIError(
-        f"PDM commands require service=PDM; current service is {detected}.",
-        exit_code=2,
-    )
-
-
 def _build_pdm_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> BackendConfig:
     config_mgr = ConfigManager()
     config_mgr.load_config(ctx_obj.get("config"))
@@ -162,7 +149,7 @@ def _run_request(
 ) -> None:
     config_mgr, bridge = _prepare_pdm_bridge()
     try:
-        _require_pdm(bridge)
+        ensure_service(bridge, "PDM")
         ctx_obj = get_context_options()
         formatter = create_formatter(
             config_mgr,
