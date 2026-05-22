@@ -38,7 +38,13 @@ from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.output import get_context_options
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 
-from ._common import apply_cli_overrides, create_formatter, ensure_service, prepare_command
+from ._common import (
+    apply_cli_overrides,
+    create_formatter,
+    dispatch_request,
+    ensure_service,
+    prepare_command,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -159,17 +165,7 @@ def _run_request(
             markdown_output=markdown_output,
             ctx_obj=ctx_obj,
         )
-        method_l = method.lower()
-        if method_l == "get":
-            result = bridge.get(path, params=params)
-        elif method_l == "post":
-            result = bridge.post(path, params=params)
-        elif method_l == "put":
-            result = bridge.put(path, params=params)
-        elif method_l == "delete":
-            result = bridge.delete(path, params=params)
-        else:
-            raise ProxmoxCLIError(f"Unsupported method: {method}", exit_code=2)
+        result = dispatch_request(bridge, method, path, params=params)
         formatter.print_output(result)
     finally:
         bridge.close()
