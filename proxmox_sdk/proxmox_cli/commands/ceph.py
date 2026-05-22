@@ -10,13 +10,11 @@ import typer
 from proxmox_sdk.proxmox_cli.app import app
 from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
 from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
-from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.output import get_context_options
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_sdk.proxmox_cli.tui_runner import launch_tui
-from proxmox_sdk.sdk.services import SERVICES
 
-from ._common import apply_cli_overrides, create_formatter, prepare_command
+from ._common import apply_cli_overrides, create_formatter, ensure_service, prepare_command
 
 logger = logging.getLogger(__name__)
 
@@ -26,19 +24,6 @@ ceph_app = typer.Typer(
     no_args_is_help=True,
 )
 app.add_typer(ceph_app, name="ceph")
-
-
-def _require_pve(bridge: ProxmoxSDKBridge) -> None:
-    # bridge.sdk is a SyncProxmoxSDK whose inner ProxmoxSDK holds _service_config.
-    inner = getattr(bridge.sdk, "_sdk", bridge.sdk)
-    service = getattr(inner, "_service_config", None)
-    if service is None or service is SERVICES["PVE"]:
-        return
-    detected = next((name for name, cfg in SERVICES.items() if cfg is service), "unknown")
-    raise ProxmoxCLIError(
-        f"Ceph commands require service=PVE; current service is {detected}.",
-        exit_code=2,
-    )
 
 
 @cli_error_handler
@@ -54,7 +39,7 @@ def _run_get(
     ctx_obj = get_context_options()
     config_mgr, bridge = prepare_command(ctx_obj)
     try:
-        _require_pve(bridge)
+        ensure_service(bridge, "PVE")
         formatter = create_formatter(
             config_mgr,
             output,

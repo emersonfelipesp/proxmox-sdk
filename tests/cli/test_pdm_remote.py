@@ -26,9 +26,10 @@ def test_remote_list_requires_pdm_service(cli_runner: CliRunner) -> None:
         app,
         ["--backend", "mock", "--service", "PVE", "pdm", "remote", "list", "--json"],
     )
-    # `_require_pdm` raises ProxmoxCLIError with exit_code=2 because the bridge
-    # service is forced to PDM inside the command, so the call should either
-    # error meaningfully (not crash) or succeed against the mock.
+    # `ensure_service(bridge, "PDM")` raises ProxmoxCLIError with exit_code=2
+    # because the bridge service is forced to PDM inside the command, so the
+    # call should either error meaningfully (not crash) or succeed against the
+    # mock.
     assert result.exit_code != 1 or "PDM" in result.output or "remotes" in result.output
 
 
