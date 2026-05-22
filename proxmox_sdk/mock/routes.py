@@ -21,6 +21,7 @@ from proxmox_sdk.mock.schema_helpers import (
 )
 from proxmox_sdk.mock.state import shared_mock_store
 from proxmox_sdk.proxmox_codegen.utils import extract_path_params, slugify_identifier
+from proxmox_sdk.routes._errors import with_error_translation
 from proxmox_sdk.routes.helpers import (
     SUPPORTED_METHODS as _SUPPORTED_GENERATED_METHODS,
 )
@@ -655,6 +656,12 @@ def _build_generated_endpoint(
             )
         )
 
+    @with_error_translation(
+        method=method,
+        path_template=path_template,
+        message_prefix="Generated Proxmox mock route",
+        detail="Schema-driven mock execution raised an unexpected exception.",
+    )
     async def generated_endpoint(**kwargs: Any) -> Any:
         request_body = kwargs.pop("request_body", None)
         path_values = {
@@ -674,39 +681,30 @@ def _build_generated_endpoint(
             owner_pid=owner_pid,
         )
 
-        try:
-            if method == "GET":
-                result = _resolve_get_state(
-                    topology,
-                    store=store,
-                    concrete_path=concrete_path,
-                    path_values=path_values,
-                    query_values=query_values,
-                )
-            else:
-                state_value = _apply_mutation(
-                    topology,
-                    store=store,
-                    concrete_path=concrete_path,
-                    path_values=path_values,
-                    body_value=body_value,
-                    query_values=query_values,
-                )
-                result = _build_operation_response(
-                    topology,
-                    concrete_path=concrete_path,
-                    state_value=state_value,
-                    body_value=body_value,
-                    path_values=path_values,
-                    query_values=query_values,
-                )
-        except HTTPException:
-            raise
-        except Exception as error:  # pragma: no cover - defensive surface
-            raise ProxmoxOpenAPIException(
-                message=f"Generated Proxmox mock route failed for {method} {path_template}.",
-                detail="Schema-driven mock execution raised an unexpected exception.",
-                python_exception=str(error),
+        if method == "GET":
+            result = _resolve_get_state(
+                topology,
+                store=store,
+                concrete_path=concrete_path,
+                path_values=path_values,
+                query_values=query_values,
+            )
+        else:
+            state_value = _apply_mutation(
+                topology,
+                store=store,
+                concrete_path=concrete_path,
+                path_values=path_values,
+                body_value=body_value,
+                query_values=query_values,
+            )
+            result = _build_operation_response(
+                topology,
+                concrete_path=concrete_path,
+                state_value=state_value,
+                body_value=body_value,
+                path_values=path_values,
+                query_values=query_values,
             )
 
         if response_model is None:
