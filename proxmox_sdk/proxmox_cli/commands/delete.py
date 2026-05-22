@@ -8,7 +8,7 @@ from typing import Optional
 import typer
 
 from ..app import app
-from ..exceptions import ProxmoxCLIError
+from ..decorators import cli_error_handler
 from ..output import get_context_options
 from ..utils import validate_api_path
 from ._common import create_formatter, prepare_command
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.command()
+@cli_error_handler
 def delete(
     path: str = typer.Argument(..., help="API path to delete"),
     force: bool = typer.Option(False, "--force", "-f", help="Force deletion without confirmation"),
@@ -55,45 +56,32 @@ def delete(
         # Silently delete in automation (exit code indicates success)
         proxmox delete /nodes/pve/qemu/100 --force 2>/dev/null
     """
-    try:
-        # Confirm deletion unless forced
-        if not force:
-            confirm = typer.confirm(f"Delete {path}?")
-            if not confirm:
-                typer.echo("Cancelled")
-                raise typer.Exit()
+    if not force:
+        confirm = typer.confirm(f"Delete {path}?")
+        if not confirm:
+            typer.echo("Cancelled")
+            raise typer.Exit()
 
-        # Get context
-        ctx_obj = get_context_options()
+    ctx_obj = get_context_options()
+    path = validate_api_path(path)
 
-        # Validate path
-        path = validate_api_path(path)
+    config_mgr, bridge = prepare_command(ctx_obj)
+    result = bridge.delete(path)
 
-        # Load config, apply overrides, create bridge
-        config_mgr, bridge = prepare_command(ctx_obj)
-        result = bridge.delete(path)
+    formatter = create_formatter(
+        config_mgr,
+        output,
+        json_output=json_output,
+        yaml_output=yaml_output,
+        markdown_output=markdown_output,
+        ctx_obj=ctx_obj,
+    )
 
-        formatter = create_formatter(
-            config_mgr,
-            output,
-            json_output=json_output,
-            yaml_output=yaml_output,
-            markdown_output=markdown_output,
-            ctx_obj=ctx_obj,
-        )
-
-        payload = {
-            "status": "success",
-            "action": "delete",
-            "path": path,
-            "data": result,
-        }
-        formatter.print_output(payload)
-        bridge.close()
-
-    except ProxmoxCLIError as e:
-        typer.echo(f"Error: {e.message}", err=True)
-        raise typer.Exit(code=e.exit_code)
-    except Exception as e:
-        typer.echo(f"Error: {e}", err=True)
-        raise typer.Exit(code=1)
+    payload = {
+        "status": "success",
+        "action": "delete",
+        "path": path,
+        "data": result,
+    }
+    formatter.print_output(payload)
+    bridge.close()

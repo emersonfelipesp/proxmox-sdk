@@ -33,6 +33,7 @@ import typer
 
 from proxmox_sdk.proxmox_cli.app import app
 from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
+from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.output import get_context_options
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
@@ -148,6 +149,7 @@ def _format_options(
     }
 
 
+@cli_error_handler
 def _run_request(
     method: str,
     path: str,
@@ -158,41 +160,32 @@ def _run_request(
     yaml_output: bool,
     markdown_output: bool,
 ) -> None:
+    config_mgr, bridge = _prepare_pdm_bridge()
     try:
-        config_mgr, bridge = _prepare_pdm_bridge()
-        try:
-            _require_pdm(bridge)
-            ctx_obj = get_context_options()
-            formatter = create_formatter(
-                config_mgr,
-                output,
-                json_output=json_output,
-                yaml_output=yaml_output,
-                markdown_output=markdown_output,
-                ctx_obj=ctx_obj,
-            )
-            method_l = method.lower()
-            if method_l == "get":
-                result = bridge.get(path, params=params)
-            elif method_l == "post":
-                result = bridge.post(path, params=params)
-            elif method_l == "put":
-                result = bridge.put(path, params=params)
-            elif method_l == "delete":
-                result = bridge.delete(path, params=params)
-            else:
-                raise ProxmoxCLIError(f"Unsupported method: {method}", exit_code=2)
-            formatter.print_output(result)
-        finally:
-            bridge.close()
-    except ProxmoxCLIError as exc:
-        typer.echo(f"Error: {exc.message}", err=True)
-        raise typer.Exit(code=exc.exit_code)
-    except typer.Exit:
-        raise
-    except Exception as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=1)
+        _require_pdm(bridge)
+        ctx_obj = get_context_options()
+        formatter = create_formatter(
+            config_mgr,
+            output,
+            json_output=json_output,
+            yaml_output=yaml_output,
+            markdown_output=markdown_output,
+            ctx_obj=ctx_obj,
+        )
+        method_l = method.lower()
+        if method_l == "get":
+            result = bridge.get(path, params=params)
+        elif method_l == "post":
+            result = bridge.post(path, params=params)
+        elif method_l == "put":
+            result = bridge.put(path, params=params)
+        elif method_l == "delete":
+            result = bridge.delete(path, params=params)
+        else:
+            raise ProxmoxCLIError(f"Unsupported method: {method}", exit_code=2)
+        formatter.print_output(result)
+    finally:
+        bridge.close()
 
 
 def _fmt_opt() -> tuple[Any, Any, Any, Any]:
@@ -1124,6 +1117,7 @@ def views_delete(
 
 
 @pdm_app.command("tui")
+@cli_error_handler
 def tui(
     ctx: typer.Context,
     mode: Optional[str] = typer.Argument(
@@ -1137,9 +1131,8 @@ def tui(
         use_mock = mode == "mock"
         backend_cfg = _build_pdm_backend_config(ctx_obj, use_mock=use_mock)
         bridge = ProxmoxSDKBridge.create(backend_cfg)
-        # Lazy-import the TUI runner so missing Textual surfaces a friendly
-        # error instead of an import traceback. The runner enables in-app
-        # view switching to PVE/Ceph/PBS without restarting the process.
+        # Lazy-import so missing Textual surfaces a friendly error instead of
+        # an import traceback.
         try:
             from proxmox_sdk.proxmox_cli.tui.runner import run_module_tui
         except ImportError:
@@ -1152,12 +1145,6 @@ def tui(
             mode="mock" if use_mock else "production",
             initial_module="pdm",
         )
-    except ProxmoxCLIError as exc:
-        typer.echo(f"Error: {exc.message}", err=True)
-        raise typer.Exit(code=exc.exit_code)
-    except Exception as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=1)
     finally:
         if bridge is not None:
             bridge.close()

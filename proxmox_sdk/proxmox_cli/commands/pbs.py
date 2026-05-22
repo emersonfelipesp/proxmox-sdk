@@ -15,7 +15,7 @@ import typer
 
 from proxmox_sdk.proxmox_cli.app import app
 from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
-from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
+from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_sdk.proxmox_cli.tui_runner import launch_tui
 
@@ -44,6 +44,7 @@ def _build_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> Backend
 
 
 @pbs_app.command("tui")
+@cli_error_handler
 def tui(
     ctx: typer.Context,
     mode: Optional[str] = typer.Argument(
@@ -69,12 +70,6 @@ def tui(
             initial_path=path,
             initial_module="pbs",
         )
-    except ProxmoxCLIError as exc:
-        typer.echo(f"Error: {exc.message}", err=True)
-        raise typer.Exit(code=exc.exit_code)
-    except Exception as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=1)
     finally:
         if bridge is not None:
             bridge.close()
