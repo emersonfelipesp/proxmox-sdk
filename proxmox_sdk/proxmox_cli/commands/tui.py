@@ -8,6 +8,7 @@ import typer
 
 from proxmox_sdk.proxmox_cli.app import app
 from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
+from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
 from proxmox_sdk.proxmox_cli.tui_runner import launch_tui
@@ -33,6 +34,7 @@ def _build_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> Backend
 
 
 @app.command("tui")
+@cli_error_handler
 def tui(
     ctx: typer.Context,
     mode: Literal["mock"] | None = typer.Argument(
@@ -88,20 +90,14 @@ def tui(
         backend_cfg = _build_backend_config(ctx_obj, use_mock=use_mock)
         bridge = ProxmoxSDKBridge.create(backend_cfg)
 
-        launch_tui(
-            bridge=bridge,
-            mode="mock" if use_mock else "production",
-            initial_path=initial_path,
-        )
-    except RuntimeError as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=2)
-    except ProxmoxCLIError as exc:
-        typer.echo(f"Error: {exc.message}", err=True)
-        raise typer.Exit(code=exc.exit_code)
-    except Exception as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=1)
+        try:
+            launch_tui(
+                bridge=bridge,
+                mode="mock" if use_mock else "production",
+                initial_path=initial_path,
+            )
+        except RuntimeError as exc:
+            raise ProxmoxCLIError(str(exc), exit_code=2) from exc
     finally:
         if bridge is not None:
             bridge.close()

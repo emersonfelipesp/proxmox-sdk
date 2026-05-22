@@ -8,7 +8,7 @@ from typing import Optional
 import typer
 
 from ..app import app
-from ..exceptions import ProxmoxCLIError
+from ..decorators import cli_error_handler
 from ..output import get_context_options
 from ..utils import parse_parameter_data, validate_api_path
 from ._common import create_formatter, prepare_command
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.command()
+@cli_error_handler
 def set_cmd(
     path: str = typer.Argument(..., help="API path to update"),
     data: Optional[list[str]] = typer.Option(
@@ -67,48 +68,35 @@ def set_cmd(
         # Update user profile
         proxmox set /access/users/user@pam -d firstname="John" -d lastname="Doe"
     """
-    try:
-        # Get context
-        ctx_obj = get_context_options()
+    ctx_obj = get_context_options()
+    path = validate_api_path(path)
 
-        # Validate path
-        path = validate_api_path(path)
+    params = parse_parameter_data(
+        short_params=data,
+        json_file=json_file,
+    )
 
-        # Parse parameters
-        params = parse_parameter_data(
-            short_params=data,
-            json_file=json_file,
-        )
-
-        if not params:
-            typer.echo("Error: No parameters provided", err=True)
-            raise typer.Exit(code=1)
-
-        # Load config, apply overrides, create bridge
-        config_mgr, bridge = prepare_command(ctx_obj)
-        result = bridge.put(path, params)
-
-        formatter = create_formatter(
-            config_mgr,
-            output,
-            json_output=json_output,
-            yaml_output=yaml_output,
-            markdown_output=markdown_output,
-            ctx_obj=ctx_obj,
-        )
-
-        payload = {
-            "status": "success",
-            "action": "set",
-            "path": path,
-            "data": result,
-        }
-        formatter.print_output(payload)
-        bridge.close()
-
-    except ProxmoxCLIError as e:
-        typer.echo(f"Error: {e.message}", err=True)
-        raise typer.Exit(code=e.exit_code)
-    except Exception as e:
-        typer.echo(f"Error: {e}", err=True)
+    if not params:
+        typer.echo("Error: No parameters provided", err=True)
         raise typer.Exit(code=1)
+
+    config_mgr, bridge = prepare_command(ctx_obj)
+    result = bridge.put(path, params)
+
+    formatter = create_formatter(
+        config_mgr,
+        output,
+        json_output=json_output,
+        yaml_output=yaml_output,
+        markdown_output=markdown_output,
+        ctx_obj=ctx_obj,
+    )
+
+    payload = {
+        "status": "success",
+        "action": "set",
+        "path": path,
+        "data": result,
+    }
+    formatter.print_output(payload)
+    bridge.close()

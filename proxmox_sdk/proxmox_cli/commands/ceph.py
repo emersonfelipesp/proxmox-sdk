@@ -9,6 +9,7 @@ import typer
 
 from proxmox_sdk.proxmox_cli.app import app
 from proxmox_sdk.proxmox_cli.config import BackendConfig, ConfigManager
+from proxmox_sdk.proxmox_cli.decorators import cli_error_handler
 from proxmox_sdk.proxmox_cli.exceptions import ProxmoxCLIError
 from proxmox_sdk.proxmox_cli.output import get_context_options
 from proxmox_sdk.proxmox_cli.sdk_bridge import ProxmoxSDKBridge
@@ -40,6 +41,7 @@ def _require_pve(bridge: ProxmoxSDKBridge) -> None:
     )
 
 
+@cli_error_handler
 def _run_get(
     path: str,
     *,
@@ -49,31 +51,22 @@ def _run_get(
     yaml_output: bool,
     markdown_output: bool,
 ) -> None:
+    ctx_obj = get_context_options()
+    config_mgr, bridge = prepare_command(ctx_obj)
     try:
-        ctx_obj = get_context_options()
-        config_mgr, bridge = prepare_command(ctx_obj)
-        try:
-            _require_pve(bridge)
-            formatter = create_formatter(
-                config_mgr,
-                output,
-                json_output=json_output,
-                yaml_output=yaml_output,
-                markdown_output=markdown_output,
-                ctx_obj=ctx_obj,
-            )
-            result = bridge.get(path, params=params)
-            formatter.print_output(result)
-        finally:
-            bridge.close()
-    except ProxmoxCLIError as exc:
-        typer.echo(f"Error: {exc.message}", err=True)
-        raise typer.Exit(code=exc.exit_code)
-    except typer.Exit:
-        raise
-    except Exception as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=1)
+        _require_pve(bridge)
+        formatter = create_formatter(
+            config_mgr,
+            output,
+            json_output=json_output,
+            yaml_output=yaml_output,
+            markdown_output=markdown_output,
+            ctx_obj=ctx_obj,
+        )
+        result = bridge.get(path, params=params)
+        formatter.print_output(result)
+    finally:
+        bridge.close()
 
 
 # ----- Cluster-scoped commands -----
@@ -373,6 +366,7 @@ def _build_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> Backend
 
 
 @ceph_app.command("tui")
+@cli_error_handler
 def tui(
     ctx: typer.Context,
     mode: Optional[str] = typer.Argument(
@@ -398,12 +392,6 @@ def tui(
             initial_path=path,
             initial_module="ceph",
         )
-    except ProxmoxCLIError as exc:
-        typer.echo(f"Error: {exc.message}", err=True)
-        raise typer.Exit(code=exc.exit_code)
-    except Exception as exc:
-        typer.echo(f"Error: {exc}", err=True)
-        raise typer.Exit(code=1)
     finally:
         if bridge is not None:
             bridge.close()
