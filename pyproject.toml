@@ -9,6 +9,7 @@ include = ["proxmox_sdk*"]
 proxmox_sdk = [
     "py.typed",
     "generated/proxmox/**/*.json",
+    "generated/proxmox/**/*.py",
     "proxmox_cli/*.json",
     "proxmox_cli/*.md",
 ]

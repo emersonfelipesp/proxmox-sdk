@@ -25,7 +25,7 @@ def dump_json(path: Path, data: object) -> None:
     """Write JSON artifact with stable formatting."""
 
     ensure_parent(path)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def slugify_identifier(value: str) -> str:

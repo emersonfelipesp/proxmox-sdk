@@ -10,6 +10,7 @@ When the OpenAPI source legitimately changes, regenerate the models and bump
 
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
 from types import ModuleType
 
@@ -24,6 +25,14 @@ def _tag_dir(tag: str) -> Path:
 
 def _openapi_path(tag: str) -> Path:
     return _tag_dir(tag) / "openapi.json"
+
+
+def _route_metadata_path(tag: str) -> Path:
+    return _tag_dir(tag) / "route_metadata.json"
+
+
+def _model_index_path(tag: str) -> Path:
+    return _tag_dir(tag) / "model_index.json"
 
 
 def _load_module(tag: str) -> ModuleType:
@@ -84,3 +93,34 @@ def test_generated_version_matches_tag(tag: str) -> None:
         f"pydantic_models.py for tag {tag!r} declares "
         f"GENERATED_FOR_PROXMOX_VERSION={mod.GENERATED_FOR_PROXMOX_VERSION!r}"
     )
+
+
+@pytest.mark.parametrize("tag", SUPPORTED_TAGS)
+def test_route_metadata_matches_openapi(tag: str) -> None:
+    openapi = json.loads(_openapi_path(tag).read_text(encoding="utf-8"))
+    metadata = json.loads(_route_metadata_path(tag).read_text(encoding="utf-8"))
+    expected_routes = sum(
+        1
+        for path_item in openapi["paths"].values()
+        for method in path_item
+        if method.upper() in {"GET", "POST", "PUT", "PATCH", "DELETE"}
+    )
+
+    assert metadata["source_sha256"] == _sha256(_openapi_path(tag))
+    assert metadata["path_count"] == len(openapi["paths"])
+    assert metadata["route_count"] == expected_routes
+    assert len(metadata["routes"]) == expected_routes
+
+
+@pytest.mark.parametrize("tag", SUPPORTED_TAGS)
+def test_model_index_covers_route_metadata(tag: str) -> None:
+    metadata = json.loads(_route_metadata_path(tag).read_text(encoding="utf-8"))
+    index = json.loads(_model_index_path(tag).read_text(encoding="utf-8"))
+
+    assert index["source_sha256"] == _sha256(_openapi_path(tag))
+    indexed_operations = set(index["operations"])
+    metadata_operations = {route["operation_id"] for route in metadata["routes"]}
+    assert metadata_operations <= indexed_operations
+
+    for group in index["groups"]:
+        assert (_tag_dir(tag) / "models" / f"{group}.py").is_file()

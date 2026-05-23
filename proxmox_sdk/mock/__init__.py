@@ -14,7 +14,9 @@ from proxmox_sdk.mock.schema_helpers import (
     schema_kind,
 )
 from proxmox_sdk.mock.state import (
+    MockStateStore,
     SharedMemoryMockStore,
+    SQLiteMockStore,
     mock_state_owner_pid,
     reset_shared_mock_state,
     shared_mock_store,
@@ -30,7 +32,9 @@ __all__ = [
     "schema_fingerprint",
     "schema_kind",
     "resolved_schema",
+    "MockStateStore",
     "SharedMemoryMockStore",
+    "SQLiteMockStore",
     "mock_state_owner_pid",
     "reset_shared_mock_state",
     "shared_mock_store",

@@ -1,0 +1,3390 @@
+{
+  "generated_at": "2026-05-23T21:58:58.807917+00:00",
+  "groups": [
+    "access",
+    "cluster",
+    "nodes",
+    "pools",
+    "storage",
+    "version"
+  ],
+  "operations": {
+    "delete_access_domains_realm": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "DeleteAccessDomainsRealmResponse"
+    },
+    "delete_access_groups_groupid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "DeleteAccessGroupsGroupidResponse"
+    },
+    "delete_access_roles_roleid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "DeleteAccessRolesRoleidResponse"
+    },
+    "delete_access_tfa_userid_id": {
+      "group": "access",
+      "request_model": "DeleteAccessTfaUseridIdRequest",
+      "response_model": "DeleteAccessTfaUseridIdResponse"
+    },
+    "delete_access_users_userid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "DeleteAccessUsersUseridResponse"
+    },
+    "delete_access_users_userid_token_tokenid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "DeleteAccessUsersUseridTokenTokenidResponse"
+    },
+    "delete_cluster_acme_account_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterAcmeAccountNameResponse"
+    },
+    "delete_cluster_acme_plugins_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterAcmePluginsIdResponse"
+    },
+    "delete_cluster_backup_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterBackupIdResponse"
+    },
+    "delete_cluster_config_nodes_node": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterConfigNodesNodeResponse"
+    },
+    "delete_cluster_firewall_aliases_name": {
+      "group": "cluster",
+      "request_model": "DeleteClusterFirewallAliasesNameRequest",
+      "response_model": "DeleteClusterFirewallAliasesNameResponse"
+    },
+    "delete_cluster_firewall_groups_group": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterFirewallGroupsGroupResponse"
+    },
+    "delete_cluster_firewall_groups_group_pos": {
+      "group": "cluster",
+      "request_model": "DeleteClusterFirewallGroupsGroupPosRequest",
+      "response_model": "DeleteClusterFirewallGroupsGroupPosResponse"
+    },
+    "delete_cluster_firewall_ipset_name": {
+      "group": "cluster",
+      "request_model": "DeleteClusterFirewallIpsetNameRequest",
+      "response_model": "DeleteClusterFirewallIpsetNameResponse"
+    },
+    "delete_cluster_firewall_ipset_name_cidr": {
+      "group": "cluster",
+      "request_model": "DeleteClusterFirewallIpsetNameCidrRequest",
+      "response_model": "DeleteClusterFirewallIpsetNameCidrResponse"
+    },
+    "delete_cluster_firewall_rules_pos": {
+      "group": "cluster",
+      "request_model": "DeleteClusterFirewallRulesPosRequest",
+      "response_model": "DeleteClusterFirewallRulesPosResponse"
+    },
+    "delete_cluster_ha_groups_group": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterHaGroupsGroupResponse"
+    },
+    "delete_cluster_ha_resources_sid": {
+      "group": "cluster",
+      "request_model": "DeleteClusterHaResourcesSidRequest",
+      "response_model": "DeleteClusterHaResourcesSidResponse"
+    },
+    "delete_cluster_ha_rules_rule": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterHaRulesRuleResponse"
+    },
+    "delete_cluster_jobs_realm_sync_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterJobsRealmSyncIdResponse"
+    },
+    "delete_cluster_mapping_dir_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterMappingDirIdResponse"
+    },
+    "delete_cluster_mapping_pci_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterMappingPciIdResponse"
+    },
+    "delete_cluster_mapping_usb_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterMappingUsbIdResponse"
+    },
+    "delete_cluster_metrics_server_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterMetricsServerIdResponse"
+    },
+    "delete_cluster_notifications_endpoints_gotify_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterNotificationsEndpointsGotifyNameResponse"
+    },
+    "delete_cluster_notifications_endpoints_sendmail_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterNotificationsEndpointsSendmailNameResponse"
+    },
+    "delete_cluster_notifications_endpoints_smtp_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterNotificationsEndpointsSmtpNameResponse"
+    },
+    "delete_cluster_notifications_endpoints_webhook_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterNotificationsEndpointsWebhookNameResponse"
+    },
+    "delete_cluster_notifications_matchers_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterNotificationsMatchersNameResponse"
+    },
+    "delete_cluster_qemu_custom_cpu_models_cputype": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterQemuCustomCpuModelsCputypeResponse"
+    },
+    "delete_cluster_replication_id": {
+      "group": "cluster",
+      "request_model": "DeleteClusterReplicationIdRequest",
+      "response_model": "DeleteClusterReplicationIdResponse"
+    },
+    "delete_cluster_sdn_controllers_controller": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnControllersControllerRequest",
+      "response_model": "DeleteClusterSdnControllersControllerResponse"
+    },
+    "delete_cluster_sdn_dns_dns": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnDnsDnsRequest",
+      "response_model": "DeleteClusterSdnDnsDnsResponse"
+    },
+    "delete_cluster_sdn_fabrics_fabric_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterSdnFabricsFabricIdResponse"
+    },
+    "delete_cluster_sdn_fabrics_node_fabric_id_node_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "DeleteClusterSdnFabricsNodeFabricIdNodeIdResponse"
+    },
+    "delete_cluster_sdn_ipams_ipam": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnIpamsIpamRequest",
+      "response_model": "DeleteClusterSdnIpamsIpamResponse"
+    },
+    "delete_cluster_sdn_lock": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnLockRequest",
+      "response_model": "DeleteClusterSdnLockResponse"
+    },
+    "delete_cluster_sdn_prefix_lists_id": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnPrefixListsIdRequest",
+      "response_model": "DeleteClusterSdnPrefixListsIdResponse"
+    },
+    "delete_cluster_sdn_prefix_lists_id_entries_url_seq": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnPrefixListsIdEntriesUrlSeqRequest",
+      "response_model": "DeleteClusterSdnPrefixListsIdEntriesUrlSeqResponse"
+    },
+    "delete_cluster_sdn_route_maps_entries_route_map_id_entry_order": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnRouteMapsEntriesRouteMapIdEntryOrderRequest",
+      "response_model": "DeleteClusterSdnRouteMapsEntriesRouteMapIdEntryOrderResponse"
+    },
+    "delete_cluster_sdn_vnets_vnet": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnVnetsVnetRequest",
+      "response_model": "DeleteClusterSdnVnetsVnetResponse"
+    },
+    "delete_cluster_sdn_vnets_vnet_firewall_rules_pos": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnVnetsVnetFirewallRulesPosRequest",
+      "response_model": "DeleteClusterSdnVnetsVnetFirewallRulesPosResponse"
+    },
+    "delete_cluster_sdn_vnets_vnet_ips": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnVnetsVnetIpsRequest",
+      "response_model": "DeleteClusterSdnVnetsVnetIpsResponse"
+    },
+    "delete_cluster_sdn_vnets_vnet_subnets_subnet": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnVnetsVnetSubnetsSubnetRequest",
+      "response_model": "DeleteClusterSdnVnetsVnetSubnetsSubnetResponse"
+    },
+    "delete_cluster_sdn_zones_zone": {
+      "group": "cluster",
+      "request_model": "DeleteClusterSdnZonesZoneRequest",
+      "response_model": "DeleteClusterSdnZonesZoneResponse"
+    },
+    "delete_nodes_node_ceph_fs_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeCephFsNameRequest",
+      "response_model": "DeleteNodesNodeCephFsNameResponse"
+    },
+    "delete_nodes_node_ceph_mds_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeCephMdsNameResponse"
+    },
+    "delete_nodes_node_ceph_mgr_id": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeCephMgrIdResponse"
+    },
+    "delete_nodes_node_ceph_mon_monid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeCephMonMonidResponse"
+    },
+    "delete_nodes_node_ceph_osd_osdid": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeCephOsdOsdidRequest",
+      "response_model": "DeleteNodesNodeCephOsdOsdidResponse"
+    },
+    "delete_nodes_node_ceph_pool_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeCephPoolNameRequest",
+      "response_model": "DeleteNodesNodeCephPoolNameResponse"
+    },
+    "delete_nodes_node_certificates_acme_certificate": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeCertificatesAcmeCertificateResponse"
+    },
+    "delete_nodes_node_certificates_custom": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeCertificatesCustomRequest",
+      "response_model": "DeleteNodesNodeCertificatesCustomResponse"
+    },
+    "delete_nodes_node_disks_directory_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeDisksDirectoryNameRequest",
+      "response_model": "DeleteNodesNodeDisksDirectoryNameResponse"
+    },
+    "delete_nodes_node_disks_lvm_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeDisksLvmNameRequest",
+      "response_model": "DeleteNodesNodeDisksLvmNameResponse"
+    },
+    "delete_nodes_node_disks_lvmthin_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeDisksLvmthinNameRequest",
+      "response_model": "DeleteNodesNodeDisksLvmthinNameResponse"
+    },
+    "delete_nodes_node_disks_zfs_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeDisksZfsNameRequest",
+      "response_model": "DeleteNodesNodeDisksZfsNameResponse"
+    },
+    "delete_nodes_node_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeFirewallRulesPosRequest",
+      "response_model": "DeleteNodesNodeFirewallRulesPosResponse"
+    },
+    "delete_nodes_node_lxc_vmid": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeLxcVmidRequest",
+      "response_model": "DeleteNodesNodeLxcVmidResponse"
+    },
+    "delete_nodes_node_lxc_vmid_firewall_aliases_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeLxcVmidFirewallAliasesNameRequest",
+      "response_model": "DeleteNodesNodeLxcVmidFirewallAliasesNameResponse"
+    },
+    "delete_nodes_node_lxc_vmid_firewall_ipset_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeLxcVmidFirewallIpsetNameRequest",
+      "response_model": "DeleteNodesNodeLxcVmidFirewallIpsetNameResponse"
+    },
+    "delete_nodes_node_lxc_vmid_firewall_ipset_name_cidr": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeLxcVmidFirewallIpsetNameCidrRequest",
+      "response_model": "DeleteNodesNodeLxcVmidFirewallIpsetNameCidrResponse"
+    },
+    "delete_nodes_node_lxc_vmid_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeLxcVmidFirewallRulesPosRequest",
+      "response_model": "DeleteNodesNodeLxcVmidFirewallRulesPosResponse"
+    },
+    "delete_nodes_node_lxc_vmid_snapshot_snapname": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeLxcVmidSnapshotSnapnameRequest",
+      "response_model": "DeleteNodesNodeLxcVmidSnapshotSnapnameResponse"
+    },
+    "delete_nodes_node_network": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeNetworkResponse"
+    },
+    "delete_nodes_node_network_iface": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeNetworkIfaceResponse"
+    },
+    "delete_nodes_node_qemu_vmid": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeQemuVmidRequest",
+      "response_model": "DeleteNodesNodeQemuVmidResponse"
+    },
+    "delete_nodes_node_qemu_vmid_firewall_aliases_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeQemuVmidFirewallAliasesNameRequest",
+      "response_model": "DeleteNodesNodeQemuVmidFirewallAliasesNameResponse"
+    },
+    "delete_nodes_node_qemu_vmid_firewall_ipset_name": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeQemuVmidFirewallIpsetNameRequest",
+      "response_model": "DeleteNodesNodeQemuVmidFirewallIpsetNameResponse"
+    },
+    "delete_nodes_node_qemu_vmid_firewall_ipset_name_cidr": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeQemuVmidFirewallIpsetNameCidrRequest",
+      "response_model": "DeleteNodesNodeQemuVmidFirewallIpsetNameCidrResponse"
+    },
+    "delete_nodes_node_qemu_vmid_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeQemuVmidFirewallRulesPosRequest",
+      "response_model": "DeleteNodesNodeQemuVmidFirewallRulesPosResponse"
+    },
+    "delete_nodes_node_qemu_vmid_snapshot_snapname": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeQemuVmidSnapshotSnapnameRequest",
+      "response_model": "DeleteNodesNodeQemuVmidSnapshotSnapnameResponse"
+    },
+    "delete_nodes_node_storage_storage_content_volume": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeStorageStorageContentVolumeRequest",
+      "response_model": "DeleteNodesNodeStorageStorageContentVolumeResponse"
+    },
+    "delete_nodes_node_storage_storage_prunebackups": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeStorageStoragePrunebackupsRequest",
+      "response_model": "DeleteNodesNodeStorageStoragePrunebackupsResponse"
+    },
+    "delete_nodes_node_subscription": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeSubscriptionResponse"
+    },
+    "delete_nodes_node_tasks_upid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "DeleteNodesNodeTasksUpidResponse"
+    },
+    "delete_pools": {
+      "group": "pools",
+      "request_model": "DeletePoolsRequest",
+      "response_model": "DeletePoolsResponse"
+    },
+    "delete_pools_poolid": {
+      "group": "pools",
+      "request_model": null,
+      "response_model": "DeletePoolsPoolidResponse"
+    },
+    "delete_storage_storage": {
+      "group": "storage",
+      "request_model": null,
+      "response_model": "DeleteStorageStorageResponse"
+    },
+    "get_access": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessResponse"
+    },
+    "get_access_acl": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessAclResponse"
+    },
+    "get_access_domains": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessDomainsResponse"
+    },
+    "get_access_domains_realm": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessDomainsRealmResponse"
+    },
+    "get_access_groups": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessGroupsResponse"
+    },
+    "get_access_groups_groupid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessGroupsGroupidResponse"
+    },
+    "get_access_openid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessOpenidResponse"
+    },
+    "get_access_permissions": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessPermissionsResponse"
+    },
+    "get_access_roles": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessRolesResponse"
+    },
+    "get_access_roles_roleid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessRolesRoleidResponse"
+    },
+    "get_access_tfa": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessTfaResponse"
+    },
+    "get_access_tfa_userid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessTfaUseridResponse"
+    },
+    "get_access_tfa_userid_id": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessTfaUseridIdResponse"
+    },
+    "get_access_ticket": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessTicketResponse"
+    },
+    "get_access_users": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessUsersResponse"
+    },
+    "get_access_users_userid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessUsersUseridResponse"
+    },
+    "get_access_users_userid_tfa": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessUsersUseridTfaResponse"
+    },
+    "get_access_users_userid_token": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessUsersUseridTokenResponse"
+    },
+    "get_access_users_userid_token_tokenid": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "GetAccessUsersUseridTokenTokenidResponse"
+    },
+    "get_cluster": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterResponse"
+    },
+    "get_cluster_acme": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeResponse"
+    },
+    "get_cluster_acme_account": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeAccountResponse"
+    },
+    "get_cluster_acme_account_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeAccountNameResponse"
+    },
+    "get_cluster_acme_challenge_schema": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeChallengeSchemaResponse"
+    },
+    "get_cluster_acme_directories": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeDirectoriesResponse"
+    },
+    "get_cluster_acme_meta": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeMetaResponse"
+    },
+    "get_cluster_acme_plugins": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmePluginsResponse"
+    },
+    "get_cluster_acme_plugins_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmePluginsIdResponse"
+    },
+    "get_cluster_acme_tos": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterAcmeTosResponse"
+    },
+    "get_cluster_backup": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBackupResponse"
+    },
+    "get_cluster_backup_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBackupIdResponse"
+    },
+    "get_cluster_backup_id_included_volumes": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBackupIdIncludedVolumesResponse"
+    },
+    "get_cluster_backup_info": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBackupInfoResponse"
+    },
+    "get_cluster_backup_info_not_backed_up": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBackupInfoNotBackedUpResponse"
+    },
+    "get_cluster_bulk_action": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBulkActionResponse"
+    },
+    "get_cluster_bulk_action_guest": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterBulkActionGuestResponse"
+    },
+    "get_cluster_ceph": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterCephResponse"
+    },
+    "get_cluster_ceph_flags": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterCephFlagsResponse"
+    },
+    "get_cluster_ceph_flags_flag": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterCephFlagsFlagResponse"
+    },
+    "get_cluster_ceph_metadata": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterCephMetadataResponse"
+    },
+    "get_cluster_ceph_status": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterCephStatusResponse"
+    },
+    "get_cluster_config": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterConfigResponse"
+    },
+    "get_cluster_config_apiversion": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterConfigApiversionResponse"
+    },
+    "get_cluster_config_join": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterConfigJoinResponse"
+    },
+    "get_cluster_config_nodes": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterConfigNodesResponse"
+    },
+    "get_cluster_config_qdevice": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterConfigQdeviceResponse"
+    },
+    "get_cluster_config_totem": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterConfigTotemResponse"
+    },
+    "get_cluster_firewall": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallResponse"
+    },
+    "get_cluster_firewall_aliases": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallAliasesResponse"
+    },
+    "get_cluster_firewall_aliases_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallAliasesNameResponse"
+    },
+    "get_cluster_firewall_groups": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallGroupsResponse"
+    },
+    "get_cluster_firewall_groups_group": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallGroupsGroupResponse"
+    },
+    "get_cluster_firewall_groups_group_pos": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallGroupsGroupPosResponse"
+    },
+    "get_cluster_firewall_ipset": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallIpsetResponse"
+    },
+    "get_cluster_firewall_ipset_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallIpsetNameResponse"
+    },
+    "get_cluster_firewall_ipset_name_cidr": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallIpsetNameCidrResponse"
+    },
+    "get_cluster_firewall_macros": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallMacrosResponse"
+    },
+    "get_cluster_firewall_options": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallOptionsResponse"
+    },
+    "get_cluster_firewall_refs": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallRefsResponse"
+    },
+    "get_cluster_firewall_rules": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallRulesResponse"
+    },
+    "get_cluster_firewall_rules_pos": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterFirewallRulesPosResponse"
+    },
+    "get_cluster_ha": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaResponse"
+    },
+    "get_cluster_ha_groups": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaGroupsResponse"
+    },
+    "get_cluster_ha_groups_group": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaGroupsGroupResponse"
+    },
+    "get_cluster_ha_resources": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaResourcesResponse"
+    },
+    "get_cluster_ha_resources_sid": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaResourcesSidResponse"
+    },
+    "get_cluster_ha_rules": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaRulesResponse"
+    },
+    "get_cluster_ha_rules_rule": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaRulesRuleResponse"
+    },
+    "get_cluster_ha_status": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaStatusResponse"
+    },
+    "get_cluster_ha_status_current": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaStatusCurrentResponse"
+    },
+    "get_cluster_ha_status_manager_status": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterHaStatusManagerStatusResponse"
+    },
+    "get_cluster_jobs": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterJobsResponse"
+    },
+    "get_cluster_jobs_realm_sync": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterJobsRealmSyncResponse"
+    },
+    "get_cluster_jobs_realm_sync_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterJobsRealmSyncIdResponse"
+    },
+    "get_cluster_jobs_schedule_analyze": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterJobsScheduleAnalyzeResponse"
+    },
+    "get_cluster_log": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterLogResponse"
+    },
+    "get_cluster_mapping": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingResponse"
+    },
+    "get_cluster_mapping_dir": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingDirResponse"
+    },
+    "get_cluster_mapping_dir_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingDirIdResponse"
+    },
+    "get_cluster_mapping_pci": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingPciResponse"
+    },
+    "get_cluster_mapping_pci_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingPciIdResponse"
+    },
+    "get_cluster_mapping_usb": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingUsbResponse"
+    },
+    "get_cluster_mapping_usb_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMappingUsbIdResponse"
+    },
+    "get_cluster_metrics": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMetricsResponse"
+    },
+    "get_cluster_metrics_export": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMetricsExportResponse"
+    },
+    "get_cluster_metrics_server": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMetricsServerResponse"
+    },
+    "get_cluster_metrics_server_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMetricsServerIdResponse"
+    },
+    "get_cluster_nextid": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNextidResponse"
+    },
+    "get_cluster_notifications": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsResponse"
+    },
+    "get_cluster_notifications_endpoints": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsResponse"
+    },
+    "get_cluster_notifications_endpoints_gotify": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsGotifyResponse"
+    },
+    "get_cluster_notifications_endpoints_gotify_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsGotifyNameResponse"
+    },
+    "get_cluster_notifications_endpoints_sendmail": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsSendmailResponse"
+    },
+    "get_cluster_notifications_endpoints_sendmail_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsSendmailNameResponse"
+    },
+    "get_cluster_notifications_endpoints_smtp": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsSmtpResponse"
+    },
+    "get_cluster_notifications_endpoints_smtp_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsSmtpNameResponse"
+    },
+    "get_cluster_notifications_endpoints_webhook": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsWebhookResponse"
+    },
+    "get_cluster_notifications_endpoints_webhook_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsEndpointsWebhookNameResponse"
+    },
+    "get_cluster_notifications_matcher_field_values": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsMatcherFieldValuesResponse"
+    },
+    "get_cluster_notifications_matcher_fields": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsMatcherFieldsResponse"
+    },
+    "get_cluster_notifications_matchers": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsMatchersResponse"
+    },
+    "get_cluster_notifications_matchers_name": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsMatchersNameResponse"
+    },
+    "get_cluster_notifications_targets": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterNotificationsTargetsResponse"
+    },
+    "get_cluster_options": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterOptionsResponse"
+    },
+    "get_cluster_qemu": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterQemuResponse"
+    },
+    "get_cluster_qemu_cpu_flags": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterQemuCpuFlagsResponse"
+    },
+    "get_cluster_qemu_custom_cpu_models": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterQemuCustomCpuModelsResponse"
+    },
+    "get_cluster_qemu_custom_cpu_models_cputype": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterQemuCustomCpuModelsCputypeResponse"
+    },
+    "get_cluster_replication": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterReplicationResponse"
+    },
+    "get_cluster_replication_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterReplicationIdResponse"
+    },
+    "get_cluster_resources": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterResourcesResponse"
+    },
+    "get_cluster_sdn": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnResponse"
+    },
+    "get_cluster_sdn_controllers": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnControllersResponse"
+    },
+    "get_cluster_sdn_controllers_controller": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnControllersControllerResponse"
+    },
+    "get_cluster_sdn_dns": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnDnsResponse"
+    },
+    "get_cluster_sdn_dns_dns": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnDnsDnsResponse"
+    },
+    "get_cluster_sdn_dry_run": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnDryRunResponse"
+    },
+    "get_cluster_sdn_fabrics": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsResponse"
+    },
+    "get_cluster_sdn_fabrics_all": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsAllResponse"
+    },
+    "get_cluster_sdn_fabrics_fabric": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsFabricResponse"
+    },
+    "get_cluster_sdn_fabrics_fabric_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsFabricIdResponse"
+    },
+    "get_cluster_sdn_fabrics_node": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsNodeResponse"
+    },
+    "get_cluster_sdn_fabrics_node_fabric_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsNodeFabricIdResponse"
+    },
+    "get_cluster_sdn_fabrics_node_fabric_id_node_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnFabricsNodeFabricIdNodeIdResponse"
+    },
+    "get_cluster_sdn_ipams": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnIpamsResponse"
+    },
+    "get_cluster_sdn_ipams_ipam": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnIpamsIpamResponse"
+    },
+    "get_cluster_sdn_ipams_ipam_status": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnIpamsIpamStatusResponse"
+    },
+    "get_cluster_sdn_prefix_lists": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnPrefixListsResponse"
+    },
+    "get_cluster_sdn_prefix_lists_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnPrefixListsIdResponse"
+    },
+    "get_cluster_sdn_prefix_lists_id_entries": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnPrefixListsIdEntriesResponse"
+    },
+    "get_cluster_sdn_prefix_lists_id_entries_url_seq": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnPrefixListsIdEntriesUrlSeqResponse"
+    },
+    "get_cluster_sdn_route_maps": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnRouteMapsResponse"
+    },
+    "get_cluster_sdn_route_maps_entries": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnRouteMapsEntriesResponse"
+    },
+    "get_cluster_sdn_route_maps_entries_route_map_id": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnRouteMapsEntriesRouteMapIdResponse"
+    },
+    "get_cluster_sdn_route_maps_entries_route_map_id_entry_order": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnRouteMapsEntriesRouteMapIdEntryOrderResponse"
+    },
+    "get_cluster_sdn_vnets": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsResponse"
+    },
+    "get_cluster_sdn_vnets_vnet": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetResponse"
+    },
+    "get_cluster_sdn_vnets_vnet_firewall": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetFirewallResponse"
+    },
+    "get_cluster_sdn_vnets_vnet_firewall_options": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetFirewallOptionsResponse"
+    },
+    "get_cluster_sdn_vnets_vnet_firewall_rules": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetFirewallRulesResponse"
+    },
+    "get_cluster_sdn_vnets_vnet_firewall_rules_pos": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetFirewallRulesPosResponse"
+    },
+    "get_cluster_sdn_vnets_vnet_subnets": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetSubnetsResponse"
+    },
+    "get_cluster_sdn_vnets_vnet_subnets_subnet": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnVnetsVnetSubnetsSubnetResponse"
+    },
+    "get_cluster_sdn_zones": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnZonesResponse"
+    },
+    "get_cluster_sdn_zones_zone": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSdnZonesZoneResponse"
+    },
+    "get_cluster_status": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterStatusResponse"
+    },
+    "get_cluster_tasks": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterTasksResponse"
+    },
+    "get_nodes": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesResponse"
+    },
+    "get_nodes_node": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeResponse"
+    },
+    "get_nodes_node_aplinfo": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAplinfoResponse"
+    },
+    "get_nodes_node_apt": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptResponse"
+    },
+    "get_nodes_node_apt_changelog": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptChangelogResponse"
+    },
+    "get_nodes_node_apt_repositories": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptRepositoriesResponse"
+    },
+    "get_nodes_node_apt_update": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptUpdateResponse"
+    },
+    "get_nodes_node_apt_versions": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptVersionsResponse"
+    },
+    "get_nodes_node_capabilities": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCapabilitiesResponse"
+    },
+    "get_nodes_node_capabilities_qemu": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCapabilitiesQemuResponse"
+    },
+    "get_nodes_node_capabilities_qemu_cpu": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCapabilitiesQemuCpuResponse"
+    },
+    "get_nodes_node_capabilities_qemu_cpu_flags": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCapabilitiesQemuCpuFlagsResponse"
+    },
+    "get_nodes_node_capabilities_qemu_machines": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCapabilitiesQemuMachinesResponse"
+    },
+    "get_nodes_node_capabilities_qemu_migration": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCapabilitiesQemuMigrationResponse"
+    },
+    "get_nodes_node_ceph": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephResponse"
+    },
+    "get_nodes_node_ceph_cfg": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephCfgResponse"
+    },
+    "get_nodes_node_ceph_cfg_db": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephCfgDbResponse"
+    },
+    "get_nodes_node_ceph_cfg_raw": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephCfgRawResponse"
+    },
+    "get_nodes_node_ceph_cfg_value": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephCfgValueResponse"
+    },
+    "get_nodes_node_ceph_cmd_safety": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephCmdSafetyResponse"
+    },
+    "get_nodes_node_ceph_crush": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephCrushResponse"
+    },
+    "get_nodes_node_ceph_fs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephFsResponse"
+    },
+    "get_nodes_node_ceph_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephLogResponse"
+    },
+    "get_nodes_node_ceph_mds": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephMdsResponse"
+    },
+    "get_nodes_node_ceph_mgr": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephMgrResponse"
+    },
+    "get_nodes_node_ceph_mon": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephMonResponse"
+    },
+    "get_nodes_node_ceph_osd": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephOsdResponse"
+    },
+    "get_nodes_node_ceph_osd_osdid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephOsdOsdidResponse"
+    },
+    "get_nodes_node_ceph_osd_osdid_lv_info": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephOsdOsdidLvInfoResponse"
+    },
+    "get_nodes_node_ceph_osd_osdid_metadata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephOsdOsdidMetadataResponse"
+    },
+    "get_nodes_node_ceph_pool": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephPoolResponse"
+    },
+    "get_nodes_node_ceph_pool_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephPoolNameResponse"
+    },
+    "get_nodes_node_ceph_pool_name_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephPoolNameStatusResponse"
+    },
+    "get_nodes_node_ceph_rules": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephRulesResponse"
+    },
+    "get_nodes_node_ceph_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephStatusResponse"
+    },
+    "get_nodes_node_certificates": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCertificatesResponse"
+    },
+    "get_nodes_node_certificates_acme": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCertificatesAcmeResponse"
+    },
+    "get_nodes_node_certificates_info": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCertificatesInfoResponse"
+    },
+    "get_nodes_node_config": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeConfigResponse"
+    },
+    "get_nodes_node_disks": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksResponse"
+    },
+    "get_nodes_node_disks_directory": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksDirectoryResponse"
+    },
+    "get_nodes_node_disks_list": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksListResponse"
+    },
+    "get_nodes_node_disks_lvm": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksLvmResponse"
+    },
+    "get_nodes_node_disks_lvmthin": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksLvmthinResponse"
+    },
+    "get_nodes_node_disks_smart": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksSmartResponse"
+    },
+    "get_nodes_node_disks_zfs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksZfsResponse"
+    },
+    "get_nodes_node_disks_zfs_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDisksZfsNameResponse"
+    },
+    "get_nodes_node_dns": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeDnsResponse"
+    },
+    "get_nodes_node_firewall": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeFirewallResponse"
+    },
+    "get_nodes_node_firewall_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeFirewallLogResponse"
+    },
+    "get_nodes_node_firewall_options": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeFirewallOptionsResponse"
+    },
+    "get_nodes_node_firewall_rules": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeFirewallRulesResponse"
+    },
+    "get_nodes_node_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeFirewallRulesPosResponse"
+    },
+    "get_nodes_node_hardware": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeHardwareResponse"
+    },
+    "get_nodes_node_hardware_pci": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeHardwarePciResponse"
+    },
+    "get_nodes_node_hardware_pci_pci_id_or_mapping": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeHardwarePciPciIdOrMappingResponse"
+    },
+    "get_nodes_node_hardware_pci_pci_id_or_mapping_mdev": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeHardwarePciPciIdOrMappingMdevResponse"
+    },
+    "get_nodes_node_hardware_usb": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeHardwareUsbResponse"
+    },
+    "get_nodes_node_hosts": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeHostsResponse"
+    },
+    "get_nodes_node_journal": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeJournalResponse"
+    },
+    "get_nodes_node_lxc": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcResponse"
+    },
+    "get_nodes_node_lxc_vmid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidResponse"
+    },
+    "get_nodes_node_lxc_vmid_config": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidConfigResponse"
+    },
+    "get_nodes_node_lxc_vmid_feature": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFeatureResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_aliases": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallAliasesResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_aliases_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallAliasesNameResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_ipset": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallIpsetResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_ipset_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallIpsetNameResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_ipset_name_cidr": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallIpsetNameCidrResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallLogResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_options": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallOptionsResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_refs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallRefsResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_rules": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallRulesResponse"
+    },
+    "get_nodes_node_lxc_vmid_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidFirewallRulesPosResponse"
+    },
+    "get_nodes_node_lxc_vmid_interfaces": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidInterfacesResponse"
+    },
+    "get_nodes_node_lxc_vmid_migrate": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidMigrateResponse"
+    },
+    "get_nodes_node_lxc_vmid_mtunnelwebsocket": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidMtunnelwebsocketResponse"
+    },
+    "get_nodes_node_lxc_vmid_pending": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidPendingResponse"
+    },
+    "get_nodes_node_lxc_vmid_rrd": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidRrdResponse"
+    },
+    "get_nodes_node_lxc_vmid_rrddata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidRrddataResponse"
+    },
+    "get_nodes_node_lxc_vmid_snapshot": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidSnapshotResponse"
+    },
+    "get_nodes_node_lxc_vmid_snapshot_snapname": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidSnapshotSnapnameResponse"
+    },
+    "get_nodes_node_lxc_vmid_snapshot_snapname_config": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidSnapshotSnapnameConfigResponse"
+    },
+    "get_nodes_node_lxc_vmid_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidStatusResponse"
+    },
+    "get_nodes_node_lxc_vmid_status_current": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidStatusCurrentResponse"
+    },
+    "get_nodes_node_lxc_vmid_vncwebsocket": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeLxcVmidVncwebsocketResponse"
+    },
+    "get_nodes_node_netstat": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeNetstatResponse"
+    },
+    "get_nodes_node_network": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeNetworkResponse"
+    },
+    "get_nodes_node_network_iface": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeNetworkIfaceResponse"
+    },
+    "get_nodes_node_qemu": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuResponse"
+    },
+    "get_nodes_node_qemu_vmid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_exec_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentExecStatusResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_file_read": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentFileReadResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_fsinfo": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetFsinfoResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_host_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetHostNameResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_memory_block_info": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetMemoryBlockInfoResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_memory_blocks": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetMemoryBlocksResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_osinfo": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetOsinfoResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_time": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetTimeResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_timezone": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetTimezoneResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_users": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetUsersResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_vcpus": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetVcpusResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_info": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentInfoResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_network_get_interfaces": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentNetworkGetInterfacesResponse"
+    },
+    "get_nodes_node_qemu_vmid_cloudinit": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidCloudinitResponse"
+    },
+    "get_nodes_node_qemu_vmid_cloudinit_dump": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidCloudinitDumpResponse"
+    },
+    "get_nodes_node_qemu_vmid_config": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidConfigResponse"
+    },
+    "get_nodes_node_qemu_vmid_feature": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFeatureResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_aliases": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallAliasesResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_aliases_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallAliasesNameResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_ipset": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallIpsetResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_ipset_name": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallIpsetNameResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_ipset_name_cidr": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallIpsetNameCidrResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallLogResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_options": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallOptionsResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_refs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallRefsResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_rules": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallRulesResponse"
+    },
+    "get_nodes_node_qemu_vmid_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidFirewallRulesPosResponse"
+    },
+    "get_nodes_node_qemu_vmid_migrate": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidMigrateResponse"
+    },
+    "get_nodes_node_qemu_vmid_mtunnelwebsocket": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidMtunnelwebsocketResponse"
+    },
+    "get_nodes_node_qemu_vmid_pending": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidPendingResponse"
+    },
+    "get_nodes_node_qemu_vmid_rrd": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidRrdResponse"
+    },
+    "get_nodes_node_qemu_vmid_rrddata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidRrddataResponse"
+    },
+    "get_nodes_node_qemu_vmid_snapshot": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidSnapshotResponse"
+    },
+    "get_nodes_node_qemu_vmid_snapshot_snapname": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidSnapshotSnapnameResponse"
+    },
+    "get_nodes_node_qemu_vmid_snapshot_snapname_config": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidSnapshotSnapnameConfigResponse"
+    },
+    "get_nodes_node_qemu_vmid_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidStatusResponse"
+    },
+    "get_nodes_node_qemu_vmid_status_current": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidStatusCurrentResponse"
+    },
+    "get_nodes_node_qemu_vmid_vncwebsocket": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidVncwebsocketResponse"
+    },
+    "get_nodes_node_query_oci_repo_tags": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQueryOciRepoTagsResponse"
+    },
+    "get_nodes_node_query_url_metadata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQueryUrlMetadataResponse"
+    },
+    "get_nodes_node_replication": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeReplicationResponse"
+    },
+    "get_nodes_node_replication_id": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeReplicationIdResponse"
+    },
+    "get_nodes_node_replication_id_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeReplicationIdLogResponse"
+    },
+    "get_nodes_node_replication_id_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeReplicationIdStatusResponse"
+    },
+    "get_nodes_node_report": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeReportResponse"
+    },
+    "get_nodes_node_rrd": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeRrdResponse"
+    },
+    "get_nodes_node_rrddata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeRrddataResponse"
+    },
+    "get_nodes_node_scan": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanResponse"
+    },
+    "get_nodes_node_scan_cifs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanCifsResponse"
+    },
+    "get_nodes_node_scan_iscsi": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanIscsiResponse"
+    },
+    "get_nodes_node_scan_lvm": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanLvmResponse"
+    },
+    "get_nodes_node_scan_lvmthin": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanLvmthinResponse"
+    },
+    "get_nodes_node_scan_nfs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanNfsResponse"
+    },
+    "get_nodes_node_scan_pbs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanPbsResponse"
+    },
+    "get_nodes_node_scan_zfs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanZfsResponse"
+    },
+    "get_nodes_node_sdn": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnResponse"
+    },
+    "get_nodes_node_sdn_fabrics_fabric": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnFabricsFabricResponse"
+    },
+    "get_nodes_node_sdn_fabrics_fabric_interfaces": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnFabricsFabricInterfacesResponse"
+    },
+    "get_nodes_node_sdn_fabrics_fabric_neighbors": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnFabricsFabricNeighborsResponse"
+    },
+    "get_nodes_node_sdn_fabrics_fabric_routes": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnFabricsFabricRoutesResponse"
+    },
+    "get_nodes_node_sdn_vnets_vnet": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnVnetsVnetResponse"
+    },
+    "get_nodes_node_sdn_vnets_vnet_mac_vrf": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnVnetsVnetMacVrfResponse"
+    },
+    "get_nodes_node_sdn_zones": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnZonesResponse"
+    },
+    "get_nodes_node_sdn_zones_zone": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnZonesZoneResponse"
+    },
+    "get_nodes_node_sdn_zones_zone_bridges": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnZonesZoneBridgesResponse"
+    },
+    "get_nodes_node_sdn_zones_zone_content": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnZonesZoneContentResponse"
+    },
+    "get_nodes_node_sdn_zones_zone_ip_vrf": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSdnZonesZoneIpVrfResponse"
+    },
+    "get_nodes_node_services": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeServicesResponse"
+    },
+    "get_nodes_node_services_service": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeServicesServiceResponse"
+    },
+    "get_nodes_node_services_service_state": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeServicesServiceStateResponse"
+    },
+    "get_nodes_node_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStatusResponse"
+    },
+    "get_nodes_node_storage": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageResponse"
+    },
+    "get_nodes_node_storage_storage": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageResponse"
+    },
+    "get_nodes_node_storage_storage_content": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageContentResponse"
+    },
+    "get_nodes_node_storage_storage_content_volume": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageContentVolumeResponse"
+    },
+    "get_nodes_node_storage_storage_file_restore_download": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageFileRestoreDownloadResponse"
+    },
+    "get_nodes_node_storage_storage_file_restore_list": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageFileRestoreListResponse"
+    },
+    "get_nodes_node_storage_storage_identity": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageIdentityResponse"
+    },
+    "get_nodes_node_storage_storage_import_metadata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageImportMetadataResponse"
+    },
+    "get_nodes_node_storage_storage_prunebackups": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStoragePrunebackupsResponse"
+    },
+    "get_nodes_node_storage_storage_rrd": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageRrdResponse"
+    },
+    "get_nodes_node_storage_storage_rrddata": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageRrddataResponse"
+    },
+    "get_nodes_node_storage_storage_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeStorageStorageStatusResponse"
+    },
+    "get_nodes_node_subscription": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSubscriptionResponse"
+    },
+    "get_nodes_node_syslog": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSyslogResponse"
+    },
+    "get_nodes_node_tasks": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeTasksResponse"
+    },
+    "get_nodes_node_tasks_upid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeTasksUpidResponse"
+    },
+    "get_nodes_node_tasks_upid_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeTasksUpidLogResponse"
+    },
+    "get_nodes_node_tasks_upid_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeTasksUpidStatusResponse"
+    },
+    "get_nodes_node_time": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeTimeResponse"
+    },
+    "get_nodes_node_version": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeVersionResponse"
+    },
+    "get_nodes_node_vncwebsocket": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeVncwebsocketResponse"
+    },
+    "get_nodes_node_vzdump_defaults": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeVzdumpDefaultsResponse"
+    },
+    "get_nodes_node_vzdump_extractconfig": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeVzdumpExtractconfigResponse"
+    },
+    "get_pools": {
+      "group": "pools",
+      "request_model": null,
+      "response_model": "GetPoolsResponse"
+    },
+    "get_pools_poolid": {
+      "group": "pools",
+      "request_model": null,
+      "response_model": "GetPoolsPoolidResponse"
+    },
+    "get_storage": {
+      "group": "storage",
+      "request_model": null,
+      "response_model": "GetStorageResponse"
+    },
+    "get_storage_storage": {
+      "group": "storage",
+      "request_model": null,
+      "response_model": "GetStorageStorageResponse"
+    },
+    "get_version": {
+      "group": "version",
+      "request_model": null,
+      "response_model": "GetVersionResponse"
+    },
+    "post_access_domains": {
+      "group": "access",
+      "request_model": "PostAccessDomainsRequest",
+      "response_model": "PostAccessDomainsResponse"
+    },
+    "post_access_domains_realm_sync": {
+      "group": "access",
+      "request_model": "PostAccessDomainsRealmSyncRequest",
+      "response_model": "PostAccessDomainsRealmSyncResponse"
+    },
+    "post_access_groups": {
+      "group": "access",
+      "request_model": "PostAccessGroupsRequest",
+      "response_model": "PostAccessGroupsResponse"
+    },
+    "post_access_openid_auth_url": {
+      "group": "access",
+      "request_model": "PostAccessOpenidAuthUrlRequest",
+      "response_model": "PostAccessOpenidAuthUrlResponse"
+    },
+    "post_access_openid_login": {
+      "group": "access",
+      "request_model": "PostAccessOpenidLoginRequest",
+      "response_model": "PostAccessOpenidLoginResponse"
+    },
+    "post_access_roles": {
+      "group": "access",
+      "request_model": "PostAccessRolesRequest",
+      "response_model": "PostAccessRolesResponse"
+    },
+    "post_access_tfa_userid": {
+      "group": "access",
+      "request_model": "PostAccessTfaUseridRequest",
+      "response_model": "PostAccessTfaUseridResponse"
+    },
+    "post_access_ticket": {
+      "group": "access",
+      "request_model": "PostAccessTicketRequest",
+      "response_model": "PostAccessTicketResponse"
+    },
+    "post_access_users": {
+      "group": "access",
+      "request_model": "PostAccessUsersRequest",
+      "response_model": "PostAccessUsersResponse"
+    },
+    "post_access_users_userid_token_tokenid": {
+      "group": "access",
+      "request_model": "PostAccessUsersUseridTokenTokenidRequest",
+      "response_model": "PostAccessUsersUseridTokenTokenidResponse"
+    },
+    "post_access_vncticket": {
+      "group": "access",
+      "request_model": "PostAccessVncticketRequest",
+      "response_model": "PostAccessVncticketResponse"
+    },
+    "post_cluster_acme_account": {
+      "group": "cluster",
+      "request_model": "PostClusterAcmeAccountRequest",
+      "response_model": "PostClusterAcmeAccountResponse"
+    },
+    "post_cluster_acme_plugins": {
+      "group": "cluster",
+      "request_model": "PostClusterAcmePluginsRequest",
+      "response_model": "PostClusterAcmePluginsResponse"
+    },
+    "post_cluster_backup": {
+      "group": "cluster",
+      "request_model": "PostClusterBackupRequest",
+      "response_model": "PostClusterBackupResponse"
+    },
+    "post_cluster_bulk_action_guest_migrate": {
+      "group": "cluster",
+      "request_model": "PostClusterBulkActionGuestMigrateRequest",
+      "response_model": "PostClusterBulkActionGuestMigrateResponse"
+    },
+    "post_cluster_bulk_action_guest_shutdown": {
+      "group": "cluster",
+      "request_model": "PostClusterBulkActionGuestShutdownRequest",
+      "response_model": "PostClusterBulkActionGuestShutdownResponse"
+    },
+    "post_cluster_bulk_action_guest_start": {
+      "group": "cluster",
+      "request_model": "PostClusterBulkActionGuestStartRequest",
+      "response_model": "PostClusterBulkActionGuestStartResponse"
+    },
+    "post_cluster_bulk_action_guest_suspend": {
+      "group": "cluster",
+      "request_model": "PostClusterBulkActionGuestSuspendRequest",
+      "response_model": "PostClusterBulkActionGuestSuspendResponse"
+    },
+    "post_cluster_config": {
+      "group": "cluster",
+      "request_model": "PostClusterConfigRequest",
+      "response_model": "PostClusterConfigResponse"
+    },
+    "post_cluster_config_join": {
+      "group": "cluster",
+      "request_model": "PostClusterConfigJoinRequest",
+      "response_model": "PostClusterConfigJoinResponse"
+    },
+    "post_cluster_config_nodes_node": {
+      "group": "cluster",
+      "request_model": "PostClusterConfigNodesNodeRequest",
+      "response_model": "PostClusterConfigNodesNodeResponse"
+    },
+    "post_cluster_firewall_aliases": {
+      "group": "cluster",
+      "request_model": "PostClusterFirewallAliasesRequest",
+      "response_model": "PostClusterFirewallAliasesResponse"
+    },
+    "post_cluster_firewall_groups": {
+      "group": "cluster",
+      "request_model": "PostClusterFirewallGroupsRequest",
+      "response_model": "PostClusterFirewallGroupsResponse"
+    },
+    "post_cluster_firewall_groups_group": {
+      "group": "cluster",
+      "request_model": "PostClusterFirewallGroupsGroupRequest",
+      "response_model": "PostClusterFirewallGroupsGroupResponse"
+    },
+    "post_cluster_firewall_ipset": {
+      "group": "cluster",
+      "request_model": "PostClusterFirewallIpsetRequest",
+      "response_model": "PostClusterFirewallIpsetResponse"
+    },
+    "post_cluster_firewall_ipset_name": {
+      "group": "cluster",
+      "request_model": "PostClusterFirewallIpsetNameRequest",
+      "response_model": "PostClusterFirewallIpsetNameResponse"
+    },
+    "post_cluster_firewall_rules": {
+      "group": "cluster",
+      "request_model": "PostClusterFirewallRulesRequest",
+      "response_model": "PostClusterFirewallRulesResponse"
+    },
+    "post_cluster_ha_groups": {
+      "group": "cluster",
+      "request_model": "PostClusterHaGroupsRequest",
+      "response_model": "PostClusterHaGroupsResponse"
+    },
+    "post_cluster_ha_resources": {
+      "group": "cluster",
+      "request_model": "PostClusterHaResourcesRequest",
+      "response_model": "PostClusterHaResourcesResponse"
+    },
+    "post_cluster_ha_resources_sid_migrate": {
+      "group": "cluster",
+      "request_model": "PostClusterHaResourcesSidMigrateRequest",
+      "response_model": "PostClusterHaResourcesSidMigrateResponse"
+    },
+    "post_cluster_ha_resources_sid_relocate": {
+      "group": "cluster",
+      "request_model": "PostClusterHaResourcesSidRelocateRequest",
+      "response_model": "PostClusterHaResourcesSidRelocateResponse"
+    },
+    "post_cluster_ha_rules": {
+      "group": "cluster",
+      "request_model": "PostClusterHaRulesRequest",
+      "response_model": "PostClusterHaRulesResponse"
+    },
+    "post_cluster_ha_status_arm_ha": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "PostClusterHaStatusArmHaResponse"
+    },
+    "post_cluster_ha_status_disarm_ha": {
+      "group": "cluster",
+      "request_model": "PostClusterHaStatusDisarmHaRequest",
+      "response_model": "PostClusterHaStatusDisarmHaResponse"
+    },
+    "post_cluster_jobs_realm_sync_id": {
+      "group": "cluster",
+      "request_model": "PostClusterJobsRealmSyncIdRequest",
+      "response_model": "PostClusterJobsRealmSyncIdResponse"
+    },
+    "post_cluster_mapping_dir": {
+      "group": "cluster",
+      "request_model": "PostClusterMappingDirRequest",
+      "response_model": "PostClusterMappingDirResponse"
+    },
+    "post_cluster_mapping_pci": {
+      "group": "cluster",
+      "request_model": "PostClusterMappingPciRequest",
+      "response_model": "PostClusterMappingPciResponse"
+    },
+    "post_cluster_mapping_usb": {
+      "group": "cluster",
+      "request_model": "PostClusterMappingUsbRequest",
+      "response_model": "PostClusterMappingUsbResponse"
+    },
+    "post_cluster_metrics_server_id": {
+      "group": "cluster",
+      "request_model": "PostClusterMetricsServerIdRequest",
+      "response_model": "PostClusterMetricsServerIdResponse"
+    },
+    "post_cluster_notifications_endpoints_gotify": {
+      "group": "cluster",
+      "request_model": "PostClusterNotificationsEndpointsGotifyRequest",
+      "response_model": "PostClusterNotificationsEndpointsGotifyResponse"
+    },
+    "post_cluster_notifications_endpoints_sendmail": {
+      "group": "cluster",
+      "request_model": "PostClusterNotificationsEndpointsSendmailRequest",
+      "response_model": "PostClusterNotificationsEndpointsSendmailResponse"
+    },
+    "post_cluster_notifications_endpoints_smtp": {
+      "group": "cluster",
+      "request_model": "PostClusterNotificationsEndpointsSmtpRequest",
+      "response_model": "PostClusterNotificationsEndpointsSmtpResponse"
+    },
+    "post_cluster_notifications_endpoints_webhook": {
+      "group": "cluster",
+      "request_model": "PostClusterNotificationsEndpointsWebhookRequest",
+      "response_model": "PostClusterNotificationsEndpointsWebhookResponse"
+    },
+    "post_cluster_notifications_matchers": {
+      "group": "cluster",
+      "request_model": "PostClusterNotificationsMatchersRequest",
+      "response_model": "PostClusterNotificationsMatchersResponse"
+    },
+    "post_cluster_notifications_targets_name_test": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "PostClusterNotificationsTargetsNameTestResponse"
+    },
+    "post_cluster_qemu_custom_cpu_models": {
+      "group": "cluster",
+      "request_model": "PostClusterQemuCustomCpuModelsRequest",
+      "response_model": "PostClusterQemuCustomCpuModelsResponse"
+    },
+    "post_cluster_replication": {
+      "group": "cluster",
+      "request_model": "PostClusterReplicationRequest",
+      "response_model": "PostClusterReplicationResponse"
+    },
+    "post_cluster_sdn_controllers": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnControllersRequest",
+      "response_model": "PostClusterSdnControllersResponse"
+    },
+    "post_cluster_sdn_dns": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnDnsRequest",
+      "response_model": "PostClusterSdnDnsResponse"
+    },
+    "post_cluster_sdn_fabrics_fabric": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnFabricsFabricRequest",
+      "response_model": "PostClusterSdnFabricsFabricResponse"
+    },
+    "post_cluster_sdn_fabrics_node_fabric_id": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnFabricsNodeFabricIdRequest",
+      "response_model": "PostClusterSdnFabricsNodeFabricIdResponse"
+    },
+    "post_cluster_sdn_ipams": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnIpamsRequest",
+      "response_model": "PostClusterSdnIpamsResponse"
+    },
+    "post_cluster_sdn_lock": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnLockRequest",
+      "response_model": "PostClusterSdnLockResponse"
+    },
+    "post_cluster_sdn_prefix_lists": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnPrefixListsRequest",
+      "response_model": "PostClusterSdnPrefixListsResponse"
+    },
+    "post_cluster_sdn_prefix_lists_id_entries": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnPrefixListsIdEntriesRequest",
+      "response_model": "PostClusterSdnPrefixListsIdEntriesResponse"
+    },
+    "post_cluster_sdn_rollback": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnRollbackRequest",
+      "response_model": "PostClusterSdnRollbackResponse"
+    },
+    "post_cluster_sdn_route_maps_entries": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnRouteMapsEntriesRequest",
+      "response_model": "PostClusterSdnRouteMapsEntriesResponse"
+    },
+    "post_cluster_sdn_vnets": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnVnetsRequest",
+      "response_model": "PostClusterSdnVnetsResponse"
+    },
+    "post_cluster_sdn_vnets_vnet_firewall_rules": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnVnetsVnetFirewallRulesRequest",
+      "response_model": "PostClusterSdnVnetsVnetFirewallRulesResponse"
+    },
+    "post_cluster_sdn_vnets_vnet_ips": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnVnetsVnetIpsRequest",
+      "response_model": "PostClusterSdnVnetsVnetIpsResponse"
+    },
+    "post_cluster_sdn_vnets_vnet_subnets": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnVnetsVnetSubnetsRequest",
+      "response_model": "PostClusterSdnVnetsVnetSubnetsResponse"
+    },
+    "post_cluster_sdn_zones": {
+      "group": "cluster",
+      "request_model": "PostClusterSdnZonesRequest",
+      "response_model": "PostClusterSdnZonesResponse"
+    },
+    "post_nodes_node_aplinfo": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeAplinfoRequest",
+      "response_model": "PostNodesNodeAplinfoResponse"
+    },
+    "post_nodes_node_apt_repositories": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeAptRepositoriesRequest",
+      "response_model": "PostNodesNodeAptRepositoriesResponse"
+    },
+    "post_nodes_node_apt_update": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeAptUpdateRequest",
+      "response_model": "PostNodesNodeAptUpdateResponse"
+    },
+    "post_nodes_node_ceph_fs_name": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephFsNameRequest",
+      "response_model": "PostNodesNodeCephFsNameResponse"
+    },
+    "post_nodes_node_ceph_init": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephInitRequest",
+      "response_model": "PostNodesNodeCephInitResponse"
+    },
+    "post_nodes_node_ceph_mds_name": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephMdsNameRequest",
+      "response_model": "PostNodesNodeCephMdsNameResponse"
+    },
+    "post_nodes_node_ceph_mgr_id": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeCephMgrIdResponse"
+    },
+    "post_nodes_node_ceph_mon_monid": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephMonMonidRequest",
+      "response_model": "PostNodesNodeCephMonMonidResponse"
+    },
+    "post_nodes_node_ceph_osd": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephOsdRequest",
+      "response_model": "PostNodesNodeCephOsdResponse"
+    },
+    "post_nodes_node_ceph_osd_osdid_in": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeCephOsdOsdidInResponse"
+    },
+    "post_nodes_node_ceph_osd_osdid_out": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeCephOsdOsdidOutResponse"
+    },
+    "post_nodes_node_ceph_osd_osdid_scrub": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephOsdOsdidScrubRequest",
+      "response_model": "PostNodesNodeCephOsdOsdidScrubResponse"
+    },
+    "post_nodes_node_ceph_pool": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephPoolRequest",
+      "response_model": "PostNodesNodeCephPoolResponse"
+    },
+    "post_nodes_node_ceph_restart": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephRestartRequest",
+      "response_model": "PostNodesNodeCephRestartResponse"
+    },
+    "post_nodes_node_ceph_start": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephStartRequest",
+      "response_model": "PostNodesNodeCephStartResponse"
+    },
+    "post_nodes_node_ceph_stop": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephStopRequest",
+      "response_model": "PostNodesNodeCephStopResponse"
+    },
+    "post_nodes_node_certificates_acme_certificate": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCertificatesAcmeCertificateRequest",
+      "response_model": "PostNodesNodeCertificatesAcmeCertificateResponse"
+    },
+    "post_nodes_node_certificates_custom": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCertificatesCustomRequest",
+      "response_model": "PostNodesNodeCertificatesCustomResponse"
+    },
+    "post_nodes_node_disks_directory": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeDisksDirectoryRequest",
+      "response_model": "PostNodesNodeDisksDirectoryResponse"
+    },
+    "post_nodes_node_disks_initgpt": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeDisksInitgptRequest",
+      "response_model": "PostNodesNodeDisksInitgptResponse"
+    },
+    "post_nodes_node_disks_lvm": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeDisksLvmRequest",
+      "response_model": "PostNodesNodeDisksLvmResponse"
+    },
+    "post_nodes_node_disks_lvmthin": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeDisksLvmthinRequest",
+      "response_model": "PostNodesNodeDisksLvmthinResponse"
+    },
+    "post_nodes_node_disks_zfs": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeDisksZfsRequest",
+      "response_model": "PostNodesNodeDisksZfsResponse"
+    },
+    "post_nodes_node_execute": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeExecuteRequest",
+      "response_model": "PostNodesNodeExecuteResponse"
+    },
+    "post_nodes_node_firewall_rules": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeFirewallRulesRequest",
+      "response_model": "PostNodesNodeFirewallRulesResponse"
+    },
+    "post_nodes_node_hosts": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeHostsRequest",
+      "response_model": "PostNodesNodeHostsResponse"
+    },
+    "post_nodes_node_lxc": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcRequest",
+      "response_model": "PostNodesNodeLxcResponse"
+    },
+    "post_nodes_node_lxc_vmid_clone": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidCloneRequest",
+      "response_model": "PostNodesNodeLxcVmidCloneResponse"
+    },
+    "post_nodes_node_lxc_vmid_firewall_aliases": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidFirewallAliasesRequest",
+      "response_model": "PostNodesNodeLxcVmidFirewallAliasesResponse"
+    },
+    "post_nodes_node_lxc_vmid_firewall_ipset": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidFirewallIpsetRequest",
+      "response_model": "PostNodesNodeLxcVmidFirewallIpsetResponse"
+    },
+    "post_nodes_node_lxc_vmid_firewall_ipset_name": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidFirewallIpsetNameRequest",
+      "response_model": "PostNodesNodeLxcVmidFirewallIpsetNameResponse"
+    },
+    "post_nodes_node_lxc_vmid_firewall_rules": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidFirewallRulesRequest",
+      "response_model": "PostNodesNodeLxcVmidFirewallRulesResponse"
+    },
+    "post_nodes_node_lxc_vmid_migrate": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidMigrateRequest",
+      "response_model": "PostNodesNodeLxcVmidMigrateResponse"
+    },
+    "post_nodes_node_lxc_vmid_move_volume": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidMoveVolumeRequest",
+      "response_model": "PostNodesNodeLxcVmidMoveVolumeResponse"
+    },
+    "post_nodes_node_lxc_vmid_mtunnel": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidMtunnelRequest",
+      "response_model": "PostNodesNodeLxcVmidMtunnelResponse"
+    },
+    "post_nodes_node_lxc_vmid_remote_migrate": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidRemoteMigrateRequest",
+      "response_model": "PostNodesNodeLxcVmidRemoteMigrateResponse"
+    },
+    "post_nodes_node_lxc_vmid_snapshot": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidSnapshotRequest",
+      "response_model": "PostNodesNodeLxcVmidSnapshotResponse"
+    },
+    "post_nodes_node_lxc_vmid_snapshot_snapname_rollback": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidSnapshotSnapnameRollbackRequest",
+      "response_model": "PostNodesNodeLxcVmidSnapshotSnapnameRollbackResponse"
+    },
+    "post_nodes_node_lxc_vmid_spiceproxy": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidSpiceproxyRequest",
+      "response_model": "PostNodesNodeLxcVmidSpiceproxyResponse"
+    },
+    "post_nodes_node_lxc_vmid_status_reboot": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidStatusRebootRequest",
+      "response_model": "PostNodesNodeLxcVmidStatusRebootResponse"
+    },
+    "post_nodes_node_lxc_vmid_status_resume": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeLxcVmidStatusResumeResponse"
+    },
+    "post_nodes_node_lxc_vmid_status_shutdown": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidStatusShutdownRequest",
+      "response_model": "PostNodesNodeLxcVmidStatusShutdownResponse"
+    },
+    "post_nodes_node_lxc_vmid_status_start": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidStatusStartRequest",
+      "response_model": "PostNodesNodeLxcVmidStatusStartResponse"
+    },
+    "post_nodes_node_lxc_vmid_status_stop": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidStatusStopRequest",
+      "response_model": "PostNodesNodeLxcVmidStatusStopResponse"
+    },
+    "post_nodes_node_lxc_vmid_status_suspend": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeLxcVmidStatusSuspendResponse"
+    },
+    "post_nodes_node_lxc_vmid_template": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeLxcVmidTemplateResponse"
+    },
+    "post_nodes_node_lxc_vmid_termproxy": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeLxcVmidTermproxyResponse"
+    },
+    "post_nodes_node_lxc_vmid_vncproxy": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeLxcVmidVncproxyRequest",
+      "response_model": "PostNodesNodeLxcVmidVncproxyResponse"
+    },
+    "post_nodes_node_migrateall": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeMigrateallRequest",
+      "response_model": "PostNodesNodeMigrateallResponse"
+    },
+    "post_nodes_node_network": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeNetworkRequest",
+      "response_model": "PostNodesNodeNetworkResponse"
+    },
+    "post_nodes_node_qemu": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuRequest",
+      "response_model": "PostNodesNodeQemuResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidAgentRequest",
+      "response_model": "PostNodesNodeQemuVmidAgentResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_exec": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidAgentExecRequest",
+      "response_model": "PostNodesNodeQemuVmidAgentExecResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_file_write": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidAgentFileWriteRequest",
+      "response_model": "PostNodesNodeQemuVmidAgentFileWriteResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_fsfreeze_freeze": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentFsfreezeFreezeResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_fsfreeze_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentFsfreezeStatusResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_fsfreeze_thaw": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentFsfreezeThawResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_fstrim": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentFstrimResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_ping": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentPingResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_set_user_password": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidAgentSetUserPasswordRequest",
+      "response_model": "PostNodesNodeQemuVmidAgentSetUserPasswordResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_shutdown": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentShutdownResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_suspend_disk": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentSuspendDiskResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_suspend_hybrid": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentSuspendHybridResponse"
+    },
+    "post_nodes_node_qemu_vmid_agent_suspend_ram": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeQemuVmidAgentSuspendRamResponse"
+    },
+    "post_nodes_node_qemu_vmid_clone": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidCloneRequest",
+      "response_model": "PostNodesNodeQemuVmidCloneResponse"
+    },
+    "post_nodes_node_qemu_vmid_config": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidConfigRequest",
+      "response_model": "PostNodesNodeQemuVmidConfigResponse"
+    },
+    "post_nodes_node_qemu_vmid_dbus_vmstate": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidDbusVmstateRequest",
+      "response_model": "PostNodesNodeQemuVmidDbusVmstateResponse"
+    },
+    "post_nodes_node_qemu_vmid_firewall_aliases": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidFirewallAliasesRequest",
+      "response_model": "PostNodesNodeQemuVmidFirewallAliasesResponse"
+    },
+    "post_nodes_node_qemu_vmid_firewall_ipset": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidFirewallIpsetRequest",
+      "response_model": "PostNodesNodeQemuVmidFirewallIpsetResponse"
+    },
+    "post_nodes_node_qemu_vmid_firewall_ipset_name": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidFirewallIpsetNameRequest",
+      "response_model": "PostNodesNodeQemuVmidFirewallIpsetNameResponse"
+    },
+    "post_nodes_node_qemu_vmid_firewall_rules": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidFirewallRulesRequest",
+      "response_model": "PostNodesNodeQemuVmidFirewallRulesResponse"
+    },
+    "post_nodes_node_qemu_vmid_migrate": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidMigrateRequest",
+      "response_model": "PostNodesNodeQemuVmidMigrateResponse"
+    },
+    "post_nodes_node_qemu_vmid_monitor": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidMonitorRequest",
+      "response_model": "PostNodesNodeQemuVmidMonitorResponse"
+    },
+    "post_nodes_node_qemu_vmid_move_disk": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidMoveDiskRequest",
+      "response_model": "PostNodesNodeQemuVmidMoveDiskResponse"
+    },
+    "post_nodes_node_qemu_vmid_mtunnel": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidMtunnelRequest",
+      "response_model": "PostNodesNodeQemuVmidMtunnelResponse"
+    },
+    "post_nodes_node_qemu_vmid_remote_migrate": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidRemoteMigrateRequest",
+      "response_model": "PostNodesNodeQemuVmidRemoteMigrateResponse"
+    },
+    "post_nodes_node_qemu_vmid_snapshot": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidSnapshotRequest",
+      "response_model": "PostNodesNodeQemuVmidSnapshotResponse"
+    },
+    "post_nodes_node_qemu_vmid_snapshot_snapname_rollback": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidSnapshotSnapnameRollbackRequest",
+      "response_model": "PostNodesNodeQemuVmidSnapshotSnapnameRollbackResponse"
+    },
+    "post_nodes_node_qemu_vmid_spiceproxy": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidSpiceproxyRequest",
+      "response_model": "PostNodesNodeQemuVmidSpiceproxyResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_reboot": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusRebootRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusRebootResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_reset": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusResetRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusResetResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_resume": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusResumeRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusResumeResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_shutdown": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusShutdownRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusShutdownResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_start": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusStartRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusStartResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_stop": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusStopRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusStopResponse"
+    },
+    "post_nodes_node_qemu_vmid_status_suspend": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidStatusSuspendRequest",
+      "response_model": "PostNodesNodeQemuVmidStatusSuspendResponse"
+    },
+    "post_nodes_node_qemu_vmid_template": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidTemplateRequest",
+      "response_model": "PostNodesNodeQemuVmidTemplateResponse"
+    },
+    "post_nodes_node_qemu_vmid_termproxy": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidTermproxyRequest",
+      "response_model": "PostNodesNodeQemuVmidTermproxyResponse"
+    },
+    "post_nodes_node_qemu_vmid_vncproxy": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeQemuVmidVncproxyRequest",
+      "response_model": "PostNodesNodeQemuVmidVncproxyResponse"
+    },
+    "post_nodes_node_replication_id_schedule_now": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeReplicationIdScheduleNowResponse"
+    },
+    "post_nodes_node_services_service_reload": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeServicesServiceReloadResponse"
+    },
+    "post_nodes_node_services_service_restart": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeServicesServiceRestartResponse"
+    },
+    "post_nodes_node_services_service_start": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeServicesServiceStartResponse"
+    },
+    "post_nodes_node_services_service_stop": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeServicesServiceStopResponse"
+    },
+    "post_nodes_node_spiceshell": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeSpiceshellRequest",
+      "response_model": "PostNodesNodeSpiceshellResponse"
+    },
+    "post_nodes_node_startall": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStartallRequest",
+      "response_model": "PostNodesNodeStartallResponse"
+    },
+    "post_nodes_node_status": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStatusRequest",
+      "response_model": "PostNodesNodeStatusResponse"
+    },
+    "post_nodes_node_stopall": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStopallRequest",
+      "response_model": "PostNodesNodeStopallResponse"
+    },
+    "post_nodes_node_storage_storage_content": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStorageStorageContentRequest",
+      "response_model": "PostNodesNodeStorageStorageContentResponse"
+    },
+    "post_nodes_node_storage_storage_content_volume": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStorageStorageContentVolumeRequest",
+      "response_model": "PostNodesNodeStorageStorageContentVolumeResponse"
+    },
+    "post_nodes_node_storage_storage_download_url": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStorageStorageDownloadUrlRequest",
+      "response_model": "PostNodesNodeStorageStorageDownloadUrlResponse"
+    },
+    "post_nodes_node_storage_storage_oci_registry_pull": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStorageStorageOciRegistryPullRequest",
+      "response_model": "PostNodesNodeStorageStorageOciRegistryPullResponse"
+    },
+    "post_nodes_node_storage_storage_upload": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeStorageStorageUploadRequest",
+      "response_model": "PostNodesNodeStorageStorageUploadResponse"
+    },
+    "post_nodes_node_subscription": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeSubscriptionRequest",
+      "response_model": "PostNodesNodeSubscriptionResponse"
+    },
+    "post_nodes_node_suspendall": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeSuspendallRequest",
+      "response_model": "PostNodesNodeSuspendallResponse"
+    },
+    "post_nodes_node_termproxy": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeTermproxyRequest",
+      "response_model": "PostNodesNodeTermproxyResponse"
+    },
+    "post_nodes_node_vncshell": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeVncshellRequest",
+      "response_model": "PostNodesNodeVncshellResponse"
+    },
+    "post_nodes_node_vzdump": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeVzdumpRequest",
+      "response_model": "PostNodesNodeVzdumpResponse"
+    },
+    "post_nodes_node_wakeonlan": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PostNodesNodeWakeonlanResponse"
+    },
+    "post_pools": {
+      "group": "pools",
+      "request_model": "PostPoolsRequest",
+      "response_model": "PostPoolsResponse"
+    },
+    "post_storage": {
+      "group": "storage",
+      "request_model": "PostStorageRequest",
+      "response_model": "PostStorageResponse"
+    },
+    "put_access_acl": {
+      "group": "access",
+      "request_model": "PutAccessAclRequest",
+      "response_model": "PutAccessAclResponse"
+    },
+    "put_access_domains_realm": {
+      "group": "access",
+      "request_model": "PutAccessDomainsRealmRequest",
+      "response_model": "PutAccessDomainsRealmResponse"
+    },
+    "put_access_groups_groupid": {
+      "group": "access",
+      "request_model": "PutAccessGroupsGroupidRequest",
+      "response_model": "PutAccessGroupsGroupidResponse"
+    },
+    "put_access_password": {
+      "group": "access",
+      "request_model": "PutAccessPasswordRequest",
+      "response_model": "PutAccessPasswordResponse"
+    },
+    "put_access_roles_roleid": {
+      "group": "access",
+      "request_model": "PutAccessRolesRoleidRequest",
+      "response_model": "PutAccessRolesRoleidResponse"
+    },
+    "put_access_tfa_userid_id": {
+      "group": "access",
+      "request_model": "PutAccessTfaUseridIdRequest",
+      "response_model": "PutAccessTfaUseridIdResponse"
+    },
+    "put_access_users_userid": {
+      "group": "access",
+      "request_model": "PutAccessUsersUseridRequest",
+      "response_model": "PutAccessUsersUseridResponse"
+    },
+    "put_access_users_userid_token_tokenid": {
+      "group": "access",
+      "request_model": "PutAccessUsersUseridTokenTokenidRequest",
+      "response_model": "PutAccessUsersUseridTokenTokenidResponse"
+    },
+    "put_access_users_userid_unlock_tfa": {
+      "group": "access",
+      "request_model": null,
+      "response_model": "PutAccessUsersUseridUnlockTfaResponse"
+    },
+    "put_cluster_acme_account_name": {
+      "group": "cluster",
+      "request_model": "PutClusterAcmeAccountNameRequest",
+      "response_model": "PutClusterAcmeAccountNameResponse"
+    },
+    "put_cluster_acme_plugins_id": {
+      "group": "cluster",
+      "request_model": "PutClusterAcmePluginsIdRequest",
+      "response_model": "PutClusterAcmePluginsIdResponse"
+    },
+    "put_cluster_backup_id": {
+      "group": "cluster",
+      "request_model": "PutClusterBackupIdRequest",
+      "response_model": "PutClusterBackupIdResponse"
+    },
+    "put_cluster_ceph_flags": {
+      "group": "cluster",
+      "request_model": "PutClusterCephFlagsRequest",
+      "response_model": "PutClusterCephFlagsResponse"
+    },
+    "put_cluster_ceph_flags_flag": {
+      "group": "cluster",
+      "request_model": "PutClusterCephFlagsFlagRequest",
+      "response_model": "PutClusterCephFlagsFlagResponse"
+    },
+    "put_cluster_firewall_aliases_name": {
+      "group": "cluster",
+      "request_model": "PutClusterFirewallAliasesNameRequest",
+      "response_model": "PutClusterFirewallAliasesNameResponse"
+    },
+    "put_cluster_firewall_groups_group_pos": {
+      "group": "cluster",
+      "request_model": "PutClusterFirewallGroupsGroupPosRequest",
+      "response_model": "PutClusterFirewallGroupsGroupPosResponse"
+    },
+    "put_cluster_firewall_ipset_name_cidr": {
+      "group": "cluster",
+      "request_model": "PutClusterFirewallIpsetNameCidrRequest",
+      "response_model": "PutClusterFirewallIpsetNameCidrResponse"
+    },
+    "put_cluster_firewall_options": {
+      "group": "cluster",
+      "request_model": "PutClusterFirewallOptionsRequest",
+      "response_model": "PutClusterFirewallOptionsResponse"
+    },
+    "put_cluster_firewall_rules_pos": {
+      "group": "cluster",
+      "request_model": "PutClusterFirewallRulesPosRequest",
+      "response_model": "PutClusterFirewallRulesPosResponse"
+    },
+    "put_cluster_ha_groups_group": {
+      "group": "cluster",
+      "request_model": "PutClusterHaGroupsGroupRequest",
+      "response_model": "PutClusterHaGroupsGroupResponse"
+    },
+    "put_cluster_ha_resources_sid": {
+      "group": "cluster",
+      "request_model": "PutClusterHaResourcesSidRequest",
+      "response_model": "PutClusterHaResourcesSidResponse"
+    },
+    "put_cluster_ha_rules_rule": {
+      "group": "cluster",
+      "request_model": "PutClusterHaRulesRuleRequest",
+      "response_model": "PutClusterHaRulesRuleResponse"
+    },
+    "put_cluster_jobs_realm_sync_id": {
+      "group": "cluster",
+      "request_model": "PutClusterJobsRealmSyncIdRequest",
+      "response_model": "PutClusterJobsRealmSyncIdResponse"
+    },
+    "put_cluster_mapping_dir_id": {
+      "group": "cluster",
+      "request_model": "PutClusterMappingDirIdRequest",
+      "response_model": "PutClusterMappingDirIdResponse"
+    },
+    "put_cluster_mapping_pci_id": {
+      "group": "cluster",
+      "request_model": "PutClusterMappingPciIdRequest",
+      "response_model": "PutClusterMappingPciIdResponse"
+    },
+    "put_cluster_mapping_usb_id": {
+      "group": "cluster",
+      "request_model": "PutClusterMappingUsbIdRequest",
+      "response_model": "PutClusterMappingUsbIdResponse"
+    },
+    "put_cluster_metrics_server_id": {
+      "group": "cluster",
+      "request_model": "PutClusterMetricsServerIdRequest",
+      "response_model": "PutClusterMetricsServerIdResponse"
+    },
+    "put_cluster_notifications_endpoints_gotify_name": {
+      "group": "cluster",
+      "request_model": "PutClusterNotificationsEndpointsGotifyNameRequest",
+      "response_model": "PutClusterNotificationsEndpointsGotifyNameResponse"
+    },
+    "put_cluster_notifications_endpoints_sendmail_name": {
+      "group": "cluster",
+      "request_model": "PutClusterNotificationsEndpointsSendmailNameRequest",
+      "response_model": "PutClusterNotificationsEndpointsSendmailNameResponse"
+    },
+    "put_cluster_notifications_endpoints_smtp_name": {
+      "group": "cluster",
+      "request_model": "PutClusterNotificationsEndpointsSmtpNameRequest",
+      "response_model": "PutClusterNotificationsEndpointsSmtpNameResponse"
+    },
+    "put_cluster_notifications_endpoints_webhook_name": {
+      "group": "cluster",
+      "request_model": "PutClusterNotificationsEndpointsWebhookNameRequest",
+      "response_model": "PutClusterNotificationsEndpointsWebhookNameResponse"
+    },
+    "put_cluster_notifications_matchers_name": {
+      "group": "cluster",
+      "request_model": "PutClusterNotificationsMatchersNameRequest",
+      "response_model": "PutClusterNotificationsMatchersNameResponse"
+    },
+    "put_cluster_options": {
+      "group": "cluster",
+      "request_model": "PutClusterOptionsRequest",
+      "response_model": "PutClusterOptionsResponse"
+    },
+    "put_cluster_qemu_custom_cpu_models_cputype": {
+      "group": "cluster",
+      "request_model": "PutClusterQemuCustomCpuModelsCputypeRequest",
+      "response_model": "PutClusterQemuCustomCpuModelsCputypeResponse"
+    },
+    "put_cluster_replication_id": {
+      "group": "cluster",
+      "request_model": "PutClusterReplicationIdRequest",
+      "response_model": "PutClusterReplicationIdResponse"
+    },
+    "put_cluster_sdn": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnRequest",
+      "response_model": "PutClusterSdnResponse"
+    },
+    "put_cluster_sdn_controllers_controller": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnControllersControllerRequest",
+      "response_model": "PutClusterSdnControllersControllerResponse"
+    },
+    "put_cluster_sdn_dns_dns": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnDnsDnsRequest",
+      "response_model": "PutClusterSdnDnsDnsResponse"
+    },
+    "put_cluster_sdn_fabrics_fabric_id": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnFabricsFabricIdRequest",
+      "response_model": "PutClusterSdnFabricsFabricIdResponse"
+    },
+    "put_cluster_sdn_fabrics_node_fabric_id_node_id": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnFabricsNodeFabricIdNodeIdRequest",
+      "response_model": "PutClusterSdnFabricsNodeFabricIdNodeIdResponse"
+    },
+    "put_cluster_sdn_ipams_ipam": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnIpamsIpamRequest",
+      "response_model": "PutClusterSdnIpamsIpamResponse"
+    },
+    "put_cluster_sdn_prefix_lists_id": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnPrefixListsIdRequest",
+      "response_model": "PutClusterSdnPrefixListsIdResponse"
+    },
+    "put_cluster_sdn_prefix_lists_id_entries_url_seq": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnPrefixListsIdEntriesUrlSeqRequest",
+      "response_model": "PutClusterSdnPrefixListsIdEntriesUrlSeqResponse"
+    },
+    "put_cluster_sdn_route_maps_entries_route_map_id_entry_order": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnRouteMapsEntriesRouteMapIdEntryOrderRequest",
+      "response_model": "PutClusterSdnRouteMapsEntriesRouteMapIdEntryOrderResponse"
+    },
+    "put_cluster_sdn_vnets_vnet": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnVnetsVnetRequest",
+      "response_model": "PutClusterSdnVnetsVnetResponse"
+    },
+    "put_cluster_sdn_vnets_vnet_firewall_options": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnVnetsVnetFirewallOptionsRequest",
+      "response_model": "PutClusterSdnVnetsVnetFirewallOptionsResponse"
+    },
+    "put_cluster_sdn_vnets_vnet_firewall_rules_pos": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnVnetsVnetFirewallRulesPosRequest",
+      "response_model": "PutClusterSdnVnetsVnetFirewallRulesPosResponse"
+    },
+    "put_cluster_sdn_vnets_vnet_ips": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnVnetsVnetIpsRequest",
+      "response_model": "PutClusterSdnVnetsVnetIpsResponse"
+    },
+    "put_cluster_sdn_vnets_vnet_subnets_subnet": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnVnetsVnetSubnetsSubnetRequest",
+      "response_model": "PutClusterSdnVnetsVnetSubnetsSubnetResponse"
+    },
+    "put_cluster_sdn_zones_zone": {
+      "group": "cluster",
+      "request_model": "PutClusterSdnZonesZoneRequest",
+      "response_model": "PutClusterSdnZonesZoneResponse"
+    },
+    "put_nodes_node_apt_repositories": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeAptRepositoriesRequest",
+      "response_model": "PutNodesNodeAptRepositoriesResponse"
+    },
+    "put_nodes_node_ceph_pool_name": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeCephPoolNameRequest",
+      "response_model": "PutNodesNodeCephPoolNameResponse"
+    },
+    "put_nodes_node_certificates_acme_certificate": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeCertificatesAcmeCertificateRequest",
+      "response_model": "PutNodesNodeCertificatesAcmeCertificateResponse"
+    },
+    "put_nodes_node_config": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeConfigRequest",
+      "response_model": "PutNodesNodeConfigResponse"
+    },
+    "put_nodes_node_disks_wipedisk": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeDisksWipediskRequest",
+      "response_model": "PutNodesNodeDisksWipediskResponse"
+    },
+    "put_nodes_node_dns": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeDnsRequest",
+      "response_model": "PutNodesNodeDnsResponse"
+    },
+    "put_nodes_node_firewall_options": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeFirewallOptionsRequest",
+      "response_model": "PutNodesNodeFirewallOptionsResponse"
+    },
+    "put_nodes_node_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeFirewallRulesPosRequest",
+      "response_model": "PutNodesNodeFirewallRulesPosResponse"
+    },
+    "put_nodes_node_lxc_vmid_config": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidConfigRequest",
+      "response_model": "PutNodesNodeLxcVmidConfigResponse"
+    },
+    "put_nodes_node_lxc_vmid_firewall_aliases_name": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidFirewallAliasesNameRequest",
+      "response_model": "PutNodesNodeLxcVmidFirewallAliasesNameResponse"
+    },
+    "put_nodes_node_lxc_vmid_firewall_ipset_name_cidr": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidFirewallIpsetNameCidrRequest",
+      "response_model": "PutNodesNodeLxcVmidFirewallIpsetNameCidrResponse"
+    },
+    "put_nodes_node_lxc_vmid_firewall_options": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidFirewallOptionsRequest",
+      "response_model": "PutNodesNodeLxcVmidFirewallOptionsResponse"
+    },
+    "put_nodes_node_lxc_vmid_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidFirewallRulesPosRequest",
+      "response_model": "PutNodesNodeLxcVmidFirewallRulesPosResponse"
+    },
+    "put_nodes_node_lxc_vmid_resize": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidResizeRequest",
+      "response_model": "PutNodesNodeLxcVmidResizeResponse"
+    },
+    "put_nodes_node_lxc_vmid_snapshot_snapname_config": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeLxcVmidSnapshotSnapnameConfigRequest",
+      "response_model": "PutNodesNodeLxcVmidSnapshotSnapnameConfigResponse"
+    },
+    "put_nodes_node_network": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeNetworkRequest",
+      "response_model": "PutNodesNodeNetworkResponse"
+    },
+    "put_nodes_node_network_iface": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeNetworkIfaceRequest",
+      "response_model": "PutNodesNodeNetworkIfaceResponse"
+    },
+    "put_nodes_node_qemu_vmid_cloudinit": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "PutNodesNodeQemuVmidCloudinitResponse"
+    },
+    "put_nodes_node_qemu_vmid_config": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidConfigRequest",
+      "response_model": "PutNodesNodeQemuVmidConfigResponse"
+    },
+    "put_nodes_node_qemu_vmid_firewall_aliases_name": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidFirewallAliasesNameRequest",
+      "response_model": "PutNodesNodeQemuVmidFirewallAliasesNameResponse"
+    },
+    "put_nodes_node_qemu_vmid_firewall_ipset_name_cidr": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidFirewallIpsetNameCidrRequest",
+      "response_model": "PutNodesNodeQemuVmidFirewallIpsetNameCidrResponse"
+    },
+    "put_nodes_node_qemu_vmid_firewall_options": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidFirewallOptionsRequest",
+      "response_model": "PutNodesNodeQemuVmidFirewallOptionsResponse"
+    },
+    "put_nodes_node_qemu_vmid_firewall_rules_pos": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidFirewallRulesPosRequest",
+      "response_model": "PutNodesNodeQemuVmidFirewallRulesPosResponse"
+    },
+    "put_nodes_node_qemu_vmid_resize": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidResizeRequest",
+      "response_model": "PutNodesNodeQemuVmidResizeResponse"
+    },
+    "put_nodes_node_qemu_vmid_sendkey": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidSendkeyRequest",
+      "response_model": "PutNodesNodeQemuVmidSendkeyResponse"
+    },
+    "put_nodes_node_qemu_vmid_snapshot_snapname_config": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidSnapshotSnapnameConfigRequest",
+      "response_model": "PutNodesNodeQemuVmidSnapshotSnapnameConfigResponse"
+    },
+    "put_nodes_node_qemu_vmid_unlink": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeQemuVmidUnlinkRequest",
+      "response_model": "PutNodesNodeQemuVmidUnlinkResponse"
+    },
+    "put_nodes_node_storage_storage_content_volume": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeStorageStorageContentVolumeRequest",
+      "response_model": "PutNodesNodeStorageStorageContentVolumeResponse"
+    },
+    "put_nodes_node_subscription": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeSubscriptionRequest",
+      "response_model": "PutNodesNodeSubscriptionResponse"
+    },
+    "put_nodes_node_time": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeTimeRequest",
+      "response_model": "PutNodesNodeTimeResponse"
+    },
+    "put_pools": {
+      "group": "pools",
+      "request_model": "PutPoolsRequest",
+      "response_model": "PutPoolsResponse"
+    },
+    "put_pools_poolid": {
+      "group": "pools",
+      "request_model": "PutPoolsPoolidRequest",
+      "response_model": "PutPoolsPoolidResponse"
+    },
+    "put_storage_storage": {
+      "group": "storage",
+      "request_model": "PutStorageStorageRequest",
+      "response_model": "PutStorageStorageResponse"
+    }
+  },
+  "source_sha256": "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b",
+  "version_tag": "latest"
+}

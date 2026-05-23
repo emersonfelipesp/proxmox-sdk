@@ -218,7 +218,7 @@ def generate_pydantic_models_from_openapi(  # noqa: C901
         for method, operation in sorted(path_item.items()):
             if not isinstance(operation, dict):
                 continue
-            if method.upper() not in {"GET", "POST", "PUT", "DELETE"}:
+            if method.upper() not in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
                 continue
 
             operation_id = operation.get("operationId") or f"{method}_{path}"
@@ -275,3 +275,163 @@ def generate_pydantic_models_from_openapi(  # noqa: C901
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _model_group(path: str) -> str:
+    parts = [part for part in path.split("/") if part]
+    if not parts:
+        return "root"
+    return slugify_identifier(parts[0].strip("{}")) or "root"
+
+
+def _module_header(
+    *,
+    version_tag: str,
+    source_sha256: str,
+    generated_at: str,
+    group: str | None = None,
+) -> list[str]:
+    title = (
+        f'"""Generated Pydantic v2 schemas for Proxmox route group {group!r}.'
+        if group
+        else '"""Generated Pydantic v2 schemas from Proxmox OpenAPI output.'
+    )
+    return [
+        title,
+        "",
+        "Do not edit by hand. Regenerate from the matching OpenAPI artifact.",
+        '"""',
+        "",
+        "from __future__ import annotations",
+        "",
+        "from pydantic import BaseModel, ConfigDict, Field, RootModel",
+        "",
+        f'GENERATED_FOR_PROXMOX_VERSION = "{version_tag}"',
+        f'GENERATED_SOURCE_SHA256 = "{source_sha256}"',
+        f'GENERATED_AT = "{generated_at}"',
+        "",
+        "",
+        "class ProxmoxBaseModel(BaseModel):",
+        "    model_config = ConfigDict(populate_by_name=True, extra='allow')",
+        "",
+    ]
+
+
+def generate_pydantic_model_shards_from_openapi(  # noqa: C901
+    openapi: dict[str, object],
+    *,
+    version_tag: str | None = None,
+    source_sha256: str | None = None,
+    generated_at: str | None = None,
+) -> tuple[dict[str, str], dict[str, object]]:
+    """Generate route-group Pydantic model shard modules and an operation index."""
+
+    info = openapi.get("info") if isinstance(openapi, dict) else None
+    resolved_version = (
+        version_tag or (info.get("version") if isinstance(info, dict) else None) or "latest"
+    )
+    resolved_at = generated_at or utc_now_iso()
+    resolved_sha = source_sha256 or ""
+    shard_lines: dict[str, list[str]] = {}
+    seen_models: dict[str, set[str]] = {}
+    operations: dict[str, dict[str, str | None]] = {}
+
+    for path, path_item in sorted((openapi.get("paths") or {}).items()):
+        if not isinstance(path_item, dict):
+            continue
+
+        group = _model_group(path)
+        lines = shard_lines.setdefault(
+            group,
+            _module_header(
+                version_tag=resolved_version,
+                source_sha256=resolved_sha,
+                generated_at=resolved_at,
+                group=group,
+            ),
+        )
+        group_seen = seen_models.setdefault(group, set())
+
+        for method, operation in sorted(path_item.items()):
+            if not isinstance(operation, dict):
+                continue
+            if method.upper() not in {"GET", "POST", "PUT", "PATCH", "DELETE"}:
+                continue
+
+            operation_id = operation.get("operationId") or f"{method}_{path}"
+            base_name = pascal_case(operation_id)
+            operation_summary = operation.get("summary", "")
+            operation_desc = operation.get("description", "")
+            operation_doc = (
+                f"{operation_summary}. {operation_desc}".strip()
+                if operation_summary or operation_desc
+                else None
+            )
+            request_model: str | None = None
+            response_model: str | None = None
+
+            req_schema = _request_schema_for_operation(path=path, operation=operation)
+            if isinstance(req_schema, dict):
+                req_model_name = f"{base_name}Request"
+                properties = req_schema.get("properties")
+                if isinstance(properties, dict) and properties:
+                    request_model = req_model_name
+                    if req_model_name not in group_seen:
+                        req_docstring = f"{operation_doc} request" if operation_doc else None
+                        model_blocks = _generate_model_from_schema(
+                            req_model_name,
+                            req_schema,
+                            docstring=req_docstring,
+                        )
+                        group_seen.add(req_model_name)
+                        if len(model_blocks) > 1:
+                            group_seen.add(f"{req_model_name}Item")
+                        for block in model_blocks:
+                            lines.append(block.replace("(BaseModel)", "(ProxmoxBaseModel)"))
+                            lines.append("")
+
+            resp_schema = (
+                operation.get("responses", {})
+                .get("200", {})
+                .get("content", {})
+                .get("application/json", {})
+                .get("schema")
+            )
+            if isinstance(resp_schema, dict):
+                resp_model_name = f"{base_name}Response"
+                response_model = resp_model_name
+                if resp_model_name not in group_seen:
+                    resp_docstring = f"{operation_doc} response" if operation_doc else None
+                    model_blocks = _generate_model_from_schema(
+                        resp_model_name,
+                        resp_schema,
+                        docstring=resp_docstring,
+                    )
+                    group_seen.add(resp_model_name)
+                    if len(model_blocks) > 1:
+                        group_seen.add(f"{resp_model_name}Item")
+                    for block in model_blocks:
+                        lines.append(block.replace("(BaseModel)", "(ProxmoxBaseModel)"))
+                        lines.append("")
+
+            operations[str(operation_id)] = {
+                "group": group,
+                "request_model": request_model,
+                "response_model": response_model,
+            }
+
+    shards = {group: "\n".join(lines).rstrip() + "\n" for group, lines in shard_lines.items()}
+    index: dict[str, object] = {
+        "version_tag": resolved_version,
+        "generated_at": resolved_at,
+        "source_sha256": resolved_sha,
+        "groups": sorted(shards),
+        "operations": operations,
+    }
+    return shards, index
+
+
+__all__ = [
+    "generate_pydantic_model_shards_from_openapi",
+    "generate_pydantic_models_from_openapi",
+]

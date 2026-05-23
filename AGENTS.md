@@ -189,10 +189,11 @@ See [docs/security.md](docs/security.md) for the full reference. Key patterns to
 See [docs/performance.md](docs/performance.md) for the full reference. Key patterns to be aware of:
 
 - **Lazy package imports** — `proxmox_sdk/__init__.py` uses `__getattr__` to defer app construction. `import proxmox_sdk` alone does not build any FastAPI app.
-- **Route registration** — `_build_direct_child_index()` in `mock/routes.py` builds a `{parent→child}` index in one O(P) pass before the registration loop, avoiding O(P²) re-scanning.
+- **Route metadata artifacts** — `generated/proxmox/<version>/route_metadata.json` drives generated route registration, avoiding runtime topology/signature rebuilding.
+- **Lazy model shards** — `generated/proxmox/<version>/model_index.json` maps operations to route-group Pydantic shards under `models/`; the aggregate `pydantic_models.py` remains for compatibility but is not imported at startup.
 - **Schema fingerprint** — `ProxmoxSchemaValue.fingerprint` is a `@cached_property`; the JSON hash is computed once per object.
-- **Shared read locks** — Mock state reads use `LOCK_SH` (shared); only writes use `LOCK_EX`. Concurrent GETs no longer block each other.
-- **Deleted-item set** — Mock `state["deleted"]` is materialised as a Python `set` during each request for O(1) membership checks; serialised back to `list` on write.
+- **SQLite mock state** — `SQLiteMockStore` is the default `PROXMOX_MOCK_STORE=sqlite` backend and stores objects/collection members/tombstones as rows instead of serialising one whole-state blob. `shared-memory` and `dict` remain selectable.
+- **Mock-state serialization** — value blobs use `orjson` when available, with stdlib JSON fallback.
 - **URL construction** — `HttpsBackend` caches `(scheme, netloc, base_path)` in `__init__`; `_url_for()` uses `posixpath.join` with cached components instead of calling `urlsplit` on every request.
 - **Path joining fast path** — `_url_join()` in `resource.py` skips `urlsplit`/`urlunsplit` for plain paths (no `://`).
 - **None filtering fast path** — `_filter_none()` in `resource.py` returns the original dict unchanged when no `None` values are present.

@@ -175,26 +175,42 @@ A single codebase serves both development (mock) and production (real proxy) use
 | | Mock | Real |
 |---|---|---|
 | **Proxmox server required** | No | Yes |
-| **Data persistence** | In-memory (reset on restart) | Real Proxmox state |
+| **Data persistence** | SQLite/WAL mock state by default | Real Proxmox state |
 | **Request validation** | Yes (Pydantic) | Yes (Pydantic) |
 | **Response validation** | Yes (Pydantic) | Yes (Pydantic) |
-| **Startup time** | ~1 s | ~500 ms |
+| **Startup time** | ~2.1 s full app import, ~0.75 s generated route registration | ~500 ms + route registration |
 
-### 2. Dynamic Route Generation
+### 2. Metadata-Driven Route Registration
 
-Rather than hardcoding 646 routes, the server registers them at startup from the OpenAPI schema. This means schema updates automatically produce new routes with zero manual work. Startup takes ~1 second for schema loading plus route generation.
+Rather than hardcoding 675 routes or rebuilding all route topology at runtime,
+the codegen pipeline emits `route_metadata.json`, `model_index.json`, and
+route-group model shards under each `generated/proxmox/<version>/` directory.
+The server registers lightweight FastAPI dispatchers from this metadata and
+lazy-loads the matching Pydantic shard on the first request that needs
+request/response validation. The generated OpenAPI document is merged into the
+app docs directly, so Swagger/ReDoc stay complete without importing every model
+at startup.
 
 ### 3. Pre-Generated Schemas
 
-The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., `9.1.11`) is stored independently under `generated/proxmox/`; CI ships both `9.1.11/` and a `latest/` mirror.
+The OpenAPI schema, aggregate Pydantic models, lazy model shards, model index,
+and route metadata are committed to the repository so mock mode works
+completely offline without a Proxmox server. Each version (e.g., `9.1.11`) is
+stored independently under `generated/proxmox/`; CI ships both `9.1.11/` and a
+`latest` mirror.
 
 ### 4. Full Request/Response Validation
 
 Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.
 
-### 5. In-Memory Mock State
+### 5. SQLite Mock State
 
-Mock state uses `SharedMemoryMockStore` — a dict-based in-memory store with shared read locks (`LOCK_SH`) and exclusive write locks (`LOCK_EX`) for thread safety. No database dependency, zero configuration, trivially resettable. It uses a materialised `set` for deleted-item checks (`O(1)` membership test).
+Mock state uses `SQLiteMockStore` by default. It stores objects, collection
+members, metadata, and tombstones as separate rows in a tempdir-scoped SQLite
+database using WAL mode, which avoids whole-state JSON serialization on every
+request. `SharedMemoryMockStore` and `DictMockStore` remain available through
+`PROXMOX_MOCK_STORE=shared-memory|dict` for compatibility and specialized test
+cases. Value blobs use `orjson` when installed, with a stdlib JSON fallback.
 
 ### 6. aiohttp for HTTPS Transport
 
@@ -225,16 +241,18 @@ See [Security](security.md) for the full reference.
 
 | Metric | Mock Mode | Real Mode |
 |---|---|---|
-| Startup time | ~1 s | ~500 ms |
-| Request latency | <5 ms | Proxmox latency + ~20–100 ms |
+| Startup time | ~2.1 s full app import | Proxmox latency + route registration |
+| Request latency | ~4 ms local mock GET smoke | Proxmox latency + ~10–20 ms validation overhead |
 | Memory footprint | ~100 MB | ~80 MB |
 | Max throughput | 10,000+ req/s (FastAPI-bound) | Proxmox server capacity |
 
 Key optimizations:
 
 - **Lazy package imports** — `import proxmox_sdk` does not construct any FastAPI app
+- **Generated route metadata** — startup loads route metadata instead of rebuilding topology and signatures
+- **Lazy model shards** — Pydantic route-group shards load only when a request needs validation
+- **SQLite/WAL mock state** — mock CRUD stores rows per object/member instead of serializing one whole-state blob
 - **Cached URL components** — `HttpsBackend` caches `(scheme, netloc, base_path)` to skip per-request URL parsing
-- **Shared read locks** — concurrent GETs on mock state do not block each other
 - **Schema fingerprint caching** — `ProxmoxSchemaValue.fingerprint` is a `@cached_property`
 
 See [Performance](performance.md) for the complete optimization reference.

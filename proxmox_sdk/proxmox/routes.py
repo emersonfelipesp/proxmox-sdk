@@ -4,15 +4,20 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import Any
+from typing import Any, Callable
 
-from fastapi import APIRouter, Body, FastAPI, Path, Query
+from fastapi import APIRouter, Body, FastAPI, HTTPException, Path, Query, Request
 
 from proxmox_sdk.exception import ProxmoxOpenAPIException
 from proxmox_sdk.proxmox.client import ProxmoxClient
 from proxmox_sdk.proxmox.config import ProxmoxConfig
 from proxmox_sdk.proxmox_codegen.utils import slugify_identifier
 from proxmox_sdk.routes._errors import with_error_translation
+from proxmox_sdk.routes.generated_artifacts import (
+    install_generated_openapi,
+    load_operation_model,
+    load_route_metadata,
+)
 from proxmox_sdk.routes.helpers import (
     SUPPORTED_METHODS as _SUPPORTED_METHODS,
 )
@@ -193,6 +198,190 @@ def _build_generated_endpoint(
     return generated_endpoint
 
 
+def _coerce_value(value: Any, schema: dict[str, Any] | None) -> Any:
+    if value is None or not isinstance(schema, dict):
+        return value
+    schema_type = schema.get("type")
+    if schema_type == "integer":
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail=f"Invalid integer value: {value!r}")
+    if schema_type == "number":
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail=f"Invalid number value: {value!r}")
+    if schema_type == "boolean":
+        if isinstance(value, bool):
+            return value
+        lowered = str(value).strip().lower()
+        if lowered in {"1", "true", "yes", "on"}:
+            return True
+        if lowered in {"0", "false", "no", "off"}:
+            return False
+        raise HTTPException(status_code=422, detail=f"Invalid boolean value: {value!r}")
+    return value
+
+
+async def _request_body_value(request: Request, request_schema: dict[str, Any] | None) -> Any:
+    if request_schema is None:
+        return None
+    body = await request.body()
+    if not body:
+        return None
+    try:
+        return await request.json()
+    except Exception:
+        raise HTTPException(status_code=422, detail="Request body must be valid JSON.")
+
+
+def _build_metadata_endpoint(
+    *,
+    route: dict[str, Any],
+    proxmox_client: ProxmoxClient,
+    version_tag: str,
+) -> Callable[..., Any]:
+    raw_parameters = route.get("parameters")
+    parameters: list[Any] = raw_parameters if isinstance(raw_parameters, list) else []
+    path_parameters = [p for p in parameters if isinstance(p, dict) and p.get("in") == "path"]
+    query_parameters = [p for p in parameters if isinstance(p, dict) and p.get("in") == "query"]
+    path_template = str(route.get("path_template") or "")
+    method = str(route.get("method") or "").upper()
+    operation_id = str(route.get("operation_id") or "")
+    group = str(route.get("model_group") or "")
+    request_schema = (
+        route.get("request_schema") if isinstance(route.get("request_schema"), dict) else None
+    )
+    request_model_name = (
+        route.get("request_model") if isinstance(route.get("request_model"), str) else None
+    )
+    response_model_name = (
+        route.get("response_model") if isinstance(route.get("response_model"), str) else None
+    )
+
+    @with_error_translation(
+        method=method,
+        path_template=path_template,
+        message_prefix="Proxmox API request",
+    )
+    async def generated_endpoint(request: Request) -> Any:
+        path_values: dict[str, Any] = {}
+        for parameter in path_parameters:
+            python_name = str(parameter.get("python_name"))
+            original_name = str(parameter.get("name"))
+            if python_name not in request.path_params:
+                raise HTTPException(
+                    status_code=422, detail=f"Missing path parameter: {original_name}"
+                )
+            path_values[original_name] = _coerce_value(
+                request.path_params[python_name],
+                parameter.get("schema") if isinstance(parameter.get("schema"), dict) else None,
+            )
+
+        query_values: dict[str, Any] = {}
+        for parameter in query_parameters:
+            original_name = str(parameter.get("name"))
+            raw_value = request.query_params.get(original_name)
+            if raw_value is None:
+                if parameter.get("required"):
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Missing required query parameter: {original_name}",
+                    )
+                continue
+            query_values[original_name] = _coerce_value(
+                raw_value,
+                parameter.get("schema") if isinstance(parameter.get("schema"), dict) else None,
+            )
+
+        body_value = await _request_body_value(request, request_schema)
+        request_model = load_operation_model(
+            version_tag,
+            operation_id,
+            "request",
+            group=group,
+            model_name=request_model_name,
+        )
+        if request_model is not None and body_value is not None:
+            body_value = request_model.model_validate(body_value)
+        body_value = _normalize_body_value(body_value)
+
+        concrete_path = _render_path(path_template, path_values)
+        result = await proxmox_client.request(
+            method=method,
+            path=concrete_path,
+            params=query_values or None,
+            json=body_value,
+        )
+
+        response_model = load_operation_model(
+            version_tag,
+            operation_id,
+            "response",
+            group=group,
+            model_name=response_model_name,
+        )
+        if response_model is not None:
+            try:
+                return response_model.model_validate(result)
+            except Exception as error:
+                raise ProxmoxOpenAPIException(
+                    message=f"Proxmox API response validation failed for {method} {path_template}",
+                    detail="Response does not match generated model schema",
+                    python_exception=str(error),
+                )
+
+        return result
+
+    generated_endpoint.__name__ = f"{_GENERATED_ROUTE_NAME_PREFIX}{method.lower()}__{operation_id}"
+    generated_endpoint.__qualname__ = generated_endpoint.__name__
+    return generated_endpoint
+
+
+def _add_node_version_check(
+    app: FastAPI,
+    document: dict[str, object],
+    version_tag: str,
+    proxmox_client: ProxmoxClient,
+) -> None:
+    """Attach the advisory Proxmox node/schema compatibility startup check."""
+
+    _schema_info_version = str(document.get("info", {}).get("version", version_tag))
+    _schema_parts = _schema_info_version.split(".")
+    _version_prefix = (
+        ".".join(_schema_parts[:2]) if len(_schema_parts) >= 2 else _schema_info_version
+    )
+    _client_ref = proxmox_client
+
+    async def _check_node_version() -> None:
+        try:
+            result = await _client_ref.get("/api2/json/version")
+            node_version = (result or {}).get("version", "")
+            if node_version and not node_version.startswith(_version_prefix):
+                logger.warning(
+                    "proxmox-sdk real mode: loaded schema for '%s' but node reports "
+                    "version '%s'. Update PROXMOX_MOCK_SCHEMA_VERSION if needed.",
+                    version_tag,
+                    node_version,
+                )
+            else:
+                logger.info(
+                    "proxmox-sdk real mode: schema '%s' compatible with node version '%s'.",
+                    version_tag,
+                    node_version or "(unknown)",
+                )
+        except Exception as exc:
+            logger.debug(
+                "proxmox-sdk real mode: could not verify node version at startup "
+                "(schema: '%s'): %s",
+                version_tag,
+                exc,
+            )
+
+    app.add_event_handler("startup", _check_node_version)
+
+
 def register_generated_proxmox_real_routes(
     app: FastAPI | APIRouter,
     *,
@@ -222,6 +411,51 @@ def register_generated_proxmox_real_routes(
         )
 
     proxmox_client = ProxmoxClient(proxmox_config)
+
+    metadata = load_route_metadata(version_tag)
+    if metadata is not None:
+        route_count = 0
+        raw_routes = metadata.get("routes")
+        routes: list[Any] = raw_routes if isinstance(raw_routes, list) else []
+        for route in routes:
+            if not isinstance(route, dict):
+                continue
+            method_name = str(route.get("method") or "").upper()
+            if method_name not in _SUPPORTED_METHODS:
+                continue
+
+            endpoint = _build_metadata_endpoint(
+                route=route,
+                proxmox_client=proxmox_client,
+                version_tag=version_tag,
+            )
+            operation_id = str(route.get("operation_id") or "")
+            route_name = f"{_GENERATED_ROUTE_NAME_PREFIX}{method_name.lower()}__{operation_id}"
+            app.add_api_route(
+                path=str(route.get("mounted_path")),
+                endpoint=endpoint,
+                methods=[method_name],
+                name=route_name,
+                summary=route.get("summary") if isinstance(route.get("summary"), str) else None,
+                description=route.get("description")
+                if isinstance(route.get("description"), str)
+                else None,
+                tags=["proxmox real / generated"],
+                include_in_schema=False,
+            )
+            route_count += 1
+
+        if isinstance(app, FastAPI):
+            install_generated_openapi(app, document)
+            _add_node_version_check(app, document, version_tag, proxmox_client)
+        app.openapi_schema = None  # type: ignore[attr-defined]
+        return {
+            "route_count": route_count,
+            "path_count": metadata.get("path_count", 0),
+            "method_count": metadata.get("method_count", route_count),
+            "schema_version": metadata.get("schema_version", version_tag),
+            "base_prefix": metadata.get("base_prefix", "/"),
+        }
 
     model_module = _load_model_module(document, version_tag)
     base_prefix = _server_prefix(document)
@@ -274,48 +508,8 @@ def register_generated_proxmox_real_routes(
 
     app.openapi_schema = None  # type: ignore[attr-defined]
 
-    # Advisory startup hook: compare loaded schema version against the actual
-    # Proxmox node version.  Never raises — mismatches are logged as warnings
-    # so the server still starts even when node and schema diverge.
     if isinstance(app, FastAPI):
-        # Derive the prefix from the schema document's info.version so that "latest"
-        # resolves to its actual version (e.g. "9.2") instead of the literal string
-        # "latest", which would always emit a false-positive mismatch warning.
-        _schema_info_version: str = str(
-            document.get("info", {}).get("version", version_tag)  # type: ignore[union-attr]
-        )
-        _schema_parts = _schema_info_version.split(".")
-        _version_prefix = (
-            ".".join(_schema_parts[:2]) if len(_schema_parts) >= 2 else _schema_info_version
-        )
-        _client_ref = proxmox_client
-
-        async def _check_node_version() -> None:
-            try:
-                result = await _client_ref.get("/api2/json/version")
-                node_version = (result or {}).get("version", "")
-                if node_version and not node_version.startswith(_version_prefix):
-                    logger.warning(
-                        "proxmox-sdk real mode: loaded schema for '%s' but node reports "
-                        "version '%s'. Update PROXMOX_MOCK_SCHEMA_VERSION if needed.",
-                        version_tag,
-                        node_version,
-                    )
-                else:
-                    logger.info(
-                        "proxmox-sdk real mode: schema '%s' compatible with node version '%s'.",
-                        version_tag,
-                        node_version or "(unknown)",
-                    )
-            except Exception as exc:
-                logger.debug(
-                    "proxmox-sdk real mode: could not verify node version at startup "
-                    "(schema: '%s'): %s",
-                    version_tag,
-                    exc,
-                )
-
-        app.add_event_handler("startup", _check_node_version)
+        _add_node_version_check(app, document, version_tag, proxmox_client)
 
     return {
         "route_count": route_count,
