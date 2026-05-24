@@ -2154,7 +2154,7 @@
 </tr>
 <tr>
 <td><code>proxmox_codegen/</code></td>
-<td><code>proxmox codegen</code> CLI</td>
+<td><code>proxmox-sdk-codegen</code> CLI</td>
 <td>Yes</td>
 <td>Schema generation pipeline</td>
 </tr>
@@ -2172,16 +2172,20 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Mock Mode (default)</label><label for="__tabbed_1_2">Real Mode</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>Mock mode loads pre-generated OpenAPI schemas and dynamically creates CRUD endpoints backed by an in-memory state store. No real Proxmox server required.</p>
+<p>Mock mode loads pre-generated OpenAPI schemas plus route metadata and
+creates CRUD endpoints backed by configurable mock-state stores. SQLite/WAL
+is the default. No real Proxmox server required.</p>
 <pre class="mermaid"><code>flowchart TD
     REQ["HTTP Request"]
     ROUTER["FastAPI Router"]
-    MOCK_EP["Generated Mock Endpoint\n(from OpenAPI schema)"]
-    STATE["SharedMemoryMockStore\nin-memory dict"]
+    MOCK_EP["Generated Mock Dispatcher\n(from route metadata)"]
+    MODELS["Lazy Pydantic Shards\nmodels/&lt;group&gt;.py"]
+    STATE["SQLiteMockStore\nWAL row store"]
     RESP["JSON Response"]
 
     REQ --&gt; ROUTER
     ROUTER --&gt; MOCK_EP
+    MOCK_EP --&gt;|"load model when needed"| MODELS
     MOCK_EP --&gt;|"GET: read"| STATE
     MOCK_EP --&gt;|"POST/PUT: write"| STATE
     MOCK_EP --&gt;|"DELETE: remove"| STATE
@@ -2189,12 +2193,14 @@
 <p><strong>Startup flow:</strong></p>
 <ol>
 <li>Load <code>generated/proxmox/latest/openapi.json</code></li>
-<li><code>register_generated_proxmox_mock_routes()</code> iterates all 646 path/method pairs</li>
-<li>For each operation, create a dynamic FastAPI route with Pydantic request/response validation</li>
-<li>Routes perform CRUD on <code>SharedMemoryMockStore</code></li>
-<li>State persists only in memory — resets on restart</li>
+<li>Load <code>generated/proxmox/latest/route_metadata.json</code></li>
+<li><code>register_generated_proxmox_mock_routes()</code> iterates 675 metadata operations across 449 paths</li>
+<li>For each operation, create a lightweight FastAPI dispatcher with precomputed path, parameter, and mock-topology metadata</li>
+<li>Load request/response model classes lazily from <code>models/&lt;group&gt;.py</code> through <code>model_index.json</code></li>
+<li>Routes perform CRUD on <code>SQLiteMockStore</code> by default, with shared-memory and dict backends available by env var</li>
+<li>State is scoped by namespace and schema fingerprint; the default tempdir SQLite database is not a production persistence layer</li>
 </ol>
-<p><strong>Performance:</strong> ~1 second startup, &lt;5 ms per request, ~100 MB memory.</p>
+<p><strong>Performance:</strong> ~2.1 s full app import in local smoke tests, ~0.75 s generated route registration, ~4 ms warm SQLite/WAL mock request latency via local TestClient smoke tests.</p>
 </div>
 <div class="tabbed-block">
 <p>Real mode proxies requests to an actual Proxmox VE API, validating both the incoming request and the Proxmox response against the OpenAPI schema.</p>
@@ -2261,8 +2267,9 @@
     CRAWL["ProxmoxCrawler\nPlaywright"]
     PARSE["apidoc_parser.py"]
     NORM["normalize.py"]
-    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 646 ops"]
-    PYD["PydanticBuilder\n→ pydantic_models.py"]
+    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 675 ops"]
+    PYD["PydanticBuilder\n→ pydantic_models.py\n+ model shards"]
+    META["RouteMetadataBuilder\n→ route_metadata.json\n+ model_index.json"]
     USE1["proxmox-sdk\nMock routes"]
     USE2["proxbox-api\nResponse validation"]
 
@@ -2271,7 +2278,9 @@
     PARSE --&gt; NORM
     NORM --&gt; OA
     OA --&gt; PYD
+    OA --&gt; META
     OA --&gt; USE1
+    META --&gt; USE1
     PYD --&gt; USE2</code></pre>
 <p>See <a href="../codegen-pipeline/">Code Generation Pipeline</a> for the full stage-by-stage breakdown.</p>
 <hr />

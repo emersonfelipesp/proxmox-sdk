@@ -2944,11 +2944,12 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 </ul>
 <h2 id="mock-mode">Mock Mode<a class="headerlink" href="#mock-mode" title="Permanent link">&para;</a></h2>
 <h3 id="what-is-mock-mode">What is mock mode?<a class="headerlink" href="#what-is-mock-mode" title="Permanent link">&para;</a></h3>
-<p>Mock mode provides an in-memory simulation of the Proxmox VE API. It:</p>
+<p>Mock mode provides a schema-driven simulation of the Proxmox VE API. It:</p>
 <ul>
-<li>Loads 675 operations / 449 pre-generated endpoints from OpenAPI schema</li>
+<li>Loads 675 operations / 449 paths from pre-generated route metadata</li>
+<li>Lazy-loads Pydantic route-group model shards on demand</li>
 <li>Provides full CRUD operations (Create, Read, Update, Delete)</li>
-<li>Stores data in memory (resets on restart)</li>
+<li>Stores data in SQLite/WAL by default, with shared-memory and dict backends available</li>
 <li>Requires no Proxmox server</li>
 </ul>
 <p>Perfect for development, testing, and CI/CD pipelines.</p>
@@ -2959,10 +2960,17 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 </span></code></pre></div>
 <p>See the <a href="../mock-api/#custom-mock-data">Mock API Guide</a> for data format examples.</p>
 <h3 id="does-mock-data-persist-across-restarts">Does mock data persist across restarts?<a class="headerlink" href="#does-mock-data-persist-across-restarts" title="Permanent link">&para;</a></h3>
-<p><strong>No.</strong> Mock mode uses in-memory storage, so all data is lost when the server stops.</p>
-<p>If you need persistent mock data:
-- Use custom mock data files (loaded on startup)
-- Consider contributing a database-backed mode (future feature)</p>
+<p>Not by default as a production guarantee. Mock mode uses a tempdir-scoped
+SQLite/WAL store unless you override it. That state is scoped by mock namespace
+and schema fingerprint and is intended for development/test continuity, not
+durable application data.</p>
+<p>If you need predictable startup state:</p>
+<ul>
+<li>Use custom mock data files loaded on startup.</li>
+<li>Set <code>PROXMOX_MOCK_STATE_PATH</code> while debugging a specific SQLite store.</li>
+<li>Reset state between tests with <code>POST /mock/reset</code> or by changing
+  <code>PROXMOX_MOCK_STATE_NAMESPACE</code>.</li>
+</ul>
 <h3 id="can-i-use-mock-mode-in-cicd">Can I use mock mode in CI/CD?<a class="headerlink" href="#can-i-use-mock-mode-in-cicd" title="Permanent link">&para;</a></h3>
 <p><strong>Absolutely!</strong> Mock mode is perfect for CI/CD:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Example GitHub Actions workflow</span>
@@ -3060,59 +3068,62 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 <p>See the <a href="../development/">Development Guide</a> for contribution guidelines.</p>
 <h3 id="how-do-i-regenerate-the-openapi-schema">How do I regenerate the OpenAPI schema?<a class="headerlink" href="#how-do-i-regenerate-the-openapi-schema" title="Permanent link">&para;</a></h3>
 <p>Use the built-in code generation pipeline:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.proxmox_codegen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxCodegenPipeline</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.proxmox_codegen</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_proxmox_codegen_bundle</span>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">ProxmoxCodegenPipeline</span><span class="p">(</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">proxmox_url</span><span class="o">=</span><span class="s2">&quot;https://proxmox.example.com:8006&quot;</span><span class="p">,</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;root@pam&quot;</span><span class="p">,</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>    <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="p">)</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="k">await</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run_full_pipeline</span><span class="p">(</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.2&quot;</span><span class="p">,</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="p">)</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">bundle</span> <span class="o">=</span> <span class="n">generate_proxmox_codegen_bundle</span><span class="p">(</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.2&quot;</span><span class="p">,</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">worker_count</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="p">)</span>
+</span></code></pre></div>
+<p>Or from the command line:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>proxmox-sdk-codegen<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>--version-tag<span class="w"> </span><span class="m">9</span>.2<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>--output-dir<span class="w"> </span>proxmox_sdk/generated/proxmox<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>--workers<span class="w"> </span><span class="m">4</span>
 </span></code></pre></div>
 <p>This generates:
 - <code>raw_capture.json</code> - Crawler output
 - <code>openapi.json</code> - OpenAPI 3.1 schema
-- <code>pydantic_models.py</code> - Pydantic models</p>
+- <code>pydantic_models.py</code> - compatibility aggregate Pydantic models
+- <code>route_metadata.json</code> - metadata-driven route registration input
+- <code>model_index.json</code> - operation-to-model shard map
+- <code>models/&lt;group&gt;.py</code> - lazy Pydantic route-group shards</p>
 <p>See the <a href="../development/#code-generation-pipeline">Development Guide</a> for details.</p>
 <h3 id="how-do-i-run-tests">How do I run tests?<a class="headerlink" href="#how-do-i-run-tests" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Install with dev dependencies</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># Run all tests</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>pytest
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="c1"># Run with coverage</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>pytest<span class="w"> </span>--cov<span class="o">=</span>proxmox_sdk<span class="w"> </span>--cov-report<span class="o">=</span>html
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Install with dev dependencies</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Run all tests</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>pytest
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># Run with coverage</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>pytest<span class="w"> </span>--cov<span class="o">=</span>proxmox_sdk<span class="w"> </span>--cov-report<span class="o">=</span>html
 </span></code></pre></div>
 <p>See the <a href="../development/#testing">Development Guide</a> for more details.</p>
 <h3 id="how-do-i-build-the-documentation-locally">How do I build the documentation locally?<a class="headerlink" href="#how-do-i-build-the-documentation-locally" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Serve docs with live reload</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>mkdocs<span class="w"> </span>serve
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Build static site</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>mkdocs<span class="w"> </span>build
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="c1"># Deploy to GitHub Pages</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>mkdocs<span class="w"> </span>gh-deploy
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Serve docs with live reload</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>mkdocs<span class="w"> </span>serve
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Build static site</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>mkdocs<span class="w"> </span>build
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># Deploy to GitHub Pages</span>
+</span><span id="__span-14-8"><a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>mkdocs<span class="w"> </span>gh-deploy
 </span></code></pre></div>
 <p>Documentation will be available at <code>http://127.0.0.1:8000</code>.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
 <h3 id="server-wont-start-module-not-found-error">Server won't start - "Module not found" error<a class="headerlink" href="#server-wont-start-module-not-found-error" title="Permanent link">&para;</a></h3>
 <p>Make sure you've installed the package:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>proxmox-sdk
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="c1"># Or for development</span>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>proxmox-sdk
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="c1"># Or for development</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </span></code></pre></div>
 <h3 id="mock-mode-schema-not-found-error">Mock mode: "Schema not found" error<a class="headerlink" href="#mock-mode-schema-not-found-error" title="Permanent link">&para;</a></h3>
 <p>The pre-generated schema should be included in the package. If missing:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Reinstall the package</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--force-reinstall<span class="w"> </span>proxmox-sdk
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Reinstall the package</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--force-reinstall<span class="w"> </span>proxmox-sdk
 </span></code></pre></div>
 <h3 id="real-mode-connection-refused-error">Real mode: "Connection refused" error<a class="headerlink" href="#real-mode-connection-refused-error" title="Permanent link">&para;</a></h3>
 <p>Check that:
@@ -3122,34 +3133,36 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 4. SSL certificate is valid (or set <code>PROXMOX_API_VERIFY_SSL=false</code> for testing)</p>
 <h3 id="real-mode-401-unauthorized-error">Real mode: "401 Unauthorized" error<a class="headerlink" href="#real-mode-401-unauthorized-error" title="Permanent link">&para;</a></h3>
 <p>Check your credentials:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># For API token</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_TOKEN_ID</span><span class="w">      </span><span class="c1"># Should be: user@realm!tokenid (e.g., root@pam!mytoken)</span>
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_TOKEN_SECRET</span><span class="w">  </span><span class="c1"># Should be: UUID secret</span>
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>
-</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="c1"># For username/password</span>
-</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_USERNAME</span><span class="w">  </span><span class="c1"># Should be: user@realm (e.g., root@pam)</span>
-</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_PASSWORD</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># For API token</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_TOKEN_ID</span><span class="w">      </span><span class="c1"># Should be: user@realm!tokenid (e.g., root@pam!mytoken)</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_TOKEN_SECRET</span><span class="w">  </span><span class="c1"># Should be: UUID secret</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="c1"># For username/password</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_USERNAME</span><span class="w">  </span><span class="c1"># Should be: user@realm (e.g., root@pam)</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">$PROXMOX_API_PASSWORD</span>
 </span></code></pre></div>
 <p>Verify credentials work with direct Proxmox API access:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>curl<span class="w"> </span>-k<span class="w"> </span>https://proxmox.example.com:8006/api2/json/version<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: PVEAPIToken=user@realm!tokenid=uuid&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>curl<span class="w"> </span>-k<span class="w"> </span>https://proxmox.example.com:8006/api2/json/version<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: PVEAPIToken=user@realm!tokenid=uuid&quot;</span>
 </span></code></pre></div>
 <h3 id="real-mode-ssl-certificate-verification-failed">Real mode: "SSL certificate verification failed"<a class="headerlink" href="#real-mode-ssl-certificate-verification-failed" title="Permanent link">&para;</a></h3>
 <p>For development/testing with self-signed certificates:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PROXMOX_API_VERIFY_SSL</span><span class="o">=</span><span class="nb">false</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PROXMOX_API_VERIFY_SSL</span><span class="o">=</span><span class="nb">false</span>
 </span></code></pre></div>
 <p><strong>Never disable SSL verification in production.</strong> Instead, add the Proxmox CA certificate to your system trust store.</p>
 <h3 id="slow-startup-time">Slow startup time<a class="headerlink" href="#slow-startup-time" title="Permanent link">&para;</a></h3>
 <p>Normal startup times:
-- Mock mode: ~1 second (loads 5.2MB schema)
+- Mock mode: ~2.1 seconds full app import in local smoke tests; generated route registration alone is ~0.75 seconds
 - Real mode: ~500ms (minimal initialization)</p>
 <p>If startup is significantly slower:
 1. Check disk I/O performance
 2. Ensure you're not in debug mode with hot-reload (use <code>--reload</code> only for development)
-3. Verify Python version (3.11+ recommended for best performance)</p>
+3. Verify Python version (3.11+ recommended for best performance)
+4. Verify generated metadata exists for the selected schema version:
+   <code>proxmox_sdk/generated/proxmox/&lt;version&gt;/route_metadata.json</code></p>
 <h3 id="high-memory-usage">High memory usage<a class="headerlink" href="#high-memory-usage" title="Permanent link">&para;</a></h3>
 <p>Expected memory usage:
-- Mock mode: ~100MB (schema + in-memory state)
+- Mock mode: ~100MB (schema + generated metadata + active mock state)
 - Real mode: ~80MB (schema + aiohttp session)</p>
 <p>If memory usage is significantly higher:
 1. Check for memory leaks in custom code
@@ -3170,13 +3183,15 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 - Using a production ASGI server (gunicorn with uvicorn workers)
 - Direct Proxmox API access (bypassing the proxy)</p>
 <h3 id="can-i-scale-horizontally">Can I scale horizontally?<a class="headerlink" href="#can-i-scale-horizontally" title="Permanent link">&para;</a></h3>
-<p><strong>Yes!</strong> The server is stateless (in real mode) or uses in-memory state (mock mode).</p>
+<p><strong>Yes!</strong> The server is stateless in real mode. In mock mode, state is scoped to
+the configured mock backend and namespace.</p>
 <p>For real mode:
 - Run multiple instances behind a load balancer
 - Each instance independently proxies to Proxmox</p>
 <p>For mock mode:
-- Each instance has its own in-memory state
-- Not suitable for shared mock environments (use a database-backed mode instead)</p>
+- Each instance should use its own <code>PROXMOX_MOCK_STATE_NAMESPACE</code>
+- SQLite/WAL is the default store, but it is still development/test state
+- Do not use mock mode as a shared production data service</p>
 <h2 id="license-support">License &amp; Support<a class="headerlink" href="#license-support" title="Permanent link">&para;</a></h2>
 <h3 id="what-license-is-this-project-under">What license is this project under?<a class="headerlink" href="#what-license-is-this-project-under" title="Permanent link">&para;</a></h3>
 <p><strong>MIT License</strong> - Free to use, modify, and distribute, including commercial use.</p>

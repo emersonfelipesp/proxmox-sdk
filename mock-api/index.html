@@ -1037,6 +1037,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#mock-state-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock State Backends
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2075,6 +2086,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#mock-state-backends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock State Backends
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2322,10 +2344,12 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Mock mode provides a <strong>fully functional Proxmox API simulation</strong> with:</p>
 <ul>
-<li>✅ <strong>646 pre-generated endpoints</strong> from official Proxmox API</li>
-<li>✅ <strong>In-memory CRUD operations</strong> - Create, read, update, delete</li>
+<li>✅ <strong>675 generated operations across 449 Proxmox API paths</strong></li>
+<li>✅ <strong>Metadata-driven route registration</strong> from bundled <code>route_metadata.json</code></li>
+<li>✅ <strong>Lazy Pydantic model loading</strong> from route-group model shards</li>
+<li>✅ <strong>CRUD operations</strong> - Create, read, update, delete</li>
 <li>✅ <strong>Automatic data seeding</strong> - Sample data generated on first access</li>
-<li>✅ <strong>State persistence</strong> - Changes persist across requests (during runtime)</li>
+<li>✅ <strong>SQLite/WAL state by default</strong> - Changes persist across requests in the active mock namespace</li>
 <li>✅ <strong>Custom mock data</strong> - Load your own test data from JSON/YAML</li>
 </ul>
 <hr />
@@ -2356,7 +2380,9 @@
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># [{&quot;node&quot;: &quot;pve&quot;, &quot;status&quot;: &quot;online&quot;, ...}]</span>
 </span></code></pre></div>
 <h3 id="state-persistence">State Persistence<a class="headerlink" href="#state-persistence" title="Permanent link">&para;</a></h3>
-<p>Changes persist in memory during the server lifetime:</p>
+<p>Changes persist during the server lifetime through the configured mock-state
+backend. The default is SQLite/WAL, which stores objects, collection members,
+and tombstones as rows in a tempdir-scoped database:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Create a VM</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">httpx</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="s2">&quot;http://localhost:8000/api2/json/nodes/pve/qemu&quot;</span><span class="p">,</span>
@@ -2368,9 +2394,42 @@
 </span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>  <span class="c1"># Returns the VM we created</span>
 </span></code></pre></div>
 <div class="admonition warning">
-<p class="admonition-title">Memory Only</p>
-<p>Mock data is stored in RAM and <strong>will be lost</strong> when the server restarts.</p>
+<p class="admonition-title">Development state, not production persistence</p>
+<p>The default SQLite database is scoped by mock namespace and schema
+fingerprint. It is designed for development and tests, not as a durable
+database. Set <code>PROXMOX_MOCK_STATE_PATH</code> if you need an explicit database
+path while debugging.</p>
 </div>
+<h3 id="mock-state-backends">Mock State Backends<a class="headerlink" href="#mock-state-backends" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Configure with</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SQLite/WAL</td>
+<td><code>PROXMOX_MOCK_STORE=sqlite</code> or unset</td>
+<td>Default; best balance for local dev, tests, and concurrent reads</td>
+</tr>
+<tr>
+<td>Shared memory</td>
+<td><code>PROXMOX_MOCK_STORE=shared-memory</code></td>
+<td>Legacy compatibility; uses a shared-memory JSON blob and file locks</td>
+</tr>
+<tr>
+<td>Dict</td>
+<td><code>PROXMOX_MOCK_STORE=dict</code></td>
+<td>Process-local tests where isolation matters more than cross-process state</td>
+</tr>
+</tbody>
+</table>
+<p>SQLite avoids serializing the entire mock state for every read/write. Payload
+blobs use <code>orjson</code> when it is installed and fall back to the standard <code>json</code>
+module otherwise.</p>
 <hr />
 <h2 id="custom-mock-data">Custom Mock Data<a class="headerlink" href="#custom-mock-data" title="Permanent link">&para;</a></h2>
 <p>Load your own test data to simulate specific scenarios.</p>

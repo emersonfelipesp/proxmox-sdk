@@ -2774,7 +2774,13 @@
 </span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="n">pve</span> <span class="o">=</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="mockroutespy-mock-route-builder"><code>mock/routes.py</code> — Mock Route Builder<a class="headerlink" href="#mockroutespy-mock-route-builder" title="Permanent link">&para;</a></h3>
-<p><code>register_generated_proxmox_mock_routes()</code> dynamically generates 675 operations / 449 paths CRUD endpoints from the bundled OpenAPI schema at startup. Each route operates on <code>SharedMemoryMockStore</code>.</p>
+<p><code>register_generated_proxmox_mock_routes()</code> registers 675 operations across 449
+paths from bundled generated artifacts. The primary startup path reads
+<code>route_metadata.json</code> and creates lightweight FastAPI dispatchers with
+precomputed mounted paths, parameter metadata, and mock CRUD topology. Request
+and response models load lazily from <code>models/&lt;group&gt;.py</code> through
+<code>model_index.json</code>. Each route operates on <code>SQLiteMockStore</code> by default, with
+<code>shared-memory</code> and <code>dict</code> backends available through <code>PROXMOX_MOCK_STORE</code>.</p>
 <h3 id="schemapy-schema-utilities"><code>schema.py</code> — Schema Utilities<a class="headerlink" href="#schemapy-schema-utilities" title="Permanent link">&para;</a></h3>
 <p><code>load_proxmox_schema(version)</code> loads the pre-generated OpenAPI JSON from <code>generated/proxmox/&lt;version&gt;/openapi.json</code>.</p>
 <h2 id="code-generation-pipeline">Code Generation Pipeline<a class="headerlink" href="#code-generation-pipeline" title="Permanent link">&para;</a></h2>
@@ -2796,29 +2802,28 @@
 </span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>      ↓
 </span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>[4. Pydantic Builder] - Generate models
 </span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>      ↓
-</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>pydantic_models.py
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>pydantic_models.py + models/&lt;group&gt;.py + model_index.json
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>      ↓
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>[5. Route Metadata Builder] - Precompute route dispatcher inputs
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>      ↓
+</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>route_metadata.json
 </span></code></pre></div>
 <h3 id="running-code-generation">Running Code Generation<a class="headerlink" href="#running-code-generation" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.proxmox_codegen</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxCodegenPipeline</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.proxmox_codegen</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_proxmox_codegen_bundle</span>
 </span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="c1"># Initialize pipeline</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">pipeline</span> <span class="o">=</span> <span class="n">ProxmoxCodegenPipeline</span><span class="p">(</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">proxmox_url</span><span class="o">=</span><span class="s2">&quot;https://proxmox.example.com:8006&quot;</span><span class="p">,</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="n">username</span><span class="o">=</span><span class="s2">&quot;root@pam&quot;</span><span class="p">,</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="p">)</span>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="c1"># Run full pipeline</span>
-</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="k">await</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run_full_pipeline</span><span class="p">(</span>
-</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
-</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.2&quot;</span><span class="p">,</span>
-</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="p">)</span>
-</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>
-</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="c1"># Output:</span>
-</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="c1"># - output/raw_capture.json</span>
-</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="c1"># - output/openapi.json</span>
-</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="c1"># - output/pydantic_models.py</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="n">bundle</span> <span class="o">=</span> <span class="n">generate_proxmox_codegen_bundle</span><span class="p">(</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.2&quot;</span><span class="p">,</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="n">worker_count</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="c1"># Output:</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="c1"># - output/9.2/raw_capture.json</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="c1"># - output/9.2/openapi.json</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="c1"># - output/9.2/pydantic_models.py</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="c1"># - output/9.2/route_metadata.json</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="c1"># - output/9.2/model_index.json</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="c1"># - output/9.2/models/&lt;group&gt;.py</span>
 </span></code></pre></div>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <h3 id="test-structure">Test Structure<a class="headerlink" href="#test-structure" title="Permanent link">&para;</a></h3>

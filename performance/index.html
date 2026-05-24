@@ -1473,6 +1473,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#v008-performance-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.0.8 Performance Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#startup-time" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1500,6 +1511,17 @@
     <span class="md-ellipsis">
       
         Generated route metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lazy-pydantic-model-shards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lazy Pydantic model shards
       
     </span>
   </a>
@@ -1681,6 +1703,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Runtime Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-not-a-custom-rustpyo3-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not a custom Rust/PyO3 extension?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1710,6 +1749,17 @@
     <span class="md-ellipsis">
       
         Regex Pre-compilation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ci-and-packaging-guards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI and Packaging Guards
       
     </span>
   </a>
@@ -1992,6 +2042,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#v008-performance-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v0.0.8 Performance Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#startup-time" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2019,6 +2080,17 @@
     <span class="md-ellipsis">
       
         Generated route metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lazy-pydantic-model-shards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lazy Pydantic model shards
       
     </span>
   </a>
@@ -2200,6 +2272,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Runtime Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-not-a-custom-rustpyo3-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not a custom Rust/PyO3 extension?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2229,6 +2318,17 @@
     <span class="md-ellipsis">
       
         Regex Pre-compilation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ci-and-packaging-guards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI and Packaging Guards
       
     </span>
   </a>
@@ -2317,8 +2417,59 @@
 
 
 <h1 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h1>
-<p>This document describes the performance characteristics of proxmox-sdk and the optimisations applied to startup time, per-request throughput, and the SDK hot paths.</p>
+<p>This document describes the performance characteristics of proxmox-sdk and the
+optimisations applied to startup time, per-request throughput, and the SDK hot
+paths. It focuses on the v0.0.8 performance work: generated route metadata,
+lazy Pydantic model shards, SQLite/WAL mock state, optional faster JSON
+serialization, and the decision to keep native acceleration at the ASGI server
+boundary through the Granian Docker image.</p>
+<p>The short version: proxmox-sdk stays Python-first internally. The largest wins
+came from doing less work at startup and from changing the mock-state storage
+shape. A custom Rust/PyO3 extension would add packaging and maintenance cost
+without addressing the largest bottlenecks that were measured.</p>
 <hr />
+<h2 id="v008-performance-summary">v0.0.8 Performance Summary<a class="headerlink" href="#v008-performance-summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Change</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Route registration</td>
+<td>Load generated <code>route_metadata.json</code> instead of rebuilding topology from OpenAPI</td>
+<td>Startup avoids repeated topology, path, and child-relationship derivation</td>
+</tr>
+<tr>
+<td>Pydantic models</td>
+<td>Lazy-load <code>models/&lt;group&gt;.py</code> shards using <code>model_index.json</code></td>
+<td>App import no longer executes the full aggregate <code>pydantic_models.py</code> module</td>
+</tr>
+<tr>
+<td>Mock state</td>
+<td>Default to SQLite rows in WAL mode</td>
+<td>Avoids whole-state JSON serialization under a process-wide lock</td>
+</tr>
+<tr>
+<td>Serialization</td>
+<td>Use <code>orjson</code> when installed, stdlib <code>json</code> otherwise</td>
+<td>Faster payload blob encoding without custom native code</td>
+</tr>
+<tr>
+<td>Server runtime</td>
+<td>Keep using the Granian Docker variant for Rust ASGI/TLS</td>
+<td>Native HTTP server gains without changing package internals</td>
+</tr>
+<tr>
+<td>CI guards</td>
+<td>Verify metadata/model indexes for every supported schema tag</td>
+<td>Prevents stale generated artifacts from shipping</td>
+</tr>
+</tbody>
+</table>
 <h2 id="startup-time">Startup Time<a class="headerlink" href="#startup-time" title="Permanent link">&para;</a></h2>
 <h3 id="lazy-package-imports">Lazy package imports<a class="headerlink" href="#lazy-package-imports" title="Permanent link">&para;</a></h3>
 <p><code>import proxmox_sdk</code> no longer constructs any FastAPI app or imports the SDK. All top-level exports are resolved on first attribute access via <code>__getattr__</code>. This means:</p>
@@ -2327,10 +2478,10 @@
 <li>The <code>app</code> and <code>mock_app</code> attributes are only materialised when accessed (e.g. by uvicorn).</li>
 </ul>
 <h3 id="generated-route-metadata">Generated route metadata<a class="headerlink" href="#generated-route-metadata" title="Permanent link">&para;</a></h3>
-<p>675 mock routes are registered at startup for the Proxmox VE 9.2 schema. Runtime
-registration now prefers pre-generated <code>route_metadata.json</code> artifacts, so it
-does not rebuild topology, parameter maps, mounted paths, model names, and child
-collection relationships from OpenAPI on every app import.</p>
+<p>675 operations across 449 Proxmox VE 9.2 paths are registered at startup.
+Runtime registration now prefers pre-generated <code>route_metadata.json</code> artifacts,
+so it does not rebuild topology, parameter maps, mounted paths, model names, and
+child collection relationships from OpenAPI on every app import.</p>
 <table>
 <thead>
 <tr>
@@ -2342,8 +2493,8 @@ collection relationships from OpenAPI on every app import.</p>
 <tbody>
 <tr>
 <td>Child path discovery</td>
-<td>O(P²) scan — ~417K iterations for 646 paths</td>
-<td>O(P) single-pass index, ~646 iterations</td>
+<td>O(P²) scan across every path pair</td>
+<td>O(P) single-pass index during codegen</td>
 </tr>
 <tr>
 <td>Schema fingerprint</td>
@@ -2368,10 +2519,50 @@ collection relationships from OpenAPI on every app import.</p>
 <li><code>model_index.json</code> — operation-to-model and operation-to-shard lookup.</li>
 <li><code>models/&lt;group&gt;.py</code> — lazy Pydantic model shards grouped by first API path segment.</li>
 </ul>
+<p>The runtime loading path is:</p>
+<ol>
+<li><code>register_generated_proxmox_mock_routes()</code> loads the bundled OpenAPI document
+   for the selected <code>PROXMOX_MOCK_SCHEMA_VERSION</code>.</li>
+<li>It calls <code>load_route_metadata(version_tag)</code>.</li>
+<li>If <code>route_metadata.json</code> is present, route registration iterates the metadata
+   routes and builds lightweight FastAPI dispatcher closures.</li>
+<li>Each dispatcher uses the precomputed mounted path, operation ID, parameter
+   metadata, request schema, response schema, and mock topology.</li>
+<li>The generated OpenAPI document is merged directly into <code>/openapi.json</code>.</li>
+</ol>
 <p>FastAPI routes are registered as lightweight request dispatchers and excluded
 from automatic schema generation. The application merges the bundled generated
 OpenAPI paths into <code>/openapi.json</code>, preserving Swagger/ReDoc detail without
 importing every generated model at startup.</p>
+<p>If metadata is missing, the route builder falls back to the older OpenAPI
+walk. That fallback is intentionally retained for development and compatibility,
+but the shipped package and CI-tested schemas use the metadata path.</p>
+<h3 id="lazy-pydantic-model-shards">Lazy Pydantic model shards<a class="headerlink" href="#lazy-pydantic-model-shards" title="Permanent link">&para;</a></h3>
+<p>The aggregate <code>pydantic_models.py</code> file still ships for compatibility, but it is
+no longer the primary startup path. The codegen pipeline also writes
+<code>models/&lt;group&gt;.py</code> files and <code>model_index.json</code>:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxmox_sdk/generated/proxmox/latest/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── openapi.json
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── pydantic_models.py       # compatibility aggregate
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── route_metadata.json      # route registration input
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── model_index.json         # operation -&gt; shard/model lookup
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>└── models/
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    ├── access.py
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    ├── cluster.py
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    ├── nodes.py
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    ├── pools.py
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    ├── storage.py
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    └── version.py
+</span></code></pre></div>
+<p>When a route needs a request or response model, the runtime asks
+<code>load_operation_model(version_tag, operation_id, role)</code>. That function reads the
+operation entry from <code>model_index.json</code>, imports only the matching
+<code>models/&lt;group&gt;.py</code> shard, rebuilds models in that module, and returns the
+specific class. Requests to <code>/api2/json/nodes</code> therefore import the <code>nodes</code>
+shard and do not import the aggregate module.</p>
+<p>The behavior is covered by <code>tests/mock/test_routes.py</code>, which asserts that
+loading <code>get_nodes</code> imports <code>proxmox_sdk._generated_models.&lt;tag&gt;.nodes</code> and
+does not import the aggregate module.</p>
 <hr />
 <h2 id="per-request-throughput-mock-mode">Per-Request Throughput (Mock Mode)<a class="headerlink" href="#per-request-throughput-mock-mode" title="Permanent link">&para;</a></h2>
 <h3 id="sqlitewal-state-store">SQLite/WAL state store<a class="headerlink" href="#sqlitewal-state-store" title="Permanent link">&para;</a></h3>
@@ -2380,14 +2571,27 @@ importing every generated model at startup.</p>
 collection members, and tombstones as separate SQLite rows instead of serialising
 the entire mock state into one shared-memory JSON blob for every read/write.</p>
 <p>Configuration:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">PROXMOX_MOCK_STORE</span><span class="o">=</span>sqlite<span class="w">              </span><span class="c1"># default</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nv">PROXMOX_MOCK_STATE_PATH</span><span class="o">=</span>/tmp/mock.db<span class="w">   </span><span class="c1"># optional explicit DB path</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nv">PROXMOX_MOCK_STORE</span><span class="o">=</span>shared-memory<span class="w">       </span><span class="c1"># legacy shared-memory backend</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">PROXMOX_MOCK_STORE</span><span class="o">=</span>dict<span class="w">                </span><span class="c1"># process-local test fallback</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">PROXMOX_MOCK_STORE</span><span class="o">=</span>sqlite<span class="w">              </span><span class="c1"># default</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">PROXMOX_MOCK_STATE_PATH</span><span class="o">=</span>/tmp/mock.db<span class="w">   </span><span class="c1"># optional explicit DB path</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">PROXMOX_MOCK_STORE</span><span class="o">=</span>shared-memory<span class="w">       </span><span class="c1"># legacy shared-memory backend</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nv">PROXMOX_MOCK_STORE</span><span class="o">=</span>dict<span class="w">                </span><span class="c1"># process-local test fallback</span>
 </span></code></pre></div>
 <p>SQLite runs in WAL mode with a per-process connection and still resets state
-when the loaded schema fingerprint changes. Payload blobs use <code>orjson</code> when it
-is installed, falling back to the standard <code>json</code> module otherwise.</p>
+when the loaded schema fingerprint changes. Instead of storing one global JSON
+object, it stores separate rows for:</p>
+<ul>
+<li>scalar/object resources</li>
+<li>collection members</li>
+<li>tombstones for deleted resources</li>
+<li>metadata, including the active schema fingerprint</li>
+</ul>
+<p>This matters more than Python-versus-Rust serialization for realistic mock
+state sizes. Whole-state JSON serialization under a lock makes every request
+pay for unrelated mock data. Row-level storage keeps reads and writes scoped to
+the resource path being accessed.</p>
+<p>Payload blobs use <code>orjson</code> when it is installed, falling back to the standard
+<code>json</code> module otherwise. This is the preferred native-speed JSON path before
+considering custom PyO3 serialization.</p>
 <h3 id="shared-memory-locking">Shared-memory locking<a class="headerlink" href="#shared-memory-locking" title="Permanent link">&para;</a></h3>
 <p>The legacy shared-memory backend remains available and is backed by a shared-memory segment protected by a filesystem lock (<code>fcntl.flock</code>).</p>
 <table>
@@ -2419,31 +2623,31 @@ is installed, falling back to the standard <code>json</code> module otherwise.</
 <h3 id="url-construction-httpspy">URL construction (<code>https.py</code>)<a class="headerlink" href="#url-construction-httpspy" title="Permanent link">&para;</a></h3>
 <p><code>_url_for()</code> is called on every API request to join the base URL with the request path. Previously it re-parsed <code>self._base_url</code> with <code>urlsplit</code>/<code>urlunsplit</code> on every call.</p>
 <p>Now the components <code>(scheme, netloc, base_path)</code> are parsed once in <code>__init__</code> and reused:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># __init__</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">_parsed</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span><span class="p">)</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_scheme</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">scheme</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_netloc</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">netloc</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># _url_for (called per-request)</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">joined</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">return</span> <span class="n">urlunsplit</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_scheme</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_netloc</span><span class="p">,</span> <span class="n">joined</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># __init__</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">_parsed</span> <span class="o">=</span> <span class="n">urlsplit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span><span class="p">)</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_scheme</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">scheme</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_netloc</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">netloc</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">=</span> <span class="n">_parsed</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1"># _url_for (called per-request)</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="n">joined</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">return</span> <span class="n">urlunsplit</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_scheme</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_netloc</span><span class="p">,</span> <span class="n">joined</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
 </span></code></pre></div>
 <p><code>posixpath</code> is now a top-level module import instead of a deferred <code>import posixpath</code> inside the method.</p>
 <h3 id="path-joining-resourcepy">Path joining (<code>resource.py</code>)<a class="headerlink" href="#path-joining-resourcepy" title="Permanent link">&para;</a></h3>
 <p><code>_url_join()</code> is called on every attribute navigation step (<code>proxmox.nodes</code>, <code>.qemu</code>, etc.). A fast path now avoids <code>urlsplit</code>/<code>urlunsplit</code> for plain path strings (no <code>://</code>), which is the common case for SDK usage:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_url_join</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="k">return</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="c1"># full URL parsing only for absolute URLs</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="o">...</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_url_join</span><span class="p">(</span><span class="n">base</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">if</span> <span class="s2">&quot;://&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="k">return</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base</span> <span class="ow">or</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="c1"># full URL parsing only for absolute URLs</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="o">...</span>
 </span></code></pre></div>
 <h3 id="none-filtering-resourcepy">None filtering (<code>resource.py</code>)<a class="headerlink" href="#none-filtering-resourcepy" title="Permanent link">&para;</a></h3>
 <p><code>_filter_none()</code> is called once per HTTP method to strip <code>None</code> values from params/data dicts. A fast path skips the dict comprehension when no <code>None</code> values are present (common for well-formed requests):</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_filter_none</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="k">return</span> <span class="n">d</span>  <span class="c1"># avoid allocation</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_filter_none</span><span class="p">(</span><span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>        <span class="k">return</span> <span class="n">d</span>  <span class="c1"># avoid allocation</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </span></code></pre></div>
 <hr />
 <h2 id="task-polling">Task Polling<a class="headerlink" href="#task-polling" title="Permanent link">&para;</a></h2>
@@ -2453,7 +2657,7 @@ is installed, falling back to the standard <code>json</code> module otherwise.</
 <li>Long tasks (VM migrations, backups) generated many unnecessary API calls.</li>
 </ul>
 <p>It now uses <strong>exponential backoff</strong>:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>1s → 2s → 4s → 8s → 16s → 30s (cap)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>1s → 2s → 4s → 8s → 16s → 30s (cap)
 </span></code></pre></div>
 <p>Timeout tracking uses <code>time.monotonic()</code> for accurate wall-clock measurement instead of cumulative addition (which underestimates actual elapsed time by the duration of each HTTP request).</p>
 <hr />
@@ -2496,40 +2700,63 @@ is installed, falling back to the standard <code>json</code> module otherwise.</
 </table>
 <h3 id="backoff-strategy">Backoff strategy<a class="headerlink" href="#backoff-strategy" title="Permanent link">&para;</a></h3>
 <p>Retries use exponential backoff:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>attempt 1: backoff * 2⁰  → 0.5s
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>attempt 2: backoff * 2¹  → 1.0s
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>attempt 3: backoff * 2²  → 2.0s
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>…                          (capped at 30s)
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>attempt 1: backoff * 2⁰  → 0.5s
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>attempt 2: backoff * 2¹  → 1.0s
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>attempt 3: backoff * 2²  → 2.0s
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>…                          (capped at 30s)
 </span></code></pre></div>
 <p>Default <code>max_retries=0</code> preserves existing behaviour with no delay or overhead on the hot path.</p>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>       <span class="c1"># 3 retries = 4 total attempts</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">retry_backoff</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>   <span class="c1"># 0.5s, 1.0s, 2.0s</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>       <span class="c1"># 3 retries = 4 total attempts</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">retry_backoff</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>   <span class="c1"># 0.5s, 1.0s, 2.0s</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>Or via environment:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nv">PROXMOX_API_RETRIES</span><span class="o">=</span><span class="m">3</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nv">PROXMOX_API_RETRY_BACKOFF</span><span class="o">=</span><span class="m">0</span>.5
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nv">PROXMOX_API_RETRIES</span><span class="o">=</span><span class="m">3</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nv">PROXMOX_API_RETRY_BACKOFF</span><span class="o">=</span><span class="m">0</span>.5
 </span></code></pre></div>
 <hr />
 <h2 id="runtime-server">Runtime Server<a class="headerlink" href="#runtime-server" title="Permanent link">&para;</a></h2>
 <p>The project keeps native server acceleration at the ASGI boundary. Use the
 existing Granian Docker variant when you want a Rust-based HTTP/TLS server
 without adding PyO3 or native extensions to the SDK internals:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>emersonfelipesp/proxmox-sdk:latest-granian
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">8443</span>:8000<span class="w"> </span>emersonfelipesp/proxmox-sdk:latest-granian
 </span></code></pre></div>
 <p>The SDK, route metadata, lazy model loading, and mock state code remain pure
 Python so source installs and generated artifacts stay simple.</p>
+<h3 id="why-not-a-custom-rustpyo3-extension">Why not a custom Rust/PyO3 extension?<a class="headerlink" href="#why-not-a-custom-rustpyo3-extension" title="Permanent link">&para;</a></h3>
+<p>The measured bottlenecks were not "Python loops are slow" in isolation. They
+were:</p>
+<ul>
+<li>repeated OpenAPI topology work during startup</li>
+<li>eager import and execution of the full generated model module</li>
+<li>whole-state JSON serialization under locks</li>
+<li>ASGI/server overhead that is already handled by Granian</li>
+</ul>
+<p>PyO3 would not remove the need to generate route metadata, shard models, or
+change the mock-state storage shape. It would also introduce native build
+requirements for a package that currently installs as pure Python. The current
+policy is therefore:</p>
+<ol>
+<li>pre-generate static route metadata where the schema is already known</li>
+<li>lazy-load generated Python models by route group</li>
+<li>use proven serializers such as <code>orjson</code> or <code>msgspec</code> before custom native code</li>
+<li>fix the storage design if state grows beyond SQLite/WAL needs</li>
+<li>use Granian for Rust-native ASGI/server wins</li>
+</ol>
+<p>Revisit PyO3 only if profiling shows a narrow, stable CPU hotspot that remains
+after those design issues are addressed and cannot be solved with an existing
+native dependency.</p>
 <hr />
 <h2 id="config-loading">Config Loading<a class="headerlink" href="#config-loading" title="Permanent link">&para;</a></h2>
 <p><code>ProxmoxConfig.from_env()</code> previously copied the entire <code>os.environ</code> dict (50–200+ keys) on every call. It now reads only the ~20 specific keys it needs:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">_KEYS</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="s2">&quot;PROXMOX_API_MODE&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_TOKEN_ID&quot;</span><span class="p">,</span> <span class="o">...</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">)</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">env_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_KEYS</span> <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">_KEYS</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="s2">&quot;PROXMOX_API_MODE&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROXMOX_API_TOKEN_ID&quot;</span><span class="p">,</span> <span class="o">...</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">)</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">env_config</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">_KEYS</span> <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
 </span></code></pre></div>
 <p><code>yaml</code> (PyYAML) is only imported when a YAML config file is actually present, avoiding a heavy import on every startup.</p>
 <hr />
@@ -2538,8 +2765,39 @@ Python so source installs and generated artifacts stay simple.</p>
 <hr />
 <h2 id="regex-pre-compilation">Regex Pre-compilation<a class="headerlink" href="#regex-pre-compilation" title="Permanent link">&para;</a></h2>
 <p>The pattern <code>r"(^|_)name$"</code> used in semantic mock value generation was previously compiled on every call via <code>re.search(pattern, hint)</code>. It is now compiled once at module load:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">_RE_NAME_HINT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(^|_)name$&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">_RE_NAME_HINT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(^|_)name$&quot;</span><span class="p">)</span>
 </span></code></pre></div>
+<hr />
+<h2 id="ci-and-packaging-guards">CI and Packaging Guards<a class="headerlink" href="#ci-and-packaging-guards" title="Permanent link">&para;</a></h2>
+<p>The generated performance artifacts are part of the package contract. They are
+included through <code>pyproject.toml</code> package data:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">[tool.setuptools.package-data]</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">proxmox_sdk</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="s2">&quot;generated/proxmox/**/*.json&quot;</span><span class="p">,</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="s2">&quot;generated/proxmox/**/*.py&quot;</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">]</span>
+</span></code></pre></div>
+<p>The integrity tests check all supported schema tags (<code>latest</code>, <code>9.2</code>, and
+<code>9.1.11</code>):</p>
+<ul>
+<li><code>openapi.json</code> SHA matches the generated model metadata</li>
+<li><code>route_metadata.json</code> source SHA matches <code>openapi.json</code></li>
+<li>route count and path count match the OpenAPI document</li>
+<li>every operation in <code>route_metadata.json</code> is covered by <code>model_index.json</code></li>
+<li>every shard listed by <code>model_index.json</code> exists under <code>models/</code></li>
+</ul>
+<p>Run the focused guard suite locally with:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_generated_integrity.py<span class="w"> </span>tests/mock/test_routes.py
+</span></code></pre></div>
+<p>The GitHub CI and release workflows run the full test suite across:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span>latest
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.2
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.1.11
+</span></code></pre></div>
+<p>The scheduled/manual schema update workflow also runs <code>proxmox-sdk-codegen</code>.
+That command writes <code>route_metadata.json</code>, <code>model_index.json</code>, and
+<code>models/&lt;group&gt;.py</code> for both the package-internal tree and the source-of-record
+<code>generated/proxmox/</code> tree.</p>
 <hr />
 <h2 id="performance-characteristics-updated">Performance Characteristics (Updated)<a class="headerlink" href="#performance-characteristics-updated" title="Permanent link">&para;</a></h2>
 <h3 id="mock-mode">Mock Mode<a class="headerlink" href="#mock-mode" title="Permanent link">&para;</a></h3>
@@ -2626,26 +2884,26 @@ Python so source installs and generated artifacts stay simple.</p>
 <hr />
 <h2 id="profiling-tips">Profiling Tips<a class="headerlink" href="#profiling-tips" title="Permanent link">&para;</a></h2>
 <p>To measure startup time:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="s2">import time</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="s2">t0 = time.perf_counter()</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="s2">from proxmox_sdk.main import app</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="s2">print(f&#39;app ready in {time.perf_counter() - t0:.3f}s&#39;)</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="s2">&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="s2">import time</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="s2">t0 = time.perf_counter()</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="s2">from proxmox_sdk.main import app</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="s2">print(f&#39;app ready in {time.perf_counter() - t0:.3f}s&#39;)</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="s2">&quot;</span>
 </span></code></pre></div>
 <p>To measure mock route registration specifically:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="s2">import time, json</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="s2">from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="s2">from proxmox_sdk.schema import load_proxmox_generated_openapi</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="s2">from fastapi import FastAPI</span>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="s2">doc = load_proxmox_generated_openapi()</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="s2">app = FastAPI()</span>
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="s2">t0 = time.perf_counter()</span>
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="s2">register_generated_proxmox_mock_routes(app, openapi_document=doc)</span>
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="s2">print(f&#39;route registration: {time.perf_counter() - t0:.3f}s&#39;)</span>
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="s2">&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="s2">import time, json</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="s2">from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="s2">from proxmox_sdk.schema import load_proxmox_generated_openapi</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="s2">from fastapi import FastAPI</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="s2">doc = load_proxmox_generated_openapi()</span>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="s2">app = FastAPI()</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="s2">t0 = time.perf_counter()</span>
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="s2">register_generated_proxmox_mock_routes(app, openapi_document=doc)</span>
+</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="s2">print(f&#39;route registration: {time.perf_counter() - t0:.3f}s&#39;)</span>
+</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="s2">&quot;</span>
 </span></code></pre></div>
 
 
