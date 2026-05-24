@@ -1166,10 +1166,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-dynamic-route-generation" class="md-nav__link">
+  <a href="#2-metadata-driven-route-registration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Dynamic Route Generation
+        2. Metadata-Driven Route Registration
       
     </span>
   </a>
@@ -1199,10 +1199,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-in-memory-mock-state" class="md-nav__link">
+  <a href="#5-sqlite-mock-state" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. In-Memory Mock State
+        5. SQLite Mock State
       
     </span>
   </a>
@@ -1953,10 +1953,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-dynamic-route-generation" class="md-nav__link">
+  <a href="#2-metadata-driven-route-registration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Dynamic Route Generation
+        2. Metadata-Driven Route Registration
       
     </span>
   </a>
@@ -1986,10 +1986,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-in-memory-mock-state" class="md-nav__link">
+  <a href="#5-sqlite-mock-state" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. In-Memory Mock State
+        5. SQLite Mock State
       
     </span>
   </a>
@@ -2294,7 +2294,7 @@
 </tr>
 <tr>
 <td><strong>Data persistence</strong></td>
-<td>In-memory (reset on restart)</td>
+<td>SQLite/WAL mock state by default</td>
 <td>Real Proxmox state</td>
 </tr>
 <tr>
@@ -2309,19 +2309,35 @@
 </tr>
 <tr>
 <td><strong>Startup time</strong></td>
-<td>~1 s</td>
-<td>~500 ms</td>
+<td>~2.1 s full app import, ~0.75 s generated route registration</td>
+<td>~500 ms + route registration</td>
 </tr>
 </tbody>
 </table>
-<h3 id="2-dynamic-route-generation">2. Dynamic Route Generation<a class="headerlink" href="#2-dynamic-route-generation" title="Permanent link">&para;</a></h3>
-<p>Rather than hardcoding 646 routes, the server registers them at startup from the OpenAPI schema. This means schema updates automatically produce new routes with zero manual work. Startup takes ~1 second for schema loading plus route generation.</p>
+<h3 id="2-metadata-driven-route-registration">2. Metadata-Driven Route Registration<a class="headerlink" href="#2-metadata-driven-route-registration" title="Permanent link">&para;</a></h3>
+<p>Rather than hardcoding 675 routes or rebuilding all route topology at runtime,
+the codegen pipeline emits <code>route_metadata.json</code>, <code>model_index.json</code>, and
+route-group model shards under each <code>generated/proxmox/&lt;version&gt;/</code> directory.
+The server registers lightweight FastAPI dispatchers from this metadata and
+lazy-loads the matching Pydantic shard on the first request that needs
+request/response validation. The generated OpenAPI document is merged into the
+app docs directly, so Swagger/ReDoc stay complete without importing every model
+at startup.</p>
 <h3 id="3-pre-generated-schemas">3. Pre-Generated Schemas<a class="headerlink" href="#3-pre-generated-schemas" title="Permanent link">&para;</a></h3>
-<p>The OpenAPI schema and Pydantic models are committed to the repository so mock mode works completely offline without a Proxmox server. Each version (e.g., <code>9.1.11</code>) is stored independently under <code>generated/proxmox/</code>; CI ships both <code>9.1.11/</code> and a <code>latest/</code> mirror.</p>
+<p>The OpenAPI schema, aggregate Pydantic models, lazy model shards, model index,
+and route metadata are committed to the repository so mock mode works
+completely offline without a Proxmox server. Each version (e.g., <code>9.1.11</code>) is
+stored independently under <code>generated/proxmox/</code>; CI ships both <code>9.1.11/</code> and a
+<code>latest</code> mirror.</p>
 <h3 id="4-full-requestresponse-validation">4. Full Request/Response Validation<a class="headerlink" href="#4-full-requestresponse-validation" title="Permanent link">&para;</a></h3>
 <p>Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.</p>
-<h3 id="5-in-memory-mock-state">5. In-Memory Mock State<a class="headerlink" href="#5-in-memory-mock-state" title="Permanent link">&para;</a></h3>
-<p>Mock state uses <code>SharedMemoryMockStore</code> — a dict-based in-memory store with shared read locks (<code>LOCK_SH</code>) and exclusive write locks (<code>LOCK_EX</code>) for thread safety. No database dependency, zero configuration, trivially resettable. It uses a materialised <code>set</code> for deleted-item checks (<code>O(1)</code> membership test).</p>
+<h3 id="5-sqlite-mock-state">5. SQLite Mock State<a class="headerlink" href="#5-sqlite-mock-state" title="Permanent link">&para;</a></h3>
+<p>Mock state uses <code>SQLiteMockStore</code> by default. It stores objects, collection
+members, metadata, and tombstones as separate rows in a tempdir-scoped SQLite
+database using WAL mode, which avoids whole-state JSON serialization on every
+request. <code>SharedMemoryMockStore</code> and <code>DictMockStore</code> remain available through
+<code>PROXMOX_MOCK_STORE=shared-memory|dict</code> for compatibility and specialized test
+cases. Value blobs use <code>orjson</code> when installed, with a stdlib JSON fallback.</p>
 <h3 id="6-aiohttp-for-https-transport">6. aiohttp for HTTPS Transport<a class="headerlink" href="#6-aiohttp-for-https-transport" title="Permanent link">&para;</a></h3>
 <p>The HTTPS backend uses <code>aiohttp</code> for its native async/await support, mature session pooling, and robust SSL/TLS handling. The session is created lazily on first request and reused across all subsequent calls.</p>
 <hr />
@@ -2353,13 +2369,13 @@
 <tbody>
 <tr>
 <td>Startup time</td>
-<td>~1 s</td>
-<td>~500 ms</td>
+<td>~2.1 s full app import</td>
+<td>Proxmox latency + route registration</td>
 </tr>
 <tr>
 <td>Request latency</td>
-<td>&lt;5 ms</td>
-<td>Proxmox latency + ~20–100 ms</td>
+<td>~4 ms local mock GET smoke</td>
+<td>Proxmox latency + ~10–20 ms validation overhead</td>
 </tr>
 <tr>
 <td>Memory footprint</td>
@@ -2376,8 +2392,10 @@
 <p>Key optimizations:</p>
 <ul>
 <li><strong>Lazy package imports</strong> — <code>import proxmox_sdk</code> does not construct any FastAPI app</li>
+<li><strong>Generated route metadata</strong> — startup loads route metadata instead of rebuilding topology and signatures</li>
+<li><strong>Lazy model shards</strong> — Pydantic route-group shards load only when a request needs validation</li>
+<li><strong>SQLite/WAL mock state</strong> — mock CRUD stores rows per object/member instead of serializing one whole-state blob</li>
 <li><strong>Cached URL components</strong> — <code>HttpsBackend</code> caches <code>(scheme, netloc, base_path)</code> to skip per-request URL parsing</li>
-<li><strong>Shared read locks</strong> — concurrent GETs on mock state do not block each other</li>
 <li><strong>Schema fingerprint caching</strong> — <code>ProxmoxSchemaValue.fingerprint</code> is a <code>@cached_property</code></li>
 </ul>
 <p>See <a href="../performance/">Performance</a> for the complete optimization reference.</p>
