@@ -183,16 +183,19 @@ proxmox-sdk/
 │   │
 │   ├── mock/                     # Mock API implementation
 │   │   ├── app.py                # Mock FastAPI app
-│   │   ├── routes.py             # Dynamic route registration with CRUD
-│   │   ├── state.py              # SharedMemoryMockStore (in-memory)
+│   │   ├── routes.py             # Metadata-driven route registration with CRUD
+│   │   ├── state.py              # SQLite/shared-memory/dict mock state stores
 │   │   ├── schema_helpers.py     # Mock value generation
 │   │   └── loader.py             # Mock data loading from JSON/YAML
 │   │
 │   └── generated/                # Pre-generated schemas (committed)
 │       └── proxmox/
 │           └── latest/
-│               ├── openapi.json        # 5.2MB OpenAPI 3.1 schema
-│               └── pydantic_models.py  # Generated Pydantic v2 models
+│               ├── openapi.json        # OpenAPI 3.1 schema
+│               ├── route_metadata.json # Runtime route metadata
+│               ├── model_index.json    # Operation-to-model shard map
+│               ├── pydantic_models.py  # Compatibility aggregate models
+│               └── models/             # Lazy route-group Pydantic shards
 │
 ├── tests/                        # Test suite
 ├── docs/                         # MkDocs documentation

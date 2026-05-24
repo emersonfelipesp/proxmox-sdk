@@ -19,8 +19,10 @@ from proxmox_sdk.proxmox_codegen.models import GenerationBundle
 from proxmox_sdk.proxmox_codegen.normalize import normalize_captured_endpoints
 from proxmox_sdk.proxmox_codegen.openapi_generator import generate_openapi_schema
 from proxmox_sdk.proxmox_codegen.pydantic_generator import (
+    generate_pydantic_model_shards_from_openapi,
     generate_pydantic_models_from_openapi,
 )
+from proxmox_sdk.proxmox_codegen.route_metadata import generate_route_metadata
 from proxmox_sdk.proxmox_codegen.security import validate_source_url, validate_version_tag
 from proxmox_sdk.proxmox_codegen.utils import dump_json, ensure_parent, utc_now_iso
 
@@ -287,11 +289,23 @@ async def generate_proxmox_codegen_bundle_async(
         server_url="/api2/json",
     )
 
-    openapi_canonical = json.dumps(openapi, indent=2, sort_keys=True)
+    openapi_canonical = json.dumps(openapi, indent=2, sort_keys=True) + "\n"
     source_sha256 = hashlib.sha256(openapi_canonical.encode("utf-8")).hexdigest()
     generated_at = utc_now_iso()
 
     models_code = generate_pydantic_models_from_openapi(
+        openapi,
+        version_tag=cleaned_version_tag,
+        source_sha256=source_sha256,
+        generated_at=generated_at,
+    )
+    model_shards, model_index = generate_pydantic_model_shards_from_openapi(
+        openapi,
+        version_tag=cleaned_version_tag,
+        source_sha256=source_sha256,
+        generated_at=generated_at,
+    )
+    route_metadata = generate_route_metadata(
         openapi,
         version_tag=cleaned_version_tag,
         source_sha256=source_sha256,
@@ -319,12 +333,20 @@ async def generate_proxmox_codegen_bundle_async(
         raw_path = base / "raw_capture.json"
         openapi_path = base / "openapi.json"
         models_path = base / "pydantic_models.py"
+        metadata_path = base / "route_metadata.json"
+        model_index_path = base / "model_index.json"
+        model_shards_dir = base / "models"
 
         dump_json(raw_path, bundle.capture)
         ensure_parent(openapi_path)
         openapi_path.write_text(openapi_canonical, encoding="utf-8")
         ensure_parent(models_path)
         models_path.write_text(bundle.pydantic_models_code, encoding="utf-8")
+        dump_json(metadata_path, route_metadata)
+        dump_json(model_index_path, model_index)
+        model_shards_dir.mkdir(parents=True, exist_ok=True)
+        for group, code in model_shards.items():
+            (model_shards_dir / f"{group}.py").write_text(code, encoding="utf-8")
 
     return bundle
 

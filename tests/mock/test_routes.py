@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import sys
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -59,3 +62,37 @@ def test_user_create_persists(client: TestClient) -> None:
     )
     assert r.status_code == 200
     assert len(client.get("/api2/json/access/users").json()) == pre_count + 1
+
+
+def test_generated_docs_include_proxmox_paths(client: TestClient) -> None:
+    body = client.get("/openapi.json").json()
+    assert "/api2/json/nodes" in body["paths"]
+    assert "/api2/json/access/users" in body["paths"]
+
+
+def test_lazy_model_loader_imports_route_group_only(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PROXMOX_MOCK_STATE_NAMESPACE", "test_lazy_model_loader")
+    monkeypatch.setenv("PROXMOX_MOCK_STORE", "dict")
+    version_tag = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", "latest")
+    module_prefix = f"proxmox_sdk._generated_models.{version_tag.replace('.', '_')}"
+    for module_name in list(sys.modules):
+        if module_name.startswith(module_prefix):
+            sys.modules.pop(module_name, None)
+    from proxmox_sdk.routes import generated_artifacts
+
+    generated_artifacts._load_model_module.cache_clear()
+
+    assert f"{module_prefix}.aggregate" not in sys.modules
+
+    model = generated_artifacts.load_operation_model(
+        version_tag,
+        "get_nodes",
+        "response",
+        group="nodes",
+        model_name="GetNodesResponse",
+    )
+
+    assert model is not None
+    assert model.__name__ == "GetNodesResponse"
+    assert f"{module_prefix}.nodes" in sys.modules
+    assert f"{module_prefix}.aggregate" not in sys.modules

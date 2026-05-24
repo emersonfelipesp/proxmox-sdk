@@ -13,24 +13,58 @@ This document describes the performance characteristics of proxmox-sdk and the o
 - CLI tools that `import proxmox_sdk` for `__version__` or SDK classes start without paying the FastAPI app construction cost.
 - The `app` and `mock_app` attributes are only materialised when accessed (e.g. by uvicorn).
 
-### Route registration
+### Generated route metadata
 
-646 mock routes are registered at startup. The critical path includes:
+675 mock routes are registered at startup for the Proxmox VE 9.2 schema. Runtime
+registration now prefers pre-generated `route_metadata.json` artifacts, so it
+does not rebuild topology, parameter maps, mounted paths, model names, and child
+collection relationships from OpenAPI on every app import.
 
 | Step | Before | After |
 |---|---|---|
 | Child path discovery | O(P²) scan — ~417K iterations for 646 paths | O(P) single-pass index, ~646 iterations |
 | Schema fingerprint | `model_dump` + `json.dumps` + `sha256` on every call | Computed once, cached as `@cached_property` |
+| Route topology | Derived from OpenAPI during startup | Loaded from `route_metadata.json` |
+| Generated Pydantic models | Full module generated and executed during startup | Route-group model shards lazy-load on first use |
 
-The `_build_direct_child_index()` function builds a `{parent_path → child_info}` dict in one pass over all paths. This index is reused for all 646 `_build_topology()` calls instead of re-scanning every time.
+The codegen pipeline writes three runtime artifacts per schema version:
+
+- `route_metadata.json` — mounted paths, operation IDs, parameter metadata, and mock topology.
+- `model_index.json` — operation-to-model and operation-to-shard lookup.
+- `models/<group>.py` — lazy Pydantic model shards grouped by first API path segment.
+
+FastAPI routes are registered as lightweight request dispatchers and excluded
+from automatic schema generation. The application merges the bundled generated
+OpenAPI paths into `/openapi.json`, preserving Swagger/ReDoc detail without
+importing every generated model at startup.
 
 ---
 
 ## Per-Request Throughput (Mock Mode)
 
+### SQLite/WAL state store
+
+The default mock state backend is now `SQLiteMockStore`, selected by
+`PROXMOX_MOCK_STORE=sqlite` or by leaving the variable unset. It stores objects,
+collection members, and tombstones as separate SQLite rows instead of serialising
+the entire mock state into one shared-memory JSON blob for every read/write.
+
+Configuration:
+
+```bash
+PROXMOX_MOCK_STORE=sqlite              # default
+PROXMOX_MOCK_STATE_PATH=/tmp/mock.db   # optional explicit DB path
+PROXMOX_MOCK_STORE=shared-memory       # legacy shared-memory backend
+PROXMOX_MOCK_STORE=dict                # process-local test fallback
+```
+
+SQLite runs in WAL mode with a per-process connection and still resets state
+when the loaded schema fingerprint changes. Payload blobs use `orjson` when it
+is installed, falling back to the standard `json` module otherwise.
+
 ### Shared-memory locking
 
-The mock state is backed by a shared-memory segment protected by a filesystem lock (`fcntl.flock`).
+The legacy shared-memory backend remains available and is backed by a shared-memory segment protected by a filesystem lock (`fcntl.flock`).
 
 | Operation | Before | After |
 |---|---|---|
@@ -157,6 +191,21 @@ PROXMOX_API_RETRY_BACKOFF=0.5
 
 ---
 
+## Runtime Server
+
+The project keeps native server acceleration at the ASGI boundary. Use the
+existing Granian Docker variant when you want a Rust-based HTTP/TLS server
+without adding PyO3 or native extensions to the SDK internals:
+
+```bash
+docker run -p 8443:8000 emersonfelipesp/proxmox-sdk:latest-granian
+```
+
+The SDK, route metadata, lazy model loading, and mock state code remain pure
+Python so source installs and generated artifacts stay simple.
+
+---
+
 ## Config Loading
 
 `ProxmoxConfig.from_env()` previously copied the entire `os.environ` dict (50–200+ keys) on every call. It now reads only the ~20 specific keys it needs:
@@ -194,9 +243,10 @@ _RE_NAME_HINT = re.compile(r"(^|_)name$")
 
 | Metric | Value |
 |---|---|
-| Startup (schema load + route registration) | ~1 s |
-| Request latency (in-memory, no lock contention) | < 5 ms |
-| Concurrent read throughput | Parallel GETs (shared lock) |
+| Startup (schema load + route registration) | ~2.1 s full app import in local smoke test |
+| Route registration only | ~0.75 s in local smoke test |
+| Request latency (SQLite/WAL, warm state) | ~4 ms via local TestClient smoke test |
+| Concurrent read throughput | SQLite WAL readers avoid whole-state JSON serialisation |
 | Memory (schema + state) | ~100 MB |
 
 ### Real Mode

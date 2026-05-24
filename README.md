@@ -110,6 +110,8 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 - `PROXMOX_API_MODE` - Set to "mock" (default) or "real"
 - `PROXMOX_MOCK_SCHEMA_VERSION` - Version tag to use (default: "latest")
 - `PROXMOX_MOCK_DATA_PATH` - Path to custom mock data file (default: "/etc/proxmox-sdk/mock-data.json")
+- `PROXMOX_MOCK_STORE` - Mock state backend: "sqlite" (default), "shared-memory", or "dict"
+- `PROXMOX_MOCK_STATE_PATH` - Optional SQLite mock-state database path
 
 ### Real Mode
 - `PROXMOX_API_MODE` - Set to "real" to enable Proxmox integration

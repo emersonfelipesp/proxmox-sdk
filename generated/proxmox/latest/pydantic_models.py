@@ -10,8 +10,8 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 GENERATED_FOR_PROXMOX_VERSION = "latest"
-GENERATED_SOURCE_SHA256 = "c777cae163cc486413495b3342fd11a5f16f67d4f80fb7a7f79fc3c1a05cbc3f"
-GENERATED_AT = "2026-05-21T13:56:45.239064+00:00"
+GENERATED_SOURCE_SHA256 = "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b"
+GENERATED_AT = "2026-05-23T21:59:00.046024+00:00"
 
 
 class ProxmoxBaseModel(BaseModel):

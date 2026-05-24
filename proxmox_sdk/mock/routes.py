@@ -7,9 +7,9 @@ import os
 from copy import deepcopy
 from dataclasses import dataclass
 from types import ModuleType
-from typing import Any
+from typing import Any, Callable
 
-from fastapi import APIRouter, Body, FastAPI, HTTPException, Path, Query
+from fastapi import APIRouter, Body, FastAPI, HTTPException, Path, Query, Request
 
 from proxmox_sdk.exception import ProxmoxOpenAPIException
 from proxmox_sdk.mock.schema_helpers import (
@@ -22,6 +22,11 @@ from proxmox_sdk.mock.schema_helpers import (
 from proxmox_sdk.mock.state import shared_mock_store
 from proxmox_sdk.proxmox_codegen.utils import extract_path_params, slugify_identifier
 from proxmox_sdk.routes._errors import with_error_translation
+from proxmox_sdk.routes.generated_artifacts import (
+    install_generated_openapi,
+    load_operation_model,
+    load_route_metadata,
+)
 from proxmox_sdk.routes.helpers import (
     SUPPORTED_METHODS as _SUPPORTED_GENERATED_METHODS,
 )
@@ -358,6 +363,225 @@ def schema_kind_from_value(value: Any) -> str:
     if value is None:
         return "none"
     return "scalar"
+
+
+def _topology_from_metadata(route: dict[str, Any]) -> RouteTopology:
+    return RouteTopology(
+        path_template=str(route["path_template"]),
+        absolute_path_template=str(route["absolute_path_template"]),
+        method=str(route["method"]),
+        operation={},
+        request_schema=route.get("request_schema")
+        if isinstance(route.get("request_schema"), dict)
+        else None,
+        response_schema=route.get("response_schema")
+        if isinstance(route.get("response_schema"), dict)
+        else None,
+        same_path_get_schema=route.get("same_path_get_schema")
+        if isinstance(route.get("same_path_get_schema"), dict)
+        else None,
+        same_path_get_kind=str(route.get("same_path_get_kind") or "none"),
+        direct_child_template=route.get("direct_child_template")
+        if isinstance(route.get("direct_child_template"), str)
+        else None,
+        absolute_direct_child_template=route.get("absolute_direct_child_template")
+        if isinstance(route.get("absolute_direct_child_template"), str)
+        else None,
+        direct_child_param=route.get("direct_child_param")
+        if isinstance(route.get("direct_child_param"), str)
+        else None,
+        direct_child_param_schema=route.get("direct_child_param_schema")
+        if isinstance(route.get("direct_child_param_schema"), dict)
+        else None,
+        parent_collection_template=route.get("parent_collection_template")
+        if isinstance(route.get("parent_collection_template"), str)
+        else None,
+        absolute_parent_collection_template=route.get("absolute_parent_collection_template")
+        if isinstance(route.get("absolute_parent_collection_template"), str)
+        else None,
+        parent_collection_item_schema=route.get("parent_collection_item_schema")
+        if isinstance(route.get("parent_collection_item_schema"), dict)
+        else None,
+    )
+
+
+def _coerce_value(value: Any, schema: dict[str, Any] | None) -> Any:
+    if value is None or not isinstance(schema, dict):
+        return value
+    schema_type = resolved_schema(schema).get("type")
+    if schema_type == "integer":
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail=f"Invalid integer value: {value!r}")
+    if schema_type == "number":
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail=f"Invalid number value: {value!r}")
+    if schema_type == "boolean":
+        if isinstance(value, bool):
+            return value
+        lowered = str(value).strip().lower()
+        if lowered in {"1", "true", "yes", "on"}:
+            return True
+        if lowered in {"0", "false", "no", "off"}:
+            return False
+        raise HTTPException(status_code=422, detail=f"Invalid boolean value: {value!r}")
+    return value
+
+
+async def _request_body_value(request: Request, request_schema: dict[str, Any] | None) -> Any:
+    if request_schema is None:
+        return None
+    body = await request.body()
+    if not body:
+        return None
+    try:
+        return await request.json()
+    except Exception:
+        raise HTTPException(status_code=422, detail="Request body must be valid JSON.")
+
+
+def _build_metadata_endpoint(
+    *,
+    route: dict[str, Any],
+    topology: RouteTopology,
+    schema_key: str,
+    namespace: str | None,
+    owner_pid: int | None,
+    version_tag: str,
+) -> Callable[..., Any]:
+    raw_parameters = route.get("parameters")
+    parameters: list[Any] = raw_parameters if isinstance(raw_parameters, list) else []
+    path_parameters = [p for p in parameters if isinstance(p, dict) and p.get("in") == "path"]
+    query_parameters = [p for p in parameters if isinstance(p, dict) and p.get("in") == "query"]
+    operation_id = str(route.get("operation_id") or "")
+    group = str(route.get("model_group") or "")
+    request_model_name = (
+        route.get("request_model") if isinstance(route.get("request_model"), str) else None
+    )
+    response_model_name = (
+        route.get("response_model") if isinstance(route.get("response_model"), str) else None
+    )
+
+    @with_error_translation(
+        method=topology.method,
+        path_template=topology.absolute_path_template,
+        message_prefix="Generated Proxmox mock route",
+        detail="Schema-driven mock execution raised an unexpected exception.",
+    )
+    async def generated_endpoint(request: Request) -> Any:
+        path_values: dict[str, Any] = {}
+        for parameter in path_parameters:
+            python_name = str(parameter.get("python_name"))
+            original_name = str(parameter.get("name"))
+            if python_name not in request.path_params:
+                raise HTTPException(
+                    status_code=422, detail=f"Missing path parameter: {original_name}"
+                )
+            path_values[original_name] = _coerce_value(
+                request.path_params[python_name],
+                parameter.get("schema") if isinstance(parameter.get("schema"), dict) else None,
+            )
+
+        query_values: dict[str, Any] = {}
+        for parameter in query_parameters:
+            original_name = str(parameter.get("name"))
+            raw_value = request.query_params.get(original_name)
+            if raw_value is None:
+                if parameter.get("required"):
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Missing required query parameter: {original_name}",
+                    )
+                continue
+            query_values[original_name] = _coerce_value(
+                raw_value,
+                parameter.get("schema") if isinstance(parameter.get("schema"), dict) else None,
+            )
+
+        body_value = await _request_body_value(request, topology.request_schema)
+        request_model = load_operation_model(
+            version_tag,
+            operation_id,
+            "request",
+            group=group,
+            model_name=request_model_name,
+        )
+        if request_model is not None and body_value is not None:
+            body_value = request_model.model_validate(body_value)
+        body_value = _normalize_body_value(body_value)
+
+        concrete_path = _render_path(topology.absolute_path_template, path_values)
+        store = shared_mock_store(
+            schema_key,
+            namespace=namespace,
+            owner_pid=owner_pid,
+        )
+
+        if topology.method == "GET":
+            result = _resolve_get_state(
+                topology,
+                store=store,
+                concrete_path=concrete_path,
+                path_values=path_values,
+                query_values=query_values,
+            )
+        else:
+            state_value = _apply_mutation(
+                topology,
+                store=store,
+                concrete_path=concrete_path,
+                path_values=path_values,
+                body_value=body_value,
+                query_values=query_values,
+            )
+            result = _build_operation_response(
+                topology,
+                concrete_path=concrete_path,
+                state_value=state_value,
+                body_value=body_value,
+                path_values=path_values,
+                query_values=query_values,
+            )
+
+        response_model = load_operation_model(
+            version_tag,
+            operation_id,
+            "response",
+            group=group,
+            model_name=response_model_name,
+        )
+        if response_model is None:
+            return result
+
+        try:
+            return response_model.model_validate(result)
+        except Exception as error:
+            fallback = merge_with_schema_defaults(
+                topology.response_schema,
+                seed=_response_seed(topology.path_template, topology.method),
+            )
+            try:
+                return response_model.model_validate(
+                    _apply_path_values(fallback, path_values, concrete_path, topology.method)
+                )
+            except Exception:
+                raise ProxmoxOpenAPIException(
+                    message=(
+                        "Generated Proxmox mock response validation failed for "
+                        f"{topology.method} {topology.absolute_path_template}."
+                    ),
+                    detail="The synthesized mock response does not satisfy the generated model.",
+                    python_exception=str(error),
+                )
+
+    generated_endpoint.__name__ = (
+        f"{_GENERATED_ROUTE_NAME_PREFIX}{topology.method.lower()}__{operation_id}"
+    )
+    generated_endpoint.__qualname__ = generated_endpoint.__name__
+    return generated_endpoint
 
 
 def _resolve_get_state(
@@ -812,6 +1036,80 @@ def register_generated_proxmox_mock_routes(
     resolved_namespace: str = (
         namespace or os.environ.get("PROXMOX_MOCK_STATE_NAMESPACE") or f"pmx_{version_tag}"
     )
+
+    metadata = load_route_metadata(version_tag)
+    if metadata is not None:
+        document_fingerprint = schema_fingerprint(document)
+        route_names: set[str] = set()
+        route_count = 0
+        raw_routes = metadata.get("routes")
+        routes: list[Any] = raw_routes if isinstance(raw_routes, list) else []
+
+        for route in routes:
+            if not isinstance(route, dict):
+                continue
+            method_name = str(route.get("method") or "").upper()
+            if method_name not in _SUPPORTED_GENERATED_METHODS:
+                continue
+
+            topology = _topology_from_metadata(route)
+            endpoint = _build_metadata_endpoint(
+                route=route,
+                topology=topology,
+                schema_key=document_fingerprint,
+                namespace=resolved_namespace,
+                owner_pid=owner_pid,
+                version_tag=version_tag,
+            )
+
+            if custom_mock_data and topology.absolute_path_template in custom_mock_data:
+                store = shared_mock_store(
+                    document_fingerprint,
+                    namespace=resolved_namespace,
+                    owner_pid=owner_pid,
+                )
+                custom_value = custom_mock_data[topology.absolute_path_template]
+                if topology.same_path_get_kind == "array" and isinstance(custom_value, list):
+                    store.replace_collection(topology.absolute_path_template, custom_value)
+                else:
+                    store.set_object(topology.absolute_path_template, custom_value)
+
+            route_name = (
+                f"{_GENERATED_ROUTE_NAME_PREFIX}{method_name.lower()}__{route.get('operation_id')}"
+            )
+            app.add_api_route(
+                path=str(route.get("mounted_path")),
+                endpoint=endpoint,
+                methods=[method_name],
+                name=route_name,
+                summary=route.get("summary") if isinstance(route.get("summary"), str) else None,
+                description=route.get("description")
+                if isinstance(route.get("description"), str)
+                else None,
+                tags=["proxmox mock / generated"],
+                include_in_schema=False,
+            )
+            route_names.add(route_name)
+            route_count += 1
+
+        schema_version = metadata.get("schema_version", version_tag)
+        _GENERATED_ROUTE_STATES[version_tag] = {
+            "route_names": route_names,
+            "route_count": route_count,
+            "path_count": metadata.get("path_count", 0),
+            "method_count": metadata.get("method_count", route_count),
+            "schema_version": schema_version,
+        }
+        if isinstance(app, FastAPI):
+            install_generated_openapi(app, document)
+        app.openapi_schema = None
+        return {
+            "route_count": route_count,
+            "path_count": metadata.get("path_count", 0),
+            "method_count": metadata.get("method_count", route_count),
+            "schema_version": schema_version,
+            "base_prefix": metadata.get("base_prefix", "/"),
+        }
 
     model_module = _load_model_module(document, version_tag)
     document_fingerprint = schema_fingerprint(document)

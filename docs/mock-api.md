@@ -279,6 +279,8 @@ Configure mock mode behavior:
 | `PROXMOX_API_MODE` | `mock` | Set to `mock` for mock mode |
 | `PROXMOX_MOCK_SCHEMA_VERSION` | `latest` | OpenAPI schema version to use |
 | `PROXMOX_MOCK_DATA_PATH` | `/etc/proxmox-sdk/mock-data.json` | Custom mock data file path |
+| `PROXMOX_MOCK_STORE` | `sqlite` | Mock state backend: `sqlite`, `shared-memory`, or `dict` |
+| `PROXMOX_MOCK_STATE_PATH` | tempdir scoped by namespace | Optional SQLite mock-state DB path |
 | `HOST` | `0.0.0.0` | Server host to bind |
 | `PORT` | `8000` | Server port |
 
