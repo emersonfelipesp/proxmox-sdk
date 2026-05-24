@@ -35,7 +35,8 @@ Open your browser to:
 
 **http://localhost:8000/docs**
 
-You'll see the **Swagger UI** with **646 Proxmox API endpoints** ready to use!
+You'll see the **Swagger UI** with **675 generated Proxmox API operations**
+across **449 paths** ready to use!
 
 Try these endpoints:
 

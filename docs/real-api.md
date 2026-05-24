@@ -466,9 +466,9 @@ Response:
 {
   "mode": "real",
   "schema_version": "latest",
-  "proxmox_endpoints": 646,
-  "proxmox_paths": 428,
-  "proxmox_methods": 646,
+  "proxmox_endpoints": 675,
+  "proxmox_paths": 449,
+  "proxmox_methods": 675,
   "proxmox_url": "https://pve.example.com:8006",
   "auth_method": "token",
   "ssl_verify": true

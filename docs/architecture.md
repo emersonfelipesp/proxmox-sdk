@@ -31,7 +31,7 @@ flowchart TD
 | `sdk/` | `proxmox_sdk.ProxmoxSDK` | Yes | Async + sync Python SDK with 5 backends |
 | `mock/` | `proxmox_sdk.mock_main` | Yes | FastAPI mock server only |
 | `proxmox_sdk/main.py` | `proxmox_sdk.main` | Yes | Dual-mode FastAPI server |
-| `proxmox_codegen/` | `proxmox codegen` CLI | Yes | Schema generation pipeline |
+| `proxmox_codegen/` | `proxmox-sdk-codegen` CLI | Yes | Schema generation pipeline |
 | `proxmox_cli/` | `proxmox` / `pbx` CLI | Yes | Typer CLI and Textual TUI |
 
 ---
@@ -42,18 +42,22 @@ The FastAPI server can run in two modes, selected via `PROXMOX_API_MODE`:
 
 === "Mock Mode (default)"
 
-    Mock mode loads pre-generated OpenAPI schemas and dynamically creates CRUD endpoints backed by an in-memory state store. No real Proxmox server required.
+    Mock mode loads pre-generated OpenAPI schemas plus route metadata and
+    creates CRUD endpoints backed by configurable mock-state stores. SQLite/WAL
+    is the default. No real Proxmox server required.
 
     ```mermaid
     flowchart TD
         REQ["HTTP Request"]
         ROUTER["FastAPI Router"]
-        MOCK_EP["Generated Mock Endpoint\n(from OpenAPI schema)"]
-        STATE["SharedMemoryMockStore\nin-memory dict"]
+        MOCK_EP["Generated Mock Dispatcher\n(from route metadata)"]
+        MODELS["Lazy Pydantic Shards\nmodels/<group>.py"]
+        STATE["SQLiteMockStore\nWAL row store"]
         RESP["JSON Response"]
 
         REQ --> ROUTER
         ROUTER --> MOCK_EP
+        MOCK_EP -->|"load model when needed"| MODELS
         MOCK_EP -->|"GET: read"| STATE
         MOCK_EP -->|"POST/PUT: write"| STATE
         MOCK_EP -->|"DELETE: remove"| STATE
@@ -63,12 +67,14 @@ The FastAPI server can run in two modes, selected via `PROXMOX_API_MODE`:
     **Startup flow:**
 
     1. Load `generated/proxmox/latest/openapi.json`
-    2. `register_generated_proxmox_mock_routes()` iterates all 646 path/method pairs
-    3. For each operation, create a dynamic FastAPI route with Pydantic request/response validation
-    4. Routes perform CRUD on `SharedMemoryMockStore`
-    5. State persists only in memory — resets on restart
+    2. Load `generated/proxmox/latest/route_metadata.json`
+    3. `register_generated_proxmox_mock_routes()` iterates 675 metadata operations across 449 paths
+    4. For each operation, create a lightweight FastAPI dispatcher with precomputed path, parameter, and mock-topology metadata
+    5. Load request/response model classes lazily from `models/<group>.py` through `model_index.json`
+    6. Routes perform CRUD on `SQLiteMockStore` by default, with shared-memory and dict backends available by env var
+    7. State is scoped by namespace and schema fingerprint; the default tempdir SQLite database is not a production persistence layer
 
-    **Performance:** ~1 second startup, <5 ms per request, ~100 MB memory.
+    **Performance:** ~2.1 s full app import in local smoke tests, ~0.75 s generated route registration, ~4 ms warm SQLite/WAL mock request latency via local TestClient smoke tests.
 
 === "Real Mode"
 
@@ -148,8 +154,9 @@ flowchart LR
     CRAWL["ProxmoxCrawler\nPlaywright"]
     PARSE["apidoc_parser.py"]
     NORM["normalize.py"]
-    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 646 ops"]
-    PYD["PydanticBuilder\n→ pydantic_models.py"]
+    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 675 ops"]
+    PYD["PydanticBuilder\n→ pydantic_models.py\n+ model shards"]
+    META["RouteMetadataBuilder\n→ route_metadata.json\n+ model_index.json"]
     USE1["proxmox-sdk\nMock routes"]
     USE2["proxbox-api\nResponse validation"]
 
@@ -158,7 +165,9 @@ flowchart LR
     PARSE --> NORM
     NORM --> OA
     OA --> PYD
+    OA --> META
     OA --> USE1
+    META --> USE1
     PYD --> USE2
 ```
 

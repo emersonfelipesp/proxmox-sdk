@@ -244,7 +244,13 @@ pve = ProxmoxSDK.from_config(config)
 
 ### `mock/routes.py` — Mock Route Builder
 
-`register_generated_proxmox_mock_routes()` dynamically generates 675 operations / 449 paths CRUD endpoints from the bundled OpenAPI schema at startup. Each route operates on `SharedMemoryMockStore`.
+`register_generated_proxmox_mock_routes()` registers 675 operations across 449
+paths from bundled generated artifacts. The primary startup path reads
+`route_metadata.json` and creates lightweight FastAPI dispatchers with
+precomputed mounted paths, parameter metadata, and mock CRUD topology. Request
+and response models load lazily from `models/<group>.py` through
+`model_index.json`. Each route operates on `SQLiteMockStore` by default, with
+`shared-memory` and `dict` backends available through `PROXMOX_MOCK_STORE`.
 
 ### `schema.py` — Schema Utilities
 
@@ -273,32 +279,31 @@ openapi.json (5.2MB)
       ↓
 [4. Pydantic Builder] - Generate models
       ↓
-pydantic_models.py
+pydantic_models.py + models/<group>.py + model_index.json
+      ↓
+[5. Route Metadata Builder] - Precompute route dispatcher inputs
+      ↓
+route_metadata.json
 ```
 
 ### Running Code Generation
 
 ```python
-from proxmox_sdk.proxmox_codegen import ProxmoxCodegenPipeline
+from proxmox_sdk.proxmox_codegen import generate_proxmox_codegen_bundle
 
-# Initialize pipeline
-pipeline = ProxmoxCodegenPipeline(
-    proxmox_url="https://proxmox.example.com:8006",
-    username="root@pam",
-    password="password",
-    verify_ssl=False,
-)
-
-# Run full pipeline
-await pipeline.run_full_pipeline(
+bundle = generate_proxmox_codegen_bundle(
     output_dir="./output",
     version_tag="9.2",
+    worker_count=4,
 )
 
 # Output:
-# - output/raw_capture.json
-# - output/openapi.json
-# - output/pydantic_models.py
+# - output/9.2/raw_capture.json
+# - output/9.2/openapi.json
+# - output/9.2/pydantic_models.py
+# - output/9.2/route_metadata.json
+# - output/9.2/model_index.json
+# - output/9.2/models/<group>.py
 ```
 
 ## Testing

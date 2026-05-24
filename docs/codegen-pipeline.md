@@ -1,6 +1,9 @@
 # Code Generation Pipeline
 
-The `proxmox-sdk` project ships a complete pipeline that crawls the Proxmox VE API Viewer and converts it into an OpenAPI 3.1 schema and Pydantic v2 models. The generated artifacts are checked into `proxmox_sdk/generated/` so users never need to run the pipeline themselves.
+The `proxmox-sdk` project ships a complete pipeline that crawls the Proxmox VE
+API Viewer and converts it into OpenAPI 3.1, Pydantic v2 models, runtime route
+metadata, and lazy model shards. The generated artifacts are checked into
+`proxmox_sdk/generated/` so users never need to run the pipeline themselves.
 
 ---
 
@@ -15,8 +18,12 @@ flowchart TD
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
     OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 449 paths"]
-    PYDANTIC_GEN["PydanticBuilder\nParse response schemas\nGenerate typed classes\nAdd validators"]
-    PYDANTIC["pydantic_models.py\nRequest + Response models\nUsed by proxbox-api for validation"]
+    PYDANTIC_GEN["PydanticBuilder\nGenerate aggregate + shards\nAdd validators"]
+    PYDANTIC["pydantic_models.py\nCompatibility aggregate"]
+    SHARDS["models/<group>.py\nLazy route-group shards"]
+    INDEX["model_index.json\nOperation -> shard/model map"]
+    ROUTES_GEN["RouteMetadataBuilder\nPrecompute dispatcher inputs"]
+    ROUTES["route_metadata.json\nMounted paths\nParameters\nMock topology"]
 
     PVE -->|"Playwright browser"| CRAWL
     CRAWL --> RAW
@@ -25,9 +32,14 @@ flowchart TD
     OPENAPI_GEN --> OPENAPI
     OPENAPI --> PYDANTIC_GEN
     PYDANTIC_GEN --> PYDANTIC
+    PYDANTIC_GEN --> SHARDS
+    PYDANTIC_GEN --> INDEX
+    OPENAPI --> ROUTES_GEN
+    ROUTES_GEN --> ROUTES
 ```
 
-All pipeline stages are orchestrated by `ProxmoxCodegenPipeline` in `proxmox_codegen/pipeline.py`.
+All pipeline stages are orchestrated by `generate_proxmox_codegen_bundle()` in
+`proxmox_codegen/pipeline.py`.
 
 ---
 
@@ -112,7 +124,32 @@ The builder adds:
 
 ## Stage 5: Pydantic Generator (`pydantic_generator.py`)
 
-`proxmox_codegen/pydantic_generator.py` converts the OpenAPI response schemas into **Pydantic v2** model classes. These models are used by `proxbox-api` to validate SDK responses against the expected schema.
+`proxmox_codegen/pydantic_generator.py` converts the OpenAPI response schemas
+into **Pydantic v2** model classes.
+
+The generator writes two model layouts:
+
+- `pydantic_models.py` — compatibility aggregate containing every generated
+  model for the schema tag.
+- `models/<group>.py` — route-group shards used by proxmox-sdk at runtime so
+  startup does not import the full aggregate module.
+
+It also writes `model_index.json`, which maps each operation ID to the route
+group and request/response model class names. Runtime code uses this index to
+import only the shard needed for a request.
+
+### Runtime Model Loading
+
+For a request such as `GET /api2/json/nodes`, the mock/real route dispatcher can
+resolve the response model without importing every generated class:
+
+1. Look up `get_nodes` in `model_index.json`.
+2. Resolve the group `nodes` and response model `GetNodesResponse`.
+3. Import `models/nodes.py`.
+4. Return `GetNodesResponse` from that module.
+
+The aggregate `pydantic_models.py` remains useful for compatibility and for
+downstream projects that want one import surface.
 
 ### How proxbox-api Uses Generated Models
 
@@ -172,11 +209,17 @@ The codegen pipeline is exposed as a protected API endpoint on the FastAPI serve
 === "CLI"
 
     ```bash
-    # Run full pipeline against a Proxmox host
-    proxmox codegen generate --url https://pve.example.com:8006
+    # Run full pipeline against the official Proxmox API viewer
+    proxmox-sdk-codegen \
+      --version-tag 9.2 \
+      --output-dir proxmox_sdk/generated/proxmox \
+      --workers 4
 
-    # List available generated versions
-    proxmox codegen versions
+    # Regenerate the latest/ alias
+    proxmox-sdk-codegen \
+      --version-tag latest \
+      --output-dir proxmox_sdk/generated/proxmox \
+      --workers 4
     ```
 
 ---
@@ -226,16 +269,66 @@ proxmox_sdk/
     └── proxmox/
         ├── latest/       ← refreshed alongside the newest tagged version
         │   ├── openapi.json
-        │   └── pydantic_models.py
+        │   ├── route_metadata.json
+        │   ├── model_index.json
+        │   ├── pydantic_models.py
+        │   └── models/
         ├── 9.2/
         │   ├── openapi.json
-        │   └── pydantic_models.py
+        │   ├── route_metadata.json
+        │   ├── model_index.json
+        │   ├── pydantic_models.py
+        │   └── models/
         └── 9.1.11/       ← retained for backward compatibility
             ├── openapi.json
-            └── pydantic_models.py
+            ├── route_metadata.json
+            ├── model_index.json
+            ├── pydantic_models.py
+            └── models/
 ```
 
 The SDK reads the version to use from `PROXMOX_MOCK_SCHEMA_VERSION` (default: `"latest"`). Multiple versions can coexist; `GET /versions/` lists all available versions.
+
+---
+
+## Runtime Route Metadata
+
+`route_metadata.json` is generated from the same OpenAPI document and contains
+the data that used to be recomputed at app startup:
+
+- mounted FastAPI path
+- HTTP method and operation ID
+- route summary/description
+- path/query/body parameter metadata
+- request and response schemas
+- same-path GET schema information
+- direct-child and parent-collection topology for mock CRUD behavior
+- schema version, path count, route count, method count, and source SHA
+
+At runtime `register_generated_proxmox_mock_routes()` and the real route
+registrar load this metadata first. If it exists, they build lightweight
+dispatchers from metadata and merge the generated OpenAPI document into
+`/openapi.json`. They only fall back to walking the OpenAPI document directly
+when the metadata file is absent, which is useful during local development but
+not the shipped path.
+
+## Integrity Checks
+
+Generated artifacts are part of the release contract. CI runs
+`tests/test_generated_integrity.py`, which verifies for every supported schema
+tag:
+
+- `openapi.json` matches the SHA pinned in generated model metadata
+- `route_metadata.json` source SHA matches `openapi.json`
+- path and route counts match the OpenAPI document
+- every route operation is present in `model_index.json`
+- every shard referenced by the model index exists under `models/`
+
+Run the focused check locally with:
+
+```bash
+uv run pytest tests/test_generated_integrity.py
+```
 
 ---
 
@@ -245,8 +338,13 @@ To update to a new Proxmox VE version:
 
 1. Run the codegen pipeline against the new Proxmox version
 2. Store the new artifacts in `generated/proxmox/<new-version>/`
-3. Update the `latest` symlink
-4. Re-run `proxbox-api` to pick up the new models
+3. Store the same artifacts in `proxmox_sdk/generated/proxmox/<new-version>/`
+4. Regenerate `latest/` if the new version should become the default
+5. Run `uv run pytest tests/test_generated_integrity.py`
+6. Update the schema matrices in CI/release workflows if the supported-version
+   set changes
+7. Re-run downstream codegen, such as `proxbox-api`, if it vendors generated
+   models separately
 
 !!! note "proxbox-api model imports"
     `proxbox-api` always imports from `proxbox_api.generated.proxmox.latest`. If you update the `latest` version, regenerate the proxbox-api generated models by running the proxbox-api codegen pipeline as well. The two generated artifact sets must be in sync.

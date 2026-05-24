@@ -105,11 +105,12 @@ See the [Quick Start Guide](quickstart.md) for more details.
 
 ### What is mock mode?
 
-Mock mode provides an in-memory simulation of the Proxmox VE API. It:
+Mock mode provides a schema-driven simulation of the Proxmox VE API. It:
 
-- Loads 675 operations / 449 pre-generated endpoints from OpenAPI schema
+- Loads 675 operations / 449 paths from pre-generated route metadata
+- Lazy-loads Pydantic route-group model shards on demand
 - Provides full CRUD operations (Create, Read, Update, Delete)
-- Stores data in memory (resets on restart)
+- Stores data in SQLite/WAL by default, with shared-memory and dict backends available
 - Requires no Proxmox server
 
 Perfect for development, testing, and CI/CD pipelines.
@@ -127,11 +128,17 @@ See the [Mock API Guide](mock-api.md#custom-mock-data) for data format examples.
 
 ### Does mock data persist across restarts?
 
-**No.** Mock mode uses in-memory storage, so all data is lost when the server stops.
+Not by default as a production guarantee. Mock mode uses a tempdir-scoped
+SQLite/WAL store unless you override it. That state is scoped by mock namespace
+and schema fingerprint and is intended for development/test continuity, not
+durable application data.
 
-If you need persistent mock data:
-- Use custom mock data files (loaded on startup)
-- Consider contributing a database-backed mode (future feature)
+If you need predictable startup state:
+
+- Use custom mock data files loaded on startup.
+- Set `PROXMOX_MOCK_STATE_PATH` while debugging a specific SQLite store.
+- Reset state between tests with `POST /mock/reset` or by changing
+  `PROXMOX_MOCK_STATE_NAMESPACE`.
 
 ### Can I use mock mode in CI/CD?
 
@@ -285,25 +292,31 @@ See the [Development Guide](development.md) for contribution guidelines.
 Use the built-in code generation pipeline:
 
 ```python
-from proxmox_sdk.proxmox_codegen import ProxmoxCodegenPipeline
+from proxmox_sdk.proxmox_codegen import generate_proxmox_codegen_bundle
 
-pipeline = ProxmoxCodegenPipeline(
-    proxmox_url="https://proxmox.example.com:8006",
-    username="root@pam",
-    password="password",
-    verify_ssl=False,
-)
-
-await pipeline.run_full_pipeline(
+bundle = generate_proxmox_codegen_bundle(
     output_dir="./output",
     version_tag="9.2",
+    worker_count=4,
 )
+```
+
+Or from the command line:
+
+```bash
+proxmox-sdk-codegen \
+  --version-tag 9.2 \
+  --output-dir proxmox_sdk/generated/proxmox \
+  --workers 4
 ```
 
 This generates:
 - `raw_capture.json` - Crawler output
 - `openapi.json` - OpenAPI 3.1 schema
-- `pydantic_models.py` - Pydantic models
+- `pydantic_models.py` - compatibility aggregate Pydantic models
+- `route_metadata.json` - metadata-driven route registration input
+- `model_index.json` - operation-to-model shard map
+- `models/<group>.py` - lazy Pydantic route-group shards
 
 See the [Development Guide](development.md#code-generation-pipeline) for details.
 
@@ -401,18 +414,20 @@ export PROXMOX_API_VERIFY_SSL=false
 ### Slow startup time
 
 Normal startup times:
-- Mock mode: ~1 second (loads 5.2MB schema)
+- Mock mode: ~2.1 seconds full app import in local smoke tests; generated route registration alone is ~0.75 seconds
 - Real mode: ~500ms (minimal initialization)
 
 If startup is significantly slower:
 1. Check disk I/O performance
 2. Ensure you're not in debug mode with hot-reload (use `--reload` only for development)
 3. Verify Python version (3.11+ recommended for best performance)
+4. Verify generated metadata exists for the selected schema version:
+   `proxmox_sdk/generated/proxmox/<version>/route_metadata.json`
 
 ### High memory usage
 
 Expected memory usage:
-- Mock mode: ~100MB (schema + in-memory state)
+- Mock mode: ~100MB (schema + generated metadata + active mock state)
 - Real mode: ~80MB (schema + aiohttp session)
 
 If memory usage is significantly higher:
@@ -444,15 +459,17 @@ For high-traffic production use, consider:
 
 ### Can I scale horizontally?
 
-**Yes!** The server is stateless (in real mode) or uses in-memory state (mock mode).
+**Yes!** The server is stateless in real mode. In mock mode, state is scoped to
+the configured mock backend and namespace.
 
 For real mode:
 - Run multiple instances behind a load balancer
 - Each instance independently proxies to Proxmox
 
 For mock mode:
-- Each instance has its own in-memory state
-- Not suitable for shared mock environments (use a database-backed mode instead)
+- Each instance should use its own `PROXMOX_MOCK_STATE_NAMESPACE`
+- SQLite/WAL is the default store, but it is still development/test state
+- Do not use mock mode as a shared production data service
 
 ## License & Support
 
