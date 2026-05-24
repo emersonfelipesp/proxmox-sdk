@@ -8,10 +8,12 @@ Complete guide to using proxmox-sdk in mock mode for development and testing.
 
 Mock mode provides a **fully functional Proxmox API simulation** with:
 
-- ✅ **646 pre-generated endpoints** from official Proxmox API
-- ✅ **In-memory CRUD operations** - Create, read, update, delete
+- ✅ **675 generated operations across 449 Proxmox API paths**
+- ✅ **Metadata-driven route registration** from bundled `route_metadata.json`
+- ✅ **Lazy Pydantic model loading** from route-group model shards
+- ✅ **CRUD operations** - Create, read, update, delete
 - ✅ **Automatic data seeding** - Sample data generated on first access
-- ✅ **State persistence** - Changes persist across requests (during runtime)
+- ✅ **SQLite/WAL state by default** - Changes persist across requests in the active mock namespace
 - ✅ **Custom mock data** - Load your own test data from JSON/YAML
 
 ---
@@ -59,7 +61,9 @@ response = httpx.get("http://localhost:8000/api2/json/nodes")
 
 ### State Persistence
 
-Changes persist in memory during the server lifetime:
+Changes persist during the server lifetime through the configured mock-state
+backend. The default is SQLite/WAL, which stores objects, collection members,
+and tombstones as rows in a tempdir-scoped database:
 
 ```python
 # Create a VM
@@ -73,8 +77,23 @@ response = httpx.get("http://localhost:8000/api2/json/nodes/pve/qemu/100")
 print(response.json())  # Returns the VM we created
 ```
 
-!!! warning "Memory Only"
-    Mock data is stored in RAM and **will be lost** when the server restarts.
+!!! warning "Development state, not production persistence"
+    The default SQLite database is scoped by mock namespace and schema
+    fingerprint. It is designed for development and tests, not as a durable
+    database. Set `PROXMOX_MOCK_STATE_PATH` if you need an explicit database
+    path while debugging.
+
+### Mock State Backends
+
+| Backend | Configure with | Use case |
+|---|---|---|
+| SQLite/WAL | `PROXMOX_MOCK_STORE=sqlite` or unset | Default; best balance for local dev, tests, and concurrent reads |
+| Shared memory | `PROXMOX_MOCK_STORE=shared-memory` | Legacy compatibility; uses a shared-memory JSON blob and file locks |
+| Dict | `PROXMOX_MOCK_STORE=dict` | Process-local tests where isolation matters more than cross-process state |
+
+SQLite avoids serializing the entire mock state for every read/write. Payload
+blobs use `orjson` when it is installed and fall back to the standard `json`
+module otherwise.
 
 ---
 

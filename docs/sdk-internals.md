@@ -142,7 +142,7 @@ classDiagram
         +get_tokens() tuple
     }
     class MockBackend {
-        -_store: SharedMemoryMockStore
+        -_store: MockStore
         +request(method, path, params, data) Any
         +close() None
     }
@@ -172,7 +172,7 @@ classDiagram
 | Backend | Transport | Auth | Use Case |
 |---|---|---|---|
 | `https` | aiohttp over TLS | API token or password/ticket | Production — real Proxmox |
-| `mock` | In-memory dict store | None | Testing without Proxmox |
+| `mock` | SQLite/WAL, shared-memory, or dict store | None | Testing without Proxmox |
 | `ssh_paramiko` | Paramiko SSH → pvesh | SSH key or password | Hosts without open port 8006 |
 | `openssh` | openssh subprocess → pvesh | SSH key | Hosts without open port 8006 |
 | `local` | Local pvesh subprocess | None (runs as root) | Scripts on the Proxmox host itself |
@@ -297,7 +297,14 @@ else:
 
 ## Mock Backend
 
-The `MockBackend` implements `AbstractBackend` using an in-memory `SharedMemoryMockStore`. It loads the pre-generated Proxmox VE 9.2 OpenAPI schema and generates mock responses that satisfy the schema's property definitions.
+The `MockBackend` implements `AbstractBackend` using the same mock-state
+backends as the FastAPI mock server. The default is `SQLiteMockStore` in WAL
+mode; `SharedMemoryMockStore` and `DictMockStore` remain available through
+`PROXMOX_MOCK_STORE`.
+
+It loads the selected pre-generated Proxmox schema, uses the generated route
+metadata/model index where available, and generates mock responses that satisfy
+the schema's property definitions.
 
 ```python title="proxmox_sdk/sdk/api.py (class method)"
 @classmethod
@@ -311,7 +318,11 @@ def mock(cls, schema_version: str = "latest", service: str = "PVE") -> ProxmoxSD
 The mock backend supports the same attribute-chain and path-string navigation styles as the HTTPS backend — code written against mock works against real Proxmox without changes.
 
 !!! tip "Mock state persistence"
-    Mock state is per-process and resets on restart. For test isolation, reset state between tests using `POST /mock/reset` on the FastAPI server, or create a new `ProxmoxSDK.mock()` instance per test.
+    Default mock state is tempdir-scoped SQLite/WAL state, not production
+    persistence. For test isolation, reset state between tests using
+    `POST /mock/reset` on the FastAPI server, set a unique
+    `PROXMOX_MOCK_STATE_NAMESPACE`, or create a new `ProxmoxSDK.mock()` instance
+    per test.
 
 ### `from_config(config)` — construct from ProxmoxConfig
 
