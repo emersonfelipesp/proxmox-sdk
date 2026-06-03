@@ -14,6 +14,7 @@ from typing import Any
 from proxmox_sdk.ceph import models as m
 from proxmox_sdk.ceph.domains.cluster import ClusterCeph
 from proxmox_sdk.ceph.domains.nodes import NodeCeph
+from proxmox_sdk.ceph.domains.write import CephWrite
 from proxmox_sdk.sdk.api import ProxmoxSDK
 from proxmox_sdk.sdk.sync_adapter import BlockingDomainProxy
 
@@ -59,6 +60,7 @@ class CephClient:
         )
         self.cluster = ClusterCeph(self._sdk)
         self.nodes = NodeCeph(self._sdk)
+        self.write = CephWrite(self._sdk)
 
     @classmethod
     def from_sdk(cls, sdk: ProxmoxSDK) -> CephClient:
@@ -115,3 +117,7 @@ class SyncCephClient:
     @property
     def nodes(self) -> BlockingDomainProxy:
         return BlockingDomainProxy(self._loop, self._client.nodes)
+
+    @property
+    def write(self) -> BlockingDomainProxy:
+        return BlockingDomainProxy(self._loop, self._client.write)

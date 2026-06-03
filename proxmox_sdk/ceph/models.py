@@ -1,4 +1,4 @@
-"""Permissive Pydantic v2 models for Proxmox VE Ceph read endpoints."""
+"""Permissive Pydantic v2 models for Proxmox VE Ceph endpoints."""
 
 from __future__ import annotations
 
@@ -15,6 +15,21 @@ class _CephBase(BaseModel):
 
 HealthState = Literal["HEALTH_OK", "HEALTH_WARN", "HEALTH_ERR", "unknown"]
 DaemonType = Literal["mon", "mgr", "mds", "osd", "unknown"]
+CephFlagName = Literal[
+    "nobackfill",
+    "nodeep-scrub",
+    "nodown",
+    "noin",
+    "noout",
+    "norebalance",
+    "norecover",
+    "noscrub",
+    "notieragent",
+    "noup",
+    "pause",
+]
+CephPoolApplication = Literal["rbd", "cephfs", "rgw"]
+CephPGAutoscaleMode = Literal["on", "off", "warn"]
 
 
 class CephClusterStatus(_CephBase):
@@ -135,7 +150,99 @@ class CephLogLine(_CephBase):
     priority: str | None = None
 
 
+class CephFlagUpdateParams(_CephBase):
+    """Request body for ``PUT /cluster/ceph/flags/{flag}``."""
+
+    value: bool
+
+
+class CephPoolCreateParams(_CephBase):
+    """Request body for ``POST /nodes/{node}/ceph/pool``."""
+
+    name: str
+    add_storages: bool | None = None
+    application: CephPoolApplication | str | None = None
+    crush_rule: str | None = None
+    erasure_coding: str | None = Field(default=None, alias="erasure-coding")
+    min_size: int | None = None
+    pg_autoscale_mode: CephPGAutoscaleMode | str | None = None
+    pg_num: int | None = None
+    pg_num_min: int | None = None
+    size: int | None = None
+    target_size: str | None = None
+    target_size_ratio: float | None = None
+
+
+class CephPoolSetParams(_CephBase):
+    """Request body for ``PUT /nodes/{node}/ceph/pool/{name}``."""
+
+    application: CephPoolApplication | str | None = None
+    crush_rule: str | None = None
+    min_size: int | None = None
+    pg_autoscale_mode: CephPGAutoscaleMode | str | None = None
+    pg_num: int | None = None
+    pg_num_min: int | None = None
+    size: int | None = None
+    target_size: str | None = None
+    target_size_ratio: float | None = None
+
+
+class CephPoolDeleteParams(_CephBase):
+    """Request params for ``DELETE /nodes/{node}/ceph/pool/{name}``."""
+
+    force: bool | None = None
+    remove_ecprofile: bool | None = None
+    remove_storages: bool | None = None
+
+
+class CephOSDCreateParams(_CephBase):
+    """Request body for ``POST /nodes/{node}/ceph/osd``."""
+
+    dev: str
+    crush_device_class: str | None = Field(default=None, alias="crush-device-class")
+    db_dev: str | None = None
+    db_dev_size: float | None = None
+    encrypted: bool | None = None
+    osds_per_device: int | None = Field(default=None, alias="osds-per-device")
+    wal_dev: str | None = None
+    wal_dev_size: float | None = None
+
+
+class CephOSDDeleteParams(_CephBase):
+    """Request params for ``DELETE /nodes/{node}/ceph/osd/{osdid}``."""
+
+    cleanup: bool | None = None
+
+
+class CephMonCreateParams(_CephBase):
+    """Request body for ``POST /nodes/{node}/ceph/mon/{monid}``."""
+
+    mon_address: str | None = Field(default=None, alias="mon-address")
+
+
+class CephMDSCreateParams(_CephBase):
+    """Request body for ``POST /nodes/{node}/ceph/mds/{name}``."""
+
+    hotstandby: bool | None = None
+
+
+class CephFSCreateParams(_CephBase):
+    """Request body for ``POST /nodes/{node}/ceph/fs/{name}``."""
+
+    add_storage: bool | None = Field(default=None, alias="add-storage")
+    pg_num: int | None = None
+
+
+class CephServiceParams(_CephBase):
+    """Request body for node-scoped Ceph service lifecycle helpers."""
+
+    service: str | None = None
+
+
 __all__ = [
+    "CephFSCreateParams",
+    "CephFlagName",
+    "CephFlagUpdateParams",
     "CephClusterMetadata",
     "CephClusterStatus",
     "CephCrushRule",
@@ -144,7 +251,17 @@ __all__ = [
     "CephFlag",
     "CephLogLine",
     "CephOSD",
+    "CephOSDCreateParams",
+    "CephOSDDeleteParams",
+    "CephMDSCreateParams",
+    "CephMonCreateParams",
+    "CephPGAutoscaleMode",
     "CephPool",
+    "CephPoolApplication",
+    "CephPoolCreateParams",
+    "CephPoolDeleteParams",
+    "CephPoolSetParams",
+    "CephServiceParams",
     "DaemonType",
     "HealthState",
 ]
