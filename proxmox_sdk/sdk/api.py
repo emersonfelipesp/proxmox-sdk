@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
+    from proxmox_sdk.proxmox.config import ProxmoxConfig
     from proxmox_sdk.sdk.sync import SyncProxmoxSDK
 
 from proxmox_sdk.sdk.auth.token import parse_token_id
@@ -258,7 +259,7 @@ class ProxmoxSDK:
         return instance
 
     @classmethod
-    def from_config(cls, config: Any) -> ProxmoxSDK:
+    def from_config(cls, config: ProxmoxConfig) -> ProxmoxSDK:
         """Create a ProxmoxSDK instance from a ProxmoxConfig dataclass.
 
         Args:

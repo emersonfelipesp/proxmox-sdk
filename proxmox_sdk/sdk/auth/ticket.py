@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import ssl
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -65,7 +66,7 @@ class TicketAuth:
         session: aiohttp.ClientSession,
         ticket_url: str,
         *,
-        ssl: Any = None,
+        ssl: "ssl.SSLContext | bool | None" = None,
         proxy: str | None = None,
     ) -> None:
         """Perform the initial authentication flow.
@@ -110,7 +111,7 @@ class TicketAuth:
         session: aiohttp.ClientSession,
         ticket_url: str,
         *,
-        ssl: Any = None,
+        ssl: "ssl.SSLContext | bool | None" = None,
         proxy: str | None = None,
     ) -> None:
         """Renew the ticket if it is approaching expiration.
@@ -135,7 +136,7 @@ class TicketAuth:
         session: aiohttp.ClientSession,
         ticket_url: str,
         *,
-        ssl: Any = None,
+        ssl: "ssl.SSLContext | bool | None" = None,
         proxy: str | None = None,
     ) -> None:
         """Authenticate or renew the ticket as needed before a request."""
@@ -143,6 +144,14 @@ class TicketAuth:
             await self.authenticate(session, ticket_url, ssl=ssl, proxy=proxy)
         else:
             await self.maybe_renew(session, ticket_url, ssl=ssl, proxy=proxy)
+
+    def get_auth_tokens(self) -> tuple[str, str]:
+        """Return the current Proxmox ticket and CSRF token."""
+        if not self._ticket or not self._csrf_token:
+            raise AuthenticationError(
+                "Ticket authentication state is missing; authenticate before retrieving tokens"
+            )
+        return self._ticket, self._csrf_token
 
     def build_headers(self, method: str) -> dict[str, str]:
         """Return request headers for the given HTTP method."""
@@ -168,7 +177,7 @@ class TicketAuth:
         password: str,
         *,
         tfa_challenge: str | None = None,
-        ssl: Any = None,
+        ssl: "ssl.SSLContext | bool | None" = None,
         proxy: str | None = None,
     ) -> tuple[str, str]:
         """POST to /access/ticket and return (ticket, csrf_token).
@@ -193,8 +202,12 @@ class TicketAuth:
         if tfa_challenge is not None:
             payload["tfa-challenge"] = tfa_challenge
 
+        post_kwargs: dict[str, Any] = {"data": payload, "proxy": proxy}
+        if ssl is not None:
+            post_kwargs["ssl"] = ssl
+
         try:
-            async with session.post(ticket_url, data=payload, ssl=ssl, proxy=proxy) as response:
+            async with session.post(ticket_url, **post_kwargs) as response:
                 raw = await response.json(content_type=None)
 
                 if response.status != 200:

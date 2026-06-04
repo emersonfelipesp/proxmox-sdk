@@ -14,6 +14,7 @@ After the split:
 from __future__ import annotations
 
 import asyncio
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -21,6 +22,7 @@ from proxmox_sdk.sdk.auth.base import AuthStrategy, EnsurableAuthStrategy
 from proxmox_sdk.sdk.auth.ticket import TicketAuth
 from proxmox_sdk.sdk.auth.token import TokenAuth
 from proxmox_sdk.sdk.backends.base import TicketCapableBackend
+from proxmox_sdk.sdk.exceptions import AuthenticationError, ResourceException
 from proxmox_sdk.sdk.services import SERVICES
 
 
@@ -69,6 +71,58 @@ def test_https_backend_is_ticket_capable() -> None:
         auth=auth,
     )
     assert isinstance(backend, TicketCapableBackend)
+
+
+def test_ticket_auth_get_auth_tokens_requires_authenticated_state() -> None:
+    auth = TicketAuth(
+        username="root@pam",
+        password="x",
+        service_config=SERVICES["PVE"],
+    )
+
+    with pytest.raises(AuthenticationError):
+        auth.get_auth_tokens()
+
+
+def test_https_backend_get_tokens_requires_authenticated_state() -> None:
+    from proxmox_sdk.sdk.backends.https import HttpsBackend
+
+    async def _run() -> None:
+        auth = TicketAuth(
+            username="root@pam",
+            password="x",
+            service_config=SERVICES["PVE"],
+        )
+        backend = HttpsBackend(
+            host="pve.example.com",
+            service_config=SERVICES["PVE"],
+            auth=auth,
+            verify_ssl=False,
+        )
+        try:
+            with (
+                patch.object(backend, "_ensure_session", new_callable=AsyncMock) as ensure_session,
+                patch.object(backend, "_ensure_authenticated", new_callable=AsyncMock),
+            ):
+                ensure_session.return_value = AsyncMock()
+
+                with pytest.raises(AuthenticationError):
+                    await backend.get_tokens()
+        finally:
+            await backend.close()
+
+    asyncio.run(_run())
+
+
+def test_resource_exception_exposes_typed_errors_dict() -> None:
+    err = ResourceException(
+        status_code=422,
+        status_message="x",
+        errors={"field": "required"},
+    )
+
+    assert isinstance(err.errors, dict)
+    assert err.errors == {"field": "required"}
 
 
 def test_proxmoxsdk_get_tokens_rejects_non_ticket_backend() -> None:

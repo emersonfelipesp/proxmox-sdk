@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 
 class ProxmoxSDKError(Exception):
     """Base exception for all SDK errors."""
@@ -15,13 +17,13 @@ class ResourceException(ProxmoxSDKError):
         status_code: int,
         status_message: str,
         content: str = "",
-        errors: dict | None = None,
+        errors: dict[str, Any] | None = None,
         exit_code: int | None = None,
     ) -> None:
         self.status_code = status_code
         self.status_message = status_message
         self.content = content
-        self.errors = errors
+        self.errors: dict[str, Any] | None = errors
         self.exit_code = exit_code
         super().__init__(f"HTTP {status_code} {status_message}: {content}")
 

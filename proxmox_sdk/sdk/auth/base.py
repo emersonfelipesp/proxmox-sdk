@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Protocol, runtime_checkable
+import ssl
+from typing import Protocol, runtime_checkable
 
 import aiohttp
 
@@ -47,7 +48,7 @@ class EnsurableAuthStrategy(AuthStrategy, Protocol):
         session: aiohttp.ClientSession,
         ticket_url: str,
         *,
-        ssl: Any = None,
+        ssl: "ssl.SSLContext | bool | None" = None,
         proxy: str | None = None,
     ) -> None:
         """Ensure authentication state is valid before a request is sent.

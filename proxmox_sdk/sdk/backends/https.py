@@ -8,7 +8,7 @@ import logging
 import posixpath
 import re
 import ssl
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urlsplit, urlunsplit
 
 import aiohttp
@@ -16,6 +16,7 @@ import aiohttp
 from proxmox_sdk.sdk.auth.base import AuthStrategy, EnsurableAuthStrategy
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.exceptions import (
+    AuthenticationError,
     ProxmoxConnectionError,
     ProxmoxTimeoutError,
     ResourceException,
@@ -23,6 +24,7 @@ from proxmox_sdk.sdk.exceptions import (
 from proxmox_sdk.sdk.resource import _filter_none
 
 if TYPE_CHECKING:
+    from proxmox_sdk.proxmox.config import ProxmoxConfig
     from proxmox_sdk.sdk.auth.ticket import TicketAuth
     from proxmox_sdk.sdk.services import ServiceConfig
 
@@ -333,8 +335,13 @@ class HttpsBackend(AbstractBackend):
         if not self._auth.is_authenticated:
             session = await self._ensure_session()
             await self._ensure_authenticated(session)
-        assert self._auth._ticket and self._auth._csrf_token
-        return self._auth._ticket, self._auth._csrf_token
+        ticket = self._auth._ticket
+        csrf_token = self._auth._csrf_token
+        if not ticket or not csrf_token:
+            raise AuthenticationError(
+                "Ticket authentication state is missing; authenticate before retrieving tokens"
+            )
+        return ticket, csrf_token
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -404,7 +411,7 @@ class HttpsBackend(AbstractBackend):
             raw = {"data": await resp.text()}
 
         if resp.status >= 400:
-            errors = raw.get("errors") if isinstance(raw, dict) else None
+            errors = cast(dict[str, Any] | None, raw.get("errors")) if isinstance(raw, dict) else None
             content = raw.get("data", "") if isinstance(raw, dict) else str(raw)
             raise ResourceException(
                 status_code=resp.status,
@@ -472,7 +479,7 @@ class HttpsBackend(AbstractBackend):
     @classmethod
     def from_config(
         cls,
-        config: Any,  # ProxmoxConfig — avoid circular import
+        config: ProxmoxConfig,
         service_config: ServiceConfig,
     ) -> HttpsBackend:
         """Build an HttpsBackend from a ProxmoxConfig dataclass."""
