@@ -36,6 +36,26 @@ class BackendNotAvailableError(ProxmoxSDKError):
     """Raised when a required optional backend dependency is not installed."""
 
 
+class CephCapabilityUnsupportedError(ProxmoxSDKError):
+    """Raised when a Ceph provider cannot service a requested operation.
+
+    Used by the direct-provider clients (Dashboard API, RGW Admin Ops, RBD)
+    to signal that the configured provider/version does not expose the
+    requested capability, so higher layers can surface an actionable
+    "unsupported" reason instead of failing opaquely.
+    """
+
+    def __init__(self, capability: str, *, provider: str = "", detail: str = "") -> None:
+        self.capability = capability
+        self.provider = provider
+        self.detail = detail
+        location = f"{provider} provider" if provider else "provider"
+        message = f"{location} does not support capability '{capability}'"
+        if detail:
+            message = f"{message}: {detail}"
+        super().__init__(message)
+
+
 class ProxmoxTimeoutError(ResourceException):
     """Request timed out waiting for the Proxmox API to respond."""
 
@@ -55,6 +75,7 @@ __all__ = [
     "ResourceException",
     "AuthenticationError",
     "BackendNotAvailableError",
+    "CephCapabilityUnsupportedError",
     "ProxmoxTimeoutError",
     "ProxmoxConnectionError",
 ]
