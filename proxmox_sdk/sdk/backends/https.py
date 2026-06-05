@@ -411,7 +411,9 @@ class HttpsBackend(AbstractBackend):
             raw = {"data": await resp.text()}
 
         if resp.status >= 400:
-            errors = cast(dict[str, Any] | None, raw.get("errors")) if isinstance(raw, dict) else None
+            errors = (
+                cast(dict[str, Any] | None, raw.get("errors")) if isinstance(raw, dict) else None
+            )
             content = raw.get("data", "") if isinstance(raw, dict) else str(raw)
             raise ResourceException(
                 status_code=resp.status,
