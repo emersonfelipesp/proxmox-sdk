@@ -13,6 +13,7 @@ from proxmox_sdk.mock.schema_helpers import (
 from proxmox_sdk.mock.state import shared_mock_store
 from proxmox_sdk.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generated_openapi
 from proxmox_sdk.sdk.backends.base import AbstractBackend
+from proxmox_sdk.sdk.exceptions import ResourceException
 
 logger = logging.getLogger(__name__)
 
@@ -171,8 +172,14 @@ class MockBackend(AbstractBackend):
     ) -> Any:
         """Return stored value or generate a deterministic mock."""
         if self._store is not None:
+            if self._store.is_deleted(state_key):
+                raise ResourceException(
+                    status_code=404,
+                    status_message="Not Found",
+                    content="Mock resource not found.",
+                )
             stored = self._store.get_object(state_key)
-            if stored is not None and not self._store.is_deleted(state_key):
+            if stored is not None:
                 return stored
 
         resp_schema = _response_schema(operation)

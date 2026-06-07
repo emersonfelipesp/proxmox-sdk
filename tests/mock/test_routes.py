@@ -64,6 +64,26 @@ def test_user_create_persists(client: TestClient) -> None:
     assert len(client.get("/api2/json/access/users").json()) == pre_count + 1
 
 
+def test_deleted_user_detail_stays_deleted(client: TestClient) -> None:
+    userid = "psk001@pve"
+    user_path = f"/api2/json/access/users/{userid}"
+
+    created = client.post(
+        "/api2/json/access/users",
+        params={"userid": userid},
+        json={"userid": userid},
+    )
+    assert created.status_code == 200
+    assert client.get(user_path).status_code == 200
+
+    deleted = client.delete(user_path)
+    assert deleted.status_code == 200
+
+    fetched = client.get(user_path)
+    assert fetched.status_code == 404
+    assert fetched.json()["detail"] == "Mock resource not found."
+
+
 def test_generated_docs_include_proxmox_paths(client: TestClient) -> None:
     body = client.get("/openapi.json").json()
     assert "/api2/json/nodes" in body["paths"]
