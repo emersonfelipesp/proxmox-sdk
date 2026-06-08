@@ -1212,6 +1212,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../sdk-ceph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdk-pdm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Datacenter Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../sdk-examples/" class="md-nav__link">
         
   
@@ -2768,7 +2824,7 @@
 </span></code></pre></div>
 <hr />
 <h2 id="services-versions">Services &amp; Versions<a class="headerlink" href="#services-versions" title="Permanent link">&para;</a></h2>
-<p>The SDK supports multiple Proxmox services:</p>
+<p>The SDK supports four Proxmox services:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Proxmox VE (default)</span>
 </span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
 </span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
@@ -2793,12 +2849,28 @@
 </span><span id="__span-17-22"><a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;PBS&quot;</span><span class="p">,</span>
 </span><span id="__span-17-23"><a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>    <span class="n">port</span><span class="o">=</span><span class="mi">8007</span><span class="p">,</span>  <span class="c1"># PBS uses port 8007 by default</span>
 </span><span id="__span-17-24"><a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="p">)</span>
+</span><span id="__span-17-25"><a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a>
+</span><span id="__span-17-26"><a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="c1"># Proxmox Datacenter Manager</span>
+</span><span id="__span-17-27"><a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-17-28"><a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pdm.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-17-29"><a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-17-30"><a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a>    <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;automation&quot;</span><span class="p">,</span>
+</span><span id="__span-17-31"><a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a>    <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-17-32"><a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a>    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;PDM&quot;</span><span class="p">,</span>
+</span><span id="__span-17-33"><a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a>    <span class="n">port</span><span class="o">=</span><span class="mi">8443</span><span class="p">,</span>  <span class="c1"># PDM uses port 8443 by default</span>
+</span><span id="__span-17-34"><a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a><span class="p">)</span>
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">PBS HOW-TO Guide</p>
 <p>For a complete guide to PBS operations — datastores, snapshots, garbage
 collection, verification, pruning, and user management — see the
 <strong><a href="../sdk-pbs/">Proxmox Backup Server HOW-TO →</a></strong>.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">PDM HOW-TO Guide</p>
+<p>For a complete guide to PDM operations — remotes, PVE guests, PBS datastores,
+views, metrics, subscriptions, and access — see the
+<strong><a href="../sdk-pdm/">Proxmox Datacenter Manager HOW-TO →</a></strong>.</p>
 </div>
 <hr />
 <h2 id="patterns-best-practices">Patterns &amp; Best Practices<a class="headerlink" href="#patterns-best-practices" title="Permanent link">&para;</a></h2>

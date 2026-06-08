@@ -774,6 +774,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../sdk-ceph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdk-pdm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Datacenter Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../sdk-examples/" class="md-nav__link">
         
   
@@ -2335,9 +2391,10 @@ at startup.</p>
 <h3 id="3-pre-generated-schemas">3. Pre-Generated Schemas<a class="headerlink" href="#3-pre-generated-schemas" title="Permanent link">&para;</a></h3>
 <p>The OpenAPI schema, aggregate Pydantic models, lazy model shards, model index,
 and route metadata are committed to the repository so mock mode works
-completely offline without a Proxmox server. Each version (e.g., <code>9.1.11</code>) is
-stored independently under <code>generated/proxmox/</code>; CI ships both <code>9.1.11/</code> and a
-<code>latest</code> mirror.</p>
+completely offline without a Proxmox server. Each version is stored
+independently under <code>generated/proxmox/</code>; CI ships <code>9.2/</code>, <code>9.1.11/</code>, and
+<code>latest/</code> (alias for 9.2), exercising all three in parallel via
+<code>PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]</code>.</p>
 <h3 id="4-full-requestresponse-validation">4. Full Request/Response Validation<a class="headerlink" href="#4-full-requestresponse-validation" title="Permanent link">&para;</a></h3>
 <p>Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.</p>
 <h3 id="5-sqlite-mock-state">5. SQLite Mock State<a class="headerlink" href="#5-sqlite-mock-state" title="Permanent link">&para;</a></h3>

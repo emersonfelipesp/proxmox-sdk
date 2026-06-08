@@ -18,7 +18,7 @@
         <link rel="prev" href="../sdk-virtual-machines/">
       
       
-        <link rel="next" href="../sdk-examples/">
+        <link rel="next" href="../sdk-ceph/">
       
       
         
@@ -1359,6 +1359,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#typed-facade-pbsclient-syncpbsclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typed Facade: PBSClient / SyncPBSClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Typed Facade: PBSClient / SyncPBSClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#async-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-mode-for-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock mode (for tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1373,6 +1423,62 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdk-ceph/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ceph
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sdk-pdm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox Datacenter Manager
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2798,6 +2904,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#typed-facade-pbsclient-syncpbsclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typed Facade: PBSClient / SyncPBSClient
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Typed Facade: PBSClient / SyncPBSClient">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#async-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Async usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sync-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sync usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mock-mode-for-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mock mode (for tests)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#see-also" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3796,6 +3952,62 @@ a parameter means that rule is not enforced.</p>
 </span><span id="__span-42-4"><a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="c1"># Option 2: Disable verification (development only)</span>
 </span><span id="__span-42-5"><a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="n">ProxmoxSDK</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">service</span><span class="o">=</span><span class="s2">&quot;PBS&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8007</span><span class="p">,</span> <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
+<hr />
+<hr />
+<h2 id="typed-facade-pbsclient-syncpbsclient">Typed Facade: <code>PBSClient</code> / <code>SyncPBSClient</code><a class="headerlink" href="#typed-facade-pbsclient-syncpbsclient" title="Permanent link">&para;</a></h2>
+<p>For code that should work only with PBS — and never accidentally hit a PVE or PDM endpoint — import the dedicated typed facade:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-43-1"><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.pbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PBSClient</span><span class="p">,</span> <span class="n">SyncPBSClient</span>
+</span></code></pre></div>
+<p><code>PBSClient</code> composes <code>ProxmoxSDK</code> with <code>service="PBS"</code> and exposes typed domain helpers. It raises <code>ValueError</code> at construction time if you pass a non-PBS SDK instance to <code>PBSClient.from_sdk()</code>.</p>
+<h3 id="async-usage">Async usage<a class="headerlink" href="#async-usage" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-44-1"><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-44-2"><a id="__codelineno-44-2" name="__codelineno-44-2" href="#__codelineno-44-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.pbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PBSClient</span>
+</span><span id="__span-44-3"><a id="__codelineno-44-3" name="__codelineno-44-3" href="#__codelineno-44-3"></a>
+</span><span id="__span-44-4"><a id="__codelineno-44-4" name="__codelineno-44-4" href="#__codelineno-44-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+</span><span id="__span-44-5"><a id="__codelineno-44-5" name="__codelineno-44-5" href="#__codelineno-44-5"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">PBSClient</span><span class="p">(</span>
+</span><span id="__span-44-6"><a id="__codelineno-44-6" name="__codelineno-44-6" href="#__codelineno-44-6"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pbs.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-44-7"><a id="__codelineno-44-7" name="__codelineno-44-7" href="#__codelineno-44-7"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;backup-operator@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-44-8"><a id="__codelineno-44-8" name="__codelineno-44-8" href="#__codelineno-44-8"></a>        <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;automation&quot;</span><span class="p">,</span>
+</span><span id="__span-44-9"><a id="__codelineno-44-9" name="__codelineno-44-9" href="#__codelineno-44-9"></a>        <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-44-10"><a id="__codelineno-44-10" name="__codelineno-44-10" href="#__codelineno-44-10"></a>        <span class="n">port</span><span class="o">=</span><span class="mi">8007</span><span class="p">,</span>
+</span><span id="__span-44-11"><a id="__codelineno-44-11" name="__codelineno-44-11" href="#__codelineno-44-11"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">pbs</span><span class="p">:</span>
+</span><span id="__span-44-12"><a id="__codelineno-44-12" name="__codelineno-44-12" href="#__codelineno-44-12"></a>        <span class="n">version</span> <span class="o">=</span> <span class="k">await</span> <span class="n">pbs</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
+</span><span id="__span-44-13"><a id="__codelineno-44-13" name="__codelineno-44-13" href="#__codelineno-44-13"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PBS version: </span><span class="si">{</span><span class="n">version</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-44-14"><a id="__codelineno-44-14" name="__codelineno-44-14" href="#__codelineno-44-14"></a>
+</span><span id="__span-44-15"><a id="__codelineno-44-15" name="__codelineno-44-15" href="#__codelineno-44-15"></a>        <span class="c1"># Typed domain helpers</span>
+</span><span id="__span-44-16"><a id="__codelineno-44-16" name="__codelineno-44-16" href="#__codelineno-44-16"></a>        <span class="n">datastores</span> <span class="o">=</span> <span class="k">await</span> <span class="n">pbs</span><span class="o">.</span><span class="n">datastores</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+</span><span id="__span-44-17"><a id="__codelineno-44-17" name="__codelineno-44-17" href="#__codelineno-44-17"></a>        <span class="n">snapshots</span>  <span class="o">=</span> <span class="k">await</span> <span class="n">pbs</span><span class="o">.</span><span class="n">snapshots</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="s2">&quot;vm-backups&quot;</span><span class="p">)</span>
+</span><span id="__span-44-18"><a id="__codelineno-44-18" name="__codelineno-44-18" href="#__codelineno-44-18"></a>        <span class="n">jobs</span>       <span class="o">=</span> <span class="k">await</span> <span class="n">pbs</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+</span><span id="__span-44-19"><a id="__codelineno-44-19" name="__codelineno-44-19" href="#__codelineno-44-19"></a>
+</span><span id="__span-44-20"><a id="__codelineno-44-20" name="__codelineno-44-20" href="#__codelineno-44-20"></a><span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</span></code></pre></div>
+<h3 id="sync-usage">Sync usage<a class="headerlink" href="#sync-usage" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-45-1"><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.pbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SyncPBSClient</span>
+</span><span id="__span-45-2"><a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>
+</span><span id="__span-45-3"><a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="k">with</span> <span class="n">SyncPBSClient</span><span class="p">(</span>
+</span><span id="__span-45-4"><a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pbs.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-45-5"><a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;backup-operator@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-45-6"><a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>    <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;automation&quot;</span><span class="p">,</span>
+</span><span id="__span-45-7"><a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a>    <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;</span><span class="p">,</span>
+</span><span id="__span-45-8"><a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a>    <span class="n">port</span><span class="o">=</span><span class="mi">8007</span><span class="p">,</span>
+</span><span id="__span-45-9"><a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a><span class="p">)</span> <span class="k">as</span> <span class="n">pbs</span><span class="p">:</span>
+</span><span id="__span-45-10"><a id="__codelineno-45-10" name="__codelineno-45-10" href="#__codelineno-45-10"></a>    <span class="n">version</span> <span class="o">=</span> <span class="n">pbs</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
+</span><span id="__span-45-11"><a id="__codelineno-45-11" name="__codelineno-45-11" href="#__codelineno-45-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;PBS version: </span><span class="si">{</span><span class="n">version</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-45-12"><a id="__codelineno-45-12" name="__codelineno-45-12" href="#__codelineno-45-12"></a>    <span class="n">datastores</span> <span class="o">=</span> <span class="n">pbs</span><span class="o">.</span><span class="n">datastores</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+</span></code></pre></div>
+<h3 id="mock-mode-for-tests">Mock mode (for tests)<a class="headerlink" href="#mock-mode-for-tests" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-46-1"><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.pbs</span><span class="w"> </span><span class="kn">import</span> <span class="n">PBSClient</span>
+</span><span id="__span-46-2"><a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a>
+</span><span id="__span-46-3"><a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="k">async</span> <span class="k">with</span> <span class="n">PBSClient</span><span class="o">.</span><span class="n">mock</span><span class="p">()</span> <span class="k">as</span> <span class="n">pbs</span><span class="p">:</span>
+</span><span id="__span-46-4"><a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a>    <span class="n">version</span> <span class="o">=</span> <span class="k">await</span> <span class="n">pbs</span><span class="o">.</span><span class="n">version</span><span class="p">()</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Typed facade vs low-level SDK</p>
+<p><code>PBSClient</code> / <code>SyncPBSClient</code> provide typed return values via hand-coded
+Pydantic models in <code>proxmox_sdk.pbs.models</code>. For raw dict-based access or
+for endpoints not yet covered by the facade, use <code>ProxmoxSDK</code> directly
+with <code>service="PBS"</code> as shown in the sections above.</p>
+</div>
 <hr />
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
 <ul>
