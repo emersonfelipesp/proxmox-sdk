@@ -45,4 +45,10 @@ class ProviderCapability(BaseModel):
         for key in candidates:
             if key in self.operations:
                 return self.operations[key]
-        return self.write if action and action not in {"get", "list", "read"} else self.read
+        # No explicit ``operations`` entry. Reads are non-destructive, so a
+        # provider that advertises ``read`` may answer read queries True. Writes
+        # must be enumerated explicitly: an unknown write-like action is reported
+        # as unsupported so the gate never fails open on a destructive op.
+        if action and action not in {"get", "list", "read"}:
+            return False
+        return self.read

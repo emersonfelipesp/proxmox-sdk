@@ -15,12 +15,14 @@ from __future__ import annotations
 
 from typing import Any
 
+from proxmox_sdk.ceph._confirm import require_confirm
 from proxmox_sdk.ceph.providers import models as m
 from proxmox_sdk.ceph.providers._http import (
     DEFAULT_TIMEOUT,
     AsyncTransport,
     BaseHttpProvider,
     HttpResponse,
+    JSONValue,
 )
 from proxmox_sdk.ceph.providers.capability import ProviderCapability
 from proxmox_sdk.sdk.exceptions import (
@@ -123,11 +125,6 @@ class DashboardCephClient(BaseHttpProvider):
         return response
 
     @staticmethod
-    def _require_confirm(operation: str, confirm_destroy: bool) -> None:
-        if not confirm_destroy:
-            raise ValueError(f"{operation} is destructive; pass confirm_destroy=True to proceed.")
-
-    @staticmethod
     def _as_list(body: Any) -> list[dict[str, Any]]:
         if isinstance(body, list):
             return [item for item in body if isinstance(item, dict)]
@@ -204,41 +201,41 @@ class DashboardCephClient(BaseHttpProvider):
         return [m.DashboardRGWBucket.model_validate(i) for i in self._as_list(response.json_body)]
 
     # -- pool writes --------------------------------------------------------- #
-    async def pool_create(self, payload: dict[str, Any]) -> Any:
+    async def pool_create(self, payload: dict[str, Any]) -> JSONValue:
         response = await self._request("POST", "api/pool", json=payload)
         return response.json_body
 
-    async def pool_edit(self, pool_name: str, payload: dict[str, Any]) -> Any:
+    async def pool_edit(self, pool_name: str, payload: dict[str, Any]) -> JSONValue:
         response = await self._request("PUT", f"api/pool/{pool_name}", json=payload)
         return response.json_body
 
-    async def pool_delete(self, pool_name: str, *, confirm_destroy: bool = False) -> Any:
-        self._require_confirm("pool_delete", confirm_destroy)
+    async def pool_delete(self, pool_name: str, *, confirm_destroy: bool = False) -> JSONValue:
+        require_confirm("pool_delete", confirm_destroy)
         response = await self._request("DELETE", f"api/pool/{pool_name}")
         return response.json_body
 
     # -- rbd writes ---------------------------------------------------------- #
-    async def rbd_create(self, payload: dict[str, Any]) -> Any:
+    async def rbd_create(self, payload: dict[str, Any]) -> JSONValue:
         response = await self._request(
             "POST", "api/block/image", json=payload, version=_BLOCK_IMAGE_VERSION
         )
         return response.json_body
 
-    async def rbd_edit(self, image_spec: str, payload: dict[str, Any]) -> Any:
+    async def rbd_edit(self, image_spec: str, payload: dict[str, Any]) -> JSONValue:
         response = await self._request(
             "PUT", f"api/block/image/{image_spec}", json=payload, version=_BLOCK_IMAGE_VERSION
         )
         return response.json_body
 
-    async def rbd_delete(self, image_spec: str, *, confirm_destroy: bool = False) -> Any:
-        self._require_confirm("rbd_delete", confirm_destroy)
+    async def rbd_delete(self, image_spec: str, *, confirm_destroy: bool = False) -> JSONValue:
+        require_confirm("rbd_delete", confirm_destroy)
         response = await self._request(
             "DELETE", f"api/block/image/{image_spec}", version=_BLOCK_IMAGE_VERSION
         )
         return response.json_body
 
-    async def rbd_move_trash(self, image_spec: str, *, confirm_destroy: bool = False) -> Any:
-        self._require_confirm("rbd_move_trash", confirm_destroy)
+    async def rbd_move_trash(self, image_spec: str, *, confirm_destroy: bool = False) -> JSONValue:
+        require_confirm("rbd_move_trash", confirm_destroy)
         response = await self._request(
             "POST",
             f"api/block/image/{image_spec}/move_trash",
@@ -247,7 +244,7 @@ class DashboardCephClient(BaseHttpProvider):
         )
         return response.json_body
 
-    async def rbd_snapshot_create(self, image_spec: str, snapshot_name: str) -> Any:
+    async def rbd_snapshot_create(self, image_spec: str, snapshot_name: str) -> JSONValue:
         response = await self._request(
             "POST",
             f"api/block/image/{image_spec}/snap",
@@ -258,8 +255,8 @@ class DashboardCephClient(BaseHttpProvider):
 
     async def rbd_snapshot_delete(
         self, image_spec: str, snapshot_name: str, *, confirm_destroy: bool = False
-    ) -> Any:
-        self._require_confirm("rbd_snapshot_delete", confirm_destroy)
+    ) -> JSONValue:
+        require_confirm("rbd_snapshot_delete", confirm_destroy)
         response = await self._request(
             "DELETE",
             f"api/block/image/{image_spec}/snap/{snapshot_name}",

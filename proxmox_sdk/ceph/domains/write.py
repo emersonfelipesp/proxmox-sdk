@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from proxmox_sdk._response_utils import unwrap_data
 from proxmox_sdk.ceph import models as m
+from proxmox_sdk.ceph._confirm import require_confirm
+from proxmox_sdk.sdk.exceptions import ProxmoxSDKError
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -31,9 +33,19 @@ class CephWrite:
         return params.model_dump(by_alias=True, exclude_none=True)
 
     @staticmethod
-    def _require_confirm(method: str, confirm_destroy: bool) -> None:
-        if not confirm_destroy:
-            raise ValueError(f"{method} is destructive; pass confirm_destroy=True to proceed.")
+    def _upid(result: Any) -> str:
+        """Unwrap a Proxmox task response and assert it is a UPID string.
+
+        These endpoints return a task UPID on success. Validating the shape
+        (instead of a bare ``cast``) means a non-string response surfaces here
+        with a clear error rather than silently flowing out typed as ``str``.
+        """
+        upid = unwrap_data(result)
+        if not isinstance(upid, str):
+            raise ProxmoxSDKError(
+                f"expected a Proxmox task UPID string, got {type(upid).__name__}: {upid!r}"
+            )
+        return upid
 
     # ------------------------------------------------------------------
     # Pools
@@ -75,7 +87,7 @@ class CephWrite:
                 }
             )
         )
-        return cast(str, unwrap_data(await self._resource(node, "pool").post(**payload)))
+        return self._upid(await self._resource(node, "pool").post(**payload))
 
     async def pool_set(
         self,
@@ -106,7 +118,7 @@ class CephWrite:
                 target_size_ratio=target_size_ratio,
             )
         )
-        return cast(str, unwrap_data(await self._resource(node, "pool", name).put(**payload)))
+        return self._upid(await self._resource(node, "pool", name).put(**payload))
 
     async def pool_delete(
         self,
@@ -119,7 +131,7 @@ class CephWrite:
         remove_storages: bool | None = None,
     ) -> str:
         """Destroy a Ceph pool and return the Proxmox task UPID."""
-        self._require_confirm("pool_delete", confirm_destroy)
+        require_confirm("pool_delete", confirm_destroy)
         payload = self._dump(
             m.CephPoolDeleteParams(
                 force=force,
@@ -127,7 +139,7 @@ class CephWrite:
                 remove_storages=remove_storages,
             )
         )
-        return cast(str, unwrap_data(await self._resource(node, "pool", name).delete(**payload)))
+        return self._upid(await self._resource(node, "pool", name).delete(**payload))
 
     # ------------------------------------------------------------------
     # Cluster flags
@@ -178,7 +190,7 @@ class CephWrite:
                 }
             )
         )
-        return cast(str, unwrap_data(await self._resource(node, "osd").post(**payload)))
+        return self._upid(await self._resource(node, "osd").post(**payload))
 
     async def osd_delete(
         self,
@@ -189,9 +201,9 @@ class CephWrite:
         cleanup: bool | None = None,
     ) -> str:
         """Destroy an OSD and return the Proxmox task UPID."""
-        self._require_confirm("osd_delete", confirm_destroy)
+        require_confirm("osd_delete", confirm_destroy)
         payload = self._dump(m.CephOSDDeleteParams(cleanup=cleanup))
-        return cast(str, unwrap_data(await self._resource(node, "osd", osdid).delete(**payload)))
+        return self._upid(await self._resource(node, "osd", osdid).delete(**payload))
 
     async def osd_in(self, node: str, osdid: int | str) -> Any:
         """Mark an OSD in."""
@@ -214,7 +226,7 @@ class CephWrite:
     ) -> str:
         """Create a Ceph monitor and return the Proxmox task UPID."""
         payload = self._dump(m.CephMonCreateParams.model_validate({"mon_address": mon_address}))
-        return cast(str, unwrap_data(await self._resource(node, "mon", monid).post(**payload)))
+        return self._upid(await self._resource(node, "mon", monid).post(**payload))
 
     async def mon_delete(
         self,
@@ -224,12 +236,12 @@ class CephWrite:
         confirm_destroy: bool = False,
     ) -> str:
         """Destroy a Ceph monitor and return the Proxmox task UPID."""
-        self._require_confirm("mon_delete", confirm_destroy)
-        return cast(str, unwrap_data(await self._resource(node, "mon", monid).delete()))
+        require_confirm("mon_delete", confirm_destroy)
+        return self._upid(await self._resource(node, "mon", monid).delete())
 
     async def mgr_create(self, node: str, mgr_id: str) -> str:
         """Create a Ceph manager and return the Proxmox task UPID."""
-        return cast(str, unwrap_data(await self._resource(node, "mgr", mgr_id).post()))
+        return self._upid(await self._resource(node, "mgr", mgr_id).post())
 
     async def mgr_delete(
         self,
@@ -239,8 +251,8 @@ class CephWrite:
         confirm_destroy: bool = False,
     ) -> str:
         """Destroy a Ceph manager and return the Proxmox task UPID."""
-        self._require_confirm("mgr_delete", confirm_destroy)
-        return cast(str, unwrap_data(await self._resource(node, "mgr", mgr_id).delete()))
+        require_confirm("mgr_delete", confirm_destroy)
+        return self._upid(await self._resource(node, "mgr", mgr_id).delete())
 
     async def mds_create(
         self,
@@ -251,7 +263,7 @@ class CephWrite:
     ) -> str:
         """Create a Ceph metadata server and return the Proxmox task UPID."""
         payload = self._dump(m.CephMDSCreateParams(hotstandby=hotstandby))
-        return cast(str, unwrap_data(await self._resource(node, "mds", name).post(**payload)))
+        return self._upid(await self._resource(node, "mds", name).post(**payload))
 
     async def mds_delete(
         self,
@@ -261,8 +273,8 @@ class CephWrite:
         confirm_destroy: bool = False,
     ) -> str:
         """Destroy a Ceph metadata server and return the Proxmox task UPID."""
-        self._require_confirm("mds_delete", confirm_destroy)
-        return cast(str, unwrap_data(await self._resource(node, "mds", name).delete()))
+        require_confirm("mds_delete", confirm_destroy)
+        return self._upid(await self._resource(node, "mds", name).delete())
 
     # ------------------------------------------------------------------
     # CephFS
@@ -280,7 +292,7 @@ class CephWrite:
         payload = self._dump(
             m.CephFSCreateParams.model_validate({"add_storage": add_storage, "pg_num": pg_num})
         )
-        return cast(str, unwrap_data(await self._resource(node, "fs", name).post(**payload)))
+        return self._upid(await self._resource(node, "fs", name).post(**payload))
 
     # ------------------------------------------------------------------
     # Service lifecycle
@@ -289,14 +301,14 @@ class CephWrite:
     async def service_start(self, node: str, service: str | None = None) -> str:
         """Start Ceph services and return the Proxmox task UPID."""
         payload = self._dump(m.CephServiceParams(service=service))
-        return cast(str, unwrap_data(await self._resource(node, "start").post(**payload)))
+        return self._upid(await self._resource(node, "start").post(**payload))
 
     async def service_stop(self, node: str, service: str | None = None) -> str:
         """Stop Ceph services and return the Proxmox task UPID."""
         payload = self._dump(m.CephServiceParams(service=service))
-        return cast(str, unwrap_data(await self._resource(node, "stop").post(**payload)))
+        return self._upid(await self._resource(node, "stop").post(**payload))
 
     async def service_restart(self, node: str, service: str | None = None) -> str:
         """Restart Ceph services and return the Proxmox task UPID."""
         payload = self._dump(m.CephServiceParams(service=service))
-        return cast(str, unwrap_data(await self._resource(node, "restart").post(**payload)))
+        return self._upid(await self._resource(node, "restart").post(**payload))

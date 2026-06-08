@@ -12,6 +12,7 @@ inventory; writes are idempotent helpers and destructive ops require
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import hashlib
 import hmac
@@ -19,15 +20,22 @@ from collections.abc import Callable
 from email.utils import formatdate
 from typing import Any
 
+from proxmox_sdk.ceph._confirm import require_confirm
 from proxmox_sdk.ceph.providers import models as m
 from proxmox_sdk.ceph.providers._http import (
     DEFAULT_TIMEOUT,
     AsyncTransport,
     BaseHttpProvider,
     HttpResponse,
+    JSONValue,
 )
 from proxmox_sdk.ceph.providers.capability import ProviderCapability
 from proxmox_sdk.sdk.exceptions import ProxmoxSDKError
+
+#: RGW Admin Ops sub-resources that AWS SigV2 requires inside the signed
+#: canonical resource (not just the query string). ``quota`` is the only one
+#: this client currently uses, but the set keeps the signing rule explicit.
+_SIGNED_SUBRESOURCES: tuple[str, ...] = ("quota",)
 
 
 class RGWAdminClient(BaseHttpProvider):
@@ -79,9 +87,17 @@ class RGWAdminClient(BaseHttpProvider):
         }
 
     @staticmethod
-    def _require_confirm(operation: str, confirm_destroy: bool) -> None:
-        if not confirm_destroy:
-            raise ValueError(f"{operation} is destructive; pass confirm_destroy=True to proceed.")
+    def _canonical_resource(path: str, params: dict[str, Any]) -> str:
+        """Append any signed sub-resources (e.g. ``?quota``) to the resource.
+
+        AWS SigV2 requires recognised sub-resources to be part of the signed
+        canonical resource, not just the query string. Omitting them makes RGW
+        compute a different signature and reject the request with HTTP 403.
+        """
+        subresources = sorted(k for k in _SIGNED_SUBRESOURCES if k in params)
+        if not subresources:
+            return path
+        return f"{path}?{'&'.join(subresources)}"
 
     async def _request(
         self,
@@ -92,10 +108,10 @@ class RGWAdminClient(BaseHttpProvider):
         json: Any | None = None,
     ) -> HttpResponse:
         path = self._resource_path(resource)
-        headers = self._auth_headers(method, path)
-        merged_params = {"format": "json"}
+        merged_params: dict[str, Any] = {"format": "json"}
         if params:
             merged_params.update(params)
+        headers = self._auth_headers(method, self._canonical_resource(path, merged_params))
         if json is not None:
             headers["Content-Type"] = "application/json"
         response = await self._transport.request(
@@ -119,12 +135,18 @@ class RGWAdminClient(BaseHttpProvider):
         return m.RGWUser.model_validate(body)
 
     async def list_users(self) -> list[m.RGWUser]:
+        uids = await self.list_user_ids()
+        results = await asyncio.gather(
+            *(self.get_user(uid) for uid in uids), return_exceptions=True
+        )
         users: list[m.RGWUser] = []
-        for uid in await self.list_user_ids():
-            try:
-                users.append(await self.get_user(uid))
-            except ProxmoxSDKError:  # pragma: no cover - skip transient per-user errors
-                continue
+        for result in results:
+            if isinstance(result, m.RGWUser):
+                users.append(result)
+            elif isinstance(result, ProxmoxSDKError):
+                continue  # skip transient per-user errors
+            elif isinstance(result, BaseException):
+                raise result
         return users
 
     # -- bucket reads -------------------------------------------------------- #
@@ -162,7 +184,7 @@ class RGWAdminClient(BaseHttpProvider):
 
     async def set_user_quota(
         self, uid: str, *, max_size: int | None = None, max_objects: int | None = None
-    ) -> Any:
+    ) -> JSONValue:
         params: dict[str, Any] = {"uid": uid, "quota-type": "user", "enabled": "true"}
         if max_size is not None:
             params["max-size"] = max_size
@@ -173,20 +195,20 @@ class RGWAdminClient(BaseHttpProvider):
 
     async def remove_user(
         self, uid: str, *, purge_data: bool = False, confirm_destroy: bool = False
-    ) -> Any:
-        self._require_confirm("remove_user", confirm_destroy)
+    ) -> JSONValue:
+        require_confirm("remove_user", confirm_destroy)
         params = {"uid": uid, "purge-data": "true" if purge_data else "false"}
         response = await self._request("DELETE", "user", params=params)
         return response.json_body
 
     # -- bucket writes ------------------------------------------------------- #
-    async def link_bucket(self, *, bucket: str, uid: str) -> Any:
+    async def link_bucket(self, *, bucket: str, uid: str) -> JSONValue:
         response = await self._request("PUT", "bucket", params={"bucket": bucket, "uid": uid})
         return response.json_body
 
     async def set_bucket_quota(
         self, uid: str, *, max_size: int | None = None, max_objects: int | None = None
-    ) -> Any:
+    ) -> JSONValue:
         params: dict[str, Any] = {"uid": uid, "quota-type": "bucket", "enabled": "true"}
         if max_size is not None:
             params["max-size"] = max_size
@@ -197,8 +219,8 @@ class RGWAdminClient(BaseHttpProvider):
 
     async def remove_bucket(
         self, bucket: str, *, purge_objects: bool = False, confirm_destroy: bool = False
-    ) -> Any:
-        self._require_confirm("remove_bucket", confirm_destroy)
+    ) -> JSONValue:
+        require_confirm("remove_bucket", confirm_destroy)
         params = {"bucket": bucket, "purge-objects": "true" if purge_objects else "false"}
         response = await self._request("DELETE", "bucket", params=params)
         return response.json_body

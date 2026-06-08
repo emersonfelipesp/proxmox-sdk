@@ -9,6 +9,7 @@ import pytest
 from proxmox_sdk.ceph import CephClient, SyncCephClient
 from proxmox_sdk.sdk.api import ProxmoxSDK
 from proxmox_sdk.sdk.backends.base import AbstractBackend
+from proxmox_sdk.sdk.exceptions import ProxmoxSDKError
 from proxmox_sdk.sdk.resource import ProxmoxResource
 from proxmox_sdk.sdk.services import SERVICES
 
@@ -278,3 +279,12 @@ def test_sync_write_domain_blocks_and_returns_result():
     assert backend.calls == [
         ("POST", "/api2/json/nodes/pve1/ceph/start", {"service": "ceph.target"})
     ]
+
+
+async def test_write_helper_rejects_non_upid_response():
+    # A task helper must surface a clear error when Proxmox does not return a
+    # UPID string, instead of laundering a non-str value through cast(str, ...).
+    sdk, _ = _make_sdk({"/api2/json/nodes/pve1/ceph/pool": {"data": None}})
+    ceph = CephClient(_sdk=sdk)
+    with pytest.raises(ProxmoxSDKError, match="UPID"):
+        await ceph.write.pool_create("pve1", "rbd")
