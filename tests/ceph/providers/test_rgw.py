@@ -112,3 +112,53 @@ async def test_capabilities_unavailable_on_error() -> None:
     client, _ = _client(routes)
     caps = await client.capabilities()
     assert caps.available is False
+
+
+async def test_set_user_quota_signs_quota_subresource() -> None:
+    # SigV2 must fold the ``quota`` sub-resource into the signed canonical
+    # resource, otherwise strict RGW rejects the request with HTTP 403.
+    routes = {"PUT /admin/user": {}}
+    client, transport = _client(routes)
+    await client.set_user_quota("dave", max_size=1024)
+    call = transport.calls[0]
+    expected = f"AWS AKIA:{_expected_sig('PUT', '/admin/user?quota')}"
+    assert call["headers"]["Authorization"] == expected
+
+
+async def test_set_bucket_quota_signs_quota_subresource() -> None:
+    routes = {"PUT /admin/user": {}}
+    client, transport = _client(routes)
+    await client.set_bucket_quota("dave", max_objects=5)
+    call = transport.calls[0]
+    expected = f"AWS AKIA:{_expected_sig('PUT', '/admin/user?quota')}"
+    assert call["headers"]["Authorization"] == expected
+
+
+async def test_non_quota_request_signs_bare_path() -> None:
+    # A request without a signed sub-resource must still sign the bare path.
+    routes = {"PUT /admin/user": {"user_id": "carol"}}
+    client, transport = _client(routes)
+    await client.create_user("carol", display_name="Carol")
+    call = transport.calls[0]
+    expected = f"AWS AKIA:{_expected_sig('PUT', '/admin/user')}"
+    assert call["headers"]["Authorization"] == expected
+
+
+async def test_list_users_returns_parsed_users() -> None:
+    routes = {
+        "GET /admin/metadata/user": ["alice"],
+        "GET /admin/user": {"user_id": "alice", "display_name": "Alice"},
+    }
+    client, _ = _client(routes)
+    users = await client.list_users()
+    assert [u.user_id for u in users] == ["alice"]
+
+
+async def test_list_users_skips_transient_per_user_errors() -> None:
+    # Concurrent fetch must skip ProxmoxSDKError per user, not raise.
+    routes = {
+        "GET /admin/metadata/user": ["alice", "bob"],
+        "GET /admin/user": HttpResponse(status=500, text="boom"),
+    }
+    client, _ = _client(routes)
+    assert await client.list_users() == []

@@ -12,7 +12,9 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import quote
 
+from proxmox_sdk.ceph._confirm import require_confirm
 from proxmox_sdk.ceph.providers import models as m
+from proxmox_sdk.ceph.providers._http import JSONValue
 from proxmox_sdk.ceph.providers.capability import ProviderCapability
 from proxmox_sdk.ceph.providers.dashboard import DashboardCephClient
 from proxmox_sdk.sdk.exceptions import CephCapabilityUnsupportedError
@@ -33,11 +35,6 @@ class RBDClient:
 
     def __init__(self, dashboard: DashboardCephClient) -> None:
         self._dashboard = dashboard
-
-    @staticmethod
-    def _require_confirm(operation: str, confirm_destroy: bool) -> None:
-        if not confirm_destroy:
-            raise ValueError(f"{operation} is destructive; pass confirm_destroy=True to proceed.")
 
     # -- reads --------------------------------------------------------------- #
     async def list_images(self, pool_name: str | None = None) -> list[m.DashboardRBDImage]:
@@ -63,7 +60,7 @@ class RBDClient:
         stripe_unit: int | None = None,
         stripe_count: int | None = None,
         configuration: dict[str, Any] | None = None,
-    ) -> Any:
+    ) -> JSONValue:
         payload: dict[str, Any] = {
             "pool_name": pool_name,
             "name": image_name,
@@ -94,7 +91,7 @@ class RBDClient:
         namespace: str | None = None,
         current_size_bytes: int | None = None,
         allow_shrink: bool = False,
-    ) -> Any:
+    ) -> JSONValue:
         # Shrinking an RBD image can destroy data; gate it explicitly.
         if current_size_bytes is not None and size_bytes < current_size_bytes and not allow_shrink:
             raise ValueError("resize would shrink the image; pass allow_shrink=True to proceed.")
@@ -109,7 +106,7 @@ class RBDClient:
         namespace: str | None = None,
         features: list[str] | None = None,
         configuration: dict[str, Any] | None = None,
-    ) -> Any:
+    ) -> JSONValue:
         payload: dict[str, Any] = {}
         if features is not None:
             payload["features"] = features
@@ -125,8 +122,8 @@ class RBDClient:
         *,
         namespace: str | None = None,
         confirm_destroy: bool = False,
-    ) -> Any:
-        self._require_confirm("delete_image", confirm_destroy)
+    ) -> JSONValue:
+        require_confirm("delete_image", confirm_destroy)
         spec = _image_spec(pool_name, image_name, namespace)
         return await self._dashboard.rbd_delete(spec, confirm_destroy=True)
 
@@ -137,8 +134,8 @@ class RBDClient:
         *,
         namespace: str | None = None,
         confirm_destroy: bool = False,
-    ) -> Any:
-        self._require_confirm("move_to_trash", confirm_destroy)
+    ) -> JSONValue:
+        require_confirm("move_to_trash", confirm_destroy)
         spec = _image_spec(pool_name, image_name, namespace)
         return await self._dashboard.rbd_move_trash(spec, confirm_destroy=True)
 
@@ -149,7 +146,7 @@ class RBDClient:
         snapshot_name: str,
         *,
         namespace: str | None = None,
-    ) -> Any:
+    ) -> JSONValue:
         spec = _image_spec(pool_name, image_name, namespace)
         return await self._dashboard.rbd_snapshot_create(spec, snapshot_name)
 
@@ -161,8 +158,8 @@ class RBDClient:
         *,
         namespace: str | None = None,
         confirm_destroy: bool = False,
-    ) -> Any:
-        self._require_confirm("delete_snapshot", confirm_destroy)
+    ) -> JSONValue:
+        require_confirm("delete_snapshot", confirm_destroy)
         spec = _image_spec(pool_name, image_name, namespace)
         return await self._dashboard.rbd_snapshot_delete(spec, snapshot_name, confirm_destroy=True)
 

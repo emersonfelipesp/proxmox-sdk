@@ -118,7 +118,11 @@ async def test_capabilities_reports_supported_operations() -> None:
     assert caps.version == "ceph version 18.2.4"
     assert caps.supports("pool", "create") is True
     assert caps.supports("rbd_image", "delete") is True
-    assert caps.supports("nonsense", "frobnicate") is True  # write fallback for unknown verbs
+    # Unknown write-like verbs must NOT fail open — they are unsupported unless
+    # explicitly enumerated in the provider's operations map.
+    assert caps.supports("nonsense", "frobnicate") is False
+    # Unknown read verbs may still resolve via the provider's read flag.
+    assert caps.supports("nonsense", "read") is True
 
     # require() raises for an unsupported op.
     caps.operations["pool:create"] = False
@@ -135,3 +139,21 @@ async def test_capabilities_unavailable_when_summary_unreachable() -> None:
     caps = await client.capabilities()
     assert caps.available is False
     assert caps.supports("pool", "create") is False
+
+
+async def test_injected_transport_is_not_closed() -> None:
+    # An injected transport is owned by the caller (and may be shared), so the
+    # provider must not close it.
+    transport = RecordingTransport({})
+    client = DashboardCephClient(BASE, transport=transport)
+    await client.close()
+    assert transport.closed is False
+
+
+async def test_owned_transport_is_closed() -> None:
+    # A transport the provider created itself must be closed.
+    client = DashboardCephClient(BASE)
+    recorder = RecordingTransport({})
+    client._transport = recorder  # preserve _owns_transport=True
+    await client.close()
+    assert recorder.closed is True

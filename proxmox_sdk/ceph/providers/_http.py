@@ -14,14 +14,22 @@ from __future__ import annotations
 
 import ssl
 from dataclasses import dataclass, field
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, Self, runtime_checkable
 
 from proxmox_sdk.sdk.exceptions import (
     ProxmoxConnectionError,
     ResourceException,
 )
 
+if TYPE_CHECKING:
+    import aiohttp
+
 DEFAULT_TIMEOUT = 30
+
+#: Any JSON value a provider endpoint may return. Using a union (rather than
+#: ``Any``) keeps call sites honest: callers must narrow the result before
+#: treating it as a specific shape.
+JSONValue = dict[str, Any] | list[Any] | str | int | float | bool | None
 
 
 @dataclass(slots=True)
@@ -58,9 +66,12 @@ class AiohttpTransport:
     def __init__(self, *, verify_ssl: bool = True, timeout: int = DEFAULT_TIMEOUT) -> None:
         self._verify_ssl = verify_ssl
         self._timeout = timeout
-        self._session: Any = None
+        self._session: aiohttp.ClientSession | None = None
+        # Build the SSL context once; create_default_context() parses the system
+        # CA bundle, so rebuilding it per request is wasted work on hot paths.
+        self._ssl: ssl.SSLContext | bool = self._build_ssl_context()
 
-    def _ssl_context(self) -> ssl.SSLContext | bool:
+    def _build_ssl_context(self) -> ssl.SSLContext | bool:
         if self._verify_ssl:
             return True
         ctx = ssl.create_default_context()
@@ -68,7 +79,7 @@ class AiohttpTransport:
         ctx.verify_mode = ssl.CERT_NONE
         return ctx
 
-    async def _ensure_session(self) -> Any:
+    async def _ensure_session(self) -> aiohttp.ClientSession:
         import aiohttp
 
         if self._session is None or self._session.closed:
@@ -89,7 +100,7 @@ class AiohttpTransport:
         import aiohttp
 
         session = await self._ensure_session()
-        ssl_param = self._ssl_context()
+        ssl_param = self._ssl
         try:
             async with session.request(
                 method,
@@ -162,9 +173,15 @@ class BaseHttpProvider:
         self._base_url = base_url.rstrip("/")
         self._verify_ssl = verify_ssl
         self._timeout = timeout
-        self._transport: AsyncTransport = transport or AiohttpTransport(
-            verify_ssl=verify_ssl, timeout=timeout
-        )
+        self._transport: AsyncTransport
+        if transport is None:
+            self._transport = AiohttpTransport(verify_ssl=verify_ssl, timeout=timeout)
+            self._owns_transport = True
+        else:
+            # An injected transport is owned by the caller (and may be shared
+            # across provider clients), so this provider must not close it.
+            self._transport = transport
+            self._owns_transport = False
 
     def _url(self, path: str) -> str:
         return f"{self._base_url}/{path.lstrip('/')}"
@@ -181,9 +198,12 @@ class BaseHttpProvider:
             )
 
     async def close(self) -> None:
-        await self._transport.close()
+        # Only close transports we created; an injected transport is owned by
+        # the caller and may be shared across provider clients.
+        if self._owns_transport:
+            await self._transport.close()
 
-    async def __aenter__(self) -> Any:
+    async def __aenter__(self) -> Self:
         return self
 
     async def __aexit__(self, *_exc: object) -> None:

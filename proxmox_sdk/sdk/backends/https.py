@@ -16,7 +16,6 @@ import aiohttp
 from proxmox_sdk.sdk.auth.base import AuthStrategy, EnsurableAuthStrategy
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.exceptions import (
-    AuthenticationError,
     ProxmoxConnectionError,
     ProxmoxTimeoutError,
     ResourceException,
@@ -335,13 +334,7 @@ class HttpsBackend(AbstractBackend):
         if not self._auth.is_authenticated:
             session = await self._ensure_session()
             await self._ensure_authenticated(session)
-        ticket = self._auth._ticket
-        csrf_token = self._auth._csrf_token
-        if not ticket or not csrf_token:
-            raise AuthenticationError(
-                "Ticket authentication state is missing; authenticate before retrieving tokens"
-            )
-        return ticket, csrf_token
+        return self._auth.get_auth_tokens()
 
     # ------------------------------------------------------------------
     # Internal helpers

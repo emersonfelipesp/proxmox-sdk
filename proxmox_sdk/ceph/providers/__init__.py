@@ -18,6 +18,7 @@ from proxmox_sdk.ceph.providers._http import (
     AsyncTransport,
     BaseHttpProvider,
     HttpResponse,
+    JSONValue,
 )
 from proxmox_sdk.ceph.providers.capability import ProviderCapability
 from proxmox_sdk.ceph.providers.dashboard import DashboardCephClient
@@ -32,6 +33,7 @@ __all__ = [
     "CephCapabilityUnsupportedError",
     "DashboardCephClient",
     "HttpResponse",
+    "JSONValue",
     "ProviderCapability",
     "RBDClient",
     "RGWAdminClient",
