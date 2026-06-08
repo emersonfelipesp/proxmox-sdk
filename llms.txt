@@ -22,7 +22,7 @@ Core capabilities:
 ## Package Identity
 
 - Package name: proxmox-sdk
-- Current version: 0.0.6
+- Current version: 0.0.11.post2
 - Python: >= 3.11
 - License: MIT
 
@@ -124,10 +124,11 @@ Custom data override:
 
 ### Real Mode
 
-- PROXMOX_URL: Proxmox base URL (example: https://host:8006)
-- PROXMOX_API_TOKEN: API token (recommended)
-- PROXMOX_USERNAME: username fallback
-- PROXMOX_PASSWORD: password fallback
+- PROXMOX_API_URL: Proxmox base URL (example: https://host:8006)
+- PROXMOX_API_TOKEN_ID: API token ID (format: user@realm!tokenid)
+- PROXMOX_API_TOKEN_SECRET: API token secret UUID
+- PROXMOX_API_USERNAME: username fallback (format: user@realm)
+- PROXMOX_API_PASSWORD: password fallback
 - PROXMOX_API_VERIFY_SSL: TLS verification toggle
 
 ### Server
@@ -139,10 +140,16 @@ Custom data override:
 
 Defined in pyproject.toml:
 
+- proxmox (alias: proxmox-cli, pbx)
+  - Typer CLI + Textual TUI for interactive Proxmox access.
+  - Entry: proxmox_sdk.proxmox_cli.cli:cli_main
 - proxmox-sdk-codegen
   - Runs code generation tooling.
 - proxmox-sdk-mock
-  - Runs standalone mock server.
+  - Runs standalone PVE mock server.
+- proxmox-sdk-pdm-mock
+  - Runs standalone Proxmox Datacenter Manager mock server (default port 8443).
+  - Entry: proxmox_sdk.pdm_mock_main:run
 
 ## Developer Commands
 

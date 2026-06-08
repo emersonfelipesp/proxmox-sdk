@@ -17,7 +17,16 @@ Schema-driven Proxmox API toolkit Python package. Pre-generated 675-operation / 
 
 ## Multi-Surface Consumers in This Workspace
 
-- `proxbox-api/` — uses this SDK as its Proxmox API layer; pin `proxmox-sdk==0.0.3.post1`.
-- CLI entrypoints `proxmox`, `proxmox-cli`, `pbx` (and `pbx tui` Textual TUI).
+- `proxbox-api/` — uses this SDK as its Proxmox API layer; pin `proxmox-sdk==0.0.11.post2`.
+- CLI entrypoints `proxmox`, `proxmox-cli`, `pbx` (all alias `proxmox_sdk.proxmox_cli.cli:cli_main`, and `pbx tui` Textual TUI).
 - `proxmox-sdk-codegen` — Playwright → Proxmox API Viewer → OpenAPI → Pydantic codegen pipeline.
-- `proxmox-sdk-mock` — standalone mock server.
+- `proxmox-sdk-mock` — standalone PVE mock server.
+- `proxmox-sdk-pdm-mock` — standalone Proxmox Datacenter Manager mock server (default port 8443).
+
+## Typed Service Facades
+
+High-level service-specific clients are available alongside the low-level `ProxmoxSDK`:
+
+- **`proxmox_sdk.ceph`** — `CephClient` / `SyncCephClient`: typed Ceph facade over PVE API. Destructive operations (pool/daemon removal) are gated by `confirm_destroy=True`. Includes direct provider clients `DashboardCephClient`, `RGWAdminClient`, `RBDClient` (in `proxmox_sdk.ceph.providers`) and the `ProviderCapability` / `capabilities()` pattern for capability negotiation.
+- **`proxmox_sdk.pbs`** — `PBSClient` / `SyncPBSClient`: typed read-only PBS facade. Domains: `datastores`, `snapshots`, `jobs`, `nodes`. Default port 8007.
+- **`proxmox_sdk.pdm`** — `PDMClient` / `SyncPDMClient`: typed PDM facade. Domains: `remotes`, `pve`, `pbs`, `resources`, `subscriptions`, `metrics`, `access`, `views`. Default port 8443. Every guest/datastore operation requires a `remote` argument (PDM multiplexes across registered clusters).

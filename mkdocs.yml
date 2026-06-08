@@ -55,6 +55,8 @@ nav:
       - Authentication & Sessions: sdk-authentication.md
       - Virtual Machines: sdk-virtual-machines.md
       - Proxmox Backup Server: sdk-pbs.md
+      - Ceph: sdk-ceph.md
+      - Proxmox Datacenter Manager: sdk-pdm.md
       - Examples & Recipes: sdk-examples.md
   - API Modes:
       - SDK Mock Usage: sdk-mock.md

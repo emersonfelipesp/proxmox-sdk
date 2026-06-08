@@ -348,13 +348,14 @@ with ProxmoxSDK.sync_mock() as proxmox:
 
 ## Services Layer
 
-Three Proxmox services are supported, each with their own API path prefix and default port:
+Four Proxmox services are supported, each with their own API path prefix and default port:
 
 | Service | API Prefix | Default Port | Description |
 |---|---|---|---|
 | `PVE` | `/api2/json` | `8006` | Proxmox VE (default) |
 | `PMG` | `/api2/json` | `8006` | Proxmox Mail Gateway |
 | `PBS` | `/api2/json` | `8007` | Proxmox Backup Server |
+| `PDM` | `/api2/json` | `8443` | Proxmox Datacenter Manager |
 
 Service selection determines which backends are available and which endpoints the schema covers.
 

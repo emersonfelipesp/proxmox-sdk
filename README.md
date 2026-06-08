@@ -76,13 +76,21 @@ pbx tui
 pbx tui mock
 ```
 
+### PDM Mock Server
+
+```bash
+# Start the standalone Proxmox Datacenter Manager mock (default port 8443)
+proxmox-sdk-pdm-mock
+```
+
 ### Real Mode (Connect to Proxmox)
 
 ```bash
 # Configure credentials
 export PROXMOX_API_MODE=real
-export PROXMOX_URL=https://proxmox.example.com:8006
-export PROXMOX_API_TOKEN=PVEAPIToken=user@realm!tokenid=uuid
+export PROXMOX_API_URL=https://proxmox.example.com:8006
+export PROXMOX_API_TOKEN_ID=user@realm!tokenid
+export PROXMOX_API_TOKEN_SECRET=<uuid>
 
 # Start server
 uvicorn proxmox_sdk.main:app --reload
@@ -115,10 +123,11 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 
 ### Real Mode
 - `PROXMOX_API_MODE` - Set to "real" to enable Proxmox integration
-- `PROXMOX_URL` - Proxmox server URL (e.g., "https://proxmox.example.com:8006")
-- `PROXMOX_API_TOKEN` - API token (recommended, format: "PVEAPIToken=user@realm!tokenid=uuid")
-- `PROXMOX_USERNAME` - Username (fallback, format: "user@realm")
-- `PROXMOX_PASSWORD` - Password (fallback)
+- `PROXMOX_API_URL` - Proxmox server URL (e.g., "https://proxmox.example.com:8006")
+- `PROXMOX_API_TOKEN_ID` - API token ID (format: "user@realm!tokenid")
+- `PROXMOX_API_TOKEN_SECRET` - API token secret UUID
+- `PROXMOX_API_USERNAME` - Username for password auth (format: "user@realm")
+- `PROXMOX_API_PASSWORD` - Password for password auth
 - `PROXMOX_API_VERIFY_SSL` - Verify SSL certificates (default: true)
 
 ### Server

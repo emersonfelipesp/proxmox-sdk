@@ -27,7 +27,7 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 2. **Standalone Python SDK** - Production-ready SDK without FastAPI server (async + sync)
 3. **CLI + TUI** - Typer CLI and Textual terminal UI for interactive use
 4. **Codegen pipeline** - Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
-5. **646 endpoints** - Pre-generated Proxmox VE 9.1.11 API with full OpenAPI schema
+5. **675 operations / 449 endpoints** - Pre-generated Proxmox VE 9.2 API with full OpenAPI schema (9.1.11 retained for backward compatibility)
 6. **Rate limiting** - Built-in protection via SlowAPI
 
 ## Package Structure
@@ -50,6 +50,29 @@ proxmox_sdk/
 │   ├── routes.py             # Proxmox API proxy routes with validation
 │   ├── config.py             # ProxmoxConfig dataclass
 │   └── client.py             # FastAPI adapter wrapping the SDK HTTPS backend
+├── ceph/                     # Ceph facade (PVE service)
+│   ├── client.py             # CephClient / SyncCephClient
+│   ├── models.py             # Pydantic models for Ceph responses
+│   ├── _confirm.py           # confirm_destroy gate (shared)
+│   ├── domains/              # Cluster, Node, Write domain helpers
+│   └── providers/            # Direct provider clients (Dashboard, RGW, RBD)
+│       ├── capability.py     # ProviderCapability descriptor
+│       ├── dashboard.py      # DashboardCephClient
+│       ├── rgw.py            # RGWAdminClient
+│       └── rbd.py            # RBDClient
+├── pbs/                      # Proxmox Backup Server facade
+│   ├── client.py             # PBSClient / SyncPBSClient
+│   ├── models.py             # Pydantic models for PBS responses
+│   └── domains/              # Datastores, Jobs, Nodes, Snapshots
+├── pdm/                      # Proxmox Datacenter Manager facade
+│   ├── client.py             # PDMClient / SyncPDMClient
+│   ├── models.py             # Pydantic models for PDM responses
+│   ├── domains/              # Access, Metrics, PBS, PVE, Remotes, Resources, Views
+│   └── mock/                 # PDM mock routes for proxmox-sdk-pdm-mock
+├── node/                     # Node-level helpers
+│   └── hardware/             # Hardware discovery
+├── ssh/                      # SSH utilities
+│   └── __init__.py
 ├── proxmox_cli/              # CLI + TUI application
 │   ├── app.py                # Typer app construction and setup_logging
 │   ├── batch.py              # Batch request execution
@@ -60,16 +83,21 @@ proxmox_sdk/
 │   ├── config_commands.py    # `config` subcommand group
 │   ├── doc_commands.py       # `docs` subcommand group
 │   ├── docgen_capture.py     # CLI docs capture pipeline
-│   ├── error_suggestions.py  # User-friendly error hints
 │   ├── exceptions.py         # CLI-specific exceptions
 │   ├── install.py            # Self-install helpers
 │   ├── output.py             # Shared output formatting
+│   ├── pdm_tui_app.py        # PDM TUI entrypoint
 │   ├── performance.py        # Performance profiling helpers
 │   ├── release.py            # Release tooling
 │   ├── sdk_bridge.py         # Bridge between CLI and ProxmoxSDK
-│   ├── tui_app.py            # Textual TUI application
+│   ├── tui_app.py            # Textual TUI application (PVE)
 │   ├── tui_runner.py         # TUI launch wrapper
 │   ├── utils.py              # Path/param parsing utilities
+│   ├── tui/                  # Per-service Textual TUI apps
+│   │   ├── ceph_app.py       # Ceph TUI
+│   │   ├── pbs_app.py        # PBS TUI
+│   │   ├── pdm_app.py        # PDM TUI
+│   │   └── pve_app.py        # PVE TUI
 │   ├── commands/             # Subcommands
 │   │   ├── _common.py        # Shared command utilities
 │   │   ├── create.py         # `create` subcommand
@@ -101,8 +129,9 @@ proxmox_sdk/
 ├── sdk/                      # Standalone Python SDK
 │   ├── api.py                # ProxmoxSDK main class
 │   ├── sync.py               # SyncProxmoxSDK wrapper
+│   ├── sync_adapter.py       # BlockingDomainProxy for sync typed clients
 │   ├── resource.py           # Resource navigation (attribute-based)
-│   ├── services.py           # Service configs (PVE, PMG, PBS)
+│   ├── services.py           # Service configs (PVE, PMG, PBS, PDM)
 │   ├── exceptions.py         # SDK-specific exceptions
 │   ├── backends/             # Transport backends
 │   │   ├── base.py           # AbstractBackend protocol
@@ -291,6 +320,8 @@ A release publishes the package to PyPI and pushes all three Docker image varian
 - `PROXMOX_API_MODE` - Set to "mock" (default) or "real"
 - `PROXMOX_MOCK_SCHEMA_VERSION` - Version tag for mock (default: "latest")
 - `PROXMOX_MOCK_DATA_PATH` - Path to custom mock data JSON/YAML file
+- `PROXMOX_MOCK_STORE` - Mock state backend: "sqlite" (default), "shared-memory", or "dict"
+- `PROXMOX_MOCK_STATE_PATH` - Optional SQLite mock-state database path (default: tempdir-scoped)
 
 ### Real Mode
 - `PROXMOX_API_MODE` - Set to "real" to enable Proxmox integration
@@ -300,7 +331,7 @@ A release publishes the package to PyPI and pushes all three Docker image varian
 - `PROXMOX_API_USERNAME` - Username for password auth (format: "user@realm")
 - `PROXMOX_API_PASSWORD` - Password for password auth
 - `PROXMOX_API_VERIFY_SSL` - Verify SSL certificates (default: true)
-- `PROXMOX_API_SERVICE` - Service type: PVE, PMG, or PBS (default: "PVE")
+- `PROXMOX_API_SERVICE` - Service type: PVE, PMG, PBS, or PDM (default: "PVE")
 - `PROXMOX_API_BACKEND` - Transport backend: https, mock, local, ssh_paramiko, openssh (default: "https")
 - `PROXMOX_API_PATH_PREFIX` - Reverse-proxy path prefix (default: "")
 - `PROXMOX_API_OTP` - OTP/TOTP code for 2FA (default: none)

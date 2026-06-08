@@ -8,7 +8,7 @@ Production-ready examples demonstrating the Proxmox OpenAPI SDK for real-world u
 
 ```bash
 # Navigate to repository
-cd /root/nms/proxmox-sdk
+cd /path/to/proxmox-sdk
 
 # Install dependencies
 pip install -e .

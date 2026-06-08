@@ -326,7 +326,7 @@ ProxmoxSDK(
 
 ## Services & Versions
 
-The SDK supports multiple Proxmox services:
+The SDK supports four Proxmox services:
 
 ```python
 # Proxmox VE (default)
@@ -353,12 +353,27 @@ ProxmoxSDK(
     service="PBS",
     port=8007,  # PBS uses port 8007 by default
 )
+
+# Proxmox Datacenter Manager
+ProxmoxSDK(
+    host="pdm.example.com",
+    user="admin@pam",
+    token_name="automation",
+    token_value="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    service="PDM",
+    port=8443,  # PDM uses port 8443 by default
+)
 ```
 
 !!! tip "PBS HOW-TO Guide"
     For a complete guide to PBS operations — datastores, snapshots, garbage
     collection, verification, pruning, and user management — see the
     **[Proxmox Backup Server HOW-TO →](./sdk-pbs.md)**.
+
+!!! tip "PDM HOW-TO Guide"
+    For a complete guide to PDM operations — remotes, PVE guests, PBS datastores,
+    views, metrics, subscriptions, and access — see the
+    **[Proxmox Datacenter Manager HOW-TO →](./sdk-pdm.md)**.
 
 ---
 

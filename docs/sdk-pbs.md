@@ -947,6 +947,77 @@ ProxmoxSDK(..., service="PBS", port=8007, verify_ssl=False)
 
 ---
 
+---
+
+## Typed Facade: `PBSClient` / `SyncPBSClient`
+
+For code that should work only with PBS — and never accidentally hit a PVE or PDM endpoint — import the dedicated typed facade:
+
+```python
+from proxmox_sdk.pbs import PBSClient, SyncPBSClient
+```
+
+`PBSClient` composes `ProxmoxSDK` with `service="PBS"` and exposes typed domain helpers. It raises `ValueError` at construction time if you pass a non-PBS SDK instance to `PBSClient.from_sdk()`.
+
+### Async usage
+
+```python
+import asyncio
+from proxmox_sdk.pbs import PBSClient
+
+async def main():
+    async with PBSClient(
+        host="pbs.example.com",
+        user="backup-operator@pam",
+        token_name="automation",
+        token_value="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        port=8007,
+    ) as pbs:
+        version = await pbs.version()
+        print(f"PBS version: {version.version}")
+
+        # Typed domain helpers
+        datastores = await pbs.datastores.list()
+        snapshots  = await pbs.snapshots.list(store="vm-backups")
+        jobs       = await pbs.jobs.list()
+
+asyncio.run(main())
+```
+
+### Sync usage
+
+```python
+from proxmox_sdk.pbs import SyncPBSClient
+
+with SyncPBSClient(
+    host="pbs.example.com",
+    user="backup-operator@pam",
+    token_name="automation",
+    token_value="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    port=8007,
+) as pbs:
+    version = pbs.version()
+    print(f"PBS version: {version.version}")
+    datastores = pbs.datastores.list()
+```
+
+### Mock mode (for tests)
+
+```python
+from proxmox_sdk.pbs import PBSClient
+
+async with PBSClient.mock() as pbs:
+    version = await pbs.version()
+```
+
+!!! note "Typed facade vs low-level SDK"
+    `PBSClient` / `SyncPBSClient` provide typed return values via hand-coded
+    Pydantic models in `proxmox_sdk.pbs.models`. For raw dict-based access or
+    for endpoints not yet covered by the facade, use `ProxmoxSDK` directly
+    with `service="PBS"` as shown in the sections above.
+
+---
+
 ## See Also
 
 - [SDK Guide](./sdk-guide.md) — Overview, backends, and core concepts

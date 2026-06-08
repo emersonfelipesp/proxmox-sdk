@@ -204,9 +204,10 @@ at startup.
 
 The OpenAPI schema, aggregate Pydantic models, lazy model shards, model index,
 and route metadata are committed to the repository so mock mode works
-completely offline without a Proxmox server. Each version (e.g., `9.1.11`) is
-stored independently under `generated/proxmox/`; CI ships both `9.1.11/` and a
-`latest` mirror.
+completely offline without a Proxmox server. Each version is stored
+independently under `generated/proxmox/`; CI ships `9.2/`, `9.1.11/`, and
+`latest/` (alias for 9.2), exercising all three in parallel via
+`PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]`.
 
 ### 4. Full Request/Response Validation
 
