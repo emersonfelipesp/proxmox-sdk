@@ -264,6 +264,7 @@ jobs:
     if: inputs.mode == 'publish'
     name: Docker — seed base image cache (python:3.13-alpine)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Resolve checkout ref
         id: checkout_source
