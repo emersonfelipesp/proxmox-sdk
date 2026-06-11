@@ -35,7 +35,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          enable-cache: true
+          enable-cache: false
           python-version: "3.13"
 
       - name: Detect and resolve version tag
