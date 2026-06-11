@@ -23,6 +23,7 @@ jobs:
     permissions: {}
     steps:
       - name: Dispatch refresh-github-data
+        if: ${{ secrets.PROFILE_REPO_PAT != '' }}
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PROFILE_REPO_PAT }}
