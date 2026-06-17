@@ -36,6 +36,7 @@ ALLOWED_DOMAINS = [
     "pve.proxmox.com",
     "pmg.proxmox.com",
     "pbs.proxmox.com",
+    "pdm.proxmox.com",
     "proxmox.com",
 ]
 
