@@ -24,10 +24,14 @@ class _GuestOps:
         self._sdk = sdk
 
     def _guest_resource(self, remote: str, vmid: int) -> Any:
-        return self._sdk.pve.remotes(remote).guests(self._kind)(vmid)
+        # Use getattr so "qemu"/"lxc" becomes a direct path segment, not a
+        # sub-path via the non-existent /pve/remotes/{remote}/guests/{kind}/ prefix.
+        # Correct paths: /pve/remotes/{remote}/qemu/{vmid}
+        #                /pve/remotes/{remote}/lxc/{vmid}
+        return getattr(self._sdk.pve.remotes(remote), self._kind)(vmid)
 
     async def list(self, remote: str) -> list[m.PDMGuest]:
-        data = await self._sdk.pve.remotes(remote).guests(self._kind).get()
+        data = await getattr(self._sdk.pve.remotes(remote), self._kind).get()
         items: list[m.PDMGuest] = []
         for entry in normalize_list(data):
             payload = dict(entry)
