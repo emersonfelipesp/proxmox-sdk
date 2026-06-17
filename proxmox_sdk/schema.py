@@ -488,9 +488,17 @@ class ProxmoxSchemaValue(RootModel[Any]):
         return deepcopy(override)
 
 
+DEFAULT_PDM_OPENAPI_TAG = "latest"
+
+
 def _generated_dir() -> Path:
-    """Return the generated artifacts directory."""
+    """Return the generated PVE/PBS/PMG artifacts directory."""
     return Path(__file__).resolve().parent / "generated" / "proxmox"
+
+
+def _pdm_generated_dir() -> Path:
+    """Return the generated PDM artifacts directory."""
+    return Path(__file__).resolve().parent / "generated" / "pdm"
 
 
 def available_proxmox_sdk_versions() -> list[str]:
@@ -517,6 +525,43 @@ def load_proxmox_generated_openapi(
     return document.model_dump(mode="python")
 
 
+def available_pdm_sdk_versions() -> list[str]:
+    """Return list of available PDM OpenAPI version tags."""
+    generated = _pdm_generated_dir()
+    if not generated.exists():
+        return []
+
+    versions = []
+    for item in generated.iterdir():
+        if item.is_dir() and (item / "openapi.json").exists():
+            versions.append(item.name)
+
+    return sorted(versions, key=lambda v: (0 if v == DEFAULT_PDM_OPENAPI_TAG else 1, v))
+
+
+def load_pdm_generated_openapi(
+    version_tag: str = DEFAULT_PDM_OPENAPI_TAG,
+) -> dict[str, Any] | None:
+    """Load generated PDM OpenAPI schema for a specific version tag."""
+    from proxmox_sdk.proxmox_codegen.security import validate_version_tag  # noqa: PLC0415
+
+    try:
+        version_tag = validate_version_tag(version_tag)
+    except ValueError:
+        return None
+
+    openapi_path = _pdm_generated_dir() / version_tag / "openapi.json"
+    try:
+        payload = openapi_path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+    try:
+        return json.loads(payload)
+    except Exception:
+        return None
+
+
 def load_pydantic_models(version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG) -> str | None:
     """Load generated Pydantic models for a specific version tag."""
     try:
@@ -535,10 +580,13 @@ def load_pydantic_models(version_tag: str = DEFAULT_PROXMOX_OPENAPI_TAG) -> str 
 
 __all__ = [
     "DEFAULT_PROXMOX_OPENAPI_TAG",
+    "DEFAULT_PDM_OPENAPI_TAG",
     "GeneratedOpenAPIDocument",
     "available_proxmox_sdk_versions",
+    "available_pdm_sdk_versions",
     "MockDataDocument",
     "ProxmoxSchemaValue",
     "load_proxmox_generated_openapi",
+    "load_pdm_generated_openapi",
     "load_pydantic_models",
 ]

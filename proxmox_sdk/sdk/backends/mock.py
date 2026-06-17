@@ -11,7 +11,12 @@ from proxmox_sdk.mock.schema_helpers import (
     schema_fingerprint,
 )
 from proxmox_sdk.mock.state import shared_mock_store
-from proxmox_sdk.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generated_openapi
+from proxmox_sdk.schema import (
+    DEFAULT_PDM_OPENAPI_TAG,
+    DEFAULT_PROXMOX_OPENAPI_TAG,
+    load_pdm_generated_openapi,
+    load_proxmox_generated_openapi,
+)
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.exceptions import ResourceException
 
@@ -84,10 +89,14 @@ class MockBackend(AbstractBackend):
     """
 
     def __init__(
-        self, schema_version: str = DEFAULT_PROXMOX_OPENAPI_TAG, api_path_prefix: str = "/api2/json"
+        self,
+        schema_version: str = DEFAULT_PROXMOX_OPENAPI_TAG,
+        api_path_prefix: str = "/api2/json",
+        service: str = "PVE",
     ) -> None:
         self._schema_version = schema_version
         self._api_path_prefix = api_path_prefix
+        self._service = service.upper()
         self._schema: dict[str, Any] | None = None
         self._paths: dict[str, Any] = {}
         self._fingerprint: str = ""
@@ -96,11 +105,18 @@ class MockBackend(AbstractBackend):
     def _ensure_schema(self) -> None:
         if self._schema is not None:
             return
-        doc = load_proxmox_generated_openapi(version_tag=self._schema_version)
+        if self._service == "PDM":
+            version = self._schema_version if self._schema_version != DEFAULT_PROXMOX_OPENAPI_TAG else DEFAULT_PDM_OPENAPI_TAG
+            doc = load_pdm_generated_openapi(version_tag=version)
+            service_label = "PDM"
+        else:
+            doc = load_proxmox_generated_openapi(version_tag=self._schema_version)
+            service_label = "Proxmox"
         if doc is None:
             logger.warning(
-                "No Proxmox OpenAPI schema found for version '%s'. "
+                "No %s OpenAPI schema found for version '%s'. "
                 "Mock backend will return empty responses.",
+                service_label,
                 self._schema_version,
             )
             self._schema = {}

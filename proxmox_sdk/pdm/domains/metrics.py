@@ -16,8 +16,11 @@ class MetricsDomain:
         self._sdk = sdk
 
     async def status(self) -> m.PDMMetricCollectionStatus:
-        data = unwrap_data(await self._sdk.config.metrics.status.get())
+        # GET /remotes/metric-collection/status
+        # The hyphen in "metric-collection" requires call syntax (not attribute access).
+        data = unwrap_data(await self._sdk.remotes("metric-collection").status.get())
         return m.PDMMetricCollectionStatus.model_validate(data or {})
 
     async def trigger(self) -> Any:
-        return unwrap_data(await self._sdk.config.metrics.trigger.post())
+        # POST /remotes/metric-collection/trigger
+        return unwrap_data(await self._sdk.remotes("metric-collection").trigger.post())

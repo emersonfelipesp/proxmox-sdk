@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 
 from proxmox_sdk.proxmox_codegen.apidoc_parser import (
+    PDM_API_VIEWER_URL,
     PROXMOX_API_VIEWER_URL,
     fetch_apidoc_js,
     flatten_api_schema,
@@ -27,6 +28,7 @@ from proxmox_sdk.proxmox_codegen.security import validate_source_url, validate_v
 from proxmox_sdk.proxmox_codegen.utils import dump_json, ensure_parent, utc_now_iso
 
 LATEST_VERSION_TAG = "latest"
+PDM_LATEST_VERSION_TAG = "latest"
 
 _playwright_available: bool | None = None
 
@@ -65,6 +67,16 @@ def _normalized_viewer_url(url: str) -> str:
     )
 
 
+# Official viewer URLs whose "latest" tag is reserved for canonical schema generation.
+# Computed after _normalized_viewer_url is defined.
+_OFFICIAL_VIEWER_URLS: frozenset[str] = frozenset(
+    {
+        _normalized_viewer_url(PROXMOX_API_VIEWER_URL),
+        _normalized_viewer_url(PDM_API_VIEWER_URL),
+    }
+)
+
+
 def _viewer_apidoc_js_url(source_url: str) -> str:
     """Build the apidoc.js URL for a viewer source URL."""
     normalized = _normalized_viewer_url(source_url)
@@ -88,8 +100,11 @@ def _validate_source_for_version_tag(
         return
     if allow_private_ips:
         return
-    if _normalized_viewer_url(source_url) != _normalized_viewer_url(PROXMOX_API_VIEWER_URL):
-        raise ValueError("Version tag 'latest' is reserved for official Proxmox API viewer URL.")
+    if _normalized_viewer_url(source_url) not in _OFFICIAL_VIEWER_URLS:
+        raise ValueError(
+            "Version tag 'latest' is reserved for official Proxmox API viewer URLs "
+            f"({', '.join(sorted(_OFFICIAL_VIEWER_URLS))})."
+        )
 
 
 def _merge_capture(
@@ -351,8 +366,153 @@ async def generate_proxmox_codegen_bundle_async(
     return bundle
 
 
+def generate_pdm_codegen_bundle(
+    output_dir: str | Path | None = None,
+    *,
+    source_url: str = PDM_API_VIEWER_URL,
+    version_tag: str = PDM_LATEST_VERSION_TAG,
+    worker_count: int = 10,
+    retry_count: int = 2,
+    retry_backoff_seconds: float = 0.35,
+    checkpoint_every: int = 50,
+    allow_insecure_ssl: bool = False,
+    allow_private_ips: bool = False,
+) -> GenerationBundle:
+    """Sync wrapper for the PDM async generation pipeline."""
+
+    return _run_async_from_sync(
+        generate_pdm_codegen_bundle_async(
+            output_dir=output_dir,
+            source_url=source_url,
+            version_tag=version_tag,
+            worker_count=worker_count,
+            retry_count=retry_count,
+            retry_backoff_seconds=retry_backoff_seconds,
+            checkpoint_every=checkpoint_every,
+            allow_insecure_ssl=allow_insecure_ssl,
+            allow_private_ips=allow_private_ips,
+        )
+    )
+
+
+async def generate_pdm_codegen_bundle_async(
+    output_dir: str | Path | None = None,
+    *,
+    source_url: str = PDM_API_VIEWER_URL,
+    version_tag: str = PDM_LATEST_VERSION_TAG,
+    worker_count: int = 10,
+    retry_count: int = 2,
+    retry_backoff_seconds: float = 0.35,
+    checkpoint_every: int = 50,
+    allow_insecure_ssl: bool = False,
+    allow_private_ips: bool = False,
+) -> GenerationBundle:
+    """Run the full PDM generation pipeline and optionally persist artifacts.
+
+    Identical in structure to :func:`generate_proxmox_codegen_bundle_async` but
+    defaults to the official PDM API viewer URL and writes output under
+    ``generated/pdm/`` instead of ``generated/proxmox/``.
+
+    Only ``openapi.json`` and ``raw_capture.json`` are written for PDM — the
+    Pydantic model shards and route metadata are not generated because the PDM
+    typed facade (``proxmox_sdk.pdm``) uses hand-authored models.
+    """
+
+    cleaned_version_tag = validate_version_tag(version_tag)
+    _validate_source_for_version_tag(
+        source_url=source_url,
+        version_tag=cleaned_version_tag,
+        allow_private_ips=allow_private_ips,
+    )
+
+    if _check_playwright_available():
+        viewer_capture = await crawl_proxmox_api_viewer_async(
+            url=source_url,
+            worker_count=worker_count,
+            retry_count=retry_count,
+            retry_backoff_seconds=retry_backoff_seconds,
+            checkpoint_path=(
+                str(Path(output_dir) / cleaned_version_tag / "crawl_checkpoint.json")
+                if output_dir is not None
+                else None
+            ),
+            checkpoint_every=checkpoint_every,
+            allow_insecure_ssl=allow_insecure_ssl,
+        )
+    else:
+        viewer_capture = {
+            "endpoints": {},
+            "discovered_navigation_items": 0,
+            "method_count": 0,
+            "failed_endpoint_count": 0,
+            "duration_seconds": 0.0,
+        }
+
+    apidoc_source = fetch_apidoc_js(
+        url=_viewer_apidoc_js_url(source_url),
+        allow_insecure=allow_insecure_ssl,
+    )
+    apidoc_tree = parse_api_schema(apidoc_source)
+    apidoc_flat = flatten_api_schema(apidoc_tree)
+
+    merged_capture = _merge_capture(viewer_capture=viewer_capture, apidoc_flattened=apidoc_flat)
+    completeness = _capture_completeness(
+        merged_capture=merged_capture,
+        viewer_capture=viewer_capture,
+        apidoc_flat=apidoc_flat,
+    )
+    operations = normalize_captured_endpoints(merged_capture)
+
+    openapi = generate_openapi_schema(
+        operations,
+        version=cleaned_version_tag,
+        server_url="/api2/json",
+    )
+
+    openapi_canonical = json.dumps(openapi, indent=2, sort_keys=True) + "\n"
+    source_sha256 = hashlib.sha256(openapi_canonical.encode("utf-8")).hexdigest()
+    generated_at = utc_now_iso()
+
+    # PDM uses hand-authored typed models; generate a stub for the bundle field.
+    models_code = (
+        f"# PDM OpenAPI models — generated at {generated_at}\n"
+        f"# source_sha256: {source_sha256}\n"
+        "# Hand-authored typed models live in proxmox_sdk.pdm.models\n"
+    )
+
+    bundle = GenerationBundle(
+        source_url=source_url,
+        version_tag=cleaned_version_tag,
+        generated_at=generated_at,
+        endpoint_count=len(merged_capture),
+        operation_count=len(operations),
+        capture={
+            "viewer": viewer_capture,
+            "apidoc_endpoint_count": len(apidoc_flat),
+            "merged_endpoints": merged_capture,
+            "completeness": completeness,
+        },
+        openapi=openapi,
+        pydantic_models_code=models_code,
+    )
+
+    if output_dir is not None:
+        base = Path(output_dir) / cleaned_version_tag
+        raw_path = base / "raw_capture.json"
+        openapi_path = base / "openapi.json"
+
+        dump_json(raw_path, bundle.capture)
+        ensure_parent(openapi_path)
+        openapi_path.write_text(openapi_canonical, encoding="utf-8")
+
+    return bundle
+
+
 __all__ = [
     "LATEST_VERSION_TAG",
+    "PDM_LATEST_VERSION_TAG",
     "generate_proxmox_codegen_bundle",
     "generate_proxmox_codegen_bundle_async",
+    "generate_pdm_codegen_bundle",
+    "generate_pdm_codegen_bundle_async",
 ]

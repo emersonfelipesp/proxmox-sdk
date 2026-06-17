@@ -12,17 +12,24 @@ if TYPE_CHECKING:
 
 
 class RemotesDomain:
-    """Manage registered PVE/PBS remotes and query their version."""
+    """Manage registered PVE/PBS remotes and query their version.
+
+    All operations target the ``/remotes/remote`` sub-path, which is the
+    actual remote-list endpoint per the official PDM API schema.  The parent
+    ``/remotes`` path returns only a sub-directory index, not the remote list.
+    """
 
     def __init__(self, sdk: ProxmoxSDK) -> None:
         self._sdk = sdk
 
     async def list(self) -> list[m.PDMRemote]:
-        data = await self._sdk.remotes.get()
+        """GET /remotes/remote — list all configured PVE/PBS remotes."""
+        data = await self._sdk.remotes.remote.get()
         return [m.PDMRemote.model_validate(item) for item in normalize_list(data)]
 
     async def get(self, remote: str) -> m.PDMRemote:
-        data = unwrap_data(await self._sdk.remotes(remote).get())
+        """GET /remotes/remote/{id} — fetch a single remote by id."""
+        data = unwrap_data(await self._sdk.remotes.remote(remote).get())
         return m.PDMRemote.model_validate(data or {})
 
     async def add(
@@ -36,6 +43,7 @@ class RemotesDomain:
         fingerprint: str | None = None,
         web_url: str | None = None,
     ) -> Any:
+        """POST /remotes/remote — register a new remote."""
         payload: dict[str, Any] = {"id": id, "type": type}
         if nodes is not None:
             payload["nodes"] = nodes
@@ -47,14 +55,17 @@ class RemotesDomain:
             payload["fingerprint"] = fingerprint
         if web_url is not None:
             payload["web-url"] = web_url
-        return unwrap_data(await self._sdk.remotes.post(**payload))
+        return unwrap_data(await self._sdk.remotes.remote.post(**payload))
 
     async def update(self, remote: str, **changes: Any) -> Any:
-        return unwrap_data(await self._sdk.remotes(remote).put(**changes))
+        """PUT /remotes/remote/{id} — update a remote's configuration."""
+        return unwrap_data(await self._sdk.remotes.remote(remote).put(**changes))
 
     async def remove(self, remote: str) -> Any:
-        return unwrap_data(await self._sdk.remotes(remote).delete())
+        """DELETE /remotes/remote/{id} — deregister a remote."""
+        return unwrap_data(await self._sdk.remotes.remote(remote).delete())
 
     async def version(self, remote: str) -> m.PDMRemoteVersion:
-        data = unwrap_data(await self._sdk.remotes(remote).version.get())
+        """GET /remotes/remote/{id}/version — query a remote's version."""
+        data = unwrap_data(await self._sdk.remotes.remote(remote).version.get())
         return m.PDMRemoteVersion.model_validate(data or {})

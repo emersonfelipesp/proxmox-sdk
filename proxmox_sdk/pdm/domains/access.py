@@ -38,7 +38,9 @@ class _UsersOps:
         return unwrap_data(await self._sdk.access.users(userid).delete())
 
     async def passwd(self, userid: str, password: str) -> Any:
-        return unwrap_data(await self._sdk.access.password.put(userid=userid, password=password))
+        # PDM has no /access/password endpoint (unlike PVE).  Use the standard
+        # user-update path: PUT /access/users/{userid} with the password field.
+        return unwrap_data(await self._sdk.access.users(userid).put(password=password))
 
 
 class _ACLOps:

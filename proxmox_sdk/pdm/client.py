@@ -99,6 +99,11 @@ class PDMClient:
         data: Any = await self._sdk.version.get()
         return m.PDMVersion.model_validate(unwrap_data(data))
 
+    async def ping(self) -> dict[str, Any]:
+        """Call GET /ping — lightweight PDM liveness probe."""
+        data: Any = await self._sdk.ping.get()
+        return unwrap_data(data) if isinstance(data, dict) else {}
+
 
 class SyncPDMClient:
     """Synchronous wrapper around :class:`PDMClient` for non-async callers."""
@@ -123,6 +128,10 @@ class SyncPDMClient:
 
     def version(self) -> m.PDMVersion:
         return self._loop.run_until_complete(self._client.version())
+
+    def ping(self) -> dict[str, Any]:
+        """Call GET /ping — lightweight PDM liveness probe."""
+        return self._loop.run_until_complete(self._client.ping())
 
     @property
     def remotes(self) -> BlockingDomainProxy:

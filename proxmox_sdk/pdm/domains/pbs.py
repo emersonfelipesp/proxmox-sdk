@@ -18,7 +18,8 @@ class PBSDomain:
         self._sdk = sdk
 
     async def datastores(self, remote: str) -> list[m.PDMPBSDatastore]:
-        data = await self._sdk.pbs.remotes(remote).datastores.get()
+        # GET /pbs/remotes/{remote}/datastore  (singular — the schema uses no trailing 's')
+        data = await self._sdk.pbs.remotes(remote).datastore.get()
         items: list[m.PDMPBSDatastore] = []
         for entry in normalize_list(data):
             payload = dict(entry)
@@ -37,7 +38,8 @@ class PBSDomain:
         params: dict[str, Any] = {"timeframe": timeframe}
         if cf is not None:
             params["cf"] = cf
-        data = await self._sdk.pbs.remotes(remote).datastores(store).rrddata.get(**params)
+        # GET /pbs/remotes/{remote}/datastore/{datastore}/rrddata
+        data = await self._sdk.pbs.remotes(remote).datastore(store).rrddata.get(**params)
         return [m.PDMRRDData.model_validate(item) for item in normalize_list(data)]
 
     async def snapshots(
@@ -50,7 +52,8 @@ class PBSDomain:
         params: dict[str, Any] = {}
         if namespace is not None:
             params["ns"] = namespace
-        data = await self._sdk.pbs.remotes(remote).datastores(store).snapshots.get(**params)
+        # GET /pbs/remotes/{remote}/datastore/{datastore}/snapshots
+        data = await self._sdk.pbs.remotes(remote).datastore(store).snapshots.get(**params)
         items: list[m.PDMPBSSnapshot] = []
         for entry in normalize_list(data):
             payload = dict(entry)
@@ -71,7 +74,8 @@ class PBSDomain:
         params: dict[str, Any] = {"timeframe": timeframe}
         if cf is not None:
             params["cf"] = cf
-        data = await self._sdk.pbs.remotes(remote).node.rrddata.get(**params)
+        # GET /pbs/remotes/{remote}/rrddata  (no /node/ intermediate — PDM schema path)
+        data = await self._sdk.pbs.remotes(remote).rrddata.get(**params)
         return [m.PDMRRDData.model_validate(item) for item in normalize_list(data)]
 
     async def tasks(self, remote: str) -> list[m.PDMTask]:

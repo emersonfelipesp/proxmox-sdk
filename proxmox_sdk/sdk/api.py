@@ -250,7 +250,11 @@ class ProxmoxSDK:
 
         service_upper = _normalize_service_name(service)
         svc = SERVICES[service_upper]
-        backend = MockBackend(schema_version=schema_version, api_path_prefix=svc.api_path_prefix)
+        backend = MockBackend(
+            schema_version=schema_version,
+            api_path_prefix=svc.api_path_prefix,
+            service=service_upper,
+        )
         instance._service_name = service_upper
         instance._service_config = svc
         instance._backend_name = "mock"
