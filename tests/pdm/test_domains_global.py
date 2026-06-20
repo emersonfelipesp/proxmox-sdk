@@ -46,8 +46,10 @@ async def test_subscriptions_list_path():
 async def test_metrics_status_and_trigger():
     sdk, backend = make_pdm_sdk(
         {
-            "/api2/json/config/metrics/status": {"data": {"enabled": True, "status": "ok"}},
-            "/api2/json/config/metrics/trigger": {"data": "UPID:metrics:1"},
+            "/api2/json/remotes/metric-collection/status": {
+                "data": {"enabled": True, "status": "ok"}
+            },
+            "/api2/json/remotes/metric-collection/trigger": {"data": "UPID:metrics:1"},
         }
     )
     pdm = PDMClient(_sdk=sdk)

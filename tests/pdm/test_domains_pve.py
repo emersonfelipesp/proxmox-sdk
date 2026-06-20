@@ -10,7 +10,7 @@ from .conftest import make_pdm_sdk
 async def test_qemu_list_returns_guests_with_remote_injected():
     sdk, backend = make_pdm_sdk(
         {
-            "/api2/json/pve/remotes/pve-a/guests/qemu": {
+            "/api2/json/pve/remotes/pve-a/qemu": {
                 "data": [
                     {"vmid": 100, "name": "web", "status": "running"},
                     {"vmid": 101, "name": "db", "status": "stopped"},
@@ -23,25 +23,23 @@ async def test_qemu_list_returns_guests_with_remote_injected():
     assert [g.vmid for g in guests] == [100, 101]
     assert all(g.remote == "pve-a" for g in guests)
     assert all(g.type == "qemu" for g in guests)
-    assert backend.calls[0][1] == "/api2/json/pve/remotes/pve-a/guests/qemu"
+    assert backend.calls[0][1] == "/api2/json/pve/remotes/pve-a/qemu"
 
 
 async def test_lxc_list_uses_lxc_path():
-    sdk, backend = make_pdm_sdk(
-        {"/api2/json/pve/remotes/pve-a/guests/lxc": {"data": [{"vmid": 200}]}}
-    )
+    sdk, backend = make_pdm_sdk({"/api2/json/pve/remotes/pve-a/lxc": {"data": [{"vmid": 200}]}})
     pdm = PDMClient(_sdk=sdk)
     cts = await pdm.pve.lxc.list("pve-a")
     assert cts[0].type == "lxc"
-    assert backend.calls[0][1] == "/api2/json/pve/remotes/pve-a/guests/lxc"
+    assert backend.calls[0][1] == "/api2/json/pve/remotes/pve-a/lxc"
 
 
 async def test_qemu_lifecycle_endpoints():
     sdk, backend = make_pdm_sdk(
         {
-            "/api2/json/pve/remotes/pve-a/guests/qemu/100/start": {"data": "UPID:x"},
-            "/api2/json/pve/remotes/pve-a/guests/qemu/100/stop": {"data": "UPID:y"},
-            "/api2/json/pve/remotes/pve-a/guests/qemu/100/shutdown": {"data": "UPID:z"},
+            "/api2/json/pve/remotes/pve-a/qemu/100/start": {"data": "UPID:x"},
+            "/api2/json/pve/remotes/pve-a/qemu/100/stop": {"data": "UPID:y"},
+            "/api2/json/pve/remotes/pve-a/qemu/100/shutdown": {"data": "UPID:z"},
         }
     )
     pdm = PDMClient(_sdk=sdk)
@@ -53,7 +51,7 @@ async def test_qemu_lifecycle_endpoints():
 
 async def test_qemu_migrate_passes_target():
     sdk, backend = make_pdm_sdk(
-        {"/api2/json/pve/remotes/pve-a/guests/qemu/100/migrate": {"data": "UPID:m"}}
+        {"/api2/json/pve/remotes/pve-a/qemu/100/migrate": {"data": "UPID:m"}}
     )
     pdm = PDMClient(_sdk=sdk)
     await pdm.pve.qemu.migrate("pve-a", 100, target="pve2", online=True)
@@ -64,7 +62,7 @@ async def test_qemu_migrate_passes_target():
 
 async def test_qemu_remote_migrate_passes_hyphenated_params():
     sdk, backend = make_pdm_sdk(
-        {"/api2/json/pve/remotes/pve-a/guests/qemu/100/remote-migrate": {"data": "UPID:r"}}
+        {"/api2/json/pve/remotes/pve-a/qemu/100/remote-migrate": {"data": "UPID:r"}}
     )
     pdm = PDMClient(_sdk=sdk)
     await pdm.pve.qemu.remote_migrate(
@@ -79,7 +77,7 @@ async def test_qemu_remote_migrate_passes_hyphenated_params():
 async def test_qemu_config_unwraps_data():
     sdk, _ = make_pdm_sdk(
         {
-            "/api2/json/pve/remotes/pve-a/guests/qemu/100/config": {
+            "/api2/json/pve/remotes/pve-a/qemu/100/config": {
                 "data": {"name": "web", "cores": 4, "memory": 4096}
             }
         }
@@ -92,11 +90,7 @@ async def test_qemu_config_unwraps_data():
 
 async def test_qemu_rrddata_passes_timeframe():
     sdk, backend = make_pdm_sdk(
-        {
-            "/api2/json/pve/remotes/pve-a/guests/qemu/100/rrddata": {
-                "data": [{"time": 1, "cpu": 0.1}]
-            }
-        }
+        {"/api2/json/pve/remotes/pve-a/qemu/100/rrddata": {"data": [{"time": 1, "cpu": 0.1}]}}
     )
     pdm = PDMClient(_sdk=sdk)
     rrd = await pdm.pve.qemu.rrddata("pve-a", 100, timeframe="day")

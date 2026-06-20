@@ -26,57 +26,53 @@ def test_version_endpoint(client: TestClient) -> None:
 
 
 def test_remotes_list_returns_three(client: TestClient) -> None:
-    body = client.get("/api2/json/remotes").json()
+    body = client.get("/api2/json/remotes/remote").json()
     assert len(body["data"]) == 3
 
 
 def test_remotes_create_get_delete_round_trip(client: TestClient) -> None:
     assert (
         client.post(
-            "/api2/json/remotes",
+            "/api2/json/remotes/remote",
             json={"id": "pve-new", "type": "pve", "authid": "root@pam!api"},
         ).status_code
         == 200
     )
-    body = client.get("/api2/json/remotes/pve-new").json()
+    body = client.get("/api2/json/remotes/remote/pve-new").json()
     assert body["data"]["id"] == "pve-new"
-    assert client.delete("/api2/json/remotes/pve-new").status_code == 200
-    assert client.get("/api2/json/remotes/pve-new").status_code == 404
+    assert client.delete("/api2/json/remotes/remote/pve-new").status_code == 200
+    assert client.get("/api2/json/remotes/remote/pve-new").status_code == 404
 
 
 def test_remote_update_persists_field(client: TestClient) -> None:
-    client.put("/api2/json/remotes/pve-cluster-a", json={"fingerprint": "ZZ"})
-    body = client.get("/api2/json/remotes/pve-cluster-a").json()
+    client.put("/api2/json/remotes/remote/pve-cluster-a", json={"fingerprint": "ZZ"})
+    body = client.get("/api2/json/remotes/remote/pve-cluster-a").json()
     assert body["data"]["fingerprint"] == "ZZ"
 
 
 def test_remote_version_endpoint(client: TestClient) -> None:
-    body = client.get("/api2/json/remotes/pve-cluster-a/version").json()
+    body = client.get("/api2/json/remotes/remote/pve-cluster-a/version").json()
     assert body["data"]["version"].startswith("9."), (
         f"expected a 9.x PVE version, got {body['data']['version']!r}"
     )
 
 
 def test_pve_qemu_list_and_lifecycle(client: TestClient) -> None:
-    body = client.get("/api2/json/pve/remotes/pve-cluster-a/guests/qemu").json()
+    body = client.get("/api2/json/pve/remotes/pve-cluster-a/qemu").json()
     assert len(body["data"]) == 10
-    assert (
-        client.post("/api2/json/pve/remotes/pve-cluster-a/guests/qemu/100/stop").status_code == 200
-    )
+    assert client.post("/api2/json/pve/remotes/pve-cluster-a/qemu/100/stop").status_code == 200
     # Status now reflects the mutation.
-    body = client.get("/api2/json/pve/remotes/pve-cluster-a/guests/qemu").json()
+    body = client.get("/api2/json/pve/remotes/pve-cluster-a/qemu").json()
     by_id = {g["vmid"]: g for g in body["data"]}
     assert by_id[100]["status"] == "stopped"
-    assert (
-        client.post("/api2/json/pve/remotes/pve-cluster-a/guests/qemu/100/start").status_code == 200
-    )
-    body = client.get("/api2/json/pve/remotes/pve-cluster-a/guests/qemu").json()
+    assert client.post("/api2/json/pve/remotes/pve-cluster-a/qemu/100/start").status_code == 200
+    body = client.get("/api2/json/pve/remotes/pve-cluster-a/qemu").json()
     by_id = {g["vmid"]: g for g in body["data"]}
     assert by_id[100]["status"] == "running"
 
 
 def test_pve_guest_config(client: TestClient) -> None:
-    body = client.get("/api2/json/pve/remotes/pve-cluster-a/guests/qemu/100/config").json()
+    body = client.get("/api2/json/pve/remotes/pve-cluster-a/qemu/100/config").json()
     assert body["data"]["name"] == "web-prod-1"
 
 
@@ -86,14 +82,14 @@ def test_pve_resources_with_type_filter(client: TestClient) -> None:
 
 
 def test_pbs_datastore_and_snapshots(client: TestClient) -> None:
-    ds = client.get("/api2/json/pbs/remotes/pbs-main/datastores").json()
+    ds = client.get("/api2/json/pbs/remotes/pbs-main/datastore").json()
     assert {d["store"] for d in ds["data"]} == {"tank", "cold"}
-    snaps = client.get("/api2/json/pbs/remotes/pbs-main/datastores/tank/snapshots?ns=prod").json()
+    snaps = client.get("/api2/json/pbs/remotes/pbs-main/datastore/tank/snapshots?ns=prod").json()
     assert len(snaps["data"]) == 2
 
 
 def test_pbs_node_rrddata(client: TestClient) -> None:
-    body = client.get("/api2/json/pbs/remotes/pbs-main/node/rrddata").json()
+    body = client.get("/api2/json/pbs/remotes/pbs-main/rrddata").json()
     assert isinstance(body["data"], list) and body["data"]
 
 
@@ -104,8 +100,10 @@ def test_resources_endpoints(client: TestClient) -> None:
 
 
 def test_metrics_status_and_trigger(client: TestClient) -> None:
-    assert client.get("/api2/json/config/metrics/status").json()["data"]["enabled"] is True
-    body = client.post("/api2/json/config/metrics/trigger").json()
+    assert (
+        client.get("/api2/json/remotes/metric-collection/status").json()["data"]["enabled"] is True
+    )
+    body = client.post("/api2/json/remotes/metric-collection/trigger").json()
     assert "UPID" in body["data"]
 
 
@@ -130,10 +128,10 @@ def test_users_full_crud(client: TestClient) -> None:
     assert client.delete("/api2/json/access/users/x%40pdm").status_code == 200
 
 
-def test_password_change_endpoint(client: TestClient) -> None:
+def test_password_change_uses_user_update_endpoint(client: TestClient) -> None:
     r = client.put(
-        "/api2/json/access/password",
-        json={"userid": "root@pam", "password": "newpw"},
+        "/api2/json/access/users/root%40pam",
+        json={"password": "newpw"},
     )
     assert r.status_code == 200
 
@@ -178,10 +176,10 @@ def test_mock_export_seed_reset_round_trip(client: TestClient) -> None:
     # Replace state with one containing exactly one remote.
     new_state = {"remotes": [{"id": "only", "type": "pve"}], "pve": {}, "pbs": {}}
     client.post("/mock/seed", json=new_state)
-    assert len(client.get("/api2/json/remotes").json()["data"]) == 1
+    assert len(client.get("/api2/json/remotes/remote").json()["data"]) == 1
     # Restore through /mock/import.
     client.request("POST", "/mock/import", json=snapshot)
-    assert len(client.get("/api2/json/remotes").json()["data"]) == 3
+    assert len(client.get("/api2/json/remotes/remote").json()["data"]) == 3
     # /mock/reset rolls back to bundled defaults.
     client.delete("/mock/reset")
-    assert len(client.get("/api2/json/remotes").json()["data"]) == 3
+    assert len(client.get("/api2/json/remotes/remote").json()["data"]) == 3
