@@ -106,7 +106,11 @@ class MockBackend(AbstractBackend):
         if self._schema is not None:
             return
         if self._service == "PDM":
-            version = self._schema_version if self._schema_version != DEFAULT_PROXMOX_OPENAPI_TAG else DEFAULT_PDM_OPENAPI_TAG
+            version = (
+                self._schema_version
+                if self._schema_version != DEFAULT_PROXMOX_OPENAPI_TAG
+                else DEFAULT_PDM_OPENAPI_TAG
+            )
             doc = load_pdm_generated_openapi(version_tag=version)
             service_label = "PDM"
         else:

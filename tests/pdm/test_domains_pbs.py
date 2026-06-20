@@ -10,7 +10,7 @@ from .conftest import make_pdm_sdk
 async def test_pbs_datastores_list_injects_remote():
     sdk, backend = make_pdm_sdk(
         {
-            "/api2/json/pbs/remotes/pbs-main/datastores": {
+            "/api2/json/pbs/remotes/pbs-main/datastore": {
                 "data": [{"store": "tank", "total": 1000, "used": 100}]
             }
         }
@@ -19,12 +19,12 @@ async def test_pbs_datastores_list_injects_remote():
     ds = await pdm.pbs.datastores("pbs-main")
     assert ds[0].store == "tank"
     assert ds[0].remote == "pbs-main"
-    assert backend.calls[0][1] == "/api2/json/pbs/remotes/pbs-main/datastores"
+    assert backend.calls[0][1] == "/api2/json/pbs/remotes/pbs-main/datastore"
 
 
 async def test_pbs_datastore_rrddata_path_and_params():
     sdk, backend = make_pdm_sdk(
-        {"/api2/json/pbs/remotes/pbs-main/datastores/tank/rrddata": {"data": [{"time": 1}]}}
+        {"/api2/json/pbs/remotes/pbs-main/datastore/tank/rrddata": {"data": [{"time": 1}]}}
     )
     pdm = PDMClient(_sdk=sdk)
     await pdm.pbs.datastore_rrddata("pbs-main", "tank", timeframe="week", cf="AVERAGE")
@@ -35,7 +35,7 @@ async def test_pbs_datastore_rrddata_path_and_params():
 async def test_pbs_snapshots_filters_by_namespace():
     sdk, backend = make_pdm_sdk(
         {
-            "/api2/json/pbs/remotes/pbs-main/datastores/tank/snapshots": {
+            "/api2/json/pbs/remotes/pbs-main/datastore/tank/snapshots": {
                 "data": [{"backup-type": "vm", "backup-id": "100", "backup-time": 1700000000}]
             }
         }
@@ -66,9 +66,9 @@ async def test_pbs_tasks_list_and_status():
 
 async def test_pbs_node_rrddata():
     sdk, backend = make_pdm_sdk(
-        {"/api2/json/pbs/remotes/pbs-main/node/rrddata": {"data": [{"time": 1}]}}
+        {"/api2/json/pbs/remotes/pbs-main/rrddata": {"data": [{"time": 1}]}}
     )
     pdm = PDMClient(_sdk=sdk)
     rrd = await pdm.pbs.node_rrddata("pbs-main")
     assert rrd[0].time == 1
-    assert backend.calls[0][1] == "/api2/json/pbs/remotes/pbs-main/node/rrddata"
+    assert backend.calls[0][1] == "/api2/json/pbs/remotes/pbs-main/rrddata"

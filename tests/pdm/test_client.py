@@ -48,7 +48,7 @@ def test_sync_client_blocks_and_returns_typed_models():
     sdk, _ = make_pdm_sdk(
         {
             "/api2/json/version": {"data": {"version": "1.0.4"}},
-            "/api2/json/remotes": {"data": [{"id": "pve-a", "type": "pve"}]},
+            "/api2/json/remotes/remote": {"data": [{"id": "pve-a", "type": "pve"}]},
         }
     )
     client = SyncPDMClient(_sdk=sdk)

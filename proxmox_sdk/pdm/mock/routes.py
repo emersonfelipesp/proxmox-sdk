@@ -145,13 +145,13 @@ def register_generated_pdm_mock_routes(
     async def version() -> dict[str, Any]:
         return wrap(mock_state.section("version") or {})
 
-    # -- /remotes --------------------------------------------------------
+    # -- /remotes/remote -------------------------------------------------
 
-    @app.get(f"{_API_PREFIX}/remotes")
+    @app.get(f"{_API_PREFIX}/remotes/remote")
     async def remotes_list() -> dict[str, Any]:
         return wrap(mock_state.remotes())
 
-    @app.post(f"{_API_PREFIX}/remotes")
+    @app.post(f"{_API_PREFIX}/remotes/remote")
     async def remotes_create(request: Request) -> dict[str, Any]:
         body = await _read_body(request)
         if not body.get("id") or not body.get("type"):
@@ -159,34 +159,34 @@ def register_generated_pdm_mock_routes(
         mock_state.upsert_remote(body)
         return wrap(None)
 
-    @app.get(f"{_API_PREFIX}/remotes/{{remote}}")
-    async def remote_get(remote: str) -> dict[str, Any]:
-        r = mock_state.find_remote(remote)
+    @app.get(f"{_API_PREFIX}/remotes/remote/{{id}}")
+    async def remote_get(id: str) -> dict[str, Any]:
+        r = mock_state.find_remote(id)
         if r is None:
-            raise HTTPException(status_code=404, detail=f"remote '{remote}' not found")
+            raise HTTPException(status_code=404, detail=f"remote '{id}' not found")
         return wrap(r)
 
-    @app.put(f"{_API_PREFIX}/remotes/{{remote}}")
-    async def remote_update(remote: str, request: Request) -> dict[str, Any]:
-        r = mock_state.find_remote(remote)
+    @app.put(f"{_API_PREFIX}/remotes/remote/{{id}}")
+    async def remote_update(id: str, request: Request) -> dict[str, Any]:
+        r = mock_state.find_remote(id)
         if r is None:
-            raise HTTPException(status_code=404, detail=f"remote '{remote}' not found")
+            raise HTTPException(status_code=404, detail=f"remote '{id}' not found")
         body = await _read_body(request)
-        mock_state.upsert_remote({**r, **body, "id": remote})
+        mock_state.upsert_remote({**r, **body, "id": id})
         return wrap(None)
 
-    @app.delete(f"{_API_PREFIX}/remotes/{{remote}}")
-    async def remote_delete(remote: str) -> dict[str, Any]:
-        if not mock_state.remove_remote(remote):
-            raise HTTPException(status_code=404, detail=f"remote '{remote}' not found")
+    @app.delete(f"{_API_PREFIX}/remotes/remote/{{id}}")
+    async def remote_delete(id: str) -> dict[str, Any]:
+        if not mock_state.remove_remote(id):
+            raise HTTPException(status_code=404, detail=f"remote '{id}' not found")
         return wrap(None)
 
-    @app.get(f"{_API_PREFIX}/remotes/{{remote}}/version")
-    async def remote_version(remote: str) -> dict[str, Any]:
+    @app.get(f"{_API_PREFIX}/remotes/remote/{{id}}/version")
+    async def remote_version(id: str) -> dict[str, Any]:
         versions = mock_state.section("remote_versions") or {}
-        if remote not in versions:
-            raise HTTPException(status_code=404, detail=f"remote '{remote}' not found")
-        return wrap(versions[remote])
+        if id not in versions:
+            raise HTTPException(status_code=404, detail=f"remote '{id}' not found")
+        return wrap(versions[id])
 
     # -- /pve/remotes/{remote}/... --------------------------------------
 
@@ -217,11 +217,11 @@ def register_generated_pdm_mock_routes(
         bucket = mock_state._pve_bucket(remote)
         return wrap(list(bucket.get("tasks", [])))
 
-    @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}")
+    @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}")
     async def guests_list(remote: str, kind: str) -> dict[str, Any]:
         return wrap(mock_state.list_guests(remote, kind))
 
-    @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/config")
+    @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/config")
     async def guest_config(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         g = mock_state.find_guest(remote, kind, vmid)
         if g is None:
@@ -236,62 +236,62 @@ def register_generated_pdm_mock_routes(
             }
         )
 
-    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/start")
+    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/start")
     async def guest_start(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         if not mock_state.update_guest_status(remote, kind, vmid, "running"):
             raise HTTPException(status_code=404, detail="guest not found")
         return wrap(f"UPID:{remote}:0001:start:{vmid}")
 
-    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/stop")
+    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/stop")
     async def guest_stop(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         if not mock_state.update_guest_status(remote, kind, vmid, "stopped"):
             raise HTTPException(status_code=404, detail="guest not found")
         return wrap(f"UPID:{remote}:0002:stop:{vmid}")
 
-    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/shutdown")
+    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/shutdown")
     async def guest_shutdown(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         if not mock_state.update_guest_status(remote, kind, vmid, "stopped"):
             raise HTTPException(status_code=404, detail="guest not found")
         return wrap(f"UPID:{remote}:0003:shutdown:{vmid}")
 
-    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/migrate")
+    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/migrate")
     async def guest_migrate(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         if mock_state.find_guest(remote, kind, vmid) is None:
             raise HTTPException(status_code=404, detail="guest not found")
         return wrap(f"UPID:{remote}:0004:migrate:{vmid}")
 
-    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/remote-migrate")
+    @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/remote-migrate")
     async def guest_remote_migrate(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         if mock_state.find_guest(remote, kind, vmid) is None:
             raise HTTPException(status_code=404, detail="guest not found")
         return wrap(f"UPID:{remote}:0005:remote-migrate:{vmid}")
 
-    @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/guests/{{kind}}/{{vmid}}/rrddata")
+    @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/rrddata")
     async def guest_rrd(remote: str, kind: str, vmid: int) -> dict[str, Any]:
         _ = remote, kind, vmid
         return wrap(_synthetic_rrd())
 
     # -- /pbs/remotes/{remote}/... --------------------------------------
 
-    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastores")
+    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastore")
     async def pbs_datastores(remote: str) -> dict[str, Any]:
         pbs = mock_state.section("pbs") or {}
         return wrap(list(pbs.get(remote, {}).get("datastores", [])))
 
-    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastores/{{store}}/rrddata")
-    async def pbs_datastore_rrd(remote: str, store: str) -> dict[str, Any]:
-        _ = remote, store
+    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastore/{{datastore}}/rrddata")
+    async def pbs_datastore_rrd(remote: str, datastore: str) -> dict[str, Any]:
+        _ = remote, datastore
         return wrap(_synthetic_rrd())
 
-    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastores/{{store}}/snapshots")
-    async def pbs_snapshots(remote: str, store: str, ns: str | None = None) -> dict[str, Any]:
+    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastore/{{datastore}}/snapshots")
+    async def pbs_snapshots(remote: str, datastore: str, ns: str | None = None) -> dict[str, Any]:
         pbs = mock_state.section("pbs") or {}
-        snaps = [s for s in pbs.get(remote, {}).get("snapshots", []) if s.get("store") == store]
+        snaps = [s for s in pbs.get(remote, {}).get("snapshots", []) if s.get("store") == datastore]
         if ns is not None:
             snaps = [s for s in snaps if s.get("namespace") == ns]
         return wrap(snaps)
 
-    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/node/rrddata")
+    @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/rrddata")
     async def pbs_node_rrd(remote: str) -> dict[str, Any]:
         _ = remote
         return wrap(_synthetic_rrd())
@@ -346,13 +346,13 @@ def register_generated_pdm_mock_routes(
     async def resources_subscription() -> dict[str, Any]:
         return wrap((mock_state.section("resources") or {}).get("subscriptions", []))
 
-    # -- /config/metrics, /config/views ---------------------------------
+    # -- /remotes/metric-collection, /config/views -----------------------
 
-    @app.get(f"{_API_PREFIX}/config/metrics/status")
+    @app.get(f"{_API_PREFIX}/remotes/metric-collection/status")
     async def metrics_status() -> dict[str, Any]:
         return wrap((mock_state.section("metrics") or {}).get("status", {}))
 
-    @app.post(f"{_API_PREFIX}/config/metrics/trigger")
+    @app.post(f"{_API_PREFIX}/remotes/metric-collection/trigger")
     async def metrics_trigger() -> dict[str, Any]:
         return wrap("UPID:pdm:metrics:0001:trigger")
 
@@ -441,13 +441,6 @@ def register_generated_pdm_mock_routes(
         users = [u for u in access.get("users", []) if u.get("userid") != userid]
         access["users"] = users
         mock_state.write("access", access)
-        return wrap(None)
-
-    @app.put(f"{_API_PREFIX}/access/password")
-    async def users_passwd(request: Request) -> dict[str, Any]:
-        body = await _read_body(request)
-        if not body.get("userid") or not body.get("password"):
-            raise HTTPException(status_code=400, detail="userid and password are required")
         return wrap(None)
 
     @app.get(f"{_API_PREFIX}/access/acl")

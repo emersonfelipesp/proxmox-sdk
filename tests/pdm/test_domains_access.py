@@ -36,13 +36,13 @@ async def test_user_create_update_delete():
     assert backend.calls[2][0] == "DELETE"
 
 
-async def test_user_passwd_uses_password_endpoint():
-    sdk, backend = make_pdm_sdk({"/api2/json/access/password": {"data": None}})
+async def test_user_passwd_uses_user_update_endpoint():
+    sdk, backend = make_pdm_sdk({"/api2/json/access/users/alice%40pdm": {"data": None}})
     pdm = PDMClient(_sdk=sdk)
     await pdm.access.users.passwd("alice@pdm", "newpw")
     assert backend.calls[0][0] == "PUT"
+    assert backend.calls[0][1] == "/api2/json/access/users/alice%40pdm"
     body = backend.calls[0][3] or {}
-    assert body["userid"] == "alice@pdm"
     assert body["password"] == "newpw"
 
 
