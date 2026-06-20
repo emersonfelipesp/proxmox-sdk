@@ -21,12 +21,17 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     permissions: {}
+    env:
+      # The `secrets` context cannot be referenced in an `if` conditional, which
+      # made this workflow file invalid and produced a failed validation run on
+      # every push. Hoist the secret into `env` so the guard reads `env` instead.
+      PROFILE_REPO_PAT: ${{ secrets.PROFILE_REPO_PAT }}
     steps:
       - name: Dispatch refresh-github-data
-        if: ${{ secrets.PROFILE_REPO_PAT != '' }}
+        if: ${{ env.PROFILE_REPO_PAT != '' }}
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.PROFILE_REPO_PAT }}
+          token: ${{ env.PROFILE_REPO_PAT }}
           repository: emersonfelipesp/emersonfelipesp
           event-type: refresh-github-data
           client-payload: |
