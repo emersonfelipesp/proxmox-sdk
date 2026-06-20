@@ -30,6 +30,10 @@ jobs:
     steps:
       - name: Dispatch refresh-github-data
         if: ${{ env.PROFILE_REPO_PAT != '' }}
+        # Best-effort cross-repo notification: a dispatch failure (e.g. the PAT
+        # is missing or under-scoped on emersonfelipesp/emersonfelipesp) must not
+        # fail this repo's workflow run.
+        continue-on-error: true
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ env.PROFILE_REPO_PAT }}
