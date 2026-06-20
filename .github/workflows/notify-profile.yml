@@ -10,6 +10,7 @@ name: Notify profile site
 # `actions:write` (or a classic PAT with `repo` + `workflow`).
 
 on:
+  workflow_dispatch:
   issues:
     types: [opened, closed, reopened, edited, labeled, unlabeled, milestoned, demilestoned]
   release:
