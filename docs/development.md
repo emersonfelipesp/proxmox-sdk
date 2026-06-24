@@ -145,7 +145,7 @@ proxmox-sdk/
 │   │   ├── api.py                # ProxmoxSDK main class
 │   │   ├── sync.py               # SyncProxmoxSDK wrapper
 │   │   ├── resource.py           # Resource navigation (attribute-based)
-│   │   ├── services.py           # Service configs (PVE, PMG, PBS)
+│   │   ├── services.py           # Service configs (PVE, PMG, PBS, PDM)
 │   │   ├── exceptions.py         # SDK-specific exceptions
 │   │   ├── backends/             # Transport backends
 │   │   │   ├── base.py           # AbstractBackend protocol
@@ -168,7 +168,7 @@ proxmox-sdk/
 │   │   ├── config.py             # Config file management
 │   │   ├── sdk_bridge.py         # Bridge between CLI and ProxmoxSDK
 │   │   ├── tui_app.py            # Textual TUI application
-│   │   ├── commands/             # Subcommands (get, set, create, delete, ls, …)
+│   │   ├── commands/             # Subcommands (get, set, create, delete, ls, ceph, pbs, pdm, …)
 │   │   ├── docgen/               # CLI docs generation
 │   │   └── themes/               # TUI themes
 │   │
@@ -187,6 +187,10 @@ proxmox-sdk/
 │   │   ├── state.py              # SQLite/shared-memory/dict mock state stores
 │   │   ├── schema_helpers.py     # Mock value generation
 │   │   └── loader.py             # Mock data loading from JSON/YAML
+│   │
+│   ├── pbs/                      # Typed Proxmox Backup Server facade
+│   ├── pdm/                      # Typed Proxmox Datacenter Manager facade + mock routes
+│   ├── ceph/                     # Typed Ceph facade and direct provider clients
 │   │
 │   └── generated/                # Pre-generated schemas (committed)
 │       └── proxmox/

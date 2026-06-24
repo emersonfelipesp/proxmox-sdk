@@ -1,6 +1,8 @@
 # proxmox-sdk
 
-Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, and in-memory CRUD operations.
+Schema-driven FastAPI package, Python SDK, and CLI/TUI for Proxmox APIs:
+OpenAPI generation, mock data, in-memory CRUD operations, typed service
+facades, and real API connections.
 
 **📚 [Full Documentation](https://emersonfelipesp.github.io/proxmox-sdk/)**
 
@@ -10,6 +12,8 @@ Schema-driven FastAPI package for Proxmox API: OpenAPI generation, mock data, an
 - **675 Operations / 449 Endpoints**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
 - **Mock Data**: Automatically generate mock data for all endpoints with in-memory CRUD
 - **Real API Proxy**: Validated proxy to real Proxmox VE API with request/response validation
+- **Typed Facades**: PBS, PDM, and Ceph clients for higher-level workflows
+- **CLI/TUI**: Generic path commands, configuration profiles, Ceph/PBS/PDM command groups, and Textual TUIs
 - **Code Generation**: Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
 - **Multi-version Support**: Select multiple Proxmox versions with `latest` mapped to official Proxmox API viewer
 - **Swagger Docs**: FastAPI auto-generates OpenAPI documentation at `/docs`
@@ -72,11 +76,18 @@ with ProxmoxSDK.sync_mock() as proxmox:
 # Install with CLI extras
 pip install proxmox-sdk[cli]
 
+# Generic API path commands
+proxmox --backend mock get /nodes --json
+
 # Production TUI
 pbx tui
 
 # Mock TUI
 pbx tui mock
+
+# PDM command group
+proxmox --service PDM --host pdm.example.com pdm remote list
+proxmox pdm tui mock
 ```
 
 ### PDM Mock Server
@@ -107,6 +118,10 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 - **[Installation](https://emersonfelipesp.github.io/proxmox-sdk/installation/)** - Installation options (pip, uv, Docker, source)
 - **[Quick Start](https://emersonfelipesp.github.io/proxmox-sdk/quickstart/)** - 5-minute getting started guide
 - **[SDK Mock Usage](https://emersonfelipesp.github.io/proxmox-sdk/sdk-mock/)** - Using the SDK with mock data (no server required)
+- **[CLI and TUI Command Guide](https://emersonfelipesp.github.io/proxmox-sdk/cli/)** - CLI commands, profiles, PDM commands, and TUIs
+- **[Proxmox Backup Server](https://emersonfelipesp.github.io/proxmox-sdk/sdk-pbs/)** - Typed PBS facade
+- **[Proxmox Datacenter Manager](https://emersonfelipesp.github.io/proxmox-sdk/sdk-pdm/)** - Typed PDM facade and mock server
+- **[Ceph](https://emersonfelipesp.github.io/proxmox-sdk/sdk-ceph/)** - PVE Ceph facade and direct provider clients
 - **[Mock API](https://emersonfelipesp.github.io/proxmox-sdk/mock-api/)** - Mock mode guide with custom data
 - **[Real API](https://emersonfelipesp.github.io/proxmox-sdk/real-api/)** - Real Proxmox integration guide
 - **[API Reference](https://emersonfelipesp.github.io/proxmox-sdk/api-reference/)** - Endpoint documentation
@@ -150,6 +165,12 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 
 Tracing never records request params, request bodies, auth headers, cookies,
 passwords, tickets, CSRF tokens, or API token values as span data.
+
+### PDM Mock Server
+- `PROXMOX_PDM_MOCK_HOST` - Host to bind to (default: "0.0.0.0")
+- `PROXMOX_PDM_MOCK_PORT` - Port to bind to (default: "8443")
+- `PROXMOX_PDM_MOCK_SEED_FILE` - Optional JSON seed file
+- `PROXMOX_PDM_MOCK_SCHEMA_VERSION` - Reserved schema tag (default: "1.0")
 
 ## Development
 

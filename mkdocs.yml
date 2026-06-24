@@ -58,6 +58,8 @@ nav:
       - Ceph: sdk-ceph.md
       - Proxmox Datacenter Manager: sdk-pdm.md
       - Examples & Recipes: sdk-examples.md
+  - CLI & TUI:
+      - Command Guide: cli.md
   - API Modes:
       - SDK Mock Usage: sdk-mock.md
       - Mock API Mode: mock-api.md

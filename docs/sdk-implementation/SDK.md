@@ -51,7 +51,7 @@ proxmox_sdk/
 │   │   ├── __init__.py
 │   │   ├── ticket.py             # Password/ticket auth with auto-renewal
 │   │   └── token.py              # API token auth
-│   ├── services.py               # SERVICES registry (PVE, PMG, PBS)
+│   ├── services.py               # SERVICES registry (PVE, PMG, PBS, PDM)
 │   ├── exceptions.py             # SDK exceptions (ResourceException, AuthenticationError)
 │   └── tools/                    # High-level utilities
 │       ├── __init__.py
@@ -518,7 +518,7 @@ class ProxmoxSDK:
         token_value: str | None = None,
         otp: str | None = None,
         otptype: str = "totp",
-        service: Literal["PVE", "PMG", "PBS"] = "PVE",
+        service: Literal["PVE", "PMG", "PBS", "PDM"] = "PVE",
         backend: str = "https",
         port: int | None = None,
         path_prefix: str = "",
@@ -1073,7 +1073,7 @@ uvicorn.run(app, host="0.0.0.0", port=8000)
 | FastAPI dependency in SDK? | None | SDK is completely independent; FastAPI uses SDK via thin adapter |
 | Breaking changes to existing API? | None | All existing exports and behavior preserved |
 | Mock mode? | SDK backend wrapping existing mock store | Unique feature of this project; no FastAPI needed for mock |
-| Service support? | PVE + PMG + PBS | Feature parity with proxmoxer |
+| Service support? | PVE + PMG + PBS + PDM | Extends proxmoxer-style service selection with PDM support |
 | SSH backends? | Optional extras | Matches proxmoxer's optional dependency model |
 | CLI backend abstraction? | `CommandBaseBackend` mixin | DRY — same pattern as proxmoxer's `CommandBaseSession` |
 | Ticket renewal? | Same 3600s interval as proxmoxer | PVE tickets valid 2h; renew at 1h is safe and well-proven |

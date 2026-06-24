@@ -1,6 +1,8 @@
 # Proxmox OpenAPI
 
-**Schema-driven FastAPI package for Proxmox API**: OpenAPI generation, mock data, and real API connections with validation.
+**Schema-driven FastAPI package and Python SDK for Proxmox APIs**: OpenAPI
+generation, mock data, real API connections, typed service facades, and a
+CLI/TUI built on the same backend layer.
 
 ---
 
@@ -8,6 +10,17 @@
 
 ### 🔄 Auto-Generated OpenAPI Schema
 Crawl the official [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/) and automatically generate complete OpenAPI 3.0 schemas with **675 operations** across **449 endpoints**.
+
+### Multi-Service SDK Facades
+Use one backend layer across Proxmox VE (`PVE`), Proxmox Mail Gateway (`PMG`),
+Proxmox Backup Server (`PBS`), and Proxmox Datacenter Manager (`PDM`). Typed
+facades are available for PBS, PDM, and Ceph workflows that need a more
+structured interface than raw path navigation.
+
+### CLI and Textual TUIs
+The `proxmox`, `proxmox-cli`, and `pbx` entry points expose generic API
+commands, profile management, command-capture docs generation, Ceph/PBS/PDM
+command groups, and production/mock TUIs.
 
 ### 🎭 Mock API Mode (Default)
 Perfect for development and testing:
@@ -120,6 +133,10 @@ graph LR
 - **[Quick Start](quickstart.md)** - Get up and running in 5 minutes
 - **[Mock API Mode](mock-api.md)** - Complete guide to mock mode features
 - **[Real API Mode](real-api.md)** - Connect to real Proxmox servers
+- **[CLI and TUI Command Guide](cli.md)** - Command groups, profiles, PDM commands, and TUIs
+- **[Proxmox Backup Server](sdk-pbs.md)** - Typed PBS facade
+- **[Proxmox Datacenter Manager](sdk-pdm.md)** - Typed PDM facade and mock server
+- **[Ceph](sdk-ceph.md)** - PVE Ceph facade and direct provider clients
 - **[API Reference](api-reference.md)** - Endpoint documentation
 - **[Development](development.md)** - Contributing and development guide
 - **[Architecture](architecture.md)** - How it works under the hood
@@ -178,7 +195,7 @@ app = create_app()
 ## Project Status
 
 - ✅ **Stable**: Mock API mode fully functional
-- ✅ **Production Ready**: Real API mode tested with Proxmox VE 7.x and 8.x
+- ✅ **Production Ready**: Real API mode with validated HTTPS, SSH, local, and mock backends
 - 🔄 **Active Development**: Regular updates and improvements
 - 📦 **PyPI Published**: `pip install proxmox-sdk`
 

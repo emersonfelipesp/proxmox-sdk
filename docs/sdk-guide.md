@@ -10,9 +10,19 @@ The Proxmox SDK provides a **Pythonic, dynamic interface** to the Proxmox REST A
 
 - **Async-first design** - Built on `aiohttp` for efficient concurrent operations
 - **Multiple backends** - HTTPS, SSH (Paramiko/OpenSSH), local pvesh, or mock
+- **Multiple Proxmox services** - PVE, PMG, PBS, and PDM through one backend registry
 - **Type-safe** - Full exception handling with meaningful error types
 - **Session management** - Automatic credential handling and ticket renewal
 - **Real-world ready** - Used in production for automation, monitoring, and infrastructure-as-code
+
+For higher-level workflows, use the typed facades instead of raw path
+navigation:
+
+| Facade | Import | Use case |
+|---|---|---|
+| `PBSClient` / `SyncPBSClient` | `proxmox_sdk.pbs` | PBS datastores, snapshots, jobs, nodes, and version checks |
+| `PDMClient` / `SyncPDMClient` | `proxmox_sdk.pdm` | PDM remotes, PVE/PBS remote resources, metrics, access, and views |
+| `CephClient` / `SyncCephClient` | `proxmox_sdk.ceph` | PVE-managed Ceph cluster, node, and write workflows |
 
 ---
 
