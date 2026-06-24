@@ -29,6 +29,12 @@ from proxmox_sdk.pdm.mock.routes import (
 )
 
 
+def _instrument_app(app: FastAPI) -> FastAPI:
+    from proxmox_sdk import telemetry
+
+    return telemetry.instrument_fastapi_app(app)
+
+
 def create_pdm_mock_app(
     *,
     state: PDMMockState | None = None,
@@ -74,7 +80,7 @@ def create_pdm_mock_app(
     # Expose the state on the app so test fixtures can inspect / mutate it
     # without going through HTTP.
     app.state.pdm_mock_state = mock_state
-    return app
+    return _instrument_app(app)
 
 
 app = create_pdm_mock_app()

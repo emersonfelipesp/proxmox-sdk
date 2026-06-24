@@ -78,6 +78,7 @@ class ProxmoxConfig:
         PROXMOX_API_PATH_PREFIX: Reverse-proxy path prefix (default: "")
         PROXMOX_API_OTP: OTP/TOTP code for 2FA (default: None)
         PROXMOX_API_OTPTYPE: OTP type — "totp" (default: "totp")
+        PROXMOX_OTEL_ENABLED: Enable OpenTelemetry tracing (default: false)
     """
 
     # ---- Original fields (unchanged) ----
@@ -102,6 +103,7 @@ class ProxmoxConfig:
     proxies: dict[str, str] | None = field(default=None, hash=False, compare=False)
     max_retries: int = 0
     retry_backoff: float = 0.5
+    otel_enabled: bool = False
 
     @classmethod
     def from_env(cls) -> ProxmoxConfig:
@@ -130,6 +132,7 @@ class ProxmoxConfig:
             "PROXMOX_API_HTTPS_PROXY",
             "PROXMOX_API_RETRIES",
             "PROXMOX_API_RETRY_BACKOFF",
+            "PROXMOX_OTEL_ENABLED",
             "HTTP_PROXY",
             "HTTPS_PROXY",
             "http_proxy",
@@ -163,6 +166,8 @@ class ProxmoxConfig:
         otptype = env_config.get("PROXMOX_API_OTPTYPE", "totp")
         max_retries = int(env_config.get("PROXMOX_API_RETRIES", "0"))
         retry_backoff = float(env_config.get("PROXMOX_API_RETRY_BACKOFF", "0.5"))
+        otel_enabled_str = env_config.get("PROXMOX_OTEL_ENABLED", "false").lower()
+        otel_enabled = otel_enabled_str in ("true", "1", "yes")
 
         proxies = None
         http_proxy = (
@@ -201,6 +206,7 @@ class ProxmoxConfig:
             proxies=proxies,
             max_retries=max_retries,
             retry_backoff=retry_backoff,
+            otel_enabled=otel_enabled,
         )
 
     def validate_for_real_mode(self) -> None:
@@ -246,6 +252,7 @@ class ProxmoxConfig:
             "otptype": self.otptype,
             "max_retries": self.max_retries,
             "retry_backoff": self.retry_backoff,
+            "otel_enabled": self.otel_enabled,
         }
 
         if self.cert:

@@ -32,6 +32,9 @@ are no longer in the CI matrix — regenerate locally with
 
 ```bash
 pip install proxmox-sdk
+
+# Optional OpenTelemetry tracing support
+pip install proxmox-sdk[otel]
 ```
 
 ## Quick Start
@@ -133,6 +136,20 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 ### Server
 - `HOST` - Host to bind to (default: "0.0.0.0")
 - `PORT` - Port to bind to (default: "8000")
+
+### OpenTelemetry Tracing
+- `PROXMOX_OTEL_ENABLED` - Enable outbound SDK CLIENT spans and inbound FastAPI SERVER spans (default: false)
+- `OTEL_EXPORTER_OTLP_ENDPOINT` - OTLP HTTP collector endpoint (default base endpoint: "http://localhost:4318")
+- `OTEL_EXPORTER_OTLP_PROTOCOL` - Must be "http/protobuf" for the bundled HTTP exporter
+- `OTEL_EXPORTER_OTLP_HEADERS` - Optional OTLP headers
+- `OTEL_SERVICE_NAME` - Service name resource attribute (default: "proxmox-sdk")
+- `OTEL_RESOURCE_ATTRIBUTES` - Additional OpenTelemetry resource attributes
+- `OTEL_SDK_DISABLED` - Standard OpenTelemetry kill switch; truthy values disable tracing
+- `OTEL_TRACES_SAMPLER` - Standard OpenTelemetry trace sampler
+- `OTEL_TRACES_EXPORTER` - Set to "otlp" or leave unset for OTLP export; set "none" to disable export
+
+Tracing never records request params, request bodies, auth headers, cookies,
+passwords, tickets, CSRF tokens, or API token values as span data.
 
 ## Development
 

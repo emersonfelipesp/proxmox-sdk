@@ -41,6 +41,7 @@ proxmox_sdk/
 ├── rate_limit.py             # SlowAPI rate limiting configuration
 ├── exception.py              # Exception classes
 ├── logger.py                 # Logging utilities
+├── telemetry.py              # Optional OpenTelemetry tracing
 ├── routes/
 │   ├── codegen.py            # Code generation endpoints (protected)
 │   ├── helpers.py            # Shared route utilities
@@ -212,6 +213,7 @@ See [docs/security.md](docs/security.md) for the full reference. Key patterns to
 - **Config symlink protection** — `save_config()` refuses to write if the config file or its parent directory is a symlink.
 - **SSL context** — `TicketAuth` receives the same `ssl` context as the main HTTPS backend, so `verify_ssl=False` applies consistently to both auth and API requests.
 - **Proxy threading** — `TicketAuth._request_ticket()` forwards `proxy=` to `session.post()` so authentication requests go through the same proxy as all other API calls. Omitting this would cause auth to bypass the proxy in proxy-only networks.
+- **OpenTelemetry span hygiene** — Optional tracing never records request params, request bodies, auth headers, cookies, passwords, tickets, CSRF tokens, or API token values as span data.
 
 ## Performance Patterns
 
@@ -357,6 +359,17 @@ A release publishes the package to PyPI and pushes all three Docker image varian
 
 ### Logging
 - `LOG_LEVEL` - Logging level (default: "INFO")
+
+### OpenTelemetry Tracing
+- `PROXMOX_OTEL_ENABLED` - Enable outbound SDK CLIENT spans and inbound FastAPI SERVER spans (default: false)
+- `OTEL_EXPORTER_OTLP_ENDPOINT` - OTLP HTTP collector endpoint (default base endpoint: `"http://localhost:4318"`)
+- `OTEL_EXPORTER_OTLP_PROTOCOL` - Must be `"http/protobuf"` for the bundled HTTP exporter
+- `OTEL_EXPORTER_OTLP_HEADERS` - Optional OTLP headers
+- `OTEL_SERVICE_NAME` - Service name resource attribute (default: `"proxmox-sdk"`)
+- `OTEL_RESOURCE_ATTRIBUTES` - Additional OpenTelemetry resource attributes
+- `OTEL_SDK_DISABLED` - Standard OpenTelemetry kill switch; truthy values disable tracing
+- `OTEL_TRACES_SAMPLER` - Standard OpenTelemetry trace sampler
+- `OTEL_TRACES_EXPORTER` - Set to `"otlp"` or leave unset for OTLP export; set `"none"` to disable export
 
 ### Security / Auth
 - `CODEGEN_API_KEY` - Bearer token required for all `/codegen/*` endpoints (`POST /codegen/generate`, `GET /codegen/openapi`, `GET /codegen/pydantic`, `GET /codegen/versions`)

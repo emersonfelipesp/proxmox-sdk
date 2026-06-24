@@ -15,6 +15,24 @@ Schema-driven Proxmox API toolkit Python package. Pre-generated 675-operation / 
 
 `from proxmox_sdk.sdk import ProxmoxSDK` — async + sync, no server required.
 
+## OpenTelemetry Tracing
+
+OpenTelemetry tracing is optional and disabled by default. Install the
+`otel` extra, then set `PROXMOX_OTEL_ENABLED=true` to emit one CLIENT span per
+SDK backend request and SERVER spans for FastAPI apps through
+`opentelemetry-instrumentation-fastapi`. Export uses OTLP over HTTP/protobuf via
+`opentelemetry-exporter-otlp-proto-http`.
+
+Supported env vars:
+
+- `PROXMOX_OTEL_ENABLED` — proxmox-sdk enable flag.
+- `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_HEADERS` — collector endpoint/protocol/headers.
+- `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES` — resource metadata.
+- `OTEL_SDK_DISABLED`, `OTEL_TRACES_SAMPLER`, `OTEL_TRACES_EXPORTER` — standard SDK disable/sampling/export controls.
+
+Security rule: spans must never include request params, request bodies, auth
+headers, cookies, passwords, tickets, CSRF tokens, or API token values.
+
 ## Multi-Surface Consumers in This Workspace
 
 - `proxbox-api/` — uses this SDK as its Proxmox API layer; pin `proxmox-sdk==0.0.11.post2`.

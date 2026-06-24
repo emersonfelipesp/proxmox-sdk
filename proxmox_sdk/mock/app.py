@@ -15,6 +15,12 @@ from proxmox_sdk.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generat
 _STUB_SERVICES = frozenset({"pbs", "pdm"})
 
 
+def _instrument_app(app: FastAPI) -> FastAPI:
+    from proxmox_sdk import telemetry
+
+    return telemetry.instrument_fastapi_app(app)
+
+
 def create_mock_app() -> FastAPI:
     """Build the standalone Proxmox mock API app.
 
@@ -70,10 +76,10 @@ def create_mock_app() -> FastAPI:
                 custom_mock_data=custom_mock_data,
                 namespace=namespace,
             )
-            return app
+            return _instrument_app(app)
 
         _register_static_mock_routes(app, custom_mock_data)
-        return app
+        return _instrument_app(app)
 
     if openapi_doc:
         from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes
@@ -81,7 +87,7 @@ def create_mock_app() -> FastAPI:
         register_generated_proxmox_mock_routes(
             app, version_tag=version_tag, openapi_document=openapi_doc, namespace=namespace
         )
-        return app
+        return _instrument_app(app)
 
     @app.get("/api2/json")
     async def no_schema() -> dict[str, str]:
@@ -90,7 +96,7 @@ def create_mock_app() -> FastAPI:
             "message": f"Run /codegen/generate to generate version '{version_tag}' or use the full API server.",
         }
 
-    return app
+    return _instrument_app(app)
 
 
 def _create_stub_app(service: str) -> FastAPI:
@@ -124,7 +130,7 @@ def _create_stub_app(service: str) -> FastAPI:
     async def version() -> dict[str, str]:
         return {"version": __version__}
 
-    return app
+    return _instrument_app(app)
 
 
 def _register_static_mock_routes(app: FastAPI, mock_data: dict[str, Any]) -> None:

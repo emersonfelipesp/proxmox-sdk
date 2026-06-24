@@ -102,6 +102,7 @@ class ProxmoxSDK:
         identity_file: str | None = None,
         forward_ssh_agent: bool = False,
         config_file: str | None = None,
+        otel_enabled: bool | None = None,
     ) -> None:
         service_upper = _normalize_service_name(service)
         svc: ServiceConfig = SERVICES[service_upper]
@@ -111,7 +112,7 @@ class ProxmoxSDK:
             self._service_name = service_upper
             self._service_config = svc
             self._backend_name = "custom"
-            self._backend = _backend
+            self._backend = self._install_backend(_backend, otel_enabled=otel_enabled)
             self._root = ProxmoxResource(path=svc.api_path_prefix, backend=self._backend)
             return
 
@@ -124,7 +125,7 @@ class ProxmoxSDK:
         self._service_name = service_upper
         self._service_config = svc
         self._backend_name = backend
-        self._backend = BackendFactory().create(
+        built_backend = BackendFactory().create(
             BackendBuildSpec(
                 backend=backend,
                 service_config=svc,
@@ -151,9 +152,28 @@ class ProxmoxSDK:
                 config_file=config_file,
             )
         )
+        self._backend = self._install_backend(built_backend, otel_enabled=otel_enabled)
         self._root: ProxmoxResource = ProxmoxResource(
             path=svc.api_path_prefix,
             backend=self._backend,
+        )
+
+    def _install_backend(
+        self,
+        backend: AbstractBackend,
+        *,
+        otel_enabled: bool | None = None,
+    ) -> AbstractBackend:
+        """Wrap *backend* with tracing when telemetry is explicitly enabled."""
+        from proxmox_sdk import telemetry
+
+        if not telemetry.is_enabled(otel_enabled):
+            return backend
+        return telemetry.TracingBackend(
+            backend,
+            backend_name=self._backend_name,
+            service_name=self._service_name,
+            otel_enabled=otel_enabled,
         )
 
     @property
@@ -234,6 +254,8 @@ class ProxmoxSDK:
         cls,
         schema_version: str = "latest",
         service: ServiceName = "PVE",
+        *,
+        otel_enabled: bool | None = None,
     ) -> ProxmoxSDK:
         """Create a ProxmoxSDK instance backed by the in-memory mock.
 
@@ -258,8 +280,8 @@ class ProxmoxSDK:
         instance._service_name = service_upper
         instance._service_config = svc
         instance._backend_name = "mock"
-        instance._backend = backend
-        instance._root = ProxmoxResource(path=svc.api_path_prefix, backend=backend)
+        instance._backend = instance._install_backend(backend, otel_enabled=otel_enabled)
+        instance._root = ProxmoxResource(path=svc.api_path_prefix, backend=instance._backend)
         return instance
 
     @classmethod
@@ -279,7 +301,11 @@ class ProxmoxSDK:
 
         if backend_name == "mock" or getattr(config, "api_mode", "real") == "mock":
             schema_version = getattr(config, "schema_version", "latest")
-            return cls.mock(schema_version=schema_version, service=service)
+            return cls.mock(
+                schema_version=schema_version,
+                service=service,
+                otel_enabled=getattr(config, "otel_enabled", None),
+            )
 
         # Extract credentials from ProxmoxConfig
         token_id: str | None = config.token_id
@@ -318,6 +344,7 @@ class ProxmoxSDK:
             port=getattr(config, "port", None),
             otp=getattr(config, "otp", None),
             otptype=getattr(config, "otptype", "totp"),
+            otel_enabled=getattr(config, "otel_enabled", None),
         )
 
     @classmethod
@@ -342,6 +369,8 @@ class ProxmoxSDK:
         cls,
         schema_version: str = "latest",
         service: ServiceName = "PVE",
+        *,
+        otel_enabled: bool | None = None,
     ) -> "SyncProxmoxSDK":
         """Create a synchronous mock SDK instance.
 
@@ -367,7 +396,11 @@ class ProxmoxSDK:
         import asyncio
 
         instance._loop = asyncio.new_event_loop()
-        instance._sdk = cls.mock(schema_version=schema_version, service=service)
+        instance._sdk = cls.mock(
+            schema_version=schema_version,
+            service=service,
+            otel_enabled=otel_enabled,
+        )
         from proxmox_sdk.sdk.sync import SyncProxmoxResource
 
         instance._root = SyncProxmoxResource(instance._sdk._root, instance._loop)

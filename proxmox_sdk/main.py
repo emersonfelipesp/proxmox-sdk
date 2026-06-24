@@ -171,6 +171,9 @@ def create_app() -> FastAPI:
     route_info: dict[str, Any] = {"mode": api_mode}
 
     _configure_middleware(app, config)
+    from proxmox_sdk import telemetry
+
+    telemetry.instrument_fastapi_app(app, config)
     _register_utility_routes(app, config, route_info)
 
     app.include_router(codegen_router, prefix="/codegen", tags=["codegen"])

@@ -41,6 +41,12 @@ cli = [
     "textual>=0.79.1",
     "pyyaml>=6.0",
 ]
+otel = [
+    "opentelemetry-api",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http",
+    "opentelemetry-instrumentation-fastapi",
+]
 all = [
     "paramiko>=5.0.0",
     "openssh-wrapper>=0.4",
@@ -48,6 +54,10 @@ all = [
     "rich>=13.0.0",
     "textual>=0.79.1",
     "pyyaml>=6.0",
+    "opentelemetry-api",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http",
+    "opentelemetry-instrumentation-fastapi",
 ]
 test = [
     "httpx>=0.28.1",
@@ -74,6 +84,7 @@ dev = [
     "pre-commit>=4.3.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "pytest-asyncio>=0.24.0",
 ]
 
 [dependency-groups]
@@ -84,6 +95,7 @@ dev = [
     "pre-commit>=4.3.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "pytest-asyncio>=0.24.0",
 ]
 
 [project.scripts]
