@@ -12,27 +12,31 @@
         <meta name="author" content="Emerson Felipe">
       
       
-        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-sdk/reference/command-capture/config-show/">
+        <link rel="canonical" href="https://emersonfelipesp.github.io/proxmox-sdk/cli/">
       
       
+        <link rel="prev" href="../sdk-examples/">
+      
+      
+        <link rel="next" href="../sdk-mock/">
       
       
         
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Config Show - Proxmox OpenAPI</title>
+        <title>Command Guide - Proxmox OpenAPI</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,7 +55,7 @@
       
     
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#config-show" class="md-skip">
+        <a href="#cli-and-tui-command-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +100,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="Proxmox OpenAPI" class="md-header__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
+    <a href=".." title="Proxmox OpenAPI" class="md-header__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -116,7 +120,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Config Show
+              Command Guide
             
           </span>
         </div>
@@ -228,7 +232,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -249,7 +253,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../installation/" class="md-tabs__link">
+        <a href="../installation/" class="md-tabs__link">
           
   
   
@@ -269,7 +273,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../sdk-guide/" class="md-tabs__link">
+        <a href="../sdk-guide/" class="md-tabs__link">
           
   
   
@@ -285,11 +289,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../cli/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -309,7 +315,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../sdk-mock/" class="md-tabs__link">
+        <a href="../sdk-mock/" class="md-tabs__link">
           
   
   
@@ -329,7 +335,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../architecture/" class="md-tabs__link">
+        <a href="../architecture/" class="md-tabs__link">
           
   
   
@@ -349,7 +355,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../ssh/" class="md-tabs__link">
+        <a href="../ssh/" class="md-tabs__link">
           
   
   
@@ -369,7 +375,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../development/" class="md-tabs__link">
+        <a href="../development/" class="md-tabs__link">
           
   
   
@@ -389,7 +395,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../" class="md-tabs__link">
+        <a href="../reference/command-capture/" class="md-tabs__link">
           
   
   
@@ -407,7 +413,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../faq/" class="md-tabs__link">
+      <a href="../faq/" class="md-tabs__link">
         
   
   
@@ -448,7 +454,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="Proxmox OpenAPI" class="md-nav__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
+    <a href=".." title="Proxmox OpenAPI" class="md-nav__button md-logo" aria-label="Proxmox OpenAPI" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -478,7 +484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -559,7 +565,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -587,7 +593,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../quickstart/" class="md-nav__link">
+      <a href="../quickstart/" class="md-nav__link">
         
   
   
@@ -676,7 +682,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-guide/" class="md-nav__link">
+      <a href="../sdk-guide/" class="md-nav__link">
         
   
   
@@ -704,7 +710,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-authentication/" class="md-nav__link">
+      <a href="../sdk-authentication/" class="md-nav__link">
         
   
   
@@ -732,7 +738,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-virtual-machines/" class="md-nav__link">
+      <a href="../sdk-virtual-machines/" class="md-nav__link">
         
   
   
@@ -760,7 +766,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-pbs/" class="md-nav__link">
+      <a href="../sdk-pbs/" class="md-nav__link">
         
   
   
@@ -788,7 +794,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-ceph/" class="md-nav__link">
+      <a href="../sdk-ceph/" class="md-nav__link">
         
   
   
@@ -816,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-pdm/" class="md-nav__link">
+      <a href="../sdk-pdm/" class="md-nav__link">
         
   
   
@@ -844,7 +850,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-examples/" class="md-nav__link">
+      <a href="../sdk-examples/" class="md-nav__link">
         
   
   
@@ -876,28 +882,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -915,7 +924,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -930,10 +939,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../cli/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command Guide
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -949,6 +985,103 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generic-api-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generic API Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Profiles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#textual-tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Textual TUI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pdm-command-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM Command Tree
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ceph-and-pbs-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ceph and PBS Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Capture
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1022,7 +1155,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-mock/" class="md-nav__link">
+      <a href="../sdk-mock/" class="md-nav__link">
         
   
   
@@ -1050,7 +1183,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../mock-api/" class="md-nav__link">
+      <a href="../mock-api/" class="md-nav__link">
         
   
   
@@ -1078,7 +1211,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../real-api/" class="md-nav__link">
+      <a href="../real-api/" class="md-nav__link">
         
   
   
@@ -1106,7 +1239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api-reference/" class="md-nav__link">
+      <a href="../api-reference/" class="md-nav__link">
         
   
   
@@ -1195,7 +1328,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   
@@ -1223,7 +1356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-internals/" class="md-nav__link">
+      <a href="../sdk-internals/" class="md-nav__link">
         
   
   
@@ -1251,7 +1384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../codegen-pipeline/" class="md-nav__link">
+      <a href="../codegen-pipeline/" class="md-nav__link">
         
   
   
@@ -1279,7 +1412,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../ide-support/" class="md-nav__link">
+      <a href="../ide-support/" class="md-nav__link">
         
   
   
@@ -1307,7 +1440,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../integration-with-proxbox-api/" class="md-nav__link">
+      <a href="../integration-with-proxbox-api/" class="md-nav__link">
         
   
   
@@ -1396,7 +1529,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../ssh/" class="md-nav__link">
+      <a href="../ssh/" class="md-nav__link">
         
   
   
@@ -1424,7 +1557,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../node-hardware/" class="md-nav__link">
+      <a href="../node-hardware/" class="md-nav__link">
         
   
   
@@ -1513,7 +1646,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../development/" class="md-nav__link">
+      <a href="../development/" class="md-nav__link">
         
   
   
@@ -1541,7 +1674,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../security/" class="md-nav__link">
+      <a href="../security/" class="md-nav__link">
         
   
   
@@ -1569,7 +1702,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../performance/" class="md-nav__link">
+      <a href="../performance/" class="md-nav__link">
         
   
   
@@ -1658,7 +1791,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../reference/command-capture/" class="md-nav__link">
         
   
   
@@ -1686,7 +1819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../PVESH/" class="md-nav__link">
+      <a href="../reference/PVESH/" class="md-nav__link">
         
   
   
@@ -1714,7 +1847,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../proxmoxer/" class="md-nav__link">
+      <a href="../reference/proxmoxer/" class="md-nav__link">
         
   
   
@@ -1749,7 +1882,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   
@@ -1796,10 +1929,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#proxmox-config-show-help" class="md-nav__link">
+  <a href="#global-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        proxmox config-show --help
+        Global Options
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generic-api-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generic API Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Profiles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#textual-tui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Textual TUI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pdm-command-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM Command Tree
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ceph-and-pbs-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ceph and PBS Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-capture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Capture
       
     </span>
   </a>
@@ -1826,34 +2025,227 @@
   
 
 
-<h1 id="config-show">Config Show<a class="headerlink" href="#config-show" title="Permanent link">&para;</a></h1>
-<h3 id="proxmox-config-show-help"><code>proxmox config-show --help</code><a class="headerlink" href="#proxmox-config-show-help" title="Permanent link">&para;</a></h3>
-<p><strong>Input:</strong></p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>proxmox<span class="w"> </span>config-show<span class="w"> </span>--help
+<h1 id="cli-and-tui-command-guide">CLI and TUI Command Guide<a class="headerlink" href="#cli-and-tui-command-guide" title="Permanent link">&para;</a></h1>
+<p>The <code>proxmox</code> console script is a Typer CLI for Proxmox automation. It shares
+the same backend layer as <code>ProxmoxSDK</code>, so CLI commands can target HTTPS,
+mock, SSH, and local <code>pvesh</code> backends where the selected service supports them.</p>
+<p>Install the CLI extras when you need command output formatting or Textual TUIs:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;proxmox-sdk[cli]&quot;</span>
 </span></code></pre></div>
-<p><strong>Output:</strong></p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a> Usage: proxmox config-show [OPTIONS] [PROFILE]                                 
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> Show configuration for a specific profile.                                     
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a> Example:                                                                       
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a> proxmox config-show default                                                    
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a> proxmox config-show staging                                                    
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>╭─ Arguments ──────────────────────────────────────────────────────────────────╮
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   profile      [PROFILE]  Profile name [default: default]                    │
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>╰──────────────────────────────────────────────────────────────────────────────╯
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│ --output    -o      TEXT  Output format (human, json, yaml, markdown, table, │
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│                           text, raw)                                         │
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│ --json                    Shortcut for --output json                         │
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│ --yaml                    Shortcut for --output yaml                         │
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│ --markdown                Shortcut for --output markdown                     │
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│ --help                    Show this message and exit.                        │
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+<p>The package exposes three equivalent entry points:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>proxmox</code></td>
+<td>Primary CLI entry point</td>
+</tr>
+<tr>
+<td><code>proxmox-cli</code></td>
+<td>Compatibility alias</td>
+</tr>
+<tr>
+<td><code>pbx</code></td>
+<td>Short alias for interactive use</td>
+</tr>
+</tbody>
+</table>
+<h2 id="global-options">Global Options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>
+<p>Common commands use the same connection options:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>proxmox<span class="w"> </span>--service<span class="w"> </span>PVE<span class="w"> </span>--host<span class="w"> </span>pve.example.com<span class="w"> </span>--user<span class="w"> </span>root@pam<span class="w"> </span>--token-value<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span>get<span class="w"> </span>/nodes
 </span></code></pre></div>
-<p><strong>Exit code:</strong> <code>0</code>  ·  <strong>Wall time (s):</strong> <code>0.746</code></p>
-<hr />
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--service</code> / <code>-S</code></td>
+<td><code>PVE</code>, <code>PMG</code>, <code>PBS</code>, or <code>PDM</code>; defaults to <code>PVE</code></td>
+</tr>
+<tr>
+<td><code>--backend</code> / <code>-b</code></td>
+<td><code>https</code>, <code>ssh_paramiko</code>, <code>openssh</code>, <code>local</code>, or <code>mock</code></td>
+</tr>
+<tr>
+<td><code>--host</code> / <code>-H</code></td>
+<td>Target host for network backends</td>
+</tr>
+<tr>
+<td><code>--user</code> / <code>-U</code></td>
+<td>User or token principal</td>
+</tr>
+<tr>
+<td><code>--password</code> / <code>-P</code></td>
+<td>Password auth; prefer tokens or environment/config for automation</td>
+</tr>
+<tr>
+<td><code>--token-value</code></td>
+<td>API token secret</td>
+</tr>
+<tr>
+<td><code>--port</code></td>
+<td>Overrides the service default port</td>
+</tr>
+<tr>
+<td><code>--output</code> / <code>-o</code></td>
+<td><code>human</code>, <code>json</code>, <code>yaml</code>, <code>markdown</code>, <code>table</code>, <code>text</code>, or <code>raw</code></td>
+</tr>
+</tbody>
+</table>
+<p>The CLI also supports <code>--json</code>, <code>--yaml</code>, and <code>--markdown</code> shortcuts.</p>
+<h2 id="generic-api-commands">Generic API Commands<a class="headerlink" href="#generic-api-commands" title="Permanent link">&para;</a></h2>
+<p>The generic commands map directly to Proxmox API paths:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get &lt;path&gt;</code></td>
+<td>Read a resource</td>
+</tr>
+<tr>
+<td><code>create &lt;path&gt;</code></td>
+<td>Create a resource or trigger an action</td>
+</tr>
+<tr>
+<td><code>set-cmd &lt;path&gt;</code></td>
+<td>Update a resource</td>
+</tr>
+<tr>
+<td><code>delete &lt;path&gt;</code></td>
+<td>Delete a resource</td>
+</tr>
+<tr>
+<td><code>ls &lt;path&gt;</code></td>
+<td>List child resources below a path</td>
+</tr>
+<tr>
+<td><code>usage &lt;path&gt;</code></td>
+<td>Show schema and usage metadata for an endpoint</td>
+</tr>
+<tr>
+<td><code>help-cmd &lt;path&gt;</code></td>
+<td>Show endpoint help</td>
+</tr>
+<tr>
+<td><code>batch &lt;file&gt;</code></td>
+<td>Execute batch operations from JSON</td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>proxmox<span class="w"> </span>--backend<span class="w"> </span>mock<span class="w"> </span>get<span class="w"> </span>/nodes<span class="w"> </span>--json
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>proxmox<span class="w"> </span>--host<span class="w"> </span>pve.example.com<span class="w"> </span>--user<span class="w"> </span>root@pam<span class="w"> </span>ls<span class="w"> </span>/
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>proxmox<span class="w"> </span>--host<span class="w"> </span>pve.example.com<span class="w"> </span>--user<span class="w"> </span>root@pam<span class="w"> </span>usage<span class="w"> </span>/nodes<span class="w"> </span>--markdown
+</span></code></pre></div>
+<h2 id="configuration-profiles">Configuration Profiles<a class="headerlink" href="#configuration-profiles" title="Permanent link">&para;</a></h2>
+<p>Use profiles when commands need repeatable connection settings:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>proxmox<span class="w"> </span>init
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>proxmox<span class="w"> </span>config-add<span class="w"> </span>lab<span class="w"> </span>--host<span class="w"> </span>pve.example.com<span class="w"> </span>--user<span class="w"> </span>root@pam<span class="w"> </span>--service<span class="w"> </span>PVE
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>proxmox<span class="w"> </span>config-list
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>proxmox<span class="w"> </span>config-set-default<span class="w"> </span>lab
+</span></code></pre></div>
+<p>Credentials are stored in <code>~/.proxmox-cli/config.json</code>. The loader warns when
+the file has group or world read/write permissions.</p>
+<h2 id="textual-tui">Textual TUI<a class="headerlink" href="#textual-tui" title="Permanent link">&para;</a></h2>
+<p>The top-level TUI browses API paths and works with production or mock backends:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>proxmox<span class="w"> </span>tui
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>proxmox<span class="w"> </span>tui<span class="w"> </span>mock
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>proxmox<span class="w"> </span>tui<span class="w"> </span>--path<span class="w"> </span>/nodes/pve1/qemu
+</span></code></pre></div>
+<p>Module-specific TUI launchers are also available:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>proxmox<span class="w"> </span>pbs<span class="w"> </span>tui
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>proxmox<span class="w"> </span>pdm<span class="w"> </span>tui
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>proxmox<span class="w"> </span>pdm<span class="w"> </span>tui<span class="w"> </span>mock
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>proxmox<span class="w"> </span>ceph<span class="w"> </span>tui
+</span></code></pre></div>
+<h2 id="pdm-command-tree">PDM Command Tree<a class="headerlink" href="#pdm-command-tree" title="Permanent link">&para;</a></h2>
+<p>PDM has a dedicated command group because PDM multiplexes across registered PVE
+and PBS remotes. Commands operate on the PDM API, not directly on a PVE or PBS
+node.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>proxmox<span class="w"> </span>--service<span class="w"> </span>PDM<span class="w"> </span>--host<span class="w"> </span>pdm.example.com<span class="w"> </span>pdm<span class="w"> </span>remote<span class="w"> </span>list
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>proxmox<span class="w"> </span>--service<span class="w"> </span>PDM<span class="w"> </span>--host<span class="w"> </span>pdm.example.com<span class="w"> </span>pdm<span class="w"> </span>resources<span class="w"> </span>list<span class="w"> </span>--json
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>proxmox<span class="w"> </span>--service<span class="w"> </span>PDM<span class="w"> </span>--host<span class="w"> </span>pdm.example.com<span class="w"> </span>pdm<span class="w"> </span>pve<span class="w"> </span>qemu<span class="w"> </span>list<span class="w"> </span>pve-prod
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>proxmox<span class="w"> </span>--service<span class="w"> </span>PDM<span class="w"> </span>--host<span class="w"> </span>pdm.example.com<span class="w"> </span>pdm<span class="w"> </span>pbs<span class="w"> </span>datastore<span class="w"> </span>list<span class="w"> </span>pbs-prod
+</span></code></pre></div>
+<p>Top-level PDM groups:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pdm remote</code></td>
+<td>Register, update, remove, list, and inspect remotes</td>
+</tr>
+<tr>
+<td><code>pdm pve</code></td>
+<td>PVE remote resources, tasks, QEMU, LXC, and node metrics</td>
+</tr>
+<tr>
+<td><code>pdm pbs</code></td>
+<td>PBS datastores, snapshots, node metrics, and tasks</td>
+</tr>
+<tr>
+<td><code>pdm resources</code></td>
+<td>Cross-remote resource inventory and status</td>
+</tr>
+<tr>
+<td><code>pdm subscriptions</code></td>
+<td>Fleet subscription state</td>
+</tr>
+<tr>
+<td><code>pdm metrics</code></td>
+<td>Metric collection status and trigger</td>
+</tr>
+<tr>
+<td><code>pdm access</code></td>
+<td>Users, ACLs, TFA, and API tokens</td>
+</tr>
+<tr>
+<td><code>pdm views</code></td>
+<td>Custom cross-remote dashboards</td>
+</tr>
+<tr>
+<td><code>pdm tui</code></td>
+<td>PDM-specific Textual interface</td>
+</tr>
+</tbody>
+</table>
+<p>Most PDM guest and datastore commands require a <code>remote</code> argument. Use
+<code>proxmox pdm remote list</code> first when you need the registered remote names.</p>
+<h2 id="ceph-and-pbs-commands">Ceph and PBS Commands<a class="headerlink" href="#ceph-and-pbs-commands" title="Permanent link">&para;</a></h2>
+<p><code>proxmox ceph</code> is scoped to the Proxmox VE Ceph API. It exposes read commands
+for cluster status, metadata, flags, monitor/manager/MDS inventory, OSDs,
+pools, filesystems, logs, and a Ceph TUI. Write-oriented Ceph SDK helpers still
+require explicit confirmation flags in the Python API.</p>
+<p><code>proxmox pbs</code> currently provides the PBS TUI entry point. Programmatic PBS
+automation should use the <code>PBSClient</code> facade or the generic <code>--service PBS</code>
+API commands.</p>
+<h2 id="documentation-capture">Documentation Capture<a class="headerlink" href="#documentation-capture" title="Permanent link">&para;</a></h2>
+<p>The <code>docs</code> command regenerates MkDocs CLI capture artifacts:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>proxmox<span class="w"> </span>docs<span class="w"> </span>generate-capture
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>uv<span class="w"> </span>run<span class="w"> </span>mkdocs<span class="w"> </span>build<span class="w"> </span>--strict
+</span></code></pre></div>
+<p>The generated capture pages are useful for release documentation, but they can
+lag behind command changes if they have not been regenerated. Prefer this guide
+and live <code>--help</code> output when validating the current command surface.</p>
 
 
 
@@ -1940,10 +2332,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

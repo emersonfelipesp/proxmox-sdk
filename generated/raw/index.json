@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated_at": "2026-06-08T17:11:42.823848+00:00",
+    "generated_at": "2026-06-24T15:39:31.991184+00:00",
     "proxmox_invocation": [
       "/home/runner/work/proxmox-sdk/proxmox-sdk/.venv/bin/proxmox"
     ]
@@ -13,7 +13,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.818,
+      "elapsed_seconds": 0.817,
       "truncated": false
     },
     {
@@ -24,7 +24,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.758,
+      "elapsed_seconds": 0.737,
       "truncated": false
     },
     {
@@ -35,7 +35,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.728,
+      "elapsed_seconds": 0.733,
       "truncated": false
     },
     {
@@ -46,7 +46,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.735,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -58,7 +58,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.735,
+      "elapsed_seconds": 0.744,
       "truncated": false
     },
     {
@@ -70,7 +70,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.738,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -82,7 +82,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.734,
+      "elapsed_seconds": 0.752,
       "truncated": false
     },
     {
@@ -94,7 +94,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.75,
+      "elapsed_seconds": 0.748,
       "truncated": false
     },
     {
@@ -106,7 +106,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.732,
+      "elapsed_seconds": 0.736,
       "truncated": false
     },
     {
@@ -118,7 +118,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.738,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -130,7 +130,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.796,
+      "elapsed_seconds": 0.754,
       "truncated": false
     },
     {
@@ -142,7 +142,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.749,
+      "elapsed_seconds": 0.744,
       "truncated": false
     },
     {
@@ -154,7 +154,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.746,
+      "elapsed_seconds": 0.744,
       "truncated": false
     },
     {
@@ -166,7 +166,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.796,
+      "elapsed_seconds": 0.736,
       "truncated": false
     },
     {
@@ -178,7 +178,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.828,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -190,7 +190,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.768,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -202,7 +202,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.835,
+      "elapsed_seconds": 0.742,
       "truncated": false
     },
     {
@@ -214,7 +214,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.81,
+      "elapsed_seconds": 0.745,
       "truncated": false
     },
     {
@@ -226,7 +226,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.762,
+      "elapsed_seconds": 0.752,
       "truncated": false
     },
     {
@@ -237,7 +237,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.74,
+      "elapsed_seconds": 0.734,
       "truncated": false
     },
     {
@@ -248,7 +248,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.736,
+      "elapsed_seconds": 0.799,
       "truncated": false
     },
     {
@@ -259,7 +259,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.784,
+      "elapsed_seconds": 0.757,
       "truncated": false
     },
     {
@@ -270,7 +270,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.749,
+      "elapsed_seconds": 0.74,
       "truncated": false
     },
     {
@@ -281,7 +281,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.735,
+      "elapsed_seconds": 0.744,
       "truncated": false
     },
     {
@@ -292,7 +292,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.74,
+      "elapsed_seconds": 0.746,
       "truncated": false
     },
     {
@@ -303,7 +303,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.74,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -314,7 +314,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.732,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -325,7 +325,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.729,
+      "elapsed_seconds": 0.742,
       "truncated": false
     },
     {
@@ -337,7 +337,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.75,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -348,7 +348,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.742,
+      "elapsed_seconds": 0.754,
       "truncated": false
     },
     {
@@ -359,7 +359,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.764,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -370,7 +370,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.741,
+      "elapsed_seconds": 0.745,
       "truncated": false
     },
     {
@@ -381,7 +381,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.765,
+      "elapsed_seconds": 0.751,
       "truncated": false
     },
     {
@@ -392,7 +392,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.746,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -404,7 +404,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.741,
+      "elapsed_seconds": 0.76,
       "truncated": false
     },
     {
@@ -415,7 +415,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.716,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -427,7 +427,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.727,
+      "elapsed_seconds": 0.743,
       "truncated": false
     },
     {
@@ -440,7 +440,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.746,
+      "elapsed_seconds": 0.756,
       "truncated": false
     },
     {
@@ -454,7 +454,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.727,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -468,7 +468,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.741,
+      "elapsed_seconds": 0.745,
       "truncated": false
     },
     {
@@ -482,7 +482,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.741,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -495,7 +495,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.739,
+      "elapsed_seconds": 0.742,
       "truncated": false
     },
     {
@@ -509,7 +509,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.785,
+      "elapsed_seconds": 0.742,
       "truncated": false
     },
     {
@@ -523,7 +523,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.799,
+      "elapsed_seconds": 0.742,
       "truncated": false
     },
     {
@@ -537,7 +537,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.785,
+      "elapsed_seconds": 0.735,
       "truncated": false
     },
     {
@@ -550,7 +550,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.757,
+      "elapsed_seconds": 0.746,
       "truncated": false
     },
     {
@@ -578,7 +578,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.752,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -592,7 +592,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.745,
+      "elapsed_seconds": 0.725,
       "truncated": false
     },
     {
@@ -606,7 +606,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.741,
+      "elapsed_seconds": 0.736,
       "truncated": false
     },
     {
@@ -620,7 +620,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.747,
+      "elapsed_seconds": 0.742,
       "truncated": false
     },
     {
@@ -632,7 +632,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.753,
+      "elapsed_seconds": 0.751,
       "truncated": false
     },
     {
@@ -645,7 +645,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.736,
+      "elapsed_seconds": 0.76,
       "truncated": false
     },
     {
@@ -658,7 +658,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.754,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -670,7 +670,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.754,
+      "elapsed_seconds": 0.735,
       "truncated": false
     },
     {
@@ -683,7 +683,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.748,
+      "elapsed_seconds": 0.754,
       "truncated": false
     },
     {
@@ -697,7 +697,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.746,
+      "elapsed_seconds": 0.738,
       "truncated": false
     },
     {
@@ -711,7 +711,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.751,
+      "elapsed_seconds": 0.75,
       "truncated": false
     },
     {
@@ -724,7 +724,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.76,
+      "elapsed_seconds": 0.743,
       "truncated": false
     },
     {
@@ -738,7 +738,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.794,
+      "elapsed_seconds": 0.75,
       "truncated": false
     },
     {
@@ -751,7 +751,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.748,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -765,7 +765,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.743,
+      "elapsed_seconds": 0.752,
       "truncated": false
     },
     {
@@ -778,7 +778,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.73,
+      "elapsed_seconds": 0.771,
       "truncated": false
     },
     {
@@ -792,7 +792,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.738,
+      "elapsed_seconds": 0.754,
       "truncated": false
     },
     {
@@ -806,7 +806,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.751,
+      "elapsed_seconds": 0.764,
       "truncated": false
     },
     {
@@ -818,7 +818,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.779,
+      "elapsed_seconds": 0.763,
       "truncated": false
     },
     {
@@ -831,7 +831,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.751,
+      "elapsed_seconds": 0.774,
       "truncated": false
     },
     {
@@ -845,7 +845,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.748,
+      "elapsed_seconds": 0.777,
       "truncated": false
     },
     {
@@ -859,7 +859,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.757,
+      "elapsed_seconds": 0.761,
       "truncated": false
     },
     {
@@ -873,7 +873,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.744,
+      "elapsed_seconds": 0.773,
       "truncated": false
     },
     {
@@ -887,7 +887,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.748,
+      "elapsed_seconds": 0.766,
       "truncated": false
     },
     {
@@ -901,7 +901,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.757,
+      "elapsed_seconds": 0.759,
       "truncated": false
     },
     {
@@ -915,7 +915,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.756,
+      "elapsed_seconds": 0.75,
       "truncated": false
     },
     {
@@ -929,7 +929,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.769,
+      "elapsed_seconds": 0.754,
       "truncated": false
     },
     {
@@ -943,7 +943,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.746,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -956,7 +956,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.761,
+      "elapsed_seconds": 0.757,
       "truncated": false
     },
     {
@@ -970,7 +970,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.732,
+      "elapsed_seconds": 0.76,
       "truncated": false
     },
     {
@@ -984,7 +984,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.751,
+      "elapsed_seconds": 0.765,
       "truncated": false
     },
     {
@@ -997,7 +997,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.721,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -1011,7 +1011,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.723,
+      "elapsed_seconds": 0.758,
       "truncated": false
     },
     {
@@ -1025,7 +1025,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.727,
+      "elapsed_seconds": 0.753,
       "truncated": false
     },
     {
@@ -1039,7 +1039,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.724,
+      "elapsed_seconds": 0.774,
       "truncated": false
     },
     {
@@ -1053,7 +1053,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.74,
+      "elapsed_seconds": 0.756,
       "truncated": false
     },
     {
@@ -1067,7 +1067,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.72,
+      "elapsed_seconds": 0.777,
       "truncated": false
     },
     {
@@ -1081,7 +1081,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.727,
+      "elapsed_seconds": 0.763,
       "truncated": false
     },
     {
@@ -1095,7 +1095,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.724,
+      "elapsed_seconds": 0.76,
       "truncated": false
     },
     {
@@ -1109,7 +1109,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.716,
+      "elapsed_seconds": 0.768,
       "truncated": false
     },
     {
@@ -1122,7 +1122,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.713,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -1135,7 +1135,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.76,
+      "elapsed_seconds": 0.745,
       "truncated": false
     },
     {
@@ -1147,7 +1147,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.743,
+      "elapsed_seconds": 0.756,
       "truncated": false
     },
     {
@@ -1160,7 +1160,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.735,
+      "elapsed_seconds": 0.761,
       "truncated": false
     },
     {
@@ -1173,7 +1173,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.727,
+      "elapsed_seconds": 0.77,
       "truncated": false
     },
     {
@@ -1186,7 +1186,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.758,
+      "elapsed_seconds": 0.761,
       "truncated": false
     },
     {
@@ -1199,7 +1199,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.73,
+      "elapsed_seconds": 0.764,
       "truncated": false
     },
     {
@@ -1212,7 +1212,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.736,
+      "elapsed_seconds": 0.761,
       "truncated": false
     },
     {
@@ -1224,7 +1224,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.736,
+      "elapsed_seconds": 0.756,
       "truncated": false
     },
     {
@@ -1237,7 +1237,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.734,
+      "elapsed_seconds": 0.751,
       "truncated": false
     },
     {
@@ -1250,7 +1250,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.784,
+      "elapsed_seconds": 0.755,
       "truncated": false
     },
     {
@@ -1262,7 +1262,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.761,
+      "elapsed_seconds": 0.752,
       "truncated": false
     },
     {
@@ -1274,7 +1274,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.731,
+      "elapsed_seconds": 0.764,
       "truncated": false
     },
     {
@@ -1286,7 +1286,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.745,
+      "elapsed_seconds": 0.738,
       "truncated": false
     },
     {
@@ -1299,7 +1299,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.727,
+      "elapsed_seconds": 0.749,
       "truncated": false
     },
     {
@@ -1312,7 +1312,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.738,
+      "elapsed_seconds": 0.764,
       "truncated": false
     },
     {
@@ -1325,7 +1325,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.73,
+      "elapsed_seconds": 0.76,
       "truncated": false
     },
     {
@@ -1338,7 +1338,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.737,
+      "elapsed_seconds": 0.747,
       "truncated": false
     },
     {
@@ -1351,7 +1351,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.763,
+      "elapsed_seconds": 0.743,
       "truncated": false
     },
     {
@@ -1362,7 +1362,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.736,
+      "elapsed_seconds": 0.731,
       "truncated": false
     },
     {
@@ -1373,7 +1373,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.76,
+      "elapsed_seconds": 0.746,
       "truncated": false
     },
     {
@@ -1384,7 +1384,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.738,
+      "elapsed_seconds": 0.735,
       "truncated": false
     },
     {
@@ -1395,7 +1395,7 @@
         "--help"
       ],
       "exit_code": 0,
-      "elapsed_seconds": 0.736,
+      "elapsed_seconds": 0.737,
       "truncated": false
     }
   ]
