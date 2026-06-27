@@ -73,6 +73,47 @@ def test_https_backend_is_ticket_capable() -> None:
     assert isinstance(backend, TicketCapableBackend)
 
 
+def test_https_backend_ticket_url_includes_api_path_prefix() -> None:
+    """Regression: the password/ticket endpoint must be built under the
+    service API prefix (``/api2/json/access/ticket``), not a bare
+    ``/access/ticket`` — the latter returns HTTP 500 "no such file" on a
+    real Proxmox node, surfacing as a JSONDecodeError during auth.
+    """
+    from proxmox_sdk.sdk.backends.https import HttpsBackend
+
+    auth = TicketAuth(
+        username="root@pam",
+        password="secret",
+        service_config=SERVICES["PVE"],
+    )
+    backend = HttpsBackend(
+        host="pve.example.com",
+        service_config=SERVICES["PVE"],
+        auth=auth,
+    )
+    assert backend._ticket_url == "https://pve.example.com:8006/api2/json/access/ticket"
+
+
+def test_https_backend_ticket_url_respects_reverse_proxy_prefix() -> None:
+    """A reverse-proxy path prefix must sit in front of the API prefix:
+    ``/proxmox/api2/json/access/ticket``.
+    """
+    from proxmox_sdk.sdk.backends.https import HttpsBackend
+
+    auth = TicketAuth(
+        username="root@pam",
+        password="secret",
+        service_config=SERVICES["PVE"],
+    )
+    backend = HttpsBackend(
+        host="pve.example.com",
+        service_config=SERVICES["PVE"],
+        auth=auth,
+        path_prefix="/proxmox",
+    )
+    assert backend._ticket_url == "https://pve.example.com:8006/proxmox/api2/json/access/ticket"
+
+
 def test_ticket_auth_get_auth_tokens_requires_authenticated_state() -> None:
     auth = TicketAuth(
         username="root@pam",

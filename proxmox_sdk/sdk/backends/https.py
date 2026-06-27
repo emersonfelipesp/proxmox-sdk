@@ -161,7 +161,12 @@ class HttpsBackend(AbstractBackend):
 
         self._session: aiohttp.ClientSession | None = None
         self._session_loop: asyncio.AbstractEventLoop | None = None
-        self._ticket_url = f"{self._base_url}/access/ticket"
+        # The ticket endpoint lives under the service API prefix
+        # (e.g. /api2/json/access/ticket), same as every other request.
+        # Build it via _url_for() so it also respects any reverse-proxy
+        # path prefix baked into _base_url. Posting to a bare
+        # /access/ticket returns HTTP 500 "no such file" on real Proxmox.
+        self._ticket_url = self._url_for(f"{service_config.api_path_prefix}/access/ticket")
 
     # ------------------------------------------------------------------
     # Context manager support
