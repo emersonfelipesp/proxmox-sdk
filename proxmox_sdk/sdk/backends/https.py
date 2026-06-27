@@ -378,6 +378,12 @@ class HttpsBackend(AbstractBackend):
             self._session = aiohttp.ClientSession(
                 connector=connector,
                 timeout=self._timeout,
+                # Proxmox rejects a *quoted* PVEAuthCookie. aiohttp quotes cookie
+                # values containing special chars (: @ = / +) by default, which
+                # mangles the ticket and 401s every authenticated request.
+                # quote_cookie=False sends the value verbatim — and it applies to
+                # the per-request cookies= path the backend uses, not just the jar.
+                cookie_jar=aiohttp.CookieJar(quote_cookie=False),
             )
             self._session_loop = current_loop
         return self._session
