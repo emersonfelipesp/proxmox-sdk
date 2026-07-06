@@ -66,9 +66,7 @@ def test_sync_mock_request_emits_one_client_span(monkeypatch: pytest.MonkeyPatch
     finally:
         sdk.close()
 
-    client_spans = [
-        span for span in exporter.get_finished_spans() if span.kind == span_kind.CLIENT
-    ]
+    client_spans = [span for span in exporter.get_finished_spans() if span.kind == span_kind.CLIENT]
     assert len(client_spans) == 1
     span = client_spans[0]
     assert span.name == "proxmox GET"
