@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal, cast
 
 if TYPE_CHECKING:
+    from aiohttp import ClientSession
+
     from proxmox_sdk.proxmox.config import ProxmoxConfig
     from proxmox_sdk.sdk.sync import SyncProxmoxSDK
 
@@ -69,6 +71,13 @@ class ProxmoxSDK:
 
         proxmox = ProxmoxSDK(backend="local", service="PVE")
 
+    Bring your own aiohttp session (HTTPS backend)::
+
+        async with aiohttp.ClientSession() as session:
+            async with ProxmoxSDK(host=..., user=..., password=..., session=session) as proxmox:
+                nodes = await proxmox.nodes.get()
+            # The SDK reuses `session` verbatim and never closes it.
+
     Sync usage::
 
         proxmox = ProxmoxSDK.sync(host=..., user=..., password=...)
@@ -103,6 +112,7 @@ class ProxmoxSDK:
         forward_ssh_agent: bool = False,
         config_file: str | None = None,
         otel_enabled: bool | None = None,
+        session: ClientSession | None = None,
     ) -> None:
         service_upper = _normalize_service_name(service)
         svc: ServiceConfig = SERVICES[service_upper]
@@ -150,6 +160,7 @@ class ProxmoxSDK:
                 identity_file=identity_file,
                 forward_ssh_agent=forward_ssh_agent,
                 config_file=config_file,
+                session=session,
             )
         )
         self._backend = self._install_backend(built_backend, otel_enabled=otel_enabled)

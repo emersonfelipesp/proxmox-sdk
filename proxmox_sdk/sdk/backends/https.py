@@ -142,6 +142,7 @@ class HttpsBackend(AbstractBackend):
         proxies: dict[str, str] | None = None,
         max_retries: int = 0,
         retry_backoff: float = 0.5,
+        session: aiohttp.ClientSession | None = None,
     ) -> None:
         resolved_port = port if port is not None else service_config.default_port
         self._base_url = _build_base_url(host, resolved_port, path_prefix)
@@ -159,8 +160,13 @@ class HttpsBackend(AbstractBackend):
         self._max_retries = max_retries
         self._retry_backoff = retry_backoff
 
-        self._session: aiohttp.ClientSession | None = None
+        self._session: aiohttp.ClientSession | None = session
         self._session_loop: asyncio.AbstractEventLoop | None = None
+        # A caller-supplied ("bring your own") session is owned by the caller:
+        # it is reused verbatim and never closed by this backend. Its cookie jar
+        # may re-quote the Proxmox ticket, which request()/_upload() handle by
+        # sending the auth cookie verbatim in an explicit header instead.
+        self._session_external: bool = session is not None
         # The ticket endpoint lives under the service API prefix
         # (e.g. /api2/json/access/ticket), same as every other request.
         # Build it via _url_for() so it also respects any reverse-proxy
@@ -204,6 +210,17 @@ class HttpsBackend(AbstractBackend):
             **self._auth.build_headers(method),
         }
         cookies = self._auth.build_cookies()
+        if self._session_external and cookies:
+            # A caller-supplied session's cookie jar auto-stores the auth cookie
+            # (PVEAuthCookie) from the ticket POST and re-quotes it on send;
+            # Proxmox rejects a *quoted* cookie with 401. We can't change the
+            # caller's jar quoting, so drop the auth cookie from the jar and send
+            # it verbatim via an explicit Cookie header instead. Verified against
+            # a loopback server: a jar-stored cookie otherwise overrides the
+            # header, so the purge is required, not just the header.
+            self._purge_jar_auth_cookie(session)
+            headers["Cookie"] = "; ".join(f"{name}={value}" for name, value in cookies.items())
+            cookies = {}
         proxy = self._proxy
 
         # Detect file uploads (io.IOBase values in data dict)
@@ -295,7 +312,13 @@ class HttpsBackend(AbstractBackend):
         raise last_exc
 
     async def close(self) -> None:
-        """Close the underlying aiohttp session."""
+        """Close the underlying aiohttp session.
+
+        No-op for a caller-supplied ("bring your own") session: its lifecycle is
+        owned by the caller, so the reference is kept and the socket left open.
+        """
+        if self._session_external:
+            return
         if self._session is None or self._session.closed:
             self._session = None
             self._session_loop = None
@@ -345,7 +368,27 @@ class HttpsBackend(AbstractBackend):
     # Internal helpers
     # ------------------------------------------------------------------
 
+    def _purge_jar_auth_cookie(self, session: aiohttp.ClientSession) -> None:
+        """Remove the Proxmox auth cookie from a session's cookie jar.
+
+        A caller-supplied session auto-stores the auth cookie (e.g.
+        ``PVEAuthCookie``) from the ticket POST and re-quotes it on send, which
+        Proxmox rejects with 401. Dropping it from the jar lets the verbatim
+        ``Cookie`` header set in :meth:`request` take effect instead.
+        """
+        cookie_name = self._service_config.auth_cookie_name
+        try:
+            session.cookie_jar.clear(lambda cookie: cookie.key == cookie_name)
+        except TypeError:
+            # Older aiohttp without predicate support on clear(): fall back to a
+            # full clear (the backend does not rely on any other jar cookies).
+            session.cookie_jar.clear()
+
     async def _ensure_session(self) -> aiohttp.ClientSession:
+        # A caller-supplied session is used verbatim: never rebuilt or closed.
+        if self._session_external and self._session is not None:
+            return self._session
+
         current_loop = asyncio.get_running_loop()
 
         if (

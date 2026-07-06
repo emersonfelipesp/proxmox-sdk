@@ -466,6 +466,37 @@ asyncio.run(with_dynamic_totp())
 
 ## 6. Advanced: Custom Session Management
 
+### Bring Your Own Session
+
+Pass an existing `aiohttp.ClientSession` via `session=` to reuse your own
+connection pool, timeouts, tracing, or proxy configuration across the SDK and
+the rest of your application. The SDK reuses the session verbatim and **never
+closes it** — you own its lifecycle:
+
+```python
+import aiohttp
+from proxmox_sdk import ProxmoxSDK
+
+async def with_shared_session():
+    async with aiohttp.ClientSession() as session:
+        async with ProxmoxSDK(
+            host="pve.example.com",
+            user="root@pam",
+            password="secret",
+            verify_ssl=False,
+            session=session,          # <- caller-supplied session
+        ) as proxmox:
+            nodes = await proxmox.nodes.get()
+        # `session` is still open here; close it when *you* are done.
+```
+
+This works with both token and password/ticket authentication. With ticket
+auth, the Proxmox ticket (`PVEAuthCookie`) contains characters that aiohttp
+would normally quote in a cookie — which Proxmox rejects with `401`. The SDK
+handles this transparently for external sessions by removing the auth cookie
+from the session's cookie jar and sending it verbatim in an explicit `Cookie`
+header, so your session's jar configuration does not need any special setup.
+
 ### Session Reuse Across Multiple Operations
 
 ```python
