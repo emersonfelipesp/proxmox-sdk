@@ -1107,6 +1107,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#bring-your-own-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bring Your Own Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#session-reuse-across-multiple-operations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2713,6 +2724,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#bring-your-own-session" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bring Your Own Session
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#session-reuse-across-multiple-operations" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3328,81 +3350,107 @@
 </span></code></pre></div>
 <hr />
 <h2 id="6-advanced-custom-session-management">6. Advanced: Custom Session Management<a class="headerlink" href="#6-advanced-custom-session-management" title="Permanent link">&para;</a></h2>
+<h3 id="bring-your-own-session">Bring Your Own Session<a class="headerlink" href="#bring-your-own-session" title="Permanent link">&para;</a></h3>
+<p>Pass an existing <code>aiohttp.ClientSession</code> via <code>session=</code> to reuse your own
+connection pool, timeouts, tracing, or proxy configuration across the SDK and
+the rest of your application. The SDK reuses the session verbatim and <strong>never
+closes it</strong> — you own its lifecycle:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">aiohttp</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>
+</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">with_shared_session</span><span class="p">():</span>
+</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>        <span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>            <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>            <span class="n">user</span><span class="o">=</span><span class="s2">&quot;root@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>            <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
+</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>            <span class="n">verify_ssl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>            <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>          <span class="c1"># &lt;- caller-supplied session</span>
+</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>        <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-24-13"><a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>            <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-24-14"><a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a>        <span class="c1"># `session` is still open here; close it when *you* are done.</span>
+</span></code></pre></div>
+<p>This works with both token and password/ticket authentication. With ticket
+auth, the Proxmox ticket (<code>PVEAuthCookie</code>) contains characters that aiohttp
+would normally quote in a cookie — which Proxmox rejects with <code>401</code>. The SDK
+handles this transparently for external sessions by removing the auth cookie
+from the session's cookie jar and sending it verbatim in an explicit <code>Cookie</code>
+header, so your session's jar configuration does not need any special setup.</p>
 <h3 id="session-reuse-across-multiple-operations">Session Reuse Across Multiple Operations<a class="headerlink" href="#session-reuse-across-multiple-operations" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">batch_operations</span><span class="p">():</span>
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-24-4"><a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
-</span><span id="__span-24-5"><a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>        <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
-</span><span id="__span-24-6"><a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>        <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-24-7"><a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-24-8"><a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>        <span class="c1"># All reuse same session/connection</span>
-</span><span id="__span-24-9"><a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>        <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-24-10"><a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
-</span><span id="__span-24-11"><a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a>            <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-24-12"><a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>            <span class="n">vms</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">qemu</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">batch_operations</span><span class="p">():</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
+</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>        <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
+</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>        <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>        <span class="c1"># All reuse same session/connection</span>
+</span><span id="__span-25-9"><a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>        <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-25-10"><a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+</span><span id="__span-25-11"><a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>            <span class="n">status</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-25-12"><a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a>            <span class="n">vms</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">qemu</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span></code></pre></div>
 <h3 id="sync-wrapper-for-scripts">Sync Wrapper for Scripts<a class="headerlink" href="#sync-wrapper-for-scripts" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
-</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">automation_script</span><span class="p">():</span>
-</span><span id="__span-25-4"><a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>    <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span>
-</span><span id="__span-25-5"><a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-25-6"><a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
-</span><span id="__span-25-7"><a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>        <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
-</span><span id="__span-25-8"><a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>        <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-25-9"><a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-25-10"><a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a>        <span class="c1"># Blocking calls (no async/await needed)</span>
-</span><span id="__span-25-11"><a id="__codelineno-25-11" name="__codelineno-25-11" href="#__codelineno-25-11"></a>        <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-25-12"><a id="__codelineno-25-12" name="__codelineno-25-12" href="#__codelineno-25-12"></a>        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
-</span><span id="__span-25-13"><a id="__codelineno-25-13" name="__codelineno-25-13" href="#__codelineno-25-13"></a>            <span class="n">status</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-25-14"><a id="__codelineno-25-14" name="__codelineno-25-14" href="#__codelineno-25-14"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="synchronous-context-manager-with-error-handling">Synchronous Context Manager with Error Handling<a class="headerlink" href="#synchronous-context-manager-with-error-handling" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span><span class="p">,</span> <span class="n">AuthenticationError</span><span class="p">,</span> <span class="n">ResourceException</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
 </span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>
-</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="k">def</span><span class="w"> </span><span class="nf">automation_script</span><span class="p">():</span>
 </span><span id="__span-26-4"><a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>    <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span>
 </span><span id="__span-26-5"><a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
 </span><span id="__span-26-6"><a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
 </span><span id="__span-26-7"><a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>        <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
 </span><span id="__span-26-8"><a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>        <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
 </span><span id="__span-26-9"><a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-26-10"><a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>        <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-26-11"><a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a><span class="k">except</span> <span class="n">AuthenticationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-26-12"><a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auth failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-26-13"><a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a><span class="k">except</span> <span class="n">ResourceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-26-14"><a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API error: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">status_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-26-10"><a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>        <span class="c1"># Blocking calls (no async/await needed)</span>
+</span><span id="__span-26-11"><a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>        <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-26-12"><a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+</span><span id="__span-26-13"><a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a>            <span class="n">status</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-26-14"><a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="synchronous-context-manager-with-error-handling">Synchronous Context Manager with Error Handling<a class="headerlink" href="#synchronous-context-manager-with-error-handling" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span><span class="p">,</span> <span class="n">AuthenticationError</span><span class="p">,</span> <span class="n">ResourceException</span>
+</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>
+</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>    <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span>
+</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
+</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>        <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
+</span><span id="__span-27-8"><a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>        <span class="n">token_value</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-27-9"><a id="__codelineno-27-9" name="__codelineno-27-9" href="#__codelineno-27-9"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-27-10"><a id="__codelineno-27-10" name="__codelineno-27-10" href="#__codelineno-27-10"></a>        <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-27-11"><a id="__codelineno-27-11" name="__codelineno-27-11" href="#__codelineno-27-11"></a><span class="k">except</span> <span class="n">AuthenticationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-27-12"><a id="__codelineno-27-12" name="__codelineno-27-12" href="#__codelineno-27-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Auth failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-27-13"><a id="__codelineno-27-13" name="__codelineno-27-13" href="#__codelineno-27-13"></a><span class="k">except</span> <span class="n">ResourceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-27-14"><a id="__codelineno-27-14" name="__codelineno-27-14" href="#__codelineno-27-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API error: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">status_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <hr />
 <h2 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Permanent link">&para;</a></h2>
 <h3 id="1-do-use-api-tokens-for-automation">1. ✅ DO: Use API Tokens for Automation<a class="headerlink" href="#1-do-use-api-tokens-for-automation" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-27-1"><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># ✅ GOOD</span>
-</span><span id="__span-27-2"><a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-27-3"><a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-27-4"><a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
-</span><span id="__span-27-5"><a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>    <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
-</span><span id="__span-27-6"><a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>    <span class="n">token_value</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_TOKEN&quot;</span><span class="p">),</span>
-</span><span id="__span-27-7"><a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="2-dont-hardcode-credentials">2. ❌ DON'T: Hardcode Credentials<a class="headerlink" href="#2-dont-hardcode-credentials" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># ❌ BAD</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-28-1"><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="c1"># ✅ GOOD</span>
 </span><span id="__span-28-2"><a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
 </span><span id="__span-28-3"><a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
-</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;my-password&quot;</span><span class="p">,</span>  <span class="c1"># Hardcoded!</span>
-</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="p">)</span>
+</span><span id="__span-28-4"><a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">,</span>
+</span><span id="__span-28-5"><a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>    <span class="n">token_name</span><span class="o">=</span><span class="s2">&quot;my-token&quot;</span><span class="p">,</span>
+</span><span id="__span-28-6"><a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>    <span class="n">token_value</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_TOKEN&quot;</span><span class="p">),</span>
+</span><span id="__span-28-7"><a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="2-dont-hardcode-credentials">2. ❌ DON'T: Hardcode Credentials<a class="headerlink" href="#2-dont-hardcode-credentials" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># ❌ BAD</span>
+</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;my-password&quot;</span><span class="p">,</span>  <span class="c1"># Hardcoded!</span>
+</span><span id="__span-29-6"><a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="3-do-use-environment-variables-or-secrets">3. ✅ DO: Use Environment Variables or Secrets<a class="headerlink" href="#3-do-use-environment-variables-or-secrets" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-29-1"><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="c1"># ✅ GOOD</span>
-</span><span id="__span-29-2"><a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-</span><span id="__span-29-3"><a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a>
-</span><span id="__span-29-4"><a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-29-5"><a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a>    <span class="n">host</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_HOST&quot;</span><span class="p">),</span>
-</span><span id="__span-29-6"><a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a>    <span class="n">user</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_USER&quot;</span><span class="p">),</span>
-</span><span id="__span-29-7"><a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a>    <span class="n">token_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_TOKEN_NAME&quot;</span><span class="p">),</span>
-</span><span id="__span-29-8"><a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a>    <span class="n">token_value</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_TOKEN_VALUE&quot;</span><span class="p">),</span>
-</span><span id="__span-29-9"><a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="c1"># ✅ GOOD</span>
+</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
+</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>    <span class="n">host</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_HOST&quot;</span><span class="p">),</span>
+</span><span id="__span-30-6"><a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>    <span class="n">user</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_USER&quot;</span><span class="p">),</span>
+</span><span id="__span-30-7"><a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>    <span class="n">token_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_TOKEN_NAME&quot;</span><span class="p">),</span>
+</span><span id="__span-30-8"><a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>    <span class="n">token_value</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PROXMOX_TOKEN_VALUE&quot;</span><span class="p">),</span>
+</span><span id="__span-30-9"><a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="4-do-restrict-api-token-permissions">4. ✅ DO: Restrict API Token Permissions<a class="headerlink" href="#4-do-restrict-api-token-permissions" title="Permanent link">&para;</a></h3>
 <p>In Proxmox UI, when creating an API token, assign <strong>minimal required permissions</strong>:</p>
@@ -3413,40 +3461,40 @@
 </ul>
 <h3 id="5-do-rotate-tokens-regularly">5. ✅ DO: Rotate Tokens Regularly<a class="headerlink" href="#5-do-rotate-tokens-regularly" title="Permanent link">&para;</a></h3>
 <p>Set up quarterly rotation in your automation:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-30-1"><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-</span><span id="__span-30-2"><a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
-</span><span id="__span-30-3"><a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>
-</span><span id="__span-30-4"><a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">rotate_token</span><span class="p">():</span>
-</span><span id="__span-30-5"><a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-30-6"><a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-30-7"><a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
-</span><span id="__span-30-8"><a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>        <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ADMIN_PASSWORD&quot;</span><span class="p">),</span>
-</span><span id="__span-30-9"><a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-30-10"><a id="__codelineno-30-10" name="__codelineno-30-10" href="#__codelineno-30-10"></a>        <span class="c1"># Delete old token</span>
-</span><span id="__span-30-11"><a id="__codelineno-30-11" name="__codelineno-30-11" href="#__codelineno-30-11"></a>        <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tokens</span><span class="p">(</span><span class="s2">&quot;old-token&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-</span><span id="__span-30-12"><a id="__codelineno-30-12" name="__codelineno-30-12" href="#__codelineno-30-12"></a>
-</span><span id="__span-30-13"><a id="__codelineno-30-13" name="__codelineno-30-13" href="#__codelineno-30-13"></a>        <span class="c1"># Create new token</span>
-</span><span id="__span-30-14"><a id="__codelineno-30-14" name="__codelineno-30-14" href="#__codelineno-30-14"></a>        <span class="n">new_token</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-</span><span id="__span-30-15"><a id="__codelineno-30-15" name="__codelineno-30-15" href="#__codelineno-30-15"></a>            <span class="n">tokenid</span><span class="o">=</span><span class="s2">&quot;my-token-v2&quot;</span><span class="p">,</span>
-</span><span id="__span-30-16"><a id="__codelineno-30-16" name="__codelineno-30-16" href="#__codelineno-30-16"></a>            <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Rotated quarterly&quot;</span><span class="p">,</span>
-</span><span id="__span-30-17"><a id="__codelineno-30-17" name="__codelineno-30-17" href="#__codelineno-30-17"></a>        <span class="p">)</span>
-</span><span id="__span-30-18"><a id="__codelineno-30-18" name="__codelineno-30-18" href="#__codelineno-30-18"></a>
-</span><span id="__span-30-19"><a id="__codelineno-30-19" name="__codelineno-30-19" href="#__codelineno-30-19"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;New token secret: </span><span class="si">{</span><span class="n">new_token</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-30-20"><a id="__codelineno-30-20" name="__codelineno-30-20" href="#__codelineno-30-20"></a>        <span class="c1"># Save to secrets manager</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
+</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">rotate_token</span><span class="p">():</span>
+</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>        <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>        <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-31-8"><a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>        <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ADMIN_PASSWORD&quot;</span><span class="p">),</span>
+</span><span id="__span-31-9"><a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>    <span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-31-10"><a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a>        <span class="c1"># Delete old token</span>
+</span><span id="__span-31-11"><a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a>        <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tokens</span><span class="p">(</span><span class="s2">&quot;old-token&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</span><span id="__span-31-12"><a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a>
+</span><span id="__span-31-13"><a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a>        <span class="c1"># Create new token</span>
+</span><span id="__span-31-14"><a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a>        <span class="n">new_token</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">access</span><span class="o">.</span><span class="n">users</span><span class="p">(</span><span class="s2">&quot;automation@pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+</span><span id="__span-31-15"><a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a>            <span class="n">tokenid</span><span class="o">=</span><span class="s2">&quot;my-token-v2&quot;</span><span class="p">,</span>
+</span><span id="__span-31-16"><a id="__codelineno-31-16" name="__codelineno-31-16" href="#__codelineno-31-16"></a>            <span class="n">comment</span><span class="o">=</span><span class="s2">&quot;Rotated quarterly&quot;</span><span class="p">,</span>
+</span><span id="__span-31-17"><a id="__codelineno-31-17" name="__codelineno-31-17" href="#__codelineno-31-17"></a>        <span class="p">)</span>
+</span><span id="__span-31-18"><a id="__codelineno-31-18" name="__codelineno-31-18" href="#__codelineno-31-18"></a>
+</span><span id="__span-31-19"><a id="__codelineno-31-19" name="__codelineno-31-19" href="#__codelineno-31-19"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;New token secret: </span><span class="si">{</span><span class="n">new_token</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-31-20"><a id="__codelineno-31-20" name="__codelineno-31-20" href="#__codelineno-31-20"></a>        <span class="c1"># Save to secrets manager</span>
 </span></code></pre></div>
 <h3 id="6-dont-use-sudo-with-passwords">6. ❌ DON'T: Use Sudo with Passwords<a class="headerlink" href="#6-dont-use-sudo-with-passwords" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-31-1"><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="c1"># ❌ BAD (password + sudo)</span>
-</span><span id="__span-31-2"><a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-31-3"><a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-31-4"><a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation&quot;</span><span class="p">,</span>
-</span><span id="__span-31-5"><a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-</span><span id="__span-31-6"><a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;ssh_paramiko&quot;</span><span class="p">,</span>
-</span><span id="__span-31-7"><a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>    <span class="n">sudo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-31-8"><a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># ❌ BAD (password + sudo)</span>
+</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-32-3"><a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-32-4"><a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;automation&quot;</span><span class="p">,</span>
+</span><span id="__span-32-5"><a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+</span><span id="__span-32-6"><a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;ssh_paramiko&quot;</span><span class="p">,</span>
+</span><span id="__span-32-7"><a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>    <span class="n">sudo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-32-8"><a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>Instead, use SSH keys with sudoers configuration:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-32-1"><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># /etc/sudoers</span>
-</span><span id="__span-32-2"><a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>automation<span class="w"> </span><span class="nv">ALL</span><span class="o">=(</span>ALL<span class="o">)</span><span class="w"> </span>NOPASSWD:<span class="w"> </span>/usr/bin/pvesh
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="c1"># /etc/sudoers</span>
+</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>automation<span class="w"> </span><span class="nv">ALL</span><span class="o">=(</span>ALL<span class="o">)</span><span class="w"> </span>NOPASSWD:<span class="w"> </span>/usr/bin/pvesh
 </span></code></pre></div>
 <hr />
 <h2 id="troubleshooting-authentication">Troubleshooting Authentication<a class="headerlink" href="#troubleshooting-authentication" title="Permanent link">&para;</a></h2>
@@ -3456,15 +3504,15 @@
 - User doesn't exist
 - Wrong realm (e.g., <code>admin</code> vs <code>admin@pam</code>)</p>
 <p><strong>Solution:</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-33-1"><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="c1"># Check exact username format in Proxmox UI</span>
-</span><span id="__span-33-2"><a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="c1"># Format is usually: username@realm</span>
-</span><span id="__span-33-3"><a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="c1"># Examples: admin@pam, automation@pve, user@ldap</span>
-</span><span id="__span-33-4"><a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>
-</span><span id="__span-33-5"><a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-33-6"><a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-33-7"><a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>      <span class="c1"># Note the @pam realm</span>
-</span><span id="__span-33-8"><a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
-</span><span id="__span-33-9"><a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># Check exact username format in Proxmox UI</span>
+</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="c1"># Format is usually: username@realm</span>
+</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="c1"># Examples: admin@pam, automation@pve, user@ldap</span>
+</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>
+</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>      <span class="c1"># Note the @pam realm</span>
+</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;secret&quot;</span><span class="p">,</span>
+</span><span id="__span-34-9"><a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a><span class="p">)</span>
 </span></code></pre></div></p>
 <h3 id="issue-token-authentication-failed">Issue: "Token authentication failed"<a class="headerlink" href="#issue-token-authentication-failed" title="Permanent link">&para;</a></h3>
 <p><strong>Causes:</strong>
@@ -3472,25 +3520,25 @@
 - Token is disabled
 - Token is expired</p>
 <p><strong>Solution:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-34-1"><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># Verify token exists and is enabled in Proxmox UI</span>
-</span><span id="__span-34-2"><a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="c1"># Check token format: user@realm!tokenid=secret</span>
-</span><span id="__span-34-3"><a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a><span class="c1"># Example:</span>
-</span><span id="__span-34-4"><a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a><span class="c1">#   User: automation@pve</span>
-</span><span id="__span-34-5"><a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="c1">#   Token ID: my-token</span>
-</span><span id="__span-34-6"><a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a><span class="c1">#   Secret: 12345678-abcd-...</span>
-</span><span id="__span-34-7"><a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>
-</span><span id="__span-34-8"><a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a><span class="c1"># Try regenerating token in UI</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="c1"># Verify token exists and is enabled in Proxmox UI</span>
+</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="c1"># Check token format: user@realm!tokenid=secret</span>
+</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="c1"># Example:</span>
+</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a><span class="c1">#   User: automation@pve</span>
+</span><span id="__span-35-5"><a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a><span class="c1">#   Token ID: my-token</span>
+</span><span id="__span-35-6"><a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a><span class="c1">#   Secret: 12345678-abcd-...</span>
+</span><span id="__span-35-7"><a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>
+</span><span id="__span-35-8"><a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a><span class="c1"># Try regenerating token in UI</span>
 </span></code></pre></div></p>
 <h3 id="issue-2fa-authentication-required">Issue: "2FA authentication required"<a class="headerlink" href="#issue-2fa-authentication-required" title="Permanent link">&para;</a></h3>
 <p><strong>Message:</strong> <code>401 Unauthorized - OTP needed</code></p>
 <p><strong>Solution:</strong>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-35-1"><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="c1"># Add OTP parameter</span>
-</span><span id="__span-35-2"><a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-35-3"><a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-35-4"><a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
-</span><span id="__span-35-5"><a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-</span><span id="__span-35-6"><a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>    <span class="n">otp</span><span class="o">=</span><span class="s2">&quot;123456&quot;</span><span class="p">,</span>  <span class="c1"># Add 6-digit code from authenticator</span>
-</span><span id="__span-35-7"><a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># Add OTP parameter</span>
+</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;admin@pam&quot;</span><span class="p">,</span>
+</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>    <span class="n">otp</span><span class="o">=</span><span class="s2">&quot;123456&quot;</span><span class="p">,</span>  <span class="c1"># Add 6-digit code from authenticator</span>
+</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="p">)</span>
 </span></code></pre></div></p>
 <h3 id="issue-ssh-authentication-failed">Issue: "SSH authentication failed"<a class="headerlink" href="#issue-ssh-authentication-failed" title="Permanent link">&para;</a></h3>
 <p><strong>Causes:</strong>
@@ -3498,23 +3546,23 @@
 - Wrong key file path
 - Key is passphrase-protected</p>
 <p><strong>Solution:</strong>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-36-1"><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="c1"># Ensure key is in authorized_keys</span>
-</span><span id="__span-36-2"><a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>ssh-copy-id<span class="w"> </span>root@pve.example.com
-</span><span id="__span-36-3"><a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
-</span><span id="__span-36-4"><a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="c1"># Test SSH works</span>
-</span><span id="__span-36-5"><a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>ssh<span class="w"> </span>root@pve.example.com
-</span><span id="__span-36-6"><a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>
-</span><span id="__span-36-7"><a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="c1"># For passphrase-protected keys, use SSH agent</span>
-</span><span id="__span-36-8"><a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="nb">eval</span><span class="w"> </span><span class="k">$(</span>ssh-agent<span class="k">)</span>
-</span><span id="__span-36-9"><a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>ssh-add<span class="w"> </span>~/.ssh/id_rsa
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="c1"># Ensure key is in authorized_keys</span>
+</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>ssh-copy-id<span class="w"> </span>root@pve.example.com
+</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>
+</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a><span class="c1"># Test SSH works</span>
+</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>ssh<span class="w"> </span>root@pve.example.com
+</span><span id="__span-37-6"><a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a>
+</span><span id="__span-37-7"><a id="__codelineno-37-7" name="__codelineno-37-7" href="#__codelineno-37-7"></a><span class="c1"># For passphrase-protected keys, use SSH agent</span>
+</span><span id="__span-37-8"><a id="__codelineno-37-8" name="__codelineno-37-8" href="#__codelineno-37-8"></a><span class="nb">eval</span><span class="w"> </span><span class="k">$(</span>ssh-agent<span class="k">)</span>
+</span><span id="__span-37-9"><a id="__codelineno-37-9" name="__codelineno-37-9" href="#__codelineno-37-9"></a>ssh-add<span class="w"> </span>~/.ssh/id_rsa
 </span></code></pre></div></p>
 <p>Then in code:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-37-1"><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
-</span><span id="__span-37-2"><a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
-</span><span id="__span-37-3"><a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;root&quot;</span><span class="p">,</span>
-</span><span id="__span-37-4"><a id="__codelineno-37-4" name="__codelineno-37-4" href="#__codelineno-37-4"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;ssh_paramiko&quot;</span><span class="p">,</span>
-</span><span id="__span-37-5"><a id="__codelineno-37-5" name="__codelineno-37-5" href="#__codelineno-37-5"></a>    <span class="n">forward_ssh_agent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-37-6"><a id="__codelineno-37-6" name="__codelineno-37-6" href="#__codelineno-37-6"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-38-1"><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>
+</span><span id="__span-38-2"><a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a>    <span class="n">host</span><span class="o">=</span><span class="s2">&quot;pve.example.com&quot;</span><span class="p">,</span>
+</span><span id="__span-38-3"><a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a>    <span class="n">user</span><span class="o">=</span><span class="s2">&quot;root&quot;</span><span class="p">,</span>
+</span><span id="__span-38-4"><a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;ssh_paramiko&quot;</span><span class="p">,</span>
+</span><span id="__span-38-5"><a id="__codelineno-38-5" name="__codelineno-38-5" href="#__codelineno-38-5"></a>    <span class="n">forward_ssh_agent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-38-6"><a id="__codelineno-38-6" name="__codelineno-38-6" href="#__codelineno-38-6"></a><span class="p">)</span>
 </span></code></pre></div></p>
 <hr />
 <h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
