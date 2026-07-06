@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 import aiohttp
 
@@ -13,6 +15,46 @@ if TYPE_CHECKING:
     from proxmox_sdk.sdk.resource import ProxmoxResource
 
 logger = logging.getLogger(__name__)
+
+_BLOCKED_PROBE_HOSTNAMES = {"localhost", "localhost.localdomain"}
+
+
+def _is_safe_probe_url(url: str) -> bool:
+    """Return ``True`` if ``url`` is safe for SDK-host checksum probing.
+
+    Auto-discovery issues outbound GETs *from the SDK host* to sibling URLs
+    derived from ``url``. To avoid an SSRF vector against cloud metadata
+    endpoints and internal services, reject non-HTTP(S) schemes and any URL
+    whose host is a loopback / private / link-local / reserved IP literal (incl.
+    IPv4-mapped IPv6). Public hostnames are allowed — DNS-rebinding is out of
+    scope here, matching the codegen SSRF guard which also only inspects IP
+    literals.
+    """
+    try:
+        parsed = urlparse(url)
+    except ValueError:
+        return False
+    if parsed.scheme not in ("http", "https"):
+        return False
+    host = parsed.hostname
+    if not host or host.lower() in _BLOCKED_PROBE_HOSTNAMES:
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return True  # a hostname, not an IP literal — allowed
+    mapped = getattr(ip, "ipv4_mapped", None)
+    if mapped is not None:
+        ip = mapped
+    return not (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    )
+
 
 # Checksum algorithms ordered by preference (strongest first)
 _CHECKSUM_ALGORITHMS = ["sha512", "sha256", "sha224", "sha384", "md5", "sha1"]
@@ -190,6 +232,15 @@ class Files:
         Returns:
             ``(algorithm, hex_digest)`` tuple, or ``None`` if not found.
         """
+        if not _is_safe_probe_url(url):
+            logger.warning(
+                "Skipping checksum auto-discovery for %s: URL scheme/host is not "
+                "eligible for SDK-side probing (SSRF guard). Pass an explicit "
+                "checksum to verify this download.",
+                url,
+            )
+            return None
+
         filename = url.rstrip("/").rsplit("/", 1)[-1]
         base_url = url.rsplit("/", 1)[0]
 

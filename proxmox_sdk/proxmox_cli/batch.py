@@ -83,7 +83,8 @@ def batch(
         formatter = OutputFormatter(format=output_fmt, colors=True)
 
         config_mgr = ConfigManager()
-        config = config_mgr.get_profile("default")
+        config_mgr.load_config()
+        config = config_mgr.get_profile()
         if backend:
             config.backend = backend
 

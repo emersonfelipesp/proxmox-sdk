@@ -157,6 +157,13 @@ class HttpsBackend(AbstractBackend):
         self._timeout = aiohttp.ClientTimeout(total=timeout, connect=connect_timeout)
         _proxies = proxies or {}
         self._proxy = _proxies.get("https") or _proxies.get("http")
+        # Guard against negative retry settings: a negative max_retries makes the
+        # request loop run zero attempts, leaving last_exc unset and tripping the
+        # final assertion instead of raising a meaningful error.
+        if max_retries < 0:
+            raise ValueError(f"max_retries must be >= 0, got {max_retries}")
+        if retry_backoff < 0:
+            raise ValueError(f"retry_backoff must be >= 0, got {retry_backoff}")
         self._max_retries = max_retries
         self._retry_backoff = retry_backoff
 
@@ -332,13 +339,19 @@ class HttpsBackend(AbstractBackend):
                 "close() called from different loop than session creation; "
                 "scheduling close on original loop"
             )
+            # Capture the session in a local: the instance attributes are cleared
+            # below (before the scheduled callback runs on the owner loop), so the
+            # closure must not read self._session or it would hit None and leak
+            # the socket.
+            session = self._session
+            owner_loop = self._session_loop
             try:
-                if self._session_loop.is_running():
+                if owner_loop.is_running():
 
                     def _schedule_close() -> None:
-                        asyncio.create_task(self._session.close())
+                        asyncio.create_task(session.close())
 
-                    self._session_loop.call_soon_threadsafe(_schedule_close)
+                    owner_loop.call_soon_threadsafe(_schedule_close)
             except Exception:
                 logger.debug("Failed to schedule session close on original loop", exc_info=True)
 
