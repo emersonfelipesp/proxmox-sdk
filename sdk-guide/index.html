@@ -2890,11 +2890,16 @@ navigation:</p>
 </span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>    <span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>                     <span class="c1"># Retry GET/HEAD on 502/503/504 (default: 0)</span>
 </span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="n">retry_backoff</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>                 <span class="c1"># Exponential backoff base in seconds (default: 0.5)</span>
 </span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>    <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;https&quot;</span><span class="p">,</span>                   <span class="c1"># Backend type</span>
-</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="p">)</span>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>    <span class="n">session</span><span class="o">=</span><span class="n">my_aiohttp_session</span><span class="p">,</span>        <span class="c1"># Optional: reuse a caller-supplied aiohttp.ClientSession</span>
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="p">)</span>
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Retry safety</p>
-<p>Only <code>GET</code> and <code>HEAD</code> requests are retried. <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, and <code>DELETE</code> are never retried automatically to prevent accidental double-mutation.</p>
+<p>Only <code>GET</code> and <code>HEAD</code> requests are retried. <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, and <code>DELETE</code> are never retried automatically to prevent accidental double-mutation. <code>max_retries</code> and <code>retry_backoff</code> must be non-negative.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Bring your own session</p>
+<p>Pass <code>session=</code> to reuse an existing <code>aiohttp.ClientSession</code> (your own connection pool, timeouts, tracing, or proxy). The SDK uses it verbatim and never closes it — you own its lifecycle. See <a href="../sdk-authentication/#bring-your-own-session">Authentication → Bring Your Own Session</a> for details, including how ticket-cookie quoting is handled for external sessions.</p>
 </div>
 <h3 id="ssh-backend-paramiko">SSH Backend (Paramiko)<a class="headerlink" href="#ssh-backend-paramiko" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">ProxmoxSDK</span><span class="p">(</span>

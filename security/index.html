@@ -1665,6 +1665,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#download-checksum-discovery-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Download checksum-discovery guard
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2195,6 +2206,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#download-checksum-discovery-guard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Download checksum-discovery guard
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2516,6 +2538,24 @@
 <li><code>..</code>, <code>/</code>, and <code>\</code> are rejected (prevents path traversal)</li>
 <li>Empty strings are rejected</li>
 </ul>
+<h3 id="download-checksum-discovery-guard">Download checksum-discovery guard<a class="headerlink" href="#download-checksum-discovery-guard" title="Permanent link">&para;</a></h3>
+<p>When you call <code>Files.download_file_to_storage(url)</code> without an explicit
+<code>checksum=</code>, the SDK tries to auto-discover one by requesting sibling URLs
+(<code>{url}.sha256</code>, <code>{base}/SHA256SUMS</code>, …) <strong>from the SDK host</strong>. Because that
+outbound request is driven by a caller-supplied URL, <code>_is_safe_probe_url()</code> in
+<code>sdk/tools/files.py</code> gates it:</p>
+<ul>
+<li>Only <code>http</code> and <code>https</code> schemes are probed.</li>
+<li>Hosts that are loopback, private, link-local, or reserved IP literals — incl.
+  IPv4-mapped IPv6 (<code>::ffff:…</code>) and <code>localhost</code> — are refused, so a download URL
+  pointing at a cloud-metadata endpoint (<code>169.254.169.254</code>) or an internal
+  service never triggers an SDK-side probe.</li>
+<li>Public hostnames pass; DNS-rebinding is out of scope (matching the codegen
+  guard, which also inspects only IP literals).</li>
+</ul>
+<p>If the URL is refused the SDK logs a warning and skips discovery (the download
+itself still proceeds — Proxmox performs it). Pass an explicit <code>checksum=</code> to
+verify the artifact and bypass discovery entirely.</p>
 <hr />
 <h2 id="codegen-endpoint-authentication">Codegen Endpoint Authentication<a class="headerlink" href="#codegen-endpoint-authentication" title="Permanent link">&para;</a></h2>
 <p><code>POST /codegen/generate</code> and related endpoints require a Bearer token set via the <code>CODEGEN_API_KEY</code> environment variable.</p>
