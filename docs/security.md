@@ -45,6 +45,26 @@ Version tags used in codegen URLs and file paths are validated by `validate_vers
 - `..`, `/`, and `\` are rejected (prevents path traversal)
 - Empty strings are rejected
 
+### Download checksum-discovery guard
+
+When you call `Files.download_file_to_storage(url)` without an explicit
+`checksum=`, the SDK tries to auto-discover one by requesting sibling URLs
+(`{url}.sha256`, `{base}/SHA256SUMS`, …) **from the SDK host**. Because that
+outbound request is driven by a caller-supplied URL, `_is_safe_probe_url()` in
+`sdk/tools/files.py` gates it:
+
+- Only `http` and `https` schemes are probed.
+- Hosts that are loopback, private, link-local, or reserved IP literals — incl.
+  IPv4-mapped IPv6 (`::ffff:…`) and `localhost` — are refused, so a download URL
+  pointing at a cloud-metadata endpoint (`169.254.169.254`) or an internal
+  service never triggers an SDK-side probe.
+- Public hostnames pass; DNS-rebinding is out of scope (matching the codegen
+  guard, which also inspects only IP literals).
+
+If the URL is refused the SDK logs a warning and skips discovery (the download
+itself still proceeds — Proxmox performs it). Pass an explicit `checksum=` to
+verify the artifact and bypass discovery entirely.
+
 ---
 
 ## Codegen Endpoint Authentication

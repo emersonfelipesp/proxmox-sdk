@@ -237,11 +237,15 @@ ProxmoxSDK(
     max_retries=3,                     # Retry GET/HEAD on 502/503/504 (default: 0)
     retry_backoff=0.5,                 # Exponential backoff base in seconds (default: 0.5)
     backend="https",                   # Backend type
+    session=my_aiohttp_session,        # Optional: reuse a caller-supplied aiohttp.ClientSession
 )
 ```
 
 !!! note "Retry safety"
-    Only `GET` and `HEAD` requests are retried. `POST`, `PUT`, `PATCH`, and `DELETE` are never retried automatically to prevent accidental double-mutation.
+    Only `GET` and `HEAD` requests are retried. `POST`, `PUT`, `PATCH`, and `DELETE` are never retried automatically to prevent accidental double-mutation. `max_retries` and `retry_backoff` must be non-negative.
+
+!!! tip "Bring your own session"
+    Pass `session=` to reuse an existing `aiohttp.ClientSession` (your own connection pool, timeouts, tracing, or proxy). The SDK uses it verbatim and never closes it — you own its lifecycle. See [Authentication → Bring Your Own Session](sdk-authentication.md#bring-your-own-session) for details, including how ticket-cookie quoting is handled for external sessions.
 
 ### SSH Backend (Paramiko)
 
