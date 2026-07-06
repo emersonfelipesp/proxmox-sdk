@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, ClassVar, Literal
+from typing import TYPE_CHECKING, Callable, ClassVar, Literal
 
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.services import ServiceConfig
+
+if TYPE_CHECKING:
+    from aiohttp import ClientSession
 
 BackendName = Literal["mock", "local", "https", "ssh_paramiko", "openssh"]
 
@@ -42,6 +45,9 @@ class BackendBuildSpec:
     identity_file: str | None = None
     forward_ssh_agent: bool = False
     config_file: str | None = None
+    # Optional caller-supplied aiohttp session (HTTPS backend only). When set,
+    # the backend reuses it verbatim and never closes it.
+    session: "ClientSession | None" = None
 
 
 class BackendFactory:
@@ -112,6 +118,7 @@ class BackendFactory:
             proxies=config.proxies,
             max_retries=config.max_retries,
             retry_backoff=config.retry_backoff,
+            session=config.session,
         )
 
     @staticmethod

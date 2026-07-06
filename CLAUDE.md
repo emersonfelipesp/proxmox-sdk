@@ -203,6 +203,7 @@ See [docs/security.md](docs/security.md) for the full reference. Key patterns to
 - **Config symlink protection** — `save_config()` refuses to write if the config file or its parent directory is a symlink.
 - **SSL context** — `TicketAuth` receives the same `ssl` context as the main HTTPS backend, so `verify_ssl=False` applies consistently to both auth and API requests.
 - **Proxy threading** — `TicketAuth._request_ticket()` forwards `proxy=` to `session.post()` so authentication requests go through the same proxy as all other API calls. Omitting this would cause auth to bypass the proxy in proxy-only networks.
+- **Bring-your-own session** — `ProxmoxSDK(session=...)` / `HttpsBackend(session=...)` reuse a caller-supplied `aiohttp.ClientSession` verbatim and never close it (the caller owns its lifecycle). For ticket auth the backend removes the auth cookie from the external jar and sends `PVEAuthCookie` verbatim in an explicit `Cookie` header — an external jar re-quotes the cookie and overrides the header, and Proxmox rejects a quoted cookie with `401`. Internal (SDK-created) sessions are unchanged: they use a `quote_cookie=False` jar and are closed on `close()`.
 - **OpenTelemetry span hygiene** — Optional tracing never records request params, request bodies, auth headers, cookies, passwords, tickets, CSRF tokens, or API token values as span data.
 
 ## Performance Patterns
