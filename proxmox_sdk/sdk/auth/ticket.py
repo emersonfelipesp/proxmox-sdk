@@ -208,7 +208,17 @@ class TicketAuth:
 
         try:
             async with session.post(ticket_url, **post_kwargs) as response:
-                raw = await response.json(content_type=None)
+                try:
+                    raw = await response.json(content_type=None)
+                except (ValueError, aiohttp.ContentTypeError) as exc:
+                    # A reverse proxy or gateway can return a non-JSON body (e.g.
+                    # an HTML 502 page). Surface it as a typed AuthenticationError
+                    # instead of leaking a raw JSONDecodeError to the caller.
+                    body = (await response.text())[:200]
+                    raise AuthenticationError(
+                        f"Proxmox authentication returned a non-JSON response "
+                        f"(HTTP {response.status}): {body!r}"
+                    ) from exc
 
                 if response.status != 200:
                     detail = raw.get("errors") or raw.get("data") or str(raw)

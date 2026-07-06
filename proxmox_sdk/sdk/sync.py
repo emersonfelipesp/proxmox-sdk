@@ -136,7 +136,9 @@ class SyncProxmoxSDK:
     # ------------------------------------------------------------------
 
     def close(self) -> None:
-        """Close the backend and the event loop."""
+        """Close the backend and the event loop. Idempotent: safe to call twice."""
+        if self._loop.is_closed():
+            return
         self._loop.run_until_complete(self._sdk.close())
         self._loop.close()
 

@@ -212,6 +212,7 @@ def config_list(
         proxmox config-list
     """
     mgr = ConfigManager()
+    mgr.load_config()
     profiles = mgr.list_profiles()
     formatter = _build_formatter(
         output,
@@ -261,6 +262,7 @@ def config_show(
         proxmox config-show staging
     """
     mgr = ConfigManager()
+    mgr.load_config()
     formatter = _build_formatter(
         output,
         json_output=json_output,
@@ -318,6 +320,7 @@ def config_add(
         proxmox config-add prod --backend https --host proxmox.example.com --token-name api-token
     """
     mgr = ConfigManager()
+    mgr.load_config()
 
     config = BackendConfig(
         name=name,
@@ -381,6 +384,7 @@ def config_remove(
             return
 
     mgr = ConfigManager()
+    mgr.load_config()
     mgr.remove_profile(name)
     mgr.save_config()
 
@@ -416,6 +420,7 @@ def config_set_default(
         proxmox config-set-default staging
     """
     mgr = ConfigManager()
+    mgr.load_config()
     mgr.set_default_profile(name)
     mgr.save_config()
 

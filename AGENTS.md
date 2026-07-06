@@ -204,6 +204,8 @@ pytest
 See [docs/security.md](docs/security.md) for the full reference. Key patterns to follow:
 
 - **SSRF protection** — All user-supplied URLs must be passed through `validate_source_url()` in `proxmox_codegen/security.py` before any outbound request. Non-Proxmox domains are blocked by default (`allow_any_domain=False`). Private IPv4, private IPv6, IPv4-mapped IPv6 (`::ffff:`), and 6to4 addresses are all blocked.
+- **Download checksum-discovery SSRF guard** — `Files._discover_checksum()` (`sdk/tools/files.py`) probes sibling URLs *from the SDK host* to auto-find a checksum. `_is_safe_probe_url()` gates this: only `http`/`https` schemes, and hosts that are loopback/private/link-local/reserved IP literals (incl. IPv4-mapped IPv6 and `localhost`) are refused, so a download URL pointing at cloud-metadata or internal services never triggers an SDK-side probe. Public hostnames pass; an explicit `checksum=` bypasses discovery entirely.
+- **Typed auth failures** — `TicketAuth._request_ticket()` wraps non-JSON `/access/ticket` responses (e.g. an HTML 502 from a reverse proxy) as `AuthenticationError` instead of leaking a raw `JSONDecodeError`.
 - **Codegen auth** — `POST /codegen/generate` and related endpoints require a `Bearer` token via `CODEGEN_API_KEY`. Rate-limited to 1 req/hour.
 - **CORS** — Disabled by default. Enable via `CORS_ORIGINS`. Allowed headers are restricted to `Content-Type`, `Authorization`, `X-Requested-With`. Wildcards are never used.
 - **Health endpoint** — Returns `404` for non-localhost callers. `testclient` is only added to the allowlist when `TESTING=1`.
