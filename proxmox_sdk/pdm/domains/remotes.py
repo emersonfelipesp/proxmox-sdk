@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
 from proxmox_sdk._response_utils import normalize_list, unwrap_data
@@ -9,6 +10,28 @@ from proxmox_sdk.pdm import models as m
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK
+
+RemoteNodeInput = str | m.PDMRemoteNode | Mapping[str, Any]
+
+
+def _node_address(node: RemoteNodeInput) -> str:
+    """Return the wire-format address required by the PDM OpenAPI schema."""
+
+    if isinstance(node, str):
+        address = node.strip()
+    elif isinstance(node, m.PDMRemoteNode):
+        address = node.hostname.strip()
+    else:
+        address = m.PDMRemoteNode.model_validate(node).hostname.strip()
+    if not address:
+        raise ValueError("PDM remote nodes require a non-empty hostname or IP address")
+    return address
+
+
+def _node_addresses(nodes: list[RemoteNodeInput]) -> list[str]:
+    """Normalize public node inputs to the schema-required string array."""
+
+    return [_node_address(node) for node in nodes]
 
 
 class RemotesDomain:
@@ -37,7 +60,7 @@ class RemotesDomain:
         *,
         id: str,
         type: m.RemoteType,
-        nodes: list[dict[str, Any]] | None = None,
+        nodes: list[RemoteNodeInput] | None = None,
         authid: str | None = None,
         token: str | None = None,
         fingerprint: str | None = None,
@@ -46,7 +69,7 @@ class RemotesDomain:
         """POST /remotes/remote — register a new remote."""
         payload: dict[str, Any] = {"id": id, "type": type}
         if nodes is not None:
-            payload["nodes"] = nodes
+            payload["nodes"] = _node_addresses(nodes)
         if authid is not None:
             payload["authid"] = authid
         if token is not None:
@@ -59,6 +82,11 @@ class RemotesDomain:
 
     async def update(self, remote: str, **changes: Any) -> Any:
         """PUT /remotes/remote/{id} — update a remote's configuration."""
+        if "nodes" in changes:
+            nodes = changes["nodes"]
+            if not isinstance(nodes, list):
+                raise ValueError("PDM remote nodes must be provided as a list")
+            changes["nodes"] = _node_addresses(nodes)
         return unwrap_data(await self._sdk.remotes.remote(remote).put(**changes))
 
     async def remove(self, remote: str) -> Any:

@@ -8,6 +8,8 @@ include = ["proxmox_sdk*"]
 [tool.setuptools.package-data]
 proxmox_sdk = [
     "py.typed",
+    "generated/pdm/**/*.json",
+    "generated/pdm/**/*.py",
     "generated/proxmox/**/*.json",
     "generated/proxmox/**/*.py",
     "proxmox_cli/*.json",

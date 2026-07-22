@@ -58,6 +58,12 @@ jobs:
       - name: Build distribution
         run: uv run --with build python -m build
 
+      - name: Validate package metadata
+        run: uv run --with twine python -m twine check dist/*
+
+      - name: Verify installed-wheel PDM contract
+        run: uv run python tests/verify_wheel_contract.py dist/*.whl
+
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v7
         with:

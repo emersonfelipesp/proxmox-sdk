@@ -33,6 +33,11 @@ in parallel via `PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]`. Older relea
 are no longer in the CI matrix — regenerate locally with
 `proxmox-sdk-codegen --version-tag <your-version>` if you need them.
 
+The generated PDM schema also ships in every wheel at
+`proxmox_sdk/generated/pdm/latest/openapi.json`. CI and release validation run
+typed `PDMClient.mock()` reads from the built wheel outside the source checkout,
+so editable imports cannot hide missing package data.
+
 ## Installation
 
 ```bash

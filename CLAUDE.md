@@ -29,6 +29,7 @@ proxmox_sdk/
 ├── main.py                   # Full API server (mock OR real mode)
 ├── mock_main.py              # Standalone mock-only server entrypoint
 ├── schema.py                 # Schema management (load/save OpenAPI)
+├── generated/pdm/latest/     # Packaged PDM OpenAPI + raw capture artifacts
 ├── rate_limit.py             # SlowAPI rate limiting configuration
 ├── exception.py              # Exception classes
 ├── logger.py                 # Logging utilities
@@ -182,6 +183,10 @@ uv run python -c "import proxmox_sdk.mock_main"
 # Test SDK imports
 uv run python -c "from proxmox_sdk.sdk import ProxmoxSDK"
 uv run python -c "from proxmox_sdk.sdk.sync import SyncProxmoxSDK"
+
+# Build and verify runtime artifacts from the wheel, outside the source tree
+uv run --with build python -m build
+uv run python tests/verify_wheel_contract.py dist/*.whl
 
 # Test CLI imports
 uv run python -c "from proxmox_sdk.proxmox_cli.cli import cli"

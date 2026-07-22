@@ -57,6 +57,31 @@ jobs:
           uv run python -c "import proxmox_sdk.mock_main"
           uv run python -c "import proxmox_sdk.pdm_mock_main"
 
+  package:
+    name: Build and verify wheel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Sync runtime dependencies
+        run: uv sync --frozen
+
+      - name: Build distribution
+        run: uv run --with build python -m build
+
+      - name: Validate package metadata
+        run: uv run --with twine python -m twine check dist/*
+
+      - name: Verify installed-wheel PDM contract
+        run: uv run python tests/verify_wheel_contract.py dist/*.whl
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -93,7 +118,7 @@ jobs:
   # - Production images on GitHub Release (version tag + latest)
   docker-images:
     name: Publish Docker images (Hub)
-    needs: [lint, syntax, test]
+    needs: [lint, syntax, package, test]
     if: >
       (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/testing')) ||
       (github.event_name == 'release' && github.event.action == 'published' && !github.event.release.prerelease)

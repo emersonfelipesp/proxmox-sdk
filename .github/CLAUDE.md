@@ -31,6 +31,7 @@ GitHub Actions CI/CD workflows for `proxmox-sdk`. All workflows live under `.git
 ci.yml
 ├── lint
 ├── syntax
+├── package (build + metadata + installed-wheel PDM contract)
 ├── test
 └── docker-images (on main/testing push OR release)
     └── calls docker-hub-publish.yml (parallel: docker-raw, docker-nginx, docker-granian)
@@ -55,5 +56,6 @@ ci.yml
 ## Key Rules
 
 - The `uv.lock` at the repo root must stay in sync with `pyproject.toml` because CI runs `uv sync --frozen`.
+- CI and release preparation must run `tests/verify_wheel_contract.py` against the built wheel so source imports cannot hide missing generated schemas.
 - Release workflows validate that the `pyproject.toml` version matches the Git tag before publishing.
 - Do not add secrets to workflow files — use repository secrets (`PYPI_TOKEN`, `DOCKERHUB_TOKEN`, etc.).

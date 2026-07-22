@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class _PDMBase(BaseModel):
@@ -51,6 +51,15 @@ class PDMRemote(_PDMBase):
     token: str | None = None
     fingerprint: str | None = None
     web_url: str | None = Field(default=None, alias="web-url")
+
+    @field_validator("nodes", mode="before")
+    @classmethod
+    def normalize_node_addresses(cls, value: Any) -> Any:
+        """Normalize schema-level address strings to the public node model."""
+
+        if not isinstance(value, list):
+            return value
+        return [{"hostname": item} if isinstance(item, str) else item for item in value]
 
 
 class PDMRemoteVersion(_PDMBase):
