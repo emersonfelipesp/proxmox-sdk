@@ -14,10 +14,10 @@ flowchart TD
     PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
 
     CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n675 operations / 449 paths\npaths + methods + parameters"]
+    RAW["raw_capture.json\n675 operations / 444 paths\npaths + methods + parameters"]
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 449 paths"]
+    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 444 paths"]
     PYDANTIC_GEN["PydanticBuilder\nGenerate aggregate + shards\nAdd validators"]
     PYDANTIC["pydantic_models.py\nCompatibility aggregate"]
     SHARDS["models/<group>.py\nLazy route-group shards"]
@@ -107,10 +107,15 @@ sequenceDiagram
 | Stat | Value |
 |---|---|
 | Operations | 675 |
-| Paths | 449 |
+| Paths | 444 |
 | File size | ~5.2 MB |
 | Format | OpenAPI 3.1 |
 | Security schemes | `ApiToken` (API token), `TicketAuth` (password/ticket) |
+
+These figures are derived from `proxmox_sdk/generated/proxmox/latest/openapi.json`
+(count `len(paths)` for paths, and every HTTP method key across all paths for
+operations) — re-derive them from that file rather than trusting a cached
+number if the schema is regenerated.
 
 The builder adds:
 
@@ -181,6 +186,59 @@ The naming convention follows the OpenAPI `operationId`:
 | `GET /nodes/{node}/storage/{storage}/content` | `GetNodesNodeStorageStorageContentResponse` |
 | `GET /nodes/{node}/tasks` | `GetNodesNodeTasksResponse` |
 | `GET /nodes/{node}/tasks/{upid}/status` | `GetNodesNodeTasksUpidStatusResponse` |
+
+---
+
+## PDM Codegen Path
+
+Alongside the PVE Viewer-crawl pipeline above, `proxmox_codegen/` also supports
+generating a schema for the **Proxmox Datacenter Manager (PDM)** API. Unlike
+PVE, the PDM bundle is **apidoc-only**: it fetches and parses the PDM API
+Viewer's `apidoc.js` directly, without a Playwright browser crawl and without
+Pydantic model shard generation.
+
+```mermaid
+flowchart TD
+    PDM_VIEWER["PDM API Viewer\napidoc.js"]
+    FETCH["fetch apidoc.js\n(security.py SSRF checks)"]
+    PARSE["apidoc_parser.py\nvar apiSchema = ... parsing"]
+    BUILD["generate_pdm_codegen_bundle[_async]\n(pipeline.py)"]
+    PDM_OPENAPI["generated/pdm/latest/openapi.json\n246 paths · 318 operations"]
+    PDM_RAW["generated/pdm/latest/raw_capture.json"]
+
+    PDM_VIEWER --> FETCH
+    FETCH --> PARSE
+    PARSE --> BUILD
+    BUILD --> PDM_OPENAPI
+    BUILD --> PDM_RAW
+```
+
+Key differences from the PVE pipeline:
+
+- **Declaration-style parsing.** `apidoc_parser.py` detects both `const
+  apiSchema =` (used by PVE/PBS/PMG) and `var apiSchema =` (used by PDM) when
+  locating the embedded schema in the fetched JavaScript.
+- **Constants.** `PDM_API_VIEWER_URL` and `PDM_APIDOC_JS_URL` in
+  `apidoc_parser.py` point at `https://pdm.proxmox.com/docs/api-viewer/` and
+  its `apidoc.js`.
+- **Security allowlist.** `proxmox_codegen/security.py` includes
+  `pdm.proxmox.com` in `ALLOWED_DOMAINS` alongside `pve.proxmox.com`,
+  `pmg.proxmox.com`, `pbs.proxmox.com`, and `proxmox.com`.
+- **Bundle generation.** `generate_pdm_codegen_bundle()` /
+  `generate_pdm_codegen_bundle_async()` in `pipeline.py` orchestrate the
+  apidoc-only bundle (source URL defaults to `PDM_API_VIEWER_URL`, version tag
+  defaults to `PDM_LATEST_VERSION_TAG = "latest"`). No Pydantic shard
+  generation runs for PDM.
+- **Schema loading.** `schema.py` exposes `DEFAULT_PDM_OPENAPI_TAG`,
+  `_pdm_generated_dir()`, `available_pdm_sdk_versions()`, and
+  `load_pdm_generated_openapi()` to read the generated PDM schema at runtime
+  (used by the PDM-aware mock backend — see
+  [SDK Mock Usage](sdk-mock.md)).
+
+The generated PDM artifacts live at `proxmox_sdk/generated/pdm/latest/` and
+contain **246 paths / 318 operations** (derived from
+`proxmox_sdk/generated/pdm/latest/openapi.json`; re-derive rather than
+trusting a cached number if the schema is regenerated).
 
 ---
 

@@ -8,7 +8,7 @@ Complete guide to using proxmox-sdk in mock mode for development and testing.
 
 Mock mode provides a **fully functional Proxmox API simulation** with:
 
-- ✅ **675 generated operations across 449 Proxmox API paths**
+- ✅ **675 generated operations across 444 Proxmox API paths**
 - ✅ **Metadata-driven route registration** from bundled `route_metadata.json`
 - ✅ **Lazy Pydantic model loading** from route-group model shards
 - ✅ **CRUD operations** - Create, read, update, delete

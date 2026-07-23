@@ -9,7 +9,8 @@ facades, and real API connections.
 ## Features
 
 - **Dual Mode**: Mock mode (default) for development, Real mode for production Proxmox integration
-- **675 Operations / 449 Endpoints**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
+- **675 Operations / 444 Endpoints**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
+- **318 Operations / 246 Endpoints**: Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
 - **Mock Data**: Automatically generate mock data for all endpoints with in-memory CRUD
 - **Real API Proxy**: Validated proxy to real Proxmox VE API with request/response validation
 - **Typed Facades**: PBS, PDM, and Ceph clients for higher-level workflows

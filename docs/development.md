@@ -248,7 +248,7 @@ pve = ProxmoxSDK.from_config(config)
 
 ### `mock/routes.py` — Mock Route Builder
 
-`register_generated_proxmox_mock_routes()` registers 675 operations across 449
+`register_generated_proxmox_mock_routes()` registers 675 operations across 444
 paths from bundled generated artifacts. The primary startup path reads
 `route_metadata.json` and creates lightweight FastAPI dispatchers with
 precomputed mounted paths, parameter metadata, and mock CRUD topology. Request
@@ -271,7 +271,7 @@ Proxmox VE API
       ↓
 [1. Crawler] - Fetch API structure
       ↓
-raw_capture.json (675 operations / 449 paths)
+raw_capture.json (675 operations / 444 paths)
       ↓
 [2. Pipeline] - Normalize & enrich
       ↓

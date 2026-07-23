@@ -118,6 +118,26 @@ async with PDMClient.mock() as pdm:
 
 ---
 
+## Liveness Probe (`ping()`)
+
+`PDMClient.ping()` / `SyncPDMClient.ping()` call `GET /ping`, a lightweight
+liveness probe that does not require authentication scope beyond a valid
+session — useful for health checks before running heavier operations.
+
+```python
+async with PDMClient(...) as pdm:
+    result = await pdm.ping()
+    print(result)
+```
+
+```python
+with SyncPDMClient(...) as pdm:
+    result = pdm.ping()
+    print(result)
+```
+
+---
+
 ## Remotes
 
 List, inspect, and filter the PVE/PBS instances registered with PDM.
