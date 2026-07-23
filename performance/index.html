@@ -2643,7 +2643,7 @@ without addressing the largest bottlenecks that were measured.</p>
 <li>The <code>app</code> and <code>mock_app</code> attributes are only materialised when accessed (e.g. by uvicorn).</li>
 </ul>
 <h3 id="generated-route-metadata">Generated route metadata<a class="headerlink" href="#generated-route-metadata" title="Permanent link">&para;</a></h3>
-<p>675 operations across 449 Proxmox VE 9.2 paths are registered at startup.
+<p>675 operations across 444 Proxmox VE 9.2 paths are registered at startup.
 Runtime registration now prefers pre-generated <code>route_metadata.json</code> artifacts,
 so it does not rebuild topology, parameter maps, mounted paths, model names, and
 child collection relationships from OpenAPI on every app import.</p>

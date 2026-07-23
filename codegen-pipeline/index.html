@@ -1414,6 +1414,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#pdm-codegen-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM Codegen Path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#triggering-the-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2145,6 +2156,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#pdm-codegen-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PDM Codegen Path
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#triggering-the-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2280,10 +2302,10 @@ metadata, and lazy model shards. The generated artifacts are checked into
     PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
 
     CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n675 operations / 449 paths\npaths + methods + parameters"]
+    RAW["raw_capture.json\n675 operations / 444 paths\npaths + methods + parameters"]
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 449 paths"]
+    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 444 paths"]
     PYDANTIC_GEN["PydanticBuilder\nGenerate aggregate + shards\nAdd validators"]
     PYDANTIC["pydantic_models.py\nCompatibility aggregate"]
     SHARDS["models/&lt;group&gt;.py\nLazy route-group shards"]
@@ -2369,7 +2391,7 @@ metadata, and lazy model shards. The generated artifacts are checked into
 </tr>
 <tr>
 <td>Paths</td>
-<td>449</td>
+<td>444</td>
 </tr>
 <tr>
 <td>File size</td>
@@ -2385,6 +2407,10 @@ metadata, and lazy model shards. The generated artifacts are checked into
 </tr>
 </tbody>
 </table>
+<p>These figures are derived from <code>proxmox_sdk/generated/proxmox/latest/openapi.json</code>
+(count <code>len(paths)</code> for paths, and every HTTP method key across all paths for
+operations) — re-derive them from that file rather than trusting a cached
+number if the schema is regenerated.</p>
 <p>The builder adds:</p>
 <ul>
 <li>Path item objects with all supported HTTP methods</li>
@@ -2476,6 +2502,52 @@ downstream projects that want one import surface.</p>
 </tr>
 </tbody>
 </table>
+<hr />
+<h2 id="pdm-codegen-path">PDM Codegen Path<a class="headerlink" href="#pdm-codegen-path" title="Permanent link">&para;</a></h2>
+<p>Alongside the PVE Viewer-crawl pipeline above, <code>proxmox_codegen/</code> also supports
+generating a schema for the <strong>Proxmox Datacenter Manager (PDM)</strong> API. Unlike
+PVE, the PDM bundle is <strong>apidoc-only</strong>: it fetches and parses the PDM API
+Viewer's <code>apidoc.js</code> directly, without a Playwright browser crawl and without
+Pydantic model shard generation.</p>
+<pre class="mermaid"><code>flowchart TD
+    PDM_VIEWER["PDM API Viewer\napidoc.js"]
+    FETCH["fetch apidoc.js\n(security.py SSRF checks)"]
+    PARSE["apidoc_parser.py\nvar apiSchema = ... parsing"]
+    BUILD["generate_pdm_codegen_bundle[_async]\n(pipeline.py)"]
+    PDM_OPENAPI["generated/pdm/latest/openapi.json\n246 paths · 318 operations"]
+    PDM_RAW["generated/pdm/latest/raw_capture.json"]
+
+    PDM_VIEWER --&gt; FETCH
+    FETCH --&gt; PARSE
+    PARSE --&gt; BUILD
+    BUILD --&gt; PDM_OPENAPI
+    BUILD --&gt; PDM_RAW</code></pre>
+<p>Key differences from the PVE pipeline:</p>
+<ul>
+<li><strong>Declaration-style parsing.</strong> <code>apidoc_parser.py</code> detects both <code>const
+  apiSchema =</code> (used by PVE/PBS/PMG) and <code>var apiSchema =</code> (used by PDM) when
+  locating the embedded schema in the fetched JavaScript.</li>
+<li><strong>Constants.</strong> <code>PDM_API_VIEWER_URL</code> and <code>PDM_APIDOC_JS_URL</code> in
+  <code>apidoc_parser.py</code> point at <code>https://pdm.proxmox.com/docs/api-viewer/</code> and
+  its <code>apidoc.js</code>.</li>
+<li><strong>Security allowlist.</strong> <code>proxmox_codegen/security.py</code> includes
+  <code>pdm.proxmox.com</code> in <code>ALLOWED_DOMAINS</code> alongside <code>pve.proxmox.com</code>,
+  <code>pmg.proxmox.com</code>, <code>pbs.proxmox.com</code>, and <code>proxmox.com</code>.</li>
+<li><strong>Bundle generation.</strong> <code>generate_pdm_codegen_bundle()</code> /
+  <code>generate_pdm_codegen_bundle_async()</code> in <code>pipeline.py</code> orchestrate the
+  apidoc-only bundle (source URL defaults to <code>PDM_API_VIEWER_URL</code>, version tag
+  defaults to <code>PDM_LATEST_VERSION_TAG = "latest"</code>). No Pydantic shard
+  generation runs for PDM.</li>
+<li><strong>Schema loading.</strong> <code>schema.py</code> exposes <code>DEFAULT_PDM_OPENAPI_TAG</code>,
+  <code>_pdm_generated_dir()</code>, <code>available_pdm_sdk_versions()</code>, and
+  <code>load_pdm_generated_openapi()</code> to read the generated PDM schema at runtime
+  (used by the PDM-aware mock backend — see
+  <a href="../sdk-mock/">SDK Mock Usage</a>).</li>
+</ul>
+<p>The generated PDM artifacts live at <code>proxmox_sdk/generated/pdm/latest/</code> and
+contain <strong>246 paths / 318 operations</strong> (derived from
+<code>proxmox_sdk/generated/pdm/latest/openapi.json</code>; re-derive rather than
+trusting a cached number if the schema is regenerated).</p>
 <hr />
 <h2 id="triggering-the-pipeline">Triggering the Pipeline<a class="headerlink" href="#triggering-the-pipeline" title="Permanent link">&para;</a></h2>
 <p>The codegen pipeline is exposed as a protected API endpoint on the FastAPI server and as CLI commands:</p>

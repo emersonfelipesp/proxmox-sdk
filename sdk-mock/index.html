@@ -2683,7 +2683,21 @@
 </span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">mock</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;PBS&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
 </span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>    <span class="c1"># PBS-specific endpoints</span>
 </span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>    <span class="k">pass</span>
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="c1"># Proxmox Datacenter Manager</span>
+</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="k">async</span> <span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">mock</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;PDM&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>    <span class="c1"># PDM-specific endpoints, backed by the real generated PDM schema</span>
+</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>    <span class="k">pass</span>
 </span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">PDM mock mode is schema-backed</p>
+<p><code>ProxmoxSDK.mock(service="PDM")</code> (and <code>PDMClient.mock()</code>, see
+<a href="../sdk-pdm/">PDM HOW-TO</a>) load the real generated PDM OpenAPI schema via
+<code>load_pdm_generated_openapi()</code> (246 paths / 318 operations) instead of
+falling back to the PVE schema or returning empty responses. See the
+<a href="../codegen-pipeline/#pdm-codegen-path">PDM Codegen Path</a> for how that
+schema is produced.</p>
+</div>
 <hr />
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <h3 id="unit-tests">Unit Tests<a class="headerlink" href="#unit-tests" title="Permanent link">&para;</a></h3>

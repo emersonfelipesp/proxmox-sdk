@@ -2359,7 +2359,7 @@ is the default. No real Proxmox server required.</p>
 <ol>
 <li>Load <code>generated/proxmox/latest/openapi.json</code></li>
 <li>Load <code>generated/proxmox/latest/route_metadata.json</code></li>
-<li><code>register_generated_proxmox_mock_routes()</code> iterates 675 metadata operations across 449 paths</li>
+<li><code>register_generated_proxmox_mock_routes()</code> iterates 675 metadata operations across 444 paths</li>
 <li>For each operation, create a lightweight FastAPI dispatcher with precomputed path, parameter, and mock-topology metadata</li>
 <li>Load request/response model classes lazily from <code>models/&lt;group&gt;.py</code> through <code>model_index.json</code></li>
 <li>Routes perform CRUD on <code>SQLiteMockStore</code> by default, with shared-memory and dict backends available by env var</li>

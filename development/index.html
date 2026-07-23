@@ -2943,7 +2943,7 @@
 </span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="n">pve</span> <span class="o">=</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="mockroutespy-mock-route-builder"><code>mock/routes.py</code> — Mock Route Builder<a class="headerlink" href="#mockroutespy-mock-route-builder" title="Permanent link">&para;</a></h3>
-<p><code>register_generated_proxmox_mock_routes()</code> registers 675 operations across 449
+<p><code>register_generated_proxmox_mock_routes()</code> registers 675 operations across 444
 paths from bundled generated artifacts. The primary startup path reads
 <code>route_metadata.json</code> and creates lightweight FastAPI dispatchers with
 precomputed mounted paths, parameter metadata, and mock CRUD topology. Request
@@ -2959,7 +2959,7 @@ and response models load lazily from <code>models/&lt;group&gt;.py</code> throug
 </span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>      ↓
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>[1. Crawler] - Fetch API structure
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>      ↓
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>raw_capture.json (675 operations / 449 paths)
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>raw_capture.json (675 operations / 444 paths)
 </span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>      ↓
 </span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>[2. Pipeline] - Normalize &amp; enrich
 </span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>      ↓
