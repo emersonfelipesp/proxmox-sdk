@@ -232,7 +232,20 @@ async with ProxmoxSDK.mock(service="PMG") as proxmox:
 async with ProxmoxSDK.mock(service="PBS") as proxmox:
     # PBS-specific endpoints
     pass
+
+# Proxmox Datacenter Manager
+async with ProxmoxSDK.mock(service="PDM") as proxmox:
+    # PDM-specific endpoints, backed by the real generated PDM schema
+    pass
 ```
+
+!!! note "PDM mock mode is schema-backed"
+    `ProxmoxSDK.mock(service="PDM")` (and `PDMClient.mock()`, see
+    [PDM HOW-TO](sdk-pdm.md)) load the real generated PDM OpenAPI schema via
+    `load_pdm_generated_openapi()` (246 paths / 318 operations) instead of
+    falling back to the PVE schema or returning empty responses. See the
+    [PDM Codegen Path](codegen-pipeline.md#pdm-codegen-path) for how that
+    schema is produced.
 
 ---
 

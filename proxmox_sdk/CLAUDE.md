@@ -9,7 +9,7 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 
 ---
 
-Schema-driven Proxmox API toolkit Python package. Pre-generated 675-operation / 449-endpoint Proxmox VE 9.2 surface (`latest` mirrors 9.2; 9.1.11 retained). Dual-mode: mock (in-memory CRUD, `reset_state()`) or real (proxy to a Proxmox node via HTTPS / local `pvesh` / SSH).
+Schema-driven Proxmox API toolkit Python package. Pre-generated 675-operation / 444-endpoint Proxmox VE 9.2 surface (`latest` mirrors 9.2; 9.1.11 retained), plus a 318-operation / 246-endpoint Proxmox Datacenter Manager (PDM) surface (`proxmox_sdk/generated/pdm/latest/`). Dual-mode: mock (in-memory CRUD, `reset_state()`) or real (proxy to a Proxmox node via HTTPS / local `pvesh` / SSH).
 
 ## Standalone SDK Entry Point
 
@@ -35,7 +35,7 @@ headers, cookies, passwords, tickets, CSRF tokens, or API token values.
 
 ## Multi-Surface Consumers in This Workspace
 
-- `proxbox-api/` — uses this SDK as its Proxmox API layer; pin `proxmox-sdk==0.0.11.post2`.
+- `proxbox-api/` — uses this SDK as its Proxmox API layer; pin `proxmox-sdk==0.0.13`.
 - CLI entrypoints `proxmox`, `proxmox-cli`, `pbx` (all alias `proxmox_sdk.proxmox_cli.cli:cli_main`, and `pbx tui` Textual TUI).
 - `proxmox-sdk-codegen` — Playwright → Proxmox API Viewer → OpenAPI → Pydantic codegen pipeline.
 - `proxmox-sdk-mock` — standalone PVE mock server.

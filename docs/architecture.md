@@ -68,7 +68,7 @@ The FastAPI server can run in two modes, selected via `PROXMOX_API_MODE`:
 
     1. Load `generated/proxmox/latest/openapi.json`
     2. Load `generated/proxmox/latest/route_metadata.json`
-    3. `register_generated_proxmox_mock_routes()` iterates 675 metadata operations across 449 paths
+    3. `register_generated_proxmox_mock_routes()` iterates 675 metadata operations across 444 paths
     4. For each operation, create a lightweight FastAPI dispatcher with precomputed path, parameter, and mock-topology metadata
     5. Load request/response model classes lazily from `models/<group>.py` through `model_index.json`
     6. Routes perform CRUD on `SQLiteMockStore` by default, with shared-memory and dict backends available by env var

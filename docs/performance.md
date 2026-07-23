@@ -36,7 +36,7 @@ without addressing the largest bottlenecks that were measured.
 
 ### Generated route metadata
 
-675 operations across 449 Proxmox VE 9.2 paths are registered at startup.
+675 operations across 444 Proxmox VE 9.2 paths are registered at startup.
 Runtime registration now prefers pre-generated `route_metadata.json` artifacts,
 so it does not rebuild topology, parameter maps, mounted paths, model names, and
 child collection relationships from OpenAPI on every app import.

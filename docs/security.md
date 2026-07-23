@@ -28,6 +28,7 @@ By default only official Proxmox documentation domains are permitted:
 pve.proxmox.com
 pmg.proxmox.com
 pbs.proxmox.com
+pdm.proxmox.com
 proxmox.com
 ```
 

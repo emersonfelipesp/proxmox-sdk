@@ -4,7 +4,7 @@ This page provides a comprehensive reference of all available endpoints in the P
 
 ## Endpoint Overview
 
-The server provides **675 operations / 449 Proxmox VE API endpoints** organized into the following categories:
+The server provides **675 operations / 444 Proxmox VE API endpoints** organized into the following categories:
 
 - **Access Control** - Users, groups, roles, permissions, ACLs
 - **Cluster** - Cluster configuration, HA, resources, firewall

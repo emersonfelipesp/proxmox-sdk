@@ -441,7 +441,7 @@ else:
 
 `_render_proxmox_path()` converts OpenAPI path templates (`/nodes/{node}/qemu/{vmid}/config`) into actual paths (`/nodes/pve1/qemu/100/config`) using the route's path parameter values.
 
-This means `proxbox-api` exposes the entire 675-operation / 449-endpoint Proxmox API surface through its own authenticated proxy without writing a single line of per-endpoint handler code.
+This means `proxbox-api` exposes the entire 675-operation / 444-endpoint Proxmox API surface through its own authenticated proxy without writing a single line of per-endpoint handler code.
 
 ---
 

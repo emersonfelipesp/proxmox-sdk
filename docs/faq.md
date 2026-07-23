@@ -8,7 +8,7 @@ Frequently Asked Questions about the Proxmox OpenAPI server.
 
 Proxmox OpenAPI is a FastAPI-based server that provides two modes:
 
-1. **Mock Mode** - In-memory Proxmox VE API simulator with 675 operations / 449 endpoints for development and testing
+1. **Mock Mode** - In-memory Proxmox VE API simulator with 675 operations / 444 endpoints for development and testing
 2. **Real Mode** - Validated proxy to a real Proxmox VE API with full request/response validation
 
 It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.
@@ -107,7 +107,7 @@ See the [Quick Start Guide](quickstart.md) for more details.
 
 Mock mode provides a schema-driven simulation of the Proxmox VE API. It:
 
-- Loads 675 operations / 449 paths from pre-generated route metadata
+- Loads 675 operations / 444 paths from pre-generated route metadata
 - Lazy-loads Pydantic route-group model shards on demand
 - Provides full CRUD operations (Create, Read, Update, Delete)
 - Stores data in SQLite/WAL by default, with shared-memory and dict backends available
