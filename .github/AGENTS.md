@@ -23,16 +23,26 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 
 GitHub Actions CI/CD workflows for `proxmox-sdk`. All workflows live under `.github/workflows/`.
 
+Third-party actions are pinned to reviewed full commit SHAs. Python build tools
+and uv are exact-versioned; package jobs verify `uv.lock`, build twice under the
+event commit's `SOURCE_DATE_EPOCH`, and check out the exact protected event SHA.
+Update an action or tool only by reviewing and recording the new release commit.
+Gitea feature CI is not claimed as an authoritative merge gate without isolated
+PR runners and required branch checks. The package-of-record workflow has
+separate `release-builder` and `release-publisher` labels and remains disabled
+until operators provision those isolated runners and the protected environment.
+
 ## Workflow Index
 
 | File | Trigger | What it does |
 |------|---------|--------------|
 | `ci.yml` | Push / PR to any branch | Lint (ruff), compile, import smoke checks, run `tests/` with coverage |
-| `ci.yml` docker-images | Push to main/testing or Release published | Builds and pushes Docker images to Docker Hub (dev or release tags) |
+| `ci.yml` docker-images | Push to main/testing | Builds/tests without credentials, stages digest-addressed candidates, then promotes `dev` and commit-traceability tags |
 | `docs.yml` | Push to `main` | Builds MkDocs site and deploys to GitHub Pages |
-| `docker-hub-publish.yml` | Called by CI | Builds three Alpine-based Docker images: raw (uvicorn), nginx (nginx+mkcert+uvicorn), granian (granian+mkcert) |
-| `publish-testpypi.yml` | GitHub Release published | Validates release metadata, publishes `proxmox_sdk` to TestPyPI, validates install across Python 3.11–3.13, publishes to PyPI |
-| `release-docker-verify.yml` | Release published | Post-release smoke test of all three published Docker images |
+| `docker-hub-publish.yml` | Called by CI / release / manual | Builds and smokes raw/nginx/granian on amd64+arm64 without secrets, emits SBOMs, stages candidates in a protected job, and returns manifest digests |
+| `publish-testpypi.yml` | `v*rc*`, GitHub Release, or manual | Reproducible build, protected TestPyPI/PyPI publication, served-byte verification, hash-bound service images, and one all-image stable promotion fan-in |
+| `release-docker-verify.yml` | Successful release workflow | Confirms alias digests and smokes core + all/pve/pbs/pdm images on amd64 and arm64 |
+| `.gitea/workflows/publish-package.yml` | Protected `v*` tag | Builds and verifies the Gitea package of record for RC, final, and post releases |
 
 ## CI Job Dependencies
 
@@ -42,8 +52,8 @@ ci.yml
 ├── syntax
 ├── package (build + metadata + installed-wheel PDM contract)
 ├── test
-└── docker-images (on main/testing push OR release)
-    └── calls docker-hub-publish.yml (parallel: docker-raw, docker-nginx, docker-granian)
+└── docker-images (main/testing push only)
+    └── build/smoke 3 variants × 2 arches → candidate manifests → dev aliases
 ```
 
 ## Docker Image Tags
@@ -54,6 +64,7 @@ ci.yml
 | Raw | `<version>`, `latest`, `sha-<sha>` |
 | Nginx | `<version>-nginx`, `latest-nginx`, `sha-<sha>-nginx` |
 | Granian | `<version>-granian`, `latest-granian`, `sha-<sha>-granian` |
+| Service all/PVE/PBS/PDM | `<version>-<service>`, `latest-<service>`, `sha-<sha>-<service>` |
 
 ### Dev Mode (main/testing branch push)
 | Image | Tags |
@@ -64,7 +75,36 @@ ci.yml
 
 ## Key Rules
 
-- The `uv.lock` at the repo root must stay in sync with `pyproject.toml` because CI runs `uv sync --frozen`.
+- The `uv.lock` at the repo root must stay in sync with `pyproject.toml` because CI runs `uv lock --check` followed by `uv sync --locked`.
 - CI and release preparation must run `tests/verify_wheel_contract.py` against the built wheel so source imports cannot hide missing generated schemas.
 - Release workflows validate that the `pyproject.toml` version matches the Git tag before publishing.
-- Do not add secrets to workflow files — use repository secrets (`PYPI_TOKEN`, `DOCKERHUB_TOKEN`, etc.).
+- TestPyPI, PyPI, and Gitea preflight/postflight checks compare complete artifact
+  sets and hash bytes downloaded from the repository. Never replace this with
+  `--skip-existing` or metadata-only success.
+- `v*rc*` publishes to TestPyPI only. A manual release dispatch is TestPyPI-only
+  from protected `main`; a manual Docker dispatch never publishes. Public PyPI
+  and stable Docker aliases require a final `release.published` event.
+- The final release body must pass `tests/verify_release_evidence.py` using
+  `.github/RELEASE_EVIDENCE_TEMPLATE.md` before any public publisher can run.
+  Its package-record manifest SHA256 must equal the manifest rebuilt on GitHub.
+- Publisher jobs use protected environments and download artifacts only. Source
+  quality, Docker builds, both-architecture runtime smokes, and SBOM generation
+  happen before registry credentials exist.
+- PyPI postflight downloads and hashes the served wheel. Service images verify
+  that filename/SHA256 in the Dockerfile and install it locally with `--no-deps`.
+- All seven Docker candidates fan in before stable aliases are written. OCI
+  digests are immutable identities; `sha-<commit>` is a commit traceability tag.
+- Stable promotion is serialized and refuses to move aliases for a release that
+  is no longer GitHub's current latest release.
+- QEMU and BuildKit helpers are digest-pinned. Docker staging verifies platform
+  and provenance labels, binds archive/SBOM hashes to per-architecture registry
+  manifest digests, and the final fan-in hashes those source/run/attempt-qualified
+  evidence records. Candidate tags carry the same run token so reruns and
+  same-commit workflows cannot overwrite one another.
+- All runner jobs have explicit timeouts. Pytest also bounds individual tests,
+  uses HTTPX2 for Starlette's supported TestClient transport, and isolates mock
+  state per xdist worker/process.
+- Publisher secrets must be environment-scoped, never repository-scoped. The
+  required environment reviewers, deployment rules, protected tags, and Gitea
+  runner labels are documented in `docs/release-evidence.md` and must be
+  provisioned outside the repository.

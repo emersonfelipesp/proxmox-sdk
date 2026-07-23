@@ -21,6 +21,7 @@ permissions: {}
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions: {}
     env:
       # The `secrets` context cannot be referenced in an `if` conditional, which
@@ -34,7 +35,7 @@ jobs:
         # is missing or under-scoped on emersonfelipesp/emersonfelipesp) must not
         # fail this repo's workflow run.
         continue-on-error: true
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           token: ${{ env.PROFILE_REPO_PAT }}
           repository: emersonfelipesp/emersonfelipesp

@@ -3,311 +3,1039 @@ name: Release proxmox-sdk
 on:
   release:
     types: [published]
+  push:
+    tags: ["v*rc*"]
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  BINFMT_IMAGE: docker.io/tonistiigi/binfmt@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
+  BUILDKIT_IMAGE: docker.io/moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec
+  CANDIDATE_RUN_TOKEN: ${{ github.run_id }}-${{ github.run_attempt }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  IMAGE_REPOSITORY: emersonfelipesp/proxmox-sdk
 
 jobs:
   prepare-release:
-    name: prepare artifacts + metadata
+    name: validate context + reproducible artifacts
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
+      is_final: ${{ steps.meta.outputs.is_final }}
       package_name: ${{ steps.meta.outputs.package_name }}
+      source_date_epoch: ${{ steps.meta.outputs.source_date_epoch }}
+      source_sha: ${{ steps.meta.outputs.source_sha }}
       version: ${{ steps.meta.outputs.version }}
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout exact event source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+          ref: ${{ github.sha }}
+          fetch-depth: 0
 
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          python-version: "3.13"
+          python-version: "3.13.14"
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
 
-      - name: Validate package metadata and tag
+      - name: Sync locked release tools
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --group dev
+
+      - name: Validate protected ref, package metadata, and release kind
         id: meta
         env:
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          EVENT_SHA: ${{ github.sha }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
+          set -euo pipefail
+          if [ "$DEFAULT_BRANCH" != main ]; then
+            echo "Release policy expects main as the protected default branch" >&2
+            exit 1
+          fi
+          test "$(git rev-parse HEAD)" = "$EVENT_SHA"
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          git merge-base --is-ancestor "$EVENT_SHA" refs/remotes/origin/main
           python - <<'PY'
           import os
           import pathlib
+          import re
           import tomllib
 
-          data = tomllib.loads(pathlib.Path('pyproject.toml').read_text(encoding='utf-8'))
-          project_name = data['project']['name']
-          version = data['project']['version']
-          event = os.getenv('GITHUB_EVENT_NAME', '')
-          release_tag = os.getenv('RELEASE_TAG_NAME', '') or ''
-          if project_name != 'proxmox-sdk':
+          from packaging.version import InvalidVersion, Version
+
+          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          package_name = data["project"]["name"]
+          version_text = data["project"]["version"]
+          if package_name != "proxmox-sdk":
+              raise SystemExit(f"Unexpected project name: {package_name!r}")
+          try:
+              version = Version(version_text)
+          except InvalidVersion as exc:
+              raise SystemExit(f"Invalid PEP 440 version: {version_text!r}") from exc
+          if str(version) != version_text:
               raise SystemExit(
-                  f'Expected project name proxmox-sdk, got {project_name!r}'
+                  f"Version must use canonical PEP 440 spelling: {version}"
               )
-          if event == 'release' and release_tag != f'v{version}':
-              raise SystemExit(
-                  f'Release tag/version mismatch: tag={release_tag!r}, version={version!r}'
-              )
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
-              fh.write(f'package_name={project_name}\nversion={version}\n')
+          if version.local is not None or version.dev is not None:
+              raise SystemExit("Release versions cannot contain local or development segments")
+          if version.pre is not None and version.pre[0] != "rc":
+              raise SystemExit("Prerelease publication is restricted to rc versions")
+          if re.fullmatch(r"[0-9][0-9A-Za-z._-]{0,127}", version_text) is None:
+              raise SystemExit(f"Unsafe artifact version: {version_text!r}")
+
+          event = os.environ["EVENT_NAME"]
+          event_ref = os.environ["EVENT_REF"]
+          expected_tag = f"v{version_text}"
+          is_final = False
+          if event == "release":
+              if os.environ.get("RELEASE_TAG_NAME", "") != expected_tag:
+                  raise SystemExit("GitHub Release tag does not match pyproject version")
+              prerelease = os.environ.get("RELEASE_PRERELEASE", "").lower()
+              if prerelease not in {"true", "false"}:
+                  raise SystemExit(f"Unexpected prerelease value: {prerelease!r}")
+              is_final = prerelease == "false"
+              if is_final and version.is_prerelease:
+                  raise SystemExit("A final GitHub Release cannot use a prerelease version")
+              if not is_final and not version.is_prerelease:
+                  raise SystemExit("A prerelease GitHub Release must use a prerelease version")
+          elif event == "push":
+              if event_ref != f"refs/tags/{expected_tag}":
+                  raise SystemExit("RC tag does not match pyproject version")
+              if version.pre is None or version.pre[0] != "rc":
+                  raise SystemExit("The tag trigger is restricted to PEP 440 rc versions")
+          elif event == "workflow_dispatch":
+              if event_ref != "refs/heads/main":
+                  raise SystemExit("Manual TestPyPI runs must execute from protected main")
+          else:
+              raise SystemExit(f"Unsupported release event: {event!r}")
+
+          source_date_epoch = int(
+              __import__("subprocess").check_output(
+                  ["git", "show", "-s", "--format=%ct", "HEAD"], text=True
+              ).strip()
+          )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"is_final={str(is_final).lower()}\n")
+              output.write(f"package_name={package_name}\n")
+              output.write(f"source_date_epoch={source_date_epoch}\n")
+              output.write(f"source_sha={os.environ['EVENT_SHA']}\n")
+              output.write(f"version={version_text}\n")
           PY
 
-      - name: Build distribution
-        run: uv run --with build python -m build
+      - name: Build twice and require byte-for-byte reproducibility
+        env:
+          SOURCE_DATE_EPOCH: ${{ steps.meta.outputs.source_date_epoch }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts
+          uv run --locked python tests/build_reproducible_distributions.py \
+            --source-date-epoch "$SOURCE_DATE_EPOCH" \
+            --output-dir dist \
+            --manifest release-artifacts/distribution-manifest.json
 
-      - name: Validate package metadata
-        run: uv run --with twine python -m twine check dist/*
+      - name: Add immutable source identity to distribution evidence
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          jq --arg source_sha "$SOURCE_SHA" --arg version "$VERSION" \
+            '. + {source_sha: $source_sha, version: $version}' \
+            release-artifacts/distribution-manifest.json \
+            > release-artifacts/distribution-manifest.complete.json
+          mv release-artifacts/distribution-manifest.complete.json \
+            release-artifacts/distribution-manifest.json
 
-      - name: Verify installed-wheel PDM contract
-        run: uv run python tests/verify_wheel_contract.py dist/*.whl
+      - name: Validate final public release and package-record evidence
+        if: steps.meta.outputs.is_final == 'true'
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import pathlib
 
-      - name: Upload dist artifacts
-        uses: actions/upload-artifact@v7
+          pathlib.Path("/tmp/proxmox-sdk-release-body.md").write_text(
+              os.environ.get("RELEASE_BODY", ""), encoding="utf-8"
+          )
+          PY
+          uv run --locked python tests/verify_release_evidence.py \
+            --body-file /tmp/proxmox-sdk-release-body.md \
+            --distribution-manifest release-artifacts/distribution-manifest.json \
+            --version "$VERSION"
+
+      - name: Validate package metadata and installed-wheel contract
+        run: |
+          set -euo pipefail
+          uv run --locked python -m twine check dist/*
+          uv run --locked python tests/verify_wheel_contract.py dist/*.whl
+
+      - name: Upload distributions and build evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: dist
-          path: dist/*
+          name: dist-${{ steps.meta.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist/*
+            release-artifacts/distribution-manifest.json
           if-no-files-found: error
+          overwrite: true
+          retention-days: 90
 
-  publish-testpypi:
-    name: publish to TestPyPI
+  preflight-testpypi:
+    name: TestPyPI metadata preflight
     needs: prepare-release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      upload_required: ${{ steps.state.outputs.upload_required }}
     steps:
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+      - name: Checkout verifier only
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          python-version: '3.13'
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+      - name: Download reproducible distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          enable-cache: false
-          ignore-empty-workdir: true
+          name: dist-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
 
-      - name: Download dist artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: dist
-          path: dist
-
-      - name: Upload to TestPyPI
+      - name: Check complete TestPyPI filename/hash metadata
+        id: state
         env:
-          TEST_PYPI_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
-          TEST_PYPI_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
+          PACKAGE_NAME: ${{ needs.prepare-release.outputs.package_name }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
-          uv run --with twine python -m twine upload \
-            --non-interactive \
-            --skip-existing \
-            --repository-url https://test.pypi.org/legacy/ \
-            --username "$TEST_PYPI_USERNAME" \
-            --password "$TEST_PYPI_TOKEN" \
-            dist/*
+          python3 tests/verify_repository_artifacts.py \
+            --repository-json-base https://test.pypi.org/pypi \
+            --package "$PACKAGE_NAME" \
+            --version "$VERSION" \
+            --dist dist \
+            --allow-absent \
+            --request-timeout 20 \
+            --download-timeout 60
+
+  publish-testpypi:
+    name: publish artifact-only payload to TestPyPI
+    if: needs.preflight-testpypi.outputs.upload_required == 'true'
+    needs: [prepare-release, preflight-testpypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: testpypi
+    steps:
+      - name: Download reproducible distributions only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
+
+      - name: Upload distributions with pinned PyPA publisher
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_TOKEN }}
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/
 
   validate-testpypi:
-    name: validate TestPyPI / py${{ matrix.python-version }} / schema=${{ matrix.proxmox_schema }}
-    needs: [prepare-release, publish-testpypi]
+    name: served TestPyPI / py${{ matrix.python-version }} / schema=${{ matrix.proxmox_schema }}
+    if: >-
+      always() &&
+      needs.prepare-release.result == 'success' &&
+      needs.preflight-testpypi.result == 'success' &&
+      (needs.publish-testpypi.result == 'success' || needs.publish-testpypi.result == 'skipped')
+    needs: [prepare-release, preflight-testpypi, publish-testpypi]
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ["3.11.15", "3.12.13", "3.13.14"]
         proxmox_schema: [latest, "9.2", "9.1.11"]
     env:
       PROXMOX_MOCK_SCHEMA_VERSION: ${{ matrix.proxmox_schema }}
       PROXMOX_MOCK_STATE_NAMESPACE: pmx_${{ matrix.proxmox_schema }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout exact source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
+          version: "0.11.28"
           enable-cache: true
 
-      - name: Sync development environment
-        run: uv sync --frozen --extra test --group dev
+      - name: Download local distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
 
-      - name: Ruff (lint + format check)
+      - name: Download and hash served TestPyPI bytes
+        id: testpypi
+        env:
+          PACKAGE_NAME: ${{ needs.prepare-release.outputs.package_name }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
-          uv run ruff check .
-          uv run ruff format --check .
+          python3 tests/verify_repository_artifacts.py \
+            --repository-json-base https://test.pypi.org/pypi \
+            --package "$PACKAGE_NAME" \
+            --version "$VERSION" \
+            --dist dist \
+            --wait-seconds 300 \
+            --request-timeout 20 \
+            --download-timeout 60 \
+            --download-dir "$RUNNER_TEMP/proxmox-sdk-testpypi"
 
-      - name: Run ty type checks
-        run: uv run ty check proxmox_sdk tests --output-format concise
-
-      - name: Compile package
-        run: uv run python -m compileall proxmox_sdk
-
-      - name: Import smoke checks
+      - name: Install served wheel in a clean locked environment
+        env:
+          WHEEL_PATH: ${{ steps.testpypi.outputs.wheel_path }}
         run: |
-          uv run python -c "import proxmox_sdk.main"
-          uv run python -c "import proxmox_sdk.mock_main"
+          set -euo pipefail
+          test -f "$WHEEL_PATH"
+          uv --quiet export --locked --no-dev --no-emit-project \
+            --format requirements-txt \
+            --output-file "$RUNNER_TEMP/proxmox-sdk-requirements.txt"
+          uv venv --clear "$RUNNER_TEMP/proxmox-sdk-testpypi-venv"
+          uv --no-config pip install \
+            --python "$RUNNER_TEMP/proxmox-sdk-testpypi-venv/bin/python" \
+            --require-hashes \
+            --requirements "$RUNNER_TEMP/proxmox-sdk-requirements.txt"
+          uv --no-config pip install \
+            --python "$RUNNER_TEMP/proxmox-sdk-testpypi-venv/bin/python" \
+            --no-deps "$WHEEL_PATH"
 
-      - name: Run test suite (schema=${{ matrix.proxmox_schema }})
-        run: uv run pytest -n auto --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
+      - name: Verify served wheel outside source tree
+        working-directory: /tmp
+        env:
+          PROXMOX_MOCK_STORE: dict
+          WHEEL_PATH: ${{ steps.testpypi.outputs.wheel_path }}
+        run: |
+          "$RUNNER_TEMP/proxmox-sdk-testpypi-venv/bin/python" \
+            "$GITHUB_WORKSPACE/tests/verify_wheel_contract.py" "$WHEEL_PATH"
+          "$RUNNER_TEMP/proxmox-sdk-testpypi-venv/bin/python" -c \
+            "from proxmox_sdk.pdm import PDMClient; print(PDMClient.__name__)"
 
-  publish-docker:
-    name: publish proxmox-sdk Docker image
-    if: (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch'
+      - name: Run full source regression gates
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --extra test --group dev
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+          uv run --locked ty check proxmox_sdk tests --output-format concise
+          uv run --locked python -m compileall proxmox_sdk
+          uv run --locked python -c "import proxmox_sdk.main, proxmox_sdk.mock_main"
+          uv run --locked pytest -n 4 --cov=proxmox_sdk \
+            --cov-report=term-missing --cov-report=xml tests
+
+  preflight-pypi:
+    name: PyPI metadata preflight
+    if: needs.prepare-release.outputs.is_final == 'true'
     needs: [prepare-release, validate-testpypi]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      upload_required: ${{ steps.state.outputs.upload_required }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout verifier only
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Download reproducible distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          name: dist-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
 
-      - name: Build and publish runtime image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: raw
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            APP_MODULE=proxmox_sdk.mock_main:app
-          tags: |
-            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}
-            emersonfelipesp/proxmox-sdk:latest
-
-      - name: Build and publish nginx image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: nginx
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            APP_MODULE=proxmox_sdk.mock_main:app
-          tags: |
-            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}-nginx
-            emersonfelipesp/proxmox-sdk:latest-nginx
-
-      - name: Build and publish granian image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: granian
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            APP_MODULE=proxmox_sdk.mock_main:app
-          tags: |
-            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}-granian
-            emersonfelipesp/proxmox-sdk:latest-granian
+      - name: Check complete PyPI filename/hash metadata
+        id: state
+        env:
+          PACKAGE_NAME: ${{ needs.prepare-release.outputs.package_name }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          python3 tests/verify_repository_artifacts.py \
+            --repository-json-base https://pypi.org/pypi \
+            --package "$PACKAGE_NAME" \
+            --version "$VERSION" \
+            --dist dist \
+            --allow-absent \
+            --request-timeout 20 \
+            --download-timeout 60
 
   publish-pypi:
-    name: publish to PyPI
-    if: (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch'
-    needs: [prepare-release, validate-testpypi]
+    name: publish artifact-only payload to PyPI
+    if: needs.preflight-pypi.outputs.upload_required == 'true'
+    needs: [prepare-release, preflight-pypi]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pypi
     steps:
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
+      - name: Download reproducible distributions only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          python-version: '3.13'
+          name: dist-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v7
+      - name: Upload distributions with pinned PyPA publisher
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
-          enable-cache: false
-          ignore-empty-workdir: true
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+          packages-dir: dist/
 
-      - name: Download dist artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: dist
-          path: dist
-
-      - name: Upload to PyPI
-        env:
-          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          uv run --with twine python -m twine upload \
-            --non-interactive \
-            --skip-existing \
-            --repository-url https://upload.pypi.org/legacy/ \
-            --username "$PYPI_USERNAME" \
-            --password "$PYPI_TOKEN" \
-            dist/*
-
-  publish-service-images:
-    name: publish mock service image (${{ matrix.service }})
-    if: (github.event_name == 'release' && !github.event.release.prerelease) || github.event_name == 'workflow_dispatch'
-    needs: [prepare-release, publish-pypi]
+  verify-pypi-artifacts:
+    name: verify bytes served by PyPI
+    if: >-
+      always() &&
+      needs.prepare-release.outputs.is_final == 'true' &&
+      needs.preflight-pypi.result == 'success' &&
+      (needs.publish-pypi.result == 'success' || needs.publish-pypi.result == 'skipped')
+    needs: [prepare-release, preflight-pypi, publish-pypi]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      wheel_filename: ${{ steps.pypi.outputs.wheel_filename }}
+      wheel_sha256: ${{ steps.pypi.outputs.wheel_sha256 }}
+      wheel_size: ${{ steps.pypi.outputs.wheel_size }}
+    steps:
+      - name: Checkout verifier only
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
+
+      - name: Download reproducible distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .
+
+      - name: Download and hash bytes served by PyPI
+        id: pypi
+        env:
+          PACKAGE_NAME: ${{ needs.prepare-release.outputs.package_name }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          python3 tests/verify_repository_artifacts.py \
+            --repository-json-base https://pypi.org/pypi \
+            --package "$PACKAGE_NAME" \
+            --version "$VERSION" \
+            --dist dist \
+            --wait-seconds 300 \
+            --request-timeout 20 \
+            --download-timeout 60 \
+            --download-dir "$RUNNER_TEMP/proxmox-sdk-pypi"
+
+      - name: Record served-byte evidence
+        env:
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+          WHEEL_FILENAME: ${{ steps.pypi.outputs.wheel_filename }}
+          WHEEL_SHA256: ${{ steps.pypi.outputs.wheel_sha256 }}
+          WHEEL_SIZE: ${{ steps.pypi.outputs.wheel_size }}
+        run: |
+          jq -n \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg version "$VERSION" \
+            --arg filename "$WHEEL_FILENAME" \
+            --arg sha256 "$WHEEL_SHA256" \
+            --argjson size "$WHEEL_SIZE" \
+            '{source_sha: $source_sha, version: $version, wheel: {filename: $filename, sha256: $sha256, size: $size}}' \
+            > "$RUNNER_TEMP/pypi-served-byte-evidence.json"
+
+      - name: Upload verified PyPI wheel
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pypi-wheel-${{ needs.prepare-release.outputs.version }}-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.pypi.outputs.wheel_path }}
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 30
+
+      - name: Upload served-byte evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pypi-served-byte-evidence-${{ needs.prepare-release.outputs.version }}-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/pypi-served-byte-evidence.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90
+
+  publish-docker:
+    name: stage core Docker candidates
+    if: needs.prepare-release.outputs.is_final == 'true'
+    needs: [prepare-release, verify-pypi-artifacts]
+    uses: ./.github/workflows/docker-hub-publish.yml
+    with:
+      source_ref: ${{ needs.prepare-release.outputs.source_sha }}
+      mode: stage
+
+  build-service-images:
+    name: build + smoke service ${{ matrix.service }} / ${{ matrix.arch }}
+    if: needs.prepare-release.outputs.is_final == 'true'
+    needs: [prepare-release, verify-pypi-artifacts]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         service: [all, pve, pbs, pdm]
+        arch: [amd64, arm64]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout exact release source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+          ref: ${{ needs.prepare-release.outputs.source_sha }}
+
+      - name: Download verified PyPI wheel into build context
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: pypi-wheel-${{ needs.prepare-release.outputs.version }}-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+        with:
+          image: ${{ env.BINFMT_IMAGE }}
+          platforms: arm64
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        with:
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Build service image from hash-bound PyPI wheel
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          target: pypi-raw
+          platforms: linux/${{ matrix.arch }}
+          push: false
+          load: true
+          provenance: false
+          build-args: |
+            PROXMOX_SDK_VERSION=${{ needs.prepare-release.outputs.version }}
+            PROXMOX_SDK_WHEEL=${{ needs.verify-pypi-artifacts.outputs.wheel_filename }}
+            PROXMOX_SDK_WHEEL_SHA256=${{ needs.verify-pypi-artifacts.outputs.wheel_sha256 }}
+            PROXMOX_MOCK_SERVICE=${{ matrix.service }}
+            SOURCE_DATE_EPOCH=${{ needs.prepare-release.outputs.source_date_epoch }}
+          labels: |
+            io.nmulti.proxmox-sdk.wheel.sha256=${{ needs.verify-pypi-artifacts.outputs.wheel_sha256 }}
+            org.opencontainers.image.revision=${{ needs.prepare-release.outputs.source_sha }}
+            org.opencontainers.image.version=${{ needs.prepare-release.outputs.version }}
+          tags: local/proxmox-sdk:${{ needs.prepare-release.outputs.source_sha }}-service-${{ matrix.service }}-${{ matrix.arch }}
+          cache-from: type=gha,scope=service-${{ matrix.service }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=service-${{ matrix.service }}-${{ matrix.arch }}
+
+      - name: Verify selected service runtime and generate SBOM
+        env:
+          ARCH: ${{ matrix.arch }}
+          SERVICE: ${{ matrix.service }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          set -euo pipefail
+          image="local/proxmox-sdk:${SOURCE_SHA}-service-${SERVICE}-${ARCH}"
+          platform="linux/${ARCH}"
+          container="service-${SERVICE}-${ARCH}"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          docker run -d --platform "$platform" --name "$container" "$image"
+          ready=false
+          for attempt in $(seq 1 45); do
+            if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+              --spider http://127.0.0.1:8000/health >/dev/null 2>&1; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            docker logs "$container"
+            exit 1
+          fi
+          root_payload="$(docker exec "$container" wget -qO- http://127.0.0.1:8000/)"
+          version_payload="$(docker exec "$container" wget -qO- http://127.0.0.1:8000/version)"
+          printf '%s' "$root_payload" | jq -e --arg service "$SERVICE" '.service == $service'
+          printf '%s' "$version_payload" | jq -e --arg version "$VERSION" '.version == $version'
+          python3 tests/generate_container_sbom.py \
+            --image "$image" \
+            --platform "$platform" \
+            --output "/tmp/service-${SERVICE}-${ARCH}.cdx.json"
+          docker save --output "/tmp/service-${SERVICE}-${ARCH}.tar" "$image"
+
+      - name: Upload tested service archive and SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: service-image-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.service }}-${{ matrix.arch }}
+          path: |
+            /tmp/service-${{ matrix.service }}-${{ matrix.arch }}.tar
+            /tmp/service-${{ matrix.service }}-${{ matrix.arch }}.cdx.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 14
+
+  stage-service-images:
+    name: stage tested service manifests
+    if: needs.prepare-release.outputs.is_final == 'true'
+    needs: [prepare-release, verify-pypi-artifacts, build-service-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: dockerhub-candidate
+    outputs:
+      all_digest: ${{ steps.stage.outputs.all_digest }}
+      pve_digest: ${{ steps.stage.outputs.pve_digest }}
+      pbs_digest: ${{ steps.stage.outputs.pbs_digest }}
+      pdm_digest: ${{ steps.stage.outputs.pdm_digest }}
+    steps:
+      - name: Download tested service archives only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: service-image-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}-*
+          path: /tmp/service-images
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        with:
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
+
+      - name: Log in to Docker Hub candidate environment
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Wait for PyPI package to be available
+      - name: Push architecture candidates and assemble service manifests
+        id: stage
         env:
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+          WHEEL_SHA256: ${{ needs.verify-pypi-artifacts.outputs.wheel_sha256 }}
+        run: |
+          set -euo pipefail
+          : > /tmp/service-candidate-components.jsonl
+          for service in all pve pbs pdm; do
+            sources=()
+            for arch in amd64 arm64; do
+              archive="/tmp/service-images/service-${service}-${arch}.tar"
+              sbom="/tmp/service-images/service-${service}-${arch}.cdx.json"
+              test -f "$archive"
+              test -f "$sbom"
+              docker load --input "$archive"
+              local_image="local/proxmox-sdk:${SOURCE_SHA}-service-${service}-${arch}"
+              image_id="$(docker image inspect --format '{{.Id}}' "$local_image")"
+              image_arch="$(docker image inspect --format '{{.Architecture}}' "$local_image")"
+              image_revision="$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$local_image")"
+              image_version="$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.version"}}' "$local_image")"
+              image_wheel_sha256="$(docker image inspect --format '{{index .Config.Labels "io.nmulti.proxmox-sdk.wheel.sha256"}}' "$local_image")"
+              test "$image_arch" = "$arch"
+              test "$image_revision" = "$SOURCE_SHA"
+              test "$image_version" = "$VERSION"
+              test "$image_wheel_sha256" = "$WHEEL_SHA256"
+              jq -e --arg image_id "$image_id" --arg platform "linux/${arch}" \
+                --arg revision "$SOURCE_SHA" --arg version "$VERSION" \
+                --arg wheel_sha256 "$WHEEL_SHA256" '
+                .metadata.component["bom-ref"] == $image_id and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.platform" and .value == $platform) and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.label.org.opencontainers.image.revision" and
+                  .value == $revision) and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.label.org.opencontainers.image.version" and
+                  .value == $version) and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.label.io.nmulti.proxmox-sdk.wheel.sha256" and
+                  .value == $wheel_sha256)
+              ' "$sbom" >/dev/null
+              archive_sha256="$(sha256sum "$archive" | cut -d ' ' -f 1)"
+              sbom_sha256="$(sha256sum "$sbom" | cut -d ' ' -f 1)"
+              printf '%s' "$archive_sha256" | grep -Eq '^[0-9a-f]{64}$'
+              printf '%s' "$sbom_sha256" | grep -Eq '^[0-9a-f]{64}$'
+              arch_tag="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-service-${service}-${arch}"
+              docker tag "$local_image" "$arch_tag"
+              docker push "$arch_tag"
+              pushed_digest="$(docker image inspect --format '{{json .RepoDigests}}' "$arch_tag" \
+                | jq -er '[.[] | split("@")[1] | select(test("^sha256:[0-9a-f]{64}$"))] | unique | if length == 1 then .[0] else error("expected one pushed digest") end')"
+              arch_digest="$(docker buildx imagetools inspect "$arch_tag" \
+                --format '{{json .Manifest}}' | jq -er '.digest')"
+              printf '%s' "$arch_digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+              test "$arch_digest" = "$pushed_digest"
+              jq -nc \
+                --arg arch "$arch" \
+                --arg archive_sha256 "$archive_sha256" \
+                --arg image_id "$image_id" \
+                --arg registry_manifest_digest "$arch_digest" \
+                --arg sbom_sha256 "$sbom_sha256" \
+                --arg service "$service" \
+                '{arch: $arch, archive_sha256: $archive_sha256, image_id: $image_id, registry_manifest_digest: $registry_manifest_digest, sbom_sha256: $sbom_sha256, service: $service}' \
+                >> /tmp/service-candidate-components.jsonl
+              sources+=("${arch_tag}@${arch_digest}")
+            done
+            candidate_tag="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-service-${service}"
+            docker buildx imagetools create --tag "$candidate_tag" "${sources[@]}"
+            manifest="$(docker buildx imagetools inspect "$candidate_tag" \
+              --format '{{json .Manifest}}')"
+            printf '%s' "$manifest" | jq -e '
+              [.manifests[].platform | {os, architecture}]
+              | sort_by(.architecture)
+              == [{os: "linux", architecture: "amd64"}, {os: "linux", architecture: "arm64"}]
+            ' >/dev/null
+            digest="$(printf '%s' "$manifest" | jq -er '.digest')"
+            printf '%s' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+            printf '%s_digest=%s\n' "$service" "$digest" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Record service manifest, wheel, and SBOM bindings
+        env:
+          ALL_DIGEST: ${{ steps.stage.outputs.all_digest }}
+          PBS_DIGEST: ${{ steps.stage.outputs.pbs_digest }}
+          PDM_DIGEST: ${{ steps.stage.outputs.pdm_digest }}
+          PVE_DIGEST: ${{ steps.stage.outputs.pve_digest }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+          WHEEL_SHA256: ${{ needs.verify-pypi-artifacts.outputs.wheel_sha256 }}
+        run: |
+          jq -s \
+            --arg run_attempt "${{ github.run_attempt }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg version "$VERSION" \
+            --arg wheel_sha256 "$WHEEL_SHA256" \
+            --arg all "$ALL_DIGEST" \
+            --arg pve "$PVE_DIGEST" \
+            --arg pbs "$PBS_DIGEST" \
+            --arg pdm "$PDM_DIGEST" \
+            '{run_attempt: $run_attempt, run_id: $run_id, source_sha: $source_sha, version: $version, pypi_wheel_sha256: $wheel_sha256, manifests: {all: $all, pve: $pve, pbs: $pbs, pdm: $pdm}, components: .}' \
+            /tmp/service-candidate-components.jsonl \
+            > /tmp/service-candidate-evidence.json
+
+      - name: Upload service candidate manifest and SBOM evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: service-candidate-evidence-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/service-candidate-evidence.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90
+
+  smoke-service-candidates:
+    name: smoke staged service ${{ matrix.service }} / ${{ matrix.arch }}
+    if: needs.prepare-release.outputs.is_final == 'true'
+    needs: [prepare-release, stage-service-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [all, pve, pbs, pdm]
+        arch: [amd64, arm64]
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+        with:
+          image: ${{ env.BINFMT_IMAGE }}
+          platforms: arm64
+
+      - name: Pull service candidate by digest and verify identity
+        env:
+          ALL_DIGEST: ${{ needs.stage-service-images.outputs.all_digest }}
+          ARCH: ${{ matrix.arch }}
+          PBS_DIGEST: ${{ needs.stage-service-images.outputs.pbs_digest }}
+          PDM_DIGEST: ${{ needs.stage-service-images.outputs.pdm_digest }}
+          PVE_DIGEST: ${{ needs.stage-service-images.outputs.pve_digest }}
+          SERVICE: ${{ matrix.service }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
           VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
-          for i in $(seq 1 24); do
-            if curl -fs "https://pypi.org/pypi/proxmox-sdk/$VERSION/json" >/dev/null 2>&1; then
-              if pip install --dry-run --quiet "proxmox-sdk==$VERSION" >/dev/null 2>&1; then
-                echo "proxmox-sdk==$VERSION available on PyPI (JSON API + pip confirmed)"
-                exit 0
-              fi
+          set -euo pipefail
+          case "$SERVICE" in
+            all) digest="$ALL_DIGEST" ;;
+            pve) digest="$PVE_DIGEST" ;;
+            pbs) digest="$PBS_DIGEST" ;;
+            pdm) digest="$PDM_DIGEST" ;;
+            *) echo "Unsupported service: $SERVICE" >&2; exit 1 ;;
+          esac
+          printf '%s' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+          image="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-service-${SERVICE}@${digest}"
+          platform="linux/${ARCH}"
+          container="candidate-service-${SERVICE}-${ARCH}"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          docker pull --platform "$platform" "$image"
+          docker run -d --platform "$platform" --name "$container" "$image"
+          for attempt in $(seq 1 45); do
+            if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+              --spider http://127.0.0.1:8000/health >/dev/null 2>&1; then
+              root_payload="$(docker exec "$container" wget -qO- http://127.0.0.1:8000/)"
+              version_payload="$(docker exec "$container" wget -qO- http://127.0.0.1:8000/version)"
+              printf '%s' "$root_payload" | jq -e --arg service "$SERVICE" '.service == $service'
+              printf '%s' "$version_payload" | jq -e --arg version "$VERSION" '.version == $version'
+              exit 0
             fi
-            echo "Waiting for proxmox-sdk==$VERSION on PyPI (attempt $i/24)..."
-            sleep 30
+            sleep 2
           done
-          echo "Timed out waiting for proxmox-sdk==$VERSION on PyPI"
+          docker logs "$container"
           exit 1
 
-      - name: Build and publish ${{ matrix.service }} service image
-        uses: docker/build-push-action@v6
+  promote-all-docker-images:
+    name: fan-in and promote all stable Docker aliases
+    if: needs.prepare-release.outputs.is_final == 'true'
+    needs:
+      - prepare-release
+      - verify-pypi-artifacts
+      - publish-docker
+      - stage-service-images
+      - smoke-service-candidates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: proxmox-sdk-stable-docker-promotion
+      cancel-in-progress: false
+    environment: dockerhub-release
+    steps:
+      - name: Download core candidate provenance evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          context: .
-          target: pypi-raw
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            PROXMOX_SDK_VERSION=${{ needs.prepare-release.outputs.version }}
-            PROXMOX_MOCK_SERVICE=${{ matrix.service }}
-          tags: |
-            emersonfelipesp/proxmox-sdk:${{ needs.prepare-release.outputs.version }}-${{ matrix.service }}
-            emersonfelipesp/proxmox-sdk:latest-${{ matrix.service }}
+          name: docker-candidate-evidence-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/core-candidate-evidence
+
+      - name: Download service candidate provenance evidence
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: service-candidate-evidence-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/service-candidate-evidence
+
+      - name: Validate candidate provenance fan-in
+        id: evidence
+        env:
+          ALL_DIGEST: ${{ needs.stage-service-images.outputs.all_digest }}
+          GRANIAN_DIGEST: ${{ needs.publish-docker.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ needs.publish-docker.outputs.nginx_digest }}
+          PBS_DIGEST: ${{ needs.stage-service-images.outputs.pbs_digest }}
+          PDM_DIGEST: ${{ needs.stage-service-images.outputs.pdm_digest }}
+          PVE_DIGEST: ${{ needs.stage-service-images.outputs.pve_digest }}
+          RAW_DIGEST: ${{ needs.publish-docker.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+          WHEEL_SHA256: ${{ needs.verify-pypi-artifacts.outputs.wheel_sha256 }}
+        run: |
+          set -euo pipefail
+          core=/tmp/core-candidate-evidence/docker-candidate-evidence.json
+          service=/tmp/service-candidate-evidence/service-candidate-evidence.json
+          jq -e \
+            --arg run_attempt "${{ github.run_attempt }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --arg source_sha "$SOURCE_SHA" --arg version "$VERSION" \
+            --arg raw "$RAW_DIGEST" --arg nginx "$NGINX_DIGEST" \
+            --arg granian "$GRANIAN_DIGEST" '
+            .run_id == $run_id and .run_attempt == $run_attempt and
+            .source_sha == $source_sha and .version == $version and
+            .manifests == {raw: $raw, nginx: $nginx, granian: $granian} and
+            (.components | length == 6) and
+            ([.components[] | [.variant, .arch]] | sort) ==
+              [["granian", "amd64"], ["granian", "arm64"],
+               ["nginx", "amd64"], ["nginx", "arm64"],
+               ["raw", "amd64"], ["raw", "arm64"]] and
+            all(.components[];
+              (.image_id | test("^sha256:[0-9a-f]{64}$")) and
+              (.archive_sha256 | test("^[0-9a-f]{64}$")) and
+              (.sbom_sha256 | test("^[0-9a-f]{64}$")) and
+              (.registry_manifest_digest | test("^sha256:[0-9a-f]{64}$")))
+          ' "$core" >/dev/null
+          jq -e \
+            --arg run_attempt "${{ github.run_attempt }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --arg source_sha "$SOURCE_SHA" --arg version "$VERSION" \
+            --arg wheel_sha256 "$WHEEL_SHA256" \
+            --arg all "$ALL_DIGEST" --arg pve "$PVE_DIGEST" \
+            --arg pbs "$PBS_DIGEST" --arg pdm "$PDM_DIGEST" '
+            .run_id == $run_id and .run_attempt == $run_attempt and
+            .source_sha == $source_sha and .version == $version and
+            .pypi_wheel_sha256 == $wheel_sha256 and
+            .manifests == {all: $all, pve: $pve, pbs: $pbs, pdm: $pdm} and
+            (.components | length == 8) and
+            ([.components[] | [.service, .arch]] | sort) ==
+              [["all", "amd64"], ["all", "arm64"],
+               ["pbs", "amd64"], ["pbs", "arm64"],
+               ["pdm", "amd64"], ["pdm", "arm64"],
+               ["pve", "amd64"], ["pve", "arm64"]] and
+            all(.components[];
+              (.image_id | test("^sha256:[0-9a-f]{64}$")) and
+              (.archive_sha256 | test("^[0-9a-f]{64}$")) and
+              (.sbom_sha256 | test("^[0-9a-f]{64}$")) and
+              (.registry_manifest_digest | test("^sha256:[0-9a-f]{64}$")))
+          ' "$service" >/dev/null
+          core_sha256="$(sha256sum "$core" | cut -d ' ' -f 1)"
+          service_sha256="$(sha256sum "$service" | cut -d ' ' -f 1)"
+          printf 'core_sha256=%s\n' "$core_sha256" >> "$GITHUB_OUTPUT"
+          printf 'service_sha256=%s\n' "$service_sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Refuse to downgrade aliases from the current GitHub release
+        env:
+          CURRENT_RELEASE_ID: ${{ github.event.release.id }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$CURRENT_RELEASE_ID" | grep -Eq '^[0-9]+$'
+          latest_release_id="$(timeout 30s gh api \
+            "repos/${REPOSITORY}/releases/latest" --jq '.id')"
+          test "$latest_release_id" = "$CURRENT_RELEASE_ID"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        with:
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
+
+      - name: Log in to Docker Hub release environment
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Validate every candidate digest before promotion
+        env:
+          ALL_DIGEST: ${{ needs.stage-service-images.outputs.all_digest }}
+          GRANIAN_DIGEST: ${{ needs.publish-docker.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ needs.publish-docker.outputs.nginx_digest }}
+          PBS_DIGEST: ${{ needs.stage-service-images.outputs.pbs_digest }}
+          PDM_DIGEST: ${{ needs.stage-service-images.outputs.pdm_digest }}
+          PVE_DIGEST: ${{ needs.stage-service-images.outputs.pve_digest }}
+          RAW_DIGEST: ${{ needs.publish-docker.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          for identity in \
+            "raw:$RAW_DIGEST" \
+            "nginx:$NGINX_DIGEST" \
+            "granian:$GRANIAN_DIGEST" \
+            "service-all:$ALL_DIGEST" \
+            "service-pve:$PVE_DIGEST" \
+            "service-pbs:$PBS_DIGEST" \
+            "service-pdm:$PDM_DIGEST"; do
+            name="${identity%%:*}"
+            digest="${identity#*:}"
+            printf '%s' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+            candidate="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-${name}@${digest}"
+            observed="$(docker buildx imagetools inspect "$candidate" \
+              --format '{{json .Manifest}}' | jq -er '.digest')"
+            test "$observed" = "$digest"
+          done
+
+      - name: Promote stable aliases from verified candidate digests
+        env:
+          ALL_DIGEST: ${{ needs.stage-service-images.outputs.all_digest }}
+          GRANIAN_DIGEST: ${{ needs.publish-docker.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ needs.publish-docker.outputs.nginx_digest }}
+          PBS_DIGEST: ${{ needs.stage-service-images.outputs.pbs_digest }}
+          PDM_DIGEST: ${{ needs.stage-service-images.outputs.pdm_digest }}
+          PVE_DIGEST: ${{ needs.stage-service-images.outputs.pve_digest }}
+          RAW_DIGEST: ${{ needs.publish-docker.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: |
+          set -euo pipefail
+          for identity in \
+            "raw:$RAW_DIGEST" \
+            "nginx:$NGINX_DIGEST" \
+            "granian:$GRANIAN_DIGEST" \
+            "service-all:$ALL_DIGEST" \
+            "service-pve:$PVE_DIGEST" \
+            "service-pbs:$PBS_DIGEST" \
+            "service-pdm:$PDM_DIGEST"; do
+            name="${identity%%:*}"
+            digest="${identity#*:}"
+            case "$name" in
+              raw) suffix='' ;;
+              nginx) suffix='-nginx' ;;
+              granian) suffix='-granian' ;;
+              service-all) suffix='-all' ;;
+              service-pve) suffix='-pve' ;;
+              service-pbs) suffix='-pbs' ;;
+              service-pdm) suffix='-pdm' ;;
+              *) echo "Unsupported candidate identity: $name" >&2; exit 1 ;;
+            esac
+            candidate="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-${name}@${digest}"
+            version_tag="${IMAGE_REPOSITORY}:${VERSION}${suffix}"
+            latest_tag="${IMAGE_REPOSITORY}:latest${suffix}"
+            trace_tag="${IMAGE_REPOSITORY}:sha-${SOURCE_SHA}${suffix}"
+            docker buildx imagetools create \
+              --tag "$version_tag" --tag "$latest_tag" --tag "$trace_tag" \
+              "$candidate"
+            for alias in "$version_tag" "$latest_tag" "$trace_tag"; do
+              observed="$(docker buildx imagetools inspect "$alias" \
+                --format '{{json .Manifest}}' | jq -er '.digest')"
+              test "$observed" = "$digest"
+            done
+          done
+
+      - name: Record final promotion evidence
+        env:
+          ALL_DIGEST: ${{ needs.stage-service-images.outputs.all_digest }}
+          GRANIAN_DIGEST: ${{ needs.publish-docker.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ needs.publish-docker.outputs.nginx_digest }}
+          PBS_DIGEST: ${{ needs.stage-service-images.outputs.pbs_digest }}
+          PDM_DIGEST: ${{ needs.stage-service-images.outputs.pdm_digest }}
+          PVE_DIGEST: ${{ needs.stage-service-images.outputs.pve_digest }}
+          RAW_DIGEST: ${{ needs.publish-docker.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.prepare-release.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+          WHEEL_SHA256: ${{ needs.verify-pypi-artifacts.outputs.wheel_sha256 }}
+          CORE_EVIDENCE_SHA256: ${{ steps.evidence.outputs.core_sha256 }}
+          SERVICE_EVIDENCE_SHA256: ${{ steps.evidence.outputs.service_sha256 }}
+        run: |
+          jq -n \
+            --arg run_attempt "${{ github.run_attempt }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --arg version "$VERSION" \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg wheel_sha256 "$WHEEL_SHA256" \
+            --arg core_evidence_sha256 "$CORE_EVIDENCE_SHA256" \
+            --arg service_evidence_sha256 "$SERVICE_EVIDENCE_SHA256" \
+            --arg raw "$RAW_DIGEST" \
+            --arg nginx "$NGINX_DIGEST" \
+            --arg granian "$GRANIAN_DIGEST" \
+            --arg all "$ALL_DIGEST" \
+            --arg pve "$PVE_DIGEST" \
+            --arg pbs "$PBS_DIGEST" \
+            --arg pdm "$PDM_DIGEST" \
+            '{run_attempt: $run_attempt, run_id: $run_id, version: $version, source_sha: $source_sha, pypi_wheel_sha256: $wheel_sha256, candidate_evidence_sha256: {core: $core_evidence_sha256, service: $service_evidence_sha256}, manifests: {raw: $raw, nginx: $nginx, granian: $granian, all: $all, pve: $pve, pbs: $pbs, pdm: $pdm}}' \
+            > "$RUNNER_TEMP/release-promotion-evidence.json"
+
+      - name: Upload final promotion evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-promotion-evidence-${{ needs.prepare-release.outputs.version }}-${{ needs.prepare-release.outputs.source_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/release-promotion-evidence.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90

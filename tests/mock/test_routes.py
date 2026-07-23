@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sys
+from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,8 +19,9 @@ def _use_test_namespace(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def client() -> TestClient:
-    return TestClient(create_mock_app())
+def client() -> Iterator[TestClient]:
+    with TestClient(create_mock_app()) as test_client:
+        yield test_client
 
 
 def test_root(client: TestClient) -> None:

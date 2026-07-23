@@ -5,106 +5,149 @@ on:
     workflows: ["Release proxmox-sdk"]
     types: [completed]
 
+permissions:
+  contents: read
+
+env:
+  BINFMT_IMAGE: docker.io/tonistiigi/binfmt@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
+  BUILDKIT_IMAGE: docker.io/moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  IMAGE_REPOSITORY: emersonfelipesp/proxmox-sdk
+
 jobs:
-  verify-image:
-    name: verify Docker images on release
-    if: github.event.workflow_run.conclusion == 'success'
+  release-context:
+    name: resolve trusted final release
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      is_final: ${{ steps.release.outputs.is_final }}
+      source_sha: ${{ github.event.workflow_run.head_sha }}
+      version: ${{ steps.version.outputs.version }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout released source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
-      - name: Resolve release version
-        id: release
+      - name: Read and validate package version
+        id: version
         run: |
-          VERSION=$(python3 -c "
-          import tomllib, pathlib
-          print(tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'])
-          ")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          # Skip Docker verification for pre-release versions (rc, alpha, beta, dev)
-          if python3 -c "
-          import re, sys
-          v = '$VERSION'
-          if re.search(r'(a|b|rc|\.dev)\d*', v):
-              print(f'Pre-release {v!r} detected — skipping Docker image verification')
-              sys.exit(0)
-          sys.exit(1)
-          " 2>/dev/null; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          python3 <<'PY'
+          import os
+          import pathlib
+          import re
+          import tomllib
+
+          version = tomllib.loads(
+              pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
+          )["project"]["version"]
+          if re.fullmatch(r"[0-9][0-9A-Za-z._-]{0,127}", version) is None:
+              raise SystemExit(f"Unsafe release version: {version!r}")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"version={version}\n")
+          PY
+
+      - name: Confirm final GitHub Release context
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: v${{ steps.version.outputs.version }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          payload="$(timeout 30s gh api "repos/$REPOSITORY/releases/tags/$RELEASE_TAG")"
+          prerelease="$(printf '%s' "$payload" | jq -er '.prerelease')"
+          target_sha="$(timeout 30s gh api "repos/$REPOSITORY/commits/$RELEASE_TAG" --jq '.sha')"
+          case "$prerelease" in true|false) ;; *) exit 1 ;; esac
+          test "$target_sha" = "$SOURCE_SHA"
+          if [ "$prerelease" = false ]; then
+            echo 'is_final=true' >> "$GITHUB_OUTPUT"
           else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo 'is_final=false' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Pull release and latest images
-        if: steps.release.outputs.prerelease == 'false'
+  verify-image:
+    name: ${{ matrix.identity }} / ${{ matrix.arch }}
+    if: needs.release-context.outputs.is_final == 'true'
+    needs: release-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        identity: [raw, nginx, granian, all, pve, pbs, pdm]
+        arch: [amd64, arm64]
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+        with:
+          image: ${{ env.BINFMT_IMAGE }}
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        with:
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
+
+      - name: Verify alias digests, manifest platforms, and runtime
+        env:
+          ARCH: ${{ matrix.arch }}
+          IDENTITY: ${{ matrix.identity }}
+          SOURCE_SHA: ${{ needs.release-context.outputs.source_sha }}
+          VERSION: ${{ needs.release-context.outputs.version }}
         run: |
-          TAG="${{ steps.release.outputs.version }}"
-          docker pull emersonfelipesp/proxmox-sdk:"$TAG"
-          docker pull emersonfelipesp/proxmox-sdk:latest
-          docker pull emersonfelipesp/proxmox-sdk:"${TAG}-nginx"
-          docker pull emersonfelipesp/proxmox-sdk:latest-nginx
-          docker pull emersonfelipesp/proxmox-sdk:"${TAG}-granian"
-          docker pull emersonfelipesp/proxmox-sdk:latest-granian
-
-      - name: Smoke-test published startup
-        if: steps.release.outputs.prerelease == 'false'
-        run: |
-          set -eux
-          TAG="${{ steps.release.outputs.version }}"
-
-          # raw (HTTP)
-          docker rm -f proxmox-sdk-release-raw 2>/dev/null || true
-          docker run -d --name proxmox-sdk-release-raw \
-            -p 127.0.0.1:18080:8000 \
-            emersonfelipesp/proxmox-sdk:"$TAG"
-          for i in $(seq 1 40); do
-            if curl -fsS --max-time 5 http://127.0.0.1:18080/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-release-raw
-              break
-            fi
-            sleep 2
-            if [ "$i" -eq 40 ]; then
-              docker logs proxmox-sdk-release-raw
-              docker rm -f proxmox-sdk-release-raw
-              exit 1
-            fi
+          set -euo pipefail
+          case "$IDENTITY" in
+            raw) suffix=''; service='' ;;
+            nginx) suffix='-nginx'; service='' ;;
+            granian) suffix='-granian'; service='' ;;
+            all|pve|pbs|pdm) suffix="-${IDENTITY}"; service="$IDENTITY" ;;
+            *) echo "Unsupported image identity: $IDENTITY" >&2; exit 1 ;;
+          esac
+          version_tag="${IMAGE_REPOSITORY}:${VERSION}${suffix}"
+          latest_tag="${IMAGE_REPOSITORY}:latest${suffix}"
+          trace_tag="${IMAGE_REPOSITORY}:sha-${SOURCE_SHA}${suffix}"
+          version_manifest="$(timeout 60s docker buildx imagetools inspect "$version_tag" \
+            --format '{{json .Manifest}}')"
+          version_digest="$(printf '%s' "$version_manifest" | jq -er '.digest')"
+          printf '%s' "$version_manifest" | jq -e '
+            [.manifests[].platform | {os, architecture}]
+            | sort_by(.architecture)
+            == [{os: "linux", architecture: "amd64"}, {os: "linux", architecture: "arm64"}]
+          ' >/dev/null
+          for alias in "$latest_tag" "$trace_tag"; do
+            alias_digest="$(timeout 60s docker buildx imagetools inspect "$alias" \
+              --format '{{json .Manifest}}' | jq -er '.digest')"
+            test "$alias_digest" = "$version_digest"
           done
 
-          # nginx (HTTPS)
-          docker rm -f proxmox-sdk-release-nginx 2>/dev/null || true
-          docker run -d --name proxmox-sdk-release-nginx \
-            -p 127.0.0.1:18443:8000 \
-            emersonfelipesp/proxmox-sdk:"${TAG}-nginx"
-          for i in $(seq 1 40); do
-            if curl -kfsS --max-time 5 https://127.0.0.1:18443/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-release-nginx
-              break
+          platform="linux/${ARCH}"
+          image="${version_tag}@${version_digest}"
+          container="release-${IDENTITY}-${ARCH}"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          timeout 120s docker pull --platform "$platform" "$image"
+          docker run -d --platform "$platform" --name "$container" "$image"
+          case "$IDENTITY" in
+            nginx|granian) probe='https://127.0.0.1:8000' ;;
+            *) probe='http://127.0.0.1:8000' ;;
+          esac
+          for attempt in $(seq 1 45); do
+            if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+              --no-check-certificate --spider "${probe}/health" >/dev/null 2>&1; then
+              version_payload="$(docker exec "$container" wget -qO- \
+                --no-check-certificate "${probe}/version")"
+              printf '%s' "$version_payload" | jq -e --arg version "$VERSION" \
+                '.version == $version'
+              if [ -n "$service" ]; then
+                root_payload="$(docker exec "$container" wget -qO- "$probe/")"
+                printf '%s' "$root_payload" | jq -e --arg service "$service" \
+                  '.service == $service'
+              fi
+              exit 0
             fi
             sleep 2
-            if [ "$i" -eq 40 ]; then
-              docker logs proxmox-sdk-release-nginx
-              docker rm -f proxmox-sdk-release-nginx
-              exit 1
-            fi
           done
-
-          # granian (HTTPS)
-          docker rm -f proxmox-sdk-release-granian 2>/dev/null || true
-          docker run -d --name proxmox-sdk-release-granian \
-            -p 127.0.0.1:18444:8000 \
-            emersonfelipesp/proxmox-sdk:"${TAG}-granian"
-          for i in $(seq 1 40); do
-            if curl -kfsS --max-time 5 https://127.0.0.1:18444/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-release-granian
-              break
-            fi
-            sleep 2
-            if [ "$i" -eq 40 ]; then
-              docker logs proxmox-sdk-release-granian
-              docker rm -f proxmox-sdk-release-granian
-              exit 1
-            fi
-          done
+          docker logs "$container"
+          exit 1

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -9,8 +11,9 @@ from proxmox_sdk.pdm_mock_main import create_pdm_mock_app
 
 
 @pytest.fixture
-def client() -> TestClient:
-    return TestClient(create_pdm_mock_app())
+def client() -> Iterator[TestClient]:
+    with TestClient(create_pdm_mock_app()) as test_client:
+        yield test_client
 
 
 def test_health_and_root(client: TestClient) -> None:

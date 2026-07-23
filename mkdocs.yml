@@ -76,6 +76,7 @@ nav:
       - Hardware Discovery: node-hardware.md
   - Reference:
       - Contributing: development.md
+      - Release Evidence: release-evidence.md
       - Security: security.md
       - Performance: performance.md
   - CLI Reference:

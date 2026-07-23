@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -15,10 +17,11 @@ def _use_test_namespace(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture
-def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     monkeypatch.setenv("TESTING", "1")
     monkeypatch.setenv("PROXMOX_API_MODE", "mock")
-    return TestClient(create_app())
+    with TestClient(create_app()) as test_client:
+        yield test_client
 
 
 def test_root(client: TestClient) -> None:
@@ -61,5 +64,5 @@ def test_api_nodes(client: TestClient) -> None:
 def test_health_blocked_without_testing(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("TESTING", raising=False)
     monkeypatch.setenv("PROXMOX_API_MODE", "mock")
-    no_test_client = TestClient(create_app(), raise_server_exceptions=False)
-    assert no_test_client.get("/health").status_code == 404
+    with TestClient(create_app(), raise_server_exceptions=False) as no_test_client:
+        assert no_test_client.get("/health").status_code == 404
