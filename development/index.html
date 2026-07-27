@@ -18,7 +18,7 @@
         <link rel="prev" href="../node-hardware/">
       
       
-        <link rel="next" href="../security/">
+        <link rel="next" href="../release-evidence/">
       
       
         
@@ -2030,6 +2030,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../release-evidence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Evidence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../security/" class="md-nav__link">
         
   
@@ -3151,26 +3179,62 @@ and response models load lazily from <code>models/&lt;group&gt;.py</code> throug
 </span></code></pre></div>
 <h2 id="release-process">Release Process<a class="headerlink" href="#release-process" title="Permanent link">&para;</a></h2>
 <ol>
-<li><strong>Bump the version</strong> in <code>pyproject.toml</code> (<code>[project] version</code>). Use PEP 440 — e.g. <code>0.0.3</code>, <code>0.0.3.post1</code>, <code>0.1.0</code>.</li>
-<li><strong>Run pre-commit and tests</strong> to confirm the tree is clean:
+<li><strong>Prepare lifecycle evidence and an RC version.</strong> Use PEP 440, starting with
+   <code>X.Y.Zrc1</code>, and record requirements, design impact, test/coverage scope,
+   defects, operations, and approvals in the private issue/PR record.</li>
+<li><strong>Run the complete local gate</strong> before pushing the version change:
    <div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
-</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest
+</span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-n<span class="w"> </span><span class="m">4</span><span class="w"> </span>--cov<span class="o">=</span>proxmox_sdk<span class="w"> </span>--cov-report<span class="o">=</span>term-missing<span class="w"> </span>tests
 </span></code></pre></div></li>
-<li><strong>Commit the version bump:</strong>
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>git<span class="w"> </span>add<span class="w"> </span>pyproject.toml
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;chore: bump version to &lt;new-version&gt;&quot;</span>
-</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+<li><strong>Merge through the Gitea-first feature/release workflow.</strong> Create the
+   protected <code>v&lt;version&gt;</code> tag only after CI and the adversarial review gate are
+   clean. <code>.gitea/workflows/publish-package.yml</code> builds twice under the tag
+   commit's <code>SOURCE_DATE_EPOCH</code>, verifies byte-identical output, publishes the
+   Gitea package of record, and downloads the served bytes for a hash check.</li>
+<li><strong>Verify the package record</strong> with <code>nms git packages</code>. Promote an RC tag to
+   GitHub only after that record is complete; the <code>v*rc*</code> GitHub trigger uses
+   TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
+   <code>rcN</code> until validation is clean.</li>
+<li><strong>Create the final package of record</strong>, then copy
+   <code>.github/RELEASE_EVIDENCE_TEMPLATE.md</code> into the GitHub Release body, set the
+   exact version, copy <code>distribution_manifest_sha256</code> from the protected Gitea
+   evidence artifact, complete every checkbox with product-facing evidence, and
+   remove all private tracker references. GitHub rebuilds that manifest and
+   rejects a digest mismatch before public promotion.</li>
+<li><strong>Publish the final GitHub Release</strong> through the deploy workflow:
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v&lt;new-version&gt;<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span>--title<span class="w"> </span><span class="s2">&quot;v&lt;new-version&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span>--notes-file<span class="w"> </span>/tmp/proxmox-sdk-release-notes.md
 </span></code></pre></div></li>
-<li><strong>Create and push an annotated tag</strong> (must match <code>v&lt;pyproject-version&gt;</code>):
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>git<span class="w"> </span>tag<span class="w"> </span>v&lt;new-version&gt;
-</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>v&lt;new-version&gt;
-</span></code></pre></div></li>
-<li><strong>Create the GitHub release</strong> (triggers CI to publish to PyPI and Docker Hub):
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v&lt;new-version&gt;<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-26-2"><a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="w">  </span>--title<span class="w"> </span><span class="s2">&quot;v&lt;new-version&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-26-3"><a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a><span class="w">  </span>--notes<span class="w"> </span><span class="s2">&quot;Release notes here.&quot;</span>
-</span></code></pre></div></li>
+<li><strong>Validate public artifacts and downstream consumers.</strong> Confirm PyPI served
+   bytes, all amd64/arm64 Docker post-release checks, evidence artifacts, and
+   downstream version updates before closing the lifecycle record.</li>
 </ol>
+<p>The release workflow serializes each ref, derives <code>SOURCE_DATE_EPOCH</code> from the
+source commit, and requires two builds to produce the same wheel/sdist SHA256
+pair. Repository metadata preflight is followed by served-byte downloads at
+TestPyPI and PyPI. Existing versions with different or incomplete artifacts
+fail closed; blind <code>--skip-existing</code> behavior is forbidden.</p>
+<p>PyPI and Docker credentials are available only to protected, artifact-only
+environment jobs. The PyPI postflight wheel filename and SHA256 are passed into
+service-image builds, whose Dockerfile verifies the wheel before local
+installation. Core and service images build without registry credentials,
+produce CycloneDX inventories, and run on amd64 and arm64. Candidate manifests
+are then staged and smoked by digest. The QEMU and BuildKit helpers are pinned
+by reviewed multi-architecture digests. Staging verifies the requested platform
+and provenance labels, binds every Docker archive and SBOM hash to its registry
+manifest digest, and uploads source-SHA-qualified evidence. A single final
+fan-in validates and hashes those evidence documents before writing stable
+aliases, and only after all seven image identities pass. Reruns replace only
+artifacts bearing that same validated source SHA, run ID, and run attempt;
+candidate tags carry the same run token so same-commit CI and release jobs
+cannot overwrite one another.</p>
+<p>The repository cannot create environment reviewers, environment secrets,
+deployment-branch rules, protected tags, or isolated Gitea runners. Configure
+those prerequisites exactly as listed in
+<a href="../release-evidence/">Release evidence and package promotion</a> before enabling a
+publisher. <code>sha-&lt;commit&gt;</code> is a commit traceability tag, while the resolved OCI
+manifest digest is the immutable deployment identity.</p>
 <h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Issues:</strong> https://github.com/emersonfelipesp/proxmox-sdk/issues</li>
