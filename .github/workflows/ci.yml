@@ -8,57 +8,114 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
+          version: "0.11.28"
           enable-cache: true
-          python-version: "3.12"
+          python-version: "3.12.13"
 
       - name: Sync dependencies
-        run: uv sync --frozen --group dev
+        run: |
+          uv lock --check
+          uv sync --locked --group dev
+
+      - name: Validate GitHub Actions workflows with actionlint
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/actionlint
+          curl --fail --show-error --silent --location \
+            --output /tmp/actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          printf '%s  %s\n' "$ACTIONLINT_SHA256" /tmp/actionlint.tar.gz | sha256sum --check --strict -
+          tar --no-same-owner -xzf /tmp/actionlint.tar.gz -C /tmp/actionlint actionlint
+          /tmp/actionlint/actionlint -color .github/workflows/*.yml
+          /tmp/actionlint/actionlint -color \
+            -ignore 'label ".*" is unknown' .gitea/workflows/*.yml
 
       - name: Run ruff check
-        run: uv run ruff check .
+        run: uv run --locked ruff check .
 
       - name: Run ruff format check
-        run: uv run ruff format --check .
+        run: uv run --locked ruff format --check .
 
       - name: Run ty type checks
-        run: uv run ty check proxmox_sdk tests --output-format concise
+        run: uv run --locked ty check proxmox_sdk tests --output-format concise
 
   syntax:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
+          version: "0.11.28"
           enable-cache: true
-          python-version: "3.12"
+          python-version: "3.12.13"
 
       - name: Sync dependencies
-        run: uv sync --frozen --extra test --group dev
+        run: |
+          uv lock --check
+          uv sync --locked --extra test --group dev
 
       - name: Compile package
-        run: uv run python -m compileall proxmox_sdk tests
+        run: uv run --locked python -m compileall proxmox_sdk tests
 
       - name: Import smoke checks
         run: |
-          uv run python -c "import proxmox_sdk.main"
-          uv run python -c "import proxmox_sdk.mock_main"
-          uv run python -c "import proxmox_sdk.pdm_mock_main"
+          uv run --locked python -c "import proxmox_sdk.main"
+          uv run --locked python -c "import proxmox_sdk.mock_main"
+          uv run --locked python -c "import proxmox_sdk.pdm_mock_main"
+
+  package:
+    name: Build and verify wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+          python-version: "3.12.13"
+
+      - name: Sync runtime dependencies
+        run: |
+          uv lock --check
+          uv sync --locked --group dev
+
+      - name: Build distribution
+        run: uv run --locked python -m build --no-isolation
+
+      - name: Validate package metadata
+        run: uv run --locked python -m twine check dist/*
+
+      - name: Verify installed-wheel PDM contract
+        run: uv run --locked python tests/verify_wheel_contract.py dist/*.whl
 
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -68,38 +125,36 @@ jobs:
       PROXMOX_MOCK_STATE_NAMESPACE: pmx_${{ matrix.proxmox_schema }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
+          version: "0.11.28"
           enable-cache: true
-          python-version: "3.12"
+          python-version: "3.12.13"
 
       - name: Sync dependencies
-        run: uv sync --frozen --extra test --group dev
+        run: |
+          uv lock --check
+          uv sync --locked --extra test --group dev
 
       - name: Run mocked schema-driven tests (schema=${{ matrix.proxmox_schema }})
-        run: uv run pytest -n auto --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
+        run: uv run --locked pytest -n 4 --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: proxmox-sdk-coverage-${{ matrix.proxmox_schema }}
           path: coverage.xml
 
-  # Publish Docker images:
-  # - Dev images on main/testing branch push/PR (dev tag)
-  # - Production images on GitHub Release (version tag + latest)
+  # CI is the sole publisher for mutable dev + commit-traceability SHA tags. Stable
+  # version/latest tags are published only by the release workflow.
   docker-images:
-    name: Publish Docker images (Hub)
-    needs: [lint, syntax, test]
-    if: >
-      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/testing')) ||
-      (github.event_name == 'release' && github.event.action == 'published' && !github.event.release.prerelease)
+    name: Publish Docker dev images (Hub)
+    needs: [lint, syntax, package, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/testing')
     uses: ./.github/workflows/docker-hub-publish.yml
     with:
       source_ref: ${{ github.sha }}
       mode: publish
-      release: ${{ github.event_name == 'release' }}
-    secrets: inherit

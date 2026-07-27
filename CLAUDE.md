@@ -29,6 +29,7 @@ proxmox_sdk/
 ├── main.py                   # Full API server (mock OR real mode)
 ├── mock_main.py              # Standalone mock-only server entrypoint
 ├── schema.py                 # Schema management (load/save OpenAPI)
+├── generated/pdm/latest/     # Packaged PDM OpenAPI + raw capture artifacts
 ├── rate_limit.py             # SlowAPI rate limiting configuration
 ├── exception.py              # Exception classes
 ├── logger.py                 # Logging utilities
@@ -183,6 +184,12 @@ uv run python -c "import proxmox_sdk.mock_main"
 uv run python -c "from proxmox_sdk.sdk import ProxmoxSDK"
 uv run python -c "from proxmox_sdk.sdk.sync import SyncProxmoxSDK"
 
+# Build and verify runtime artifacts from the wheel, outside the source tree
+uv lock --check
+uv sync --locked --group dev
+uv run --locked python -m build --no-isolation
+uv run --locked python tests/verify_wheel_contract.py dist/*.whl
+
 # Test CLI imports
 uv run python -c "from proxmox_sdk.proxmox_cli.cli import cli"
 
@@ -239,54 +246,45 @@ If any hook fails, fix the issues and rerun until all hooks pass.
 
 ## Release Process
 
-A release publishes the package to PyPI and pushes all three Docker image variants (`raw`, `nginx`, `granian`) to Docker Hub with both versioned and `latest` tags.
+Follow the package-first lifecycle in `docs/release-evidence.md` and the
+workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
 
-### Steps
+1. Record NASA-aligned requirements, design, implementation, test/coverage,
+   defect, operations, and approval evidence, then prepare `X.Y.ZrcN`.
+2. Merge through Gitea review and push the protected matching tag. The Gitea
+   workflow builds the wheel/sdist twice under the commit `SOURCE_DATE_EPOCH`,
+   runs all gates, publishes the package of record, and verifies served bytes.
+3. Verify the record with `nms git packages`, promote the RC tag, and require the
+   GitHub `v*rc*` TestPyPI matrix to pass. RCs cannot reach public PyPI or stable
+   Docker tags.
+4. After a clean RC, create and verify the final Gitea package of record. Fill
+   `.github/RELEASE_EVIDENCE_TEMPLATE.md` with public product evidence and the
+   Gitea evidence artifact's `distribution_manifest_sha256`, then publish the
+   matching non-prerelease GitHub Release. GitHub rebuilds that manifest and
+   rejects a mismatch.
+5. The public workflow publishes from artifacts in protected environments,
+   downloads the wheel back from PyPI, and binds service images to that served
+   filename/SHA256. Core and service images build without registry credentials,
+   emit CycloneDX inventories, and run on amd64 and arm64 before candidate
+   manifests converge at one stable-alias fan-in. Archives, SBOMs, candidate
+   tags, and evidence are source/run/attempt-bound; the serialized fan-in
+   refuses to move aliases for a release that is no longer current latest.
+6. Validate the post-release 14-image matrix, update downstream consumers, and
+   archive the retained distribution, PyPI, SBOM, manifest, promotion, coverage,
+   and defect evidence.
 
-1. **Bump the version** in `pyproject.toml` (`[project] version`). Use PEP 440 — e.g. `0.0.2.post4`, `0.0.3`, `0.1.0`.
+Configure the `testpypi`, `pypi`, `dockerhub-candidate`,
+`dockerhub-development`, `dockerhub-release`, and `gitea-package-registry`
+environments exactly as documented. Environment secrets, required reviewers,
+deployment branch/tag policies, protected tags, and isolated Gitea
+`release-builder`/`release-publisher` runners are external prerequisites and
+cannot be created by workflow YAML.
 
-2. **Run pre-commit and tests** to confirm the tree is clean:
-   ```bash
-   uv run pre-commit run --all-files
-   uv run pytest
-   ```
-
-3. **Commit the version bump**:
-   ```bash
-   git add pyproject.toml
-   git commit -m "chore: bump version to <new-version>"
-   ```
-
-4. **Push the commit**:
-   ```bash
-   git push origin main
-   ```
-
-5. **Create and push the annotated tag** (must match `v<pyproject-version>`):
-   ```bash
-   git tag v<new-version>
-   git push origin v<new-version>
-   ```
-
-6. **Create the GitHub release** (triggers `publish-testpypi.yml` which publishes to PyPI and Docker Hub):
-   ```bash
-   gh release create v<new-version> \
-     --title "v<new-version>" \
-     --notes "Release notes here."
-   ```
-
-7. **Update downstream consumers** — bump `proxmox-sdk==<new-version>` in `proxbox-api/pyproject.toml` and any other dependents, commit, and push.
-
-### What CI does on release
-
-`publish-testpypi.yml` runs when a GitHub Release is published:
-- Validates that the tag matches `pyproject.toml` version
-- Builds and uploads `dist/` to TestPyPI
-- Validates the install on Python 3.11, 3.12, 3.13
-- Publishes to PyPI (`--skip-existing`)
-- Builds and pushes all three Docker images with `<version>` and `latest` tags
-
-`ci.yml` `docker-images` job also fires and pushes the same images via `docker-hub-publish.yml`.
+An OCI digest is the immutable image identity. A `sha-<commit>` alias is a
+commit traceability tag, not an immutable object. Docker Hub has no multi-image
+atomic tag transaction: the pipeline gates all candidates before promotion and
+can safely re-point aliases from recorded digests after an external partial
+failure, but it never rebuilds or deletes a released artifact.
 
 ## Key Endpoints
 

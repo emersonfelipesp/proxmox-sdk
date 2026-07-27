@@ -1,0 +1,11 @@
+**
+!Dockerfile
+!README.md
+!pyproject.toml
+!uv.lock
+!proxmox_sdk/
+!proxmox_sdk/**
+!docker/
+!docker/**
+!dist/
+!dist/**

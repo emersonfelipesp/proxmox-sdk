@@ -1,0 +1,395 @@
+name: Publish Gitea package of record
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gitea-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-package:
+    name: build and validate package of record
+    runs-on: release-builder
+    timeout-minutes: 60
+    outputs:
+      package_name: ${{ steps.meta.outputs.package_name }}
+      source_date_epoch: ${{ steps.meta.outputs.source_date_epoch }}
+      source_sha: ${{ steps.meta.outputs.source_sha }}
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Checkout exact tag source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+
+      - name: Sync locked release tools
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --extra test --group dev
+
+      - name: Validate protected tag and package metadata
+        id: meta
+        env:
+          EVENT_REF: ${{ github.ref }}
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EVENT_SHA"
+          git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          git merge-base --is-ancestor "$EVENT_SHA" refs/remotes/origin/main
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+          import subprocess
+          import tomllib
+
+          from packaging.version import InvalidVersion, Version
+
+          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          package_name = data["project"]["name"]
+          version_text = data["project"]["version"]
+          if package_name != "proxmox-sdk":
+              raise SystemExit(f"Unexpected package name: {package_name!r}")
+          try:
+              parsed_version = Version(version_text)
+          except InvalidVersion as exc:
+              raise SystemExit(f"Invalid PEP 440 version: {version_text!r}") from exc
+          if str(parsed_version) != version_text:
+              raise SystemExit(
+                  f"Version must use canonical PEP 440 spelling: {parsed_version}"
+              )
+          if parsed_version.local is not None or parsed_version.dev is not None:
+              raise SystemExit("Release versions cannot contain local or development segments")
+          if parsed_version.pre is not None and parsed_version.pre[0] != "rc":
+              raise SystemExit("Prerelease publication is restricted to rc versions")
+          if re.fullmatch(r"[0-9][0-9A-Za-z._-]{0,127}", version_text) is None:
+              raise SystemExit(f"Unsafe package version: {version_text!r}")
+          if os.environ["EVENT_REF"] != f"refs/tags/v{version_text}":
+              raise SystemExit("Tag does not match pyproject version")
+          epoch = int(
+              subprocess.check_output(
+                  ["git", "show", "-s", "--format=%ct", "HEAD"], text=True
+              ).strip()
+          )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"package_name={package_name}\n")
+              output.write(f"source_date_epoch={epoch}\n")
+              output.write(f"source_sha={os.environ['EVENT_SHA']}\n")
+              output.write(f"version={version_text}\n")
+          PY
+
+      - name: Run static analysis and complete regression suite
+        run: |
+          set -euo pipefail
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+          uv run --locked ty check proxmox_sdk tests --output-format concise
+          uv run --locked python -m compileall proxmox_sdk tests
+          uv run --locked pytest -n 4 --cov=proxmox_sdk \
+            --cov-report=term-missing --cov-report=xml tests
+
+      - name: Build twice and require byte-for-byte reproducibility
+        env:
+          SOURCE_DATE_EPOCH: ${{ steps.meta.outputs.source_date_epoch }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts
+          uv run --locked python tests/build_reproducible_distributions.py \
+            --source-date-epoch "$SOURCE_DATE_EPOCH" \
+            --output-dir dist \
+            --manifest release-artifacts/distribution-manifest.json
+          uv run --locked python -m twine check dist/*
+          uv run --locked python tests/verify_wheel_contract.py dist/*.whl
+
+      - name: Record source identity
+        env:
+          SOURCE_SHA: ${{ steps.meta.outputs.source_sha }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          jq --arg source_sha "$SOURCE_SHA" --arg version "$VERSION" \
+            '. + {source_sha: $source_sha, version: $version}' \
+            release-artifacts/distribution-manifest.json \
+            > release-artifacts/distribution-manifest.complete.json
+          mv release-artifacts/distribution-manifest.complete.json \
+            release-artifacts/distribution-manifest.json
+
+      - name: Upload package candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gitea-dist-${{ steps.meta.outputs.source_sha }}
+          path: |
+            dist/*
+            release-artifacts/distribution-manifest.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90
+
+  publish-package:
+    name: publish and verify artifact-only Gitea package
+    needs: prepare-package
+    runs-on: release-publisher
+    timeout-minutes: 20
+    environment: gitea-package-registry
+    steps:
+      - name: Download validated package candidate only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: gitea-dist-${{ needs.prepare-package.outputs.source_sha }}
+          path: .
+
+      - name: Create bounded same-origin package verifier
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/gitea-package-verifier"
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import textwrap
+
+          script = textwrap.dedent(r'''
+          from __future__ import annotations
+
+          import argparse
+          import base64
+          import hashlib
+          import html.parser
+          import json
+          import os
+          import pathlib
+          import re
+          import sys
+          import time
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          SUFFIXES = (".whl", ".tar.gz")
+          MAX_BYTES = 512 * 1024 * 1024
+
+
+          class Links(html.parser.HTMLParser):
+              def __init__(self) -> None:
+                  super().__init__()
+                  self.values: list[str] = []
+
+              def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+                  if tag == "a":
+                      value = dict(attrs).get("href")
+                      if value:
+                          self.values.append(value)
+
+
+          class SameOriginRedirect(urllib.request.HTTPRedirectHandler):
+              def __init__(self, origin: tuple[str, str]) -> None:
+                  super().__init__()
+                  self.origin = origin
+
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  parsed = urllib.parse.urlsplit(newurl)
+                  if (parsed.scheme, parsed.netloc) != self.origin:
+                      raise RuntimeError("Package download redirected across origins")
+                  return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+          def sha256(path: pathlib.Path) -> str:
+              digest = hashlib.sha256()
+              with path.open("rb") as handle:
+                  for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                      digest.update(chunk)
+              return digest.hexdigest()
+
+
+          def main() -> int:
+              parser = argparse.ArgumentParser()
+              parser.add_argument("--require-present", action="store_true")
+              args = parser.parse_args()
+              base = os.environ["SIMPLE_INDEX_URL"].rstrip("/") + "/"
+              package = os.environ["PACKAGE_NAME"]
+              version = os.environ["VERSION"]
+              actor = os.environ["PACKAGE_USERNAME"]
+              token = os.environ["PACKAGE_TOKEN"]
+              source_sha = os.environ["SOURCE_SHA"]
+              if not actor or not token:
+                  raise SystemExit("Package publisher credentials are missing")
+              if re.fullmatch(r"[0-9a-f]{40}", source_sha) is None:
+                  raise SystemExit("Source SHA is not a full lowercase commit digest")
+              parsed_base = urllib.parse.urlsplit(base)
+              if parsed_base.scheme != "https" or not parsed_base.netloc:
+                  raise SystemExit("Package index must use HTTPS")
+              auth = base64.b64encode(f"{actor}:{token}".encode()).decode()
+              opener = urllib.request.build_opener(
+                  SameOriginRedirect((parsed_base.scheme, parsed_base.netloc))
+              )
+
+              local = {
+                  path.name: path
+                  for path in pathlib.Path("dist").iterdir()
+                  if path.is_file() and path.name.endswith(SUFFIXES)
+              }
+              wheels = [name for name in local if name.endswith(".whl")]
+              sdists = [name for name in local if name.endswith(".tar.gz")]
+              if len(local) != 2 or len(wheels) != 1 or len(sdists) != 1:
+                  raise SystemExit(f"Expected one wheel and one sdist: {sorted(local)}")
+              manifest_path = pathlib.Path("release-artifacts/distribution-manifest.json")
+              manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+              expected_hashes = {name: sha256(path) for name, path in sorted(local.items())}
+              if (
+                  manifest.get("source_sha") != source_sha
+                  or manifest.get("version") != version
+                  or manifest.get("artifacts") != expected_hashes
+              ):
+                  raise SystemExit("Distribution manifest is not bound to this source/artifact set")
+              manifest_sha256 = sha256(manifest_path)
+              normalized = re.sub(r"[-_.]+", "-", package).lower()
+              index_url = urllib.parse.urljoin(base, normalized + "/")
+              request = urllib.request.Request(
+                  index_url,
+                  headers={"Authorization": f"Basic {auth}", "User-Agent": "proxmox-sdk-gitea-verifier/1"},
+              )
+              try:
+                  with opener.open(request, timeout=20) as response:
+                      payload = response.read(4 * 1024 * 1024 + 1)
+              except urllib.error.HTTPError as exc:
+                  if exc.code == 404 and not args.require_present:
+                      print("upload_required=true", file=open(os.environ["GITHUB_OUTPUT"], "a"))
+                      return 0
+                  raise
+              if len(payload) > 4 * 1024 * 1024:
+                  raise SystemExit("Simple-index response is too large")
+              links = Links()
+              links.feed(payload.decode("utf-8"))
+              distribution = re.sub(r"[-_.]+", "_", package)
+              version_prefix = f"{distribution}-{version}"
+              remote = {}
+              for href in links.values:
+                  filename = pathlib.PurePosixPath(
+                      urllib.parse.unquote(urllib.parse.urlsplit(href).path)
+                  ).name
+                  is_version = filename == f"{version_prefix}.tar.gz" or (
+                      filename.startswith(version_prefix + "-") and filename.endswith(".whl")
+                  )
+                  if is_version:
+                      remote[filename] = urllib.parse.urljoin(index_url, href)
+              if not remote and not args.require_present:
+                  print("upload_required=true", file=open(os.environ["GITHUB_OUTPUT"], "a"))
+                  return 0
+              if set(remote) != set(local):
+                  raise SystemExit(
+                      f"Gitea artifact set mismatch: local={sorted(local)}, remote={sorted(remote)}"
+                  )
+
+              evidence = {}
+              for filename, url in sorted(remote.items()):
+                  parsed = urllib.parse.urlsplit(url)
+                  if (parsed.scheme, parsed.netloc) != (parsed_base.scheme, parsed_base.netloc):
+                      raise SystemExit("Package link crosses origins")
+                  download = urllib.request.Request(
+                      url,
+                      headers={"Authorization": f"Basic {auth}", "User-Agent": "proxmox-sdk-gitea-verifier/1"},
+                  )
+                  digest = hashlib.sha256()
+                  size = 0
+                  deadline = time.monotonic() + 60
+                  with opener.open(download, timeout=20) as response:
+                      while True:
+                          if time.monotonic() >= deadline:
+                              raise SystemExit("Package download exceeded total deadline")
+                          chunk = response.read(min(1024 * 1024, MAX_BYTES - size + 1))
+                          if not chunk:
+                              break
+                          size += len(chunk)
+                          if size > MAX_BYTES:
+                              raise SystemExit("Package download exceeded size limit")
+                          digest.update(chunk)
+                  served_sha = digest.hexdigest()
+                  local_sha = sha256(local[filename])
+                  if served_sha != local_sha:
+                      raise SystemExit(
+                          f"Served-byte mismatch for {filename}: local={local_sha}, served={served_sha}"
+                      )
+                  evidence[filename] = {"sha256": served_sha, "size": size}
+              pathlib.Path(os.environ["RUNNER_TEMP"], "gitea-package-evidence.json").write_text(
+                  json.dumps(
+                      {
+                          "artifacts": evidence,
+                          "distribution_manifest_sha256": manifest_sha256,
+                          "package": package,
+                          "source_sha": source_sha,
+                          "version": version,
+                      },
+                      indent=2,
+                      sort_keys=True,
+                  ) + "\n",
+                  encoding="utf-8",
+              )
+              print("upload_required=false", file=open(os.environ["GITHUB_OUTPUT"], "a"))
+              return 0
+
+
+          if __name__ == "__main__":
+              raise SystemExit(main())
+          ''').lstrip()
+          pathlib.Path(
+              os.environ["RUNNER_TEMP"], "gitea-package-verifier", "verify.py"
+          ).write_text(script, encoding="utf-8")
+          PY
+
+      - name: Check whether exact served bytes already exist
+        id: preflight
+        env:
+          PACKAGE_NAME: ${{ needs.prepare-package.outputs.package_name }}
+          PACKAGE_TOKEN: ${{ secrets.GITEA_PACKAGE_TOKEN }}
+          PACKAGE_USERNAME: ${{ secrets.GITEA_PACKAGE_USERNAME }}
+          SIMPLE_INDEX_URL: ${{ github.server_url }}/api/packages/${{ github.repository_owner }}/pypi/simple
+          SOURCE_SHA: ${{ needs.prepare-package.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-package.outputs.version }}
+        run: |
+          python3 "$RUNNER_TEMP/gitea-package-verifier/verify.py"
+
+      - name: Upload package of record with pinned PyPA publisher
+        if: steps.preflight.outputs.upload_required == 'true'
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+        with:
+          user: ${{ secrets.GITEA_PACKAGE_USERNAME }}
+          password: ${{ secrets.GITEA_PACKAGE_TOKEN }}
+          repository-url: ${{ github.server_url }}/api/packages/${{ github.repository_owner }}/pypi
+          packages-dir: dist/
+
+      - name: Verify bytes served by the package of record
+        env:
+          PACKAGE_NAME: ${{ needs.prepare-package.outputs.package_name }}
+          PACKAGE_TOKEN: ${{ secrets.GITEA_PACKAGE_TOKEN }}
+          PACKAGE_USERNAME: ${{ secrets.GITEA_PACKAGE_USERNAME }}
+          SIMPLE_INDEX_URL: ${{ github.server_url }}/api/packages/${{ github.repository_owner }}/pypi/simple
+          SOURCE_SHA: ${{ needs.prepare-package.outputs.source_sha }}
+          VERSION: ${{ needs.prepare-package.outputs.version }}
+        run: |
+          python3 "$RUNNER_TEMP/gitea-package-verifier/verify.py" --require-present
+
+      - name: Upload package-record evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gitea-package-evidence-${{ needs.prepare-package.outputs.version }}-${{ needs.prepare-package.outputs.source_sha }}
+          path: ${{ runner.temp }}/gitea-package-evidence.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90

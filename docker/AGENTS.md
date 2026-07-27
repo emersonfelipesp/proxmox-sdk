@@ -35,13 +35,16 @@ Container runtime configuration for the `proxmox-sdk` service. This directory ho
 
 ## Dockerfile Overview
 
-The `Dockerfile` at the repo root uses five stages:
+The `Dockerfile` at the repo root uses six functional stages plus a final raw alias:
 
-1. **builder** — installs deps with `uv` into a virtualenv at `/app/.venv` (Alpine base, `python:3.13-alpine`)
+1. **builder** — installs the locked, non-editable project plus exact Granian
+   into `/app/.venv` (reviewed Python 3.13.14/Alpine 3.24 multi-arch digest)
 2. **runtime-base** — minimal Alpine Python image with the virtualenv copied in
 3. **raw** (default) — pure uvicorn, no proxy; `docker build .` produces this image
 4. **nginx** — extends raw; adds nginx + supervisor + mkcert, HTTPS-only
 5. **granian** — extends runtime-base; adds granian + mkcert, HTTPS-only via granian's native TLS
+6. **pypi-raw** — installs hash-locked dependencies and the exact wheel bytes
+   downloaded back from PyPI for all/pve/pbs/pdm service images
 
 ## Image Variants
 
@@ -58,6 +61,22 @@ The `Dockerfile` at the repo root uses five stages:
 - The granian image requires the TLS key in PKCS#8 format; `entrypoint-granian.sh` converts it automatically with `openssl pkcs8`.
 - For Let's Encrypt / production TLS, configure nginx externally with cert volume mounts.
 - `TARGETARCH` build arg (set by BuildKit) is used instead of `dpkg --print-architecture` for Alpine compatibility when downloading the mkcert binary.
+- Python and uv images are pinned by reviewed multi-architecture digests. uv and
+  Granian and every direct APK input are exact-versioned, and mkcert has an
+  architecture-specific SHA256 gate. Update the version, index digest, APK
+  versions, and checksums together.
+- The source-built runtime uses `uv sync --locked --no-dev --no-editable`. The
+  PyPI-backed service image exports hash-locked dependencies, verifies
+  `PROXMOX_SDK_WHEEL_SHA256`, installs that local served-byte wheel with
+  `--no-deps`, and confirms the installed version.
+- Every core and service image is built and run on amd64 and arm64 before
+  promotion, and each tested archive has a CycloneDX inventory. Registry jobs
+  stage candidates from those archives and promote aliases only by OCI digest.
+- QEMU and BuildKit helpers are digest-pinned. Candidate staging rejects a
+  platform or provenance-label mismatch and records archive/SBOM hashes beside
+  the matching per-architecture registry manifest digest.
+- `sha-<commit>` is a commit traceability tag, not an immutable identity. Record
+  the resolved OCI manifest `sha256:` digest for deployment and rollback.
 - Default `APP_MODULE` is `proxmox_sdk.mock_main:app` (mock mode). Change to `proxmox_sdk.main:app` for real Proxmox integration.
 
 ## Alpine Migration Notes (v0.0.2)

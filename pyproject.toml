@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools==83.0.0", "wheel==0.47.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -8,6 +8,8 @@ include = ["proxmox_sdk*"]
 [tool.setuptools.package-data]
 proxmox_sdk = [
     "py.typed",
+    "generated/pdm/**/*.json",
+    "generated/pdm/**/*.py",
     "generated/proxmox/**/*.json",
     "generated/proxmox/**/*.py",
     "proxmox_cli/*.json",
@@ -16,7 +18,7 @@ proxmox_sdk = [
 
 [project]
 name = "proxmox-sdk"
-version = "0.0.13"
+version = "0.0.13.post1"
 description = "pvesh-like CLI for Proxmox API with multi-backend support, performance profiling, and advanced configuration management"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -61,11 +63,13 @@ all = [
 ]
 test = [
     "httpx>=0.28.1",
+    "httpx2==2.8.0",
     "playwright>=1.58.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "pytest-asyncio>=0.24.0",
     "pytest-xdist>=3.6.1",
+    "pytest-timeout==2.4.0",
 ]
 playwright = [
     "playwright>=1.58.0",
@@ -75,7 +79,7 @@ docs = [
     "mkdocs-material>=9.7.6",
 ]
 granian = [
-    "granian>=2.7.4",
+    "granian==2.7.4",
 ]
 dev = [
     "ruff>=0.15.8",
@@ -85,10 +89,13 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "pytest-asyncio>=0.24.0",
+    "httpx2==2.8.0",
+    "pytest-timeout==2.4.0",
 ]
 
 [dependency-groups]
 dev = [
+    "build==1.5.0",
     "ruff>=0.15.8",
     "ty>=0.0.29",
     "pyright>=1.1.380",
@@ -96,6 +103,9 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "pytest-asyncio>=0.24.0",
+    "setuptools==83.0.0",
+    "twine==6.2.0",
+    "wheel==0.47.0",
 ]
 
 [project.scripts]
@@ -111,6 +121,8 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
+timeout = 120
+timeout_method = "thread"
 markers = [
     "live: tests that hit a real Proxmox node (require PROXMOX_API_URL + token env vars); excluded from CI by default",
 ]

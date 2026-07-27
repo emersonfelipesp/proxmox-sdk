@@ -33,6 +33,11 @@ in parallel via `PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]`. Older relea
 are no longer in the CI matrix — regenerate locally with
 `proxmox-sdk-codegen --version-tag <your-version>` if you need them.
 
+The generated PDM schema also ships in every wheel at
+`proxmox_sdk/generated/pdm/latest/openapi.json`. CI and release validation run
+typed `PDMClient.mock()` reads from the built wheel outside the source checkout,
+so editable imports cannot hide missing package data.
+
 ## Installation
 
 ```bash
@@ -208,13 +213,34 @@ uv run pyright proxmox_sdk
 
 ## Docker
 
-All images are **Alpine-based** (smaller footprint), built from this repository with **uv** and **`uv.lock`** in a multi-stage Dockerfile. Three variants are published to Docker Hub:
+All images are **Alpine-based** (smaller footprint), built from this repository
+with **uv** and **`uv.lock`** in a multi-stage Dockerfile. The Python and uv
+multi-architecture images are pinned by digest (currently Python 3.13.14 on
+Alpine 3.24), direct APK inputs and Granian are exact-versioned, and each
+architecture-specific mkcert download is checked against a reviewed SHA256
+before it enters an image. Three server variants are published to Docker Hub:
 
 | Variant | Tags | Description |
 |---------|------|-------------|
 | **Raw** (default) | `latest`, `<version>` | Pure uvicorn, HTTP only. Smallest image. |
 | **Nginx** | `latest-nginx`, `<version>-nginx` | nginx terminates HTTPS via mkcert; proxies to uvicorn. |
 | **Granian** | `latest-granian`, `<version>-granian` | [Granian](https://github.com/emmett-framework/granian) (Rust ASGI server) with native TLS via mkcert. No nginx. |
+
+Service-specific mock images use `latest-{all,pve,pbs,pdm}` and
+`<version>-{all,pve,pbs,pdm}`. Release builds download the project wheel back
+from PyPI, verify the served-byte SHA256, and make that exact wheel the only
+project payload accepted by those service images. Core and service images are
+smoke-tested on both amd64 and arm64 before stable aliases are promoted. The
+QEMU and BuildKit helpers are selected by reviewed multi-architecture digests,
+not floating helper tags.
+
+OCI manifest digests are the immutable image identities. `sha-<commit>` aliases
+are commit traceability tags and can be moved by a registry operator; deployment
+records should therefore retain the resolved `sha256:` manifest digest. Each
+tested image also produces a CycloneDX inventory. See
+[Release evidence and package promotion](docs/release-evidence.md) for the
+package-first RC flow, credential boundaries, archive/SBOM-to-manifest binding,
+rerun identity rules, and reproducibility limits.
 
 > **Upgrade note:** before v0.0.2, only runtime+mkcert images existed. From v0.0.2+, `latest` is the raw uvicorn image. Pull `latest-nginx` for HTTPS with nginx.
 

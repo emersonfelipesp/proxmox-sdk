@@ -1,764 +1,525 @@
-# Three Alpine-based images: raw (uvicorn), nginx (nginx+mkcert+uvicorn), granian (granian+mkcert).
-# Triggers:
-# - workflow_call: CI (main/testing) and release → always build, test, push (parallel jobs).
-# - workflow_dispatch: manual — test-only (no Hub) or full publish (parallel jobs, same as call).
+# Build and smoke images without credentials, stage candidate manifests from
+# Docker archives in a protected environment, then promote only by digest.
 name: Docker images
 
 on:
   workflow_call:
     inputs:
       source_ref:
-        description: Branch, tag, or SHA to build
+        description: Exact event commit SHA to build
         type: string
-        required: false
-        default: ""
+        required: true
       mode:
-        description: >-
-          build-and-test-only — amd64 build + in-container tests, no Docker Hub.
-          publish — build, smoke-test, and push raw + nginx + granian images.
+        description: build-and-test-only, stage (release fan-in), or publish (dev tags)
         type: string
         required: false
         default: publish
-      release:
-        description: >-
-          true — Release mode: push version tag + latest.
-          false (default) — Dev mode: push dev tag only.
-        type: boolean
-        required: false
-        default: false
+    outputs:
+      source_sha:
+        value: ${{ jobs.resolve-publish-source.outputs.sha }}
+      version:
+        value: ${{ jobs.resolve-publish-source.outputs.version }}
+      raw_digest:
+        value: ${{ jobs.stage-images.outputs.raw_digest }}
+      nginx_digest:
+        value: ${{ jobs.stage-images.outputs.nginx_digest }}
+      granian_digest:
+        value: ${{ jobs.stage-images.outputs.granian_digest }}
   workflow_dispatch:
     inputs:
       source_ref:
-        description: Branch, tag, or SHA to build
+        description: Full 40-character commit SHA to build and test without publishing
         type: string
-        required: true
-        default: main
-      mode:
-        description: >-
-          build-and-test-only — amd64 build + in-container tests, no Docker Hub.
-          publish — same as CI/release (push raw + nginx + granian, multi-arch).
-        type: choice
-        required: true
-        options:
-          - build-and-test-only
-          - publish
-        default: build-and-test-only
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
+concurrency:
+  group: docker-${{ github.workflow }}-${{ github.ref }}-${{ inputs.mode || 'manual' }}
+  cancel-in-progress: false
+
 env:
+  BINFMT_IMAGE: docker.io/tonistiigi/binfmt@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
+  BUILDKIT_IMAGE: docker.io/moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec
+  CANDIDATE_RUN_TOKEN: ${{ github.run_id }}-${{ github.run_attempt }}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  IMAGE_REPOSITORY: emersonfelipesp/proxmox-sdk
 
 jobs:
-  # Sequential local test (manual); no registry login or push.
-  docker-manual:
-    if: inputs.mode == 'build-and-test-only'
-    name: Docker — build and test only (manual)
+  resolve-publish-source:
+    name: resolve immutable source and trusted mode
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+      source_date_epoch: ${{ steps.metadata.outputs.source_date_epoch }}
+      version: ${{ steps.metadata.outputs.version }}
+      release_mode: ${{ steps.context.outputs.release_mode }}
+      requested_mode: ${{ steps.context.outputs.requested_mode }}
     steps:
-      - name: Resolve checkout ref
-        id: checkout_source
+      - name: Validate trusted event and requested mode
+        id: context
         env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_REF: ${{ github.ref }}
+          REQUESTED_MODE: ${{ github.event_name == 'workflow_dispatch' && 'build-and-test-only' || inputs.mode }}
+          TRUSTED_RELEASE_MODE: ${{ github.event_name == 'release' && github.event.action == 'published' && github.event.release.prerelease == false }}
+        run: |
+          set -euo pipefail
+          case "$REQUESTED_MODE" in
+            build-and-test-only|stage|publish) ;;
+            *) echo "Unsupported Docker mode: $REQUESTED_MODE" >&2; exit 1 ;;
+          esac
+          case "$TRUSTED_RELEASE_MODE" in
+            true|false) ;;
+            *) echo "Unexpected release mode: $TRUSTED_RELEASE_MODE" >&2; exit 1 ;;
+          esac
+          if [ "$EVENT_NAME" = workflow_dispatch ] && [ "$REQUESTED_MODE" != build-and-test-only ]; then
+            echo "Manual Docker runs cannot publish" >&2
+            exit 1
+          fi
+          if [ "$REQUESTED_MODE" = stage ] && [ "$TRUSTED_RELEASE_MODE" != true ]; then
+            echo "Only a final release event may stage release images" >&2
+            exit 1
+          fi
+          if [ "$TRUSTED_RELEASE_MODE" = true ] && [ "$REQUESTED_MODE" != stage ]; then
+            echo "Final releases must stage images for the outer fan-in promotion" >&2
+            exit 1
+          fi
+          if [ "$REQUESTED_MODE" = publish ]; then
+            if [ "$EVENT_NAME" != push ]; then
+              echo "Development publication requires a protected branch push" >&2
+              exit 1
+            fi
+            case "$EVENT_REF" in
+              refs/heads/main|refs/heads/testing) ;;
+              *) echo "Development publication is blocked for $EVENT_REF" >&2; exit 1 ;;
+            esac
+          fi
+          printf 'release_mode=%s\n' "$TRUSTED_RELEASE_MODE" >> "$GITHUB_OUTPUT"
+          printf 'requested_mode=%s\n' "$REQUESTED_MODE" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve one exact commit SHA
+        id: source
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SHA: ${{ github.sha }}
           GH_TOKEN: ${{ github.token }}
           SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
         run: |
           set -euo pipefail
-          encoded_ref="$(python3 - <<'PY'
-          import os
-          from urllib.parse import quote
+          if ! printf '%s' "$SOURCE_REF" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "source_ref must be a full lowercase commit SHA" >&2
+            exit 1
+          fi
+          if [ "$EVENT_NAME" != workflow_dispatch ] && [ "$SOURCE_REF" != "$EVENT_SHA" ]; then
+            echo "Reusable publishers must build the exact triggering event SHA" >&2
+            exit 1
+          fi
+          resolved="$(gh api "repos/${{ github.repository }}/commits/$SOURCE_REF" --jq '.sha')"
+          if [ "$resolved" != "$SOURCE_REF" ]; then
+            echo "GitHub did not resolve source_ref exactly" >&2
+            exit 1
+          fi
+          printf 'sha=%s\n' "$resolved" >> "$GITHUB_OUTPUT"
 
-          print(quote(os.environ["SOURCE_REF"], safe=""))
-          PY
-          )"
-          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout immutable source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ steps.checkout_source.outputs.sha }}
+          ref: ${{ steps.source.outputs.sha }}
+          fetch-depth: 1
 
-      - name: Validate pyproject version vs tag ref
-        id: version
+      - name: Validate source metadata
+        id: metadata
         env:
-          GIT_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
+          RELEASE_MODE: ${{ steps.context.outputs.release_mode }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RESOLVED_SHA: ${{ steps.source.outputs.sha }}
         run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$RESOLVED_SHA"
           python3 <<'PY'
           import os
           import pathlib
+          import re
           import tomllib
 
-          git_ref = os.environ["GIT_REF"].strip()
           version = tomllib.loads(
               pathlib.Path("pyproject.toml").read_text(encoding="utf-8")
           )["project"]["version"]
-          expected_tag = f"v{version}"
-          if git_ref.startswith("v") and git_ref != expected_tag:
-              raise SystemExit(
-                  f"git_ref/version mismatch: ref={git_ref!r}, expected {expected_tag!r}"
-              )
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"tag={version}\n")
+          if re.fullmatch(r"[0-9][0-9A-Za-z._-]{0,127}", version) is None:
+              raise SystemExit(f"Version is not safe as a Docker tag: {version!r}")
+          if os.environ["RELEASE_MODE"] == "true":
+              expected_tag = f"v{version}"
+              if os.environ.get("RELEASE_TAG", "") != expected_tag:
+                  raise SystemExit(
+                      f"Release tag/version mismatch: expected {expected_tag!r}"
+                  )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"version={version}\n")
           PY
+          source_date_epoch="$(git show -s --format=%ct HEAD)"
+          printf '%s' "$source_date_epoch" | grep -Eq '^[0-9]{9,12}$'
+          printf 'source_date_epoch=%s\n' "$source_date_epoch" >> "$GITHUB_OUTPUT"
 
-      - name: Keep image tag in env
-        run: echo "IMAGE_TAG=${{ steps.version.outputs.tag }}" >> $GITHUB_ENV
-
-      - name: Create Docker test script
-        run: |
-          cat <<'EOF' > /tmp/docker-tests.sh
-          #!/bin/sh
-          set -eux
-          # tests/ is bind-mounted read-only; keep bytecode out of the tree
-          export PYTHONPYCACHEPREFIX=/tmp/pycache
-          mkdir -p "$PYTHONPYCACHEPREFIX"
-          uv sync --frozen --extra test --group dev
-          uv run ruff check .
-          uv run ruff format --check .
-          uv run python -m compileall proxmox_sdk tests
-          uv run python -c "import proxmox_sdk.main"
-          uv run python -c "import proxmox_sdk.mock_main"
-          uv run pytest --cov=proxmox_sdk --cov-report=term-missing --cov-report=xml tests
-          EOF
-          chmod +x /tmp/docker-tests.sh
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-
-      # --- raw image ---
-      - name: Build amd64 raw image for in-container tests
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: raw
-          platforms: linux/amd64
-          push: false
-          load: true
-          tags: emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-raw-pre
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=raw
-          cache-to: type=gha,mode=max,scope=raw
-
-      - name: Run tests in raw image
-        run: |
-          docker run --rm \
-            -w /workspace \
-            -v /tmp/docker-tests.sh:/tmp/docker-tests.sh \
-            -v "${{ github.workspace }}:/workspace" \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-raw-pre \
-            /tmp/docker-tests.sh
-
-      - name: Smoke-test raw image startup
-        run: |
-          set -eux
-          docker rm -f proxmox-sdk-smoke-raw 2>/dev/null || true
-          docker run -d --name proxmox-sdk-smoke-raw \
-            -p 127.0.0.1:18080:8000 \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-raw-pre
-          for i in $(seq 1 40); do
-            if curl -fsS --max-time 5 http://127.0.0.1:18080/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-smoke-raw
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs proxmox-sdk-smoke-raw
-          docker rm -f proxmox-sdk-smoke-raw
-          exit 1
-
-      # --- nginx image ---
-      - name: Build amd64 nginx image for in-container tests
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: nginx
-          platforms: linux/amd64
-          push: false
-          load: true
-          tags: emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-nginx-pre
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=nginx
-          cache-to: type=gha,mode=max,scope=nginx
-
-      - name: Run tests in nginx image
-        run: |
-          docker run --rm \
-            -w /workspace \
-            -v /tmp/docker-tests.sh:/tmp/docker-tests.sh \
-            -v "${{ github.workspace }}:/workspace" \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-nginx-pre \
-            /tmp/docker-tests.sh
-
-      - name: Smoke-test nginx image startup
-        run: |
-          set -eux
-          docker rm -f proxmox-sdk-smoke-nginx 2>/dev/null || true
-          docker run -d --name proxmox-sdk-smoke-nginx \
-            -p 127.0.0.1:18443:8000 \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-nginx-pre
-          for i in $(seq 1 40); do
-            if curl -kfsS --max-time 5 https://127.0.0.1:18443/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-smoke-nginx
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs proxmox-sdk-smoke-nginx
-          docker rm -f proxmox-sdk-smoke-nginx
-          exit 1
-
-      # --- granian image ---
-      - name: Build amd64 granian image for in-container tests
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: granian
-          platforms: linux/amd64
-          push: false
-          load: true
-          tags: emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-granian-pre
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=granian
-          cache-to: type=gha,mode=max,scope=granian
-
-      - name: Run tests in granian image
-        run: |
-          docker run --rm \
-            -w /workspace \
-            -v /tmp/docker-tests.sh:/tmp/docker-tests.sh \
-            -v "${{ github.workspace }}:/workspace" \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-granian-pre \
-            /tmp/docker-tests.sh
-
-      - name: Smoke-test granian image startup
-        run: |
-          set -eux
-          docker rm -f proxmox-sdk-smoke-granian 2>/dev/null || true
-          docker run -d --name proxmox-sdk-smoke-granian \
-            -p 127.0.0.1:18444:8000 \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-granian-pre
-          for i in $(seq 1 40); do
-            if curl -kfsS --max-time 5 https://127.0.0.1:18444/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-smoke-granian
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs proxmox-sdk-smoke-granian
-          docker rm -f proxmox-sdk-smoke-granian
-          exit 1
-
-  # Seeder job: pulls python:3.13-alpine once (authenticated) and writes its
-  # builder + runtime-base layers into the GHA build cache (scope=base) before
-  # the three parallel publish jobs start.  Without this, three simultaneous
-  # manifest+layer requests for the same base image can exhaust the Docker Hub
-  # free-tier rate limit (200 authenticated pulls / 6 h).  After a warm cache
-  # exists the publish jobs skip the Docker Hub pull entirely.
-  docker-seed:
-    if: inputs.mode == 'publish'
-    name: Docker — seed base image cache (python:3.13-alpine)
+  source-quality:
+    name: locked source quality gate
+    needs: resolve-publish-source
     runs-on: ubuntu-latest
-    continue-on-error: true
+    timeout-minutes: 45
     steps:
-      - name: Resolve checkout ref
-        id: checkout_source
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
+      - name: Checkout immutable source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.resolve-publish-source.outputs.sha }}
+
+      - name: Set up Python 3.13.14
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+
+      - name: Run locked regression and static-analysis gates
         run: |
           set -euo pipefail
-          encoded_ref="$(python3 - <<'PY'
-          import os
-          from urllib.parse import quote
+          uv lock --check
+          uv sync --locked --extra test --group dev
+          uv run --locked ruff check .
+          uv run --locked ruff format --check .
+          uv run --locked ty check proxmox_sdk tests --output-format concise
+          uv run --locked python -m compileall proxmox_sdk tests
+          uv run --locked python -c "import proxmox_sdk.main, proxmox_sdk.mock_main"
+          uv run --locked pytest -n 4 --cov=proxmox_sdk --cov-report=term-missing tests
 
-          print(quote(os.environ["SOURCE_REF"], safe=""))
-          PY
-          )"
-          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ steps.checkout_source.outputs.sha }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-
-      - name: Cache builder + runtime-base stages (python:3.13-alpine, amd64 + arm64)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: runtime-base
-          platforms: linux/amd64,linux/arm64
-          push: false
-          cache-from: type=gha,scope=base
-          cache-to: type=gha,mode=max,scope=base
-
-  # Parallel publish jobs — one per image variant.
-  docker-raw:
-    if: inputs.mode == 'publish'
-    needs: [docker-seed]
-    name: Docker Hub — raw (uvicorn only, HTTP)
+  build-image:
+    name: build + smoke ${{ matrix.variant }} / ${{ matrix.arch }}
+    needs: [resolve-publish-source, source-quality]
     runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [raw, nginx, granian]
+        arch: [amd64, arm64]
     steps:
-      - name: Resolve checkout ref
-        id: checkout_source
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
-        run: |
-          set -euo pipefail
-          encoded_ref="$(python3 - <<'PY'
-          import os
-          from urllib.parse import quote
-
-          print(quote(os.environ["SOURCE_REF"], safe=""))
-          PY
-          )"
-          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout immutable source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ steps.checkout_source.outputs.sha }}
-
-      - name: Resolve source revision
-        id: source
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          ref: ${{ needs.resolve-publish-source.outputs.sha }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          image: ${{ env.BINFMT_IMAGE }}
+          platforms: arm64
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
         with:
           driver: docker-container
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
 
-      - name: Resolve image version from pyproject
-        id: version
-        env:
-          GIT_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.ref_name }}
-        run: |
-          python3 <<'PY'
-          import os
-          import pathlib
-          import tomllib
-
-          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
-          version = data["project"]["version"]
-          expected_tag = f"v{version}"
-          git_ref = os.environ["GIT_REF"].strip()
-          if git_ref.startswith("v") and git_ref != expected_tag:
-              raise SystemExit(
-                  f"git ref / pyproject mismatch: ref={git_ref!r}, expected {expected_tag!r}"
-              )
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"tag={version}\n")
-          PY
-
-      - name: Keep image tag in env
-        run: echo "IMAGE_TAG=${{ steps.version.outputs.tag }}" >> $GITHUB_ENV
-
-      - name: Build amd64 raw image for pre-release tests
-        uses: docker/build-push-action@v6
+      - name: Build locally without registry credentials
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
-          target: raw
-          platforms: linux/amd64
+          target: ${{ matrix.variant }}
+          platforms: linux/${{ matrix.arch }}
           push: false
           load: true
-          tags: emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-raw-pre
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=raw
-          cache-to: type=gha,mode=max,scope=raw
+          provenance: false
+          build-args: |
+            SOURCE_DATE_EPOCH=${{ needs.resolve-publish-source.outputs.source_date_epoch }}
+          labels: |
+            org.opencontainers.image.revision=${{ needs.resolve-publish-source.outputs.sha }}
+            org.opencontainers.image.version=${{ needs.resolve-publish-source.outputs.version }}
+          tags: local/proxmox-sdk:${{ needs.resolve-publish-source.outputs.sha }}-${{ matrix.variant }}-${{ matrix.arch }}
+          cache-from: type=gha,scope=${{ matrix.variant }}-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}-${{ matrix.arch }}
 
-      - name: Smoke-test raw image before push
+      - name: Smoke runtime and generate CycloneDX inventory
+        env:
+          ARCH: ${{ matrix.arch }}
+          SOURCE_SHA: ${{ needs.resolve-publish-source.outputs.sha }}
+          VARIANT: ${{ matrix.variant }}
         run: |
-          set -eux
-          docker rm -f proxmox-sdk-smoke-raw 2>/dev/null || true
-          docker run -d --name proxmox-sdk-smoke-raw \
-            -p 127.0.0.1:18080:8000 \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-raw-pre
-          for i in $(seq 1 40); do
-            if curl -fsS --max-time 5 http://127.0.0.1:18080/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-smoke-raw
-              exit 0
+          set -euo pipefail
+          image="local/proxmox-sdk:${SOURCE_SHA}-${VARIANT}-${ARCH}"
+          platform="linux/${ARCH}"
+          container="proxmox-sdk-${VARIANT}-${ARCH}"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          docker run -d --platform "$platform" --name "$container" "$image"
+          case "$VARIANT" in
+            raw) probe='http://127.0.0.1:8000' ;;
+            nginx|granian) probe='https://127.0.0.1:8000' ;;
+            *) echo "Unsupported variant: $VARIANT" >&2; exit 1 ;;
+          esac
+          ready=false
+          for attempt in $(seq 1 45); do
+            if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+              --no-check-certificate --spider "${probe}/health" >/dev/null 2>&1; then
+              ready=true
+              break
             fi
             sleep 2
           done
-          docker logs proxmox-sdk-smoke-raw
-          docker rm -f proxmox-sdk-smoke-raw
-          exit 1
-
-      - name: Build and push raw Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: raw
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ inputs.release && format('emersonfelipesp/proxmox-sdk:{0}', env.IMAGE_TAG) || '' }}
-            ${{ inputs.release && 'emersonfelipesp/proxmox-sdk:latest' || '' }}
-            emersonfelipesp/proxmox-sdk:dev
-            emersonfelipesp/proxmox-sdk:sha-${{ steps.source.outputs.sha }}
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=raw
-          cache-to: type=gha,mode=max,scope=raw
-
-      - name: Smoke-test pushed raw images
-        run: |
-          set -eux
-          if ${{ inputs.release }}; then
-            TAGS="${{ env.IMAGE_TAG }} latest dev sha-${{ steps.source.outputs.sha }}"
-          else
-            TAGS="dev sha-${{ steps.source.outputs.sha }}"
+          if [ "$ready" != true ]; then
+            docker logs "$container"
+            exit 1
           fi
-          for TAG in $TAGS; do
-            NAME=$(printf 'proxmox-sdk-smoke-%s' "$TAG" | tr '.:' '-')
-            docker rm -f "$NAME" 2>/dev/null || true
-            docker run -d --name "$NAME" \
-              -p 127.0.0.1:18080:8000 \
-              emersonfelipesp/proxmox-sdk:"$TAG"
-            ok=0
-            for i in $(seq 1 40); do
-              if curl -fsS --max-time 5 http://127.0.0.1:18080/ >/dev/null 2>&1; then
-                ok=1
-                break
-              fi
-              sleep 2
-            done
-            if [ "$ok" -ne 1 ]; then
-              docker logs "$NAME"
-              docker rm -f "$NAME"
-              exit 1
-            fi
-            docker rm -f "$NAME"
-          done
+          docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+            --no-check-certificate --spider "${probe}/version"
+          python3 tests/generate_container_sbom.py \
+            --image "$image" \
+            --platform "$platform" \
+            --output "/tmp/${VARIANT}-${ARCH}.cdx.json"
+          docker save --output "/tmp/${VARIANT}-${ARCH}.tar" "$image"
 
-  docker-nginx:
-    if: inputs.mode == 'publish'
-    needs: [docker-seed]
-    name: Docker Hub — nginx (nginx + mkcert HTTPS + uvicorn)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Resolve checkout ref
-        id: checkout_source
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
-        run: |
-          set -euo pipefail
-          encoded_ref="$(python3 - <<'PY'
-          import os
-          from urllib.parse import quote
-
-          print(quote(os.environ["SOURCE_REF"], safe=""))
-          PY
-          )"
-          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Upload tested image archive and SBOM
+        if: needs.resolve-publish-source.outputs.requested_mode != 'build-and-test-only'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          ref: ${{ steps.checkout_source.outputs.sha }}
+          name: docker-image-${{ needs.resolve-publish-source.outputs.sha }}-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.variant }}-${{ matrix.arch }}
+          path: |
+            /tmp/${{ matrix.variant }}-${{ matrix.arch }}.tar
+            /tmp/${{ matrix.variant }}-${{ matrix.arch }}.cdx.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 14
 
-      - name: Resolve source revision
-        id: source
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  stage-images:
+    name: stage tested candidate manifests
+    if: needs.resolve-publish-source.outputs.requested_mode != 'build-and-test-only'
+    needs: [resolve-publish-source, build-image]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: dockerhub-candidate
+    outputs:
+      raw_digest: ${{ steps.stage.outputs.raw_digest }}
+      nginx_digest: ${{ steps.stage.outputs.nginx_digest }}
+      granian_digest: ${{ steps.stage.outputs.granian_digest }}
+    steps:
+      - name: Download tested image archives only
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: docker-image-${{ needs.resolve-publish-source.outputs.sha }}-${{ github.run_id }}-${{ github.run_attempt }}-*
+          path: /tmp/docker-images
+          merge-multiple: true
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        with:
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Log in to Docker Hub candidate environment
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-
-      - name: Resolve image version from pyproject
-        id: version
+      - name: Push architecture candidates and assemble manifests
+        id: stage
         env:
-          GIT_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.ref_name }}
+          SOURCE_SHA: ${{ needs.resolve-publish-source.outputs.sha }}
+          VERSION: ${{ needs.resolve-publish-source.outputs.version }}
         run: |
-          python3 <<'PY'
-          import os
-          import pathlib
-          import tomllib
+          set -euo pipefail
+          : > /tmp/docker-candidate-components.jsonl
+          for variant in raw nginx granian; do
+            sources=()
+            for arch in amd64 arm64; do
+              archive="/tmp/docker-images/${variant}-${arch}.tar"
+              sbom="/tmp/docker-images/${variant}-${arch}.cdx.json"
+              test -f "$archive"
+              test -f "$sbom"
+              docker load --input "$archive"
+              local_image="local/proxmox-sdk:${SOURCE_SHA}-${variant}-${arch}"
+              image_id="$(docker image inspect --format '{{.Id}}' "$local_image")"
+              image_arch="$(docker image inspect --format '{{.Architecture}}' "$local_image")"
+              image_revision="$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$local_image")"
+              image_version="$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.version"}}' "$local_image")"
+              test "$image_arch" = "$arch"
+              test "$image_revision" = "$SOURCE_SHA"
+              test "$image_version" = "$VERSION"
+              jq -e --arg image_id "$image_id" --arg platform "linux/${arch}" \
+                --arg revision "$SOURCE_SHA" --arg version "$VERSION" '
+                .metadata.component["bom-ref"] == $image_id and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.platform" and .value == $platform) and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.label.org.opencontainers.image.revision" and
+                  .value == $revision) and
+                any(.metadata.component.properties[];
+                  .name == "oci.image.label.org.opencontainers.image.version" and
+                  .value == $version)
+              ' "$sbom" >/dev/null
+              archive_sha256="$(sha256sum "$archive" | cut -d ' ' -f 1)"
+              sbom_sha256="$(sha256sum "$sbom" | cut -d ' ' -f 1)"
+              printf '%s' "$archive_sha256" | grep -Eq '^[0-9a-f]{64}$'
+              printf '%s' "$sbom_sha256" | grep -Eq '^[0-9a-f]{64}$'
+              arch_tag="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-${variant}-${arch}"
+              docker tag "$local_image" "$arch_tag"
+              docker push "$arch_tag"
+              pushed_digest="$(docker image inspect --format '{{json .RepoDigests}}' "$arch_tag" \
+                | jq -er '[.[] | split("@")[1] | select(test("^sha256:[0-9a-f]{64}$"))] | unique | if length == 1 then .[0] else error("expected one pushed digest") end')"
+              arch_digest="$(docker buildx imagetools inspect "$arch_tag" \
+                --format '{{json .Manifest}}' | jq -er '.digest')"
+              printf '%s' "$arch_digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+              test "$arch_digest" = "$pushed_digest"
+              jq -nc \
+                --arg arch "$arch" \
+                --arg archive_sha256 "$archive_sha256" \
+                --arg image_id "$image_id" \
+                --arg registry_manifest_digest "$arch_digest" \
+                --arg sbom_sha256 "$sbom_sha256" \
+                --arg variant "$variant" \
+                '{arch: $arch, archive_sha256: $archive_sha256, image_id: $image_id, registry_manifest_digest: $registry_manifest_digest, sbom_sha256: $sbom_sha256, variant: $variant}' \
+                >> /tmp/docker-candidate-components.jsonl
+              sources+=("${arch_tag}@${arch_digest}")
+            done
+            candidate_tag="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-${variant}"
+            docker buildx imagetools create --tag "$candidate_tag" "${sources[@]}"
+            manifest="$(docker buildx imagetools inspect "$candidate_tag" \
+              --format '{{json .Manifest}}')"
+            printf '%s' "$manifest" | jq -e '
+              [.manifests[].platform | {os, architecture}]
+              | sort_by(.architecture)
+              == [{os: "linux", architecture: "amd64"}, {os: "linux", architecture: "arm64"}]
+            ' >/dev/null
+            candidate_digest="$(printf '%s' "$manifest" | jq -er '.digest')"
+            printf '%s' "$candidate_digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+            printf '%s_digest=%s\n' "$variant" "$candidate_digest" >> "$GITHUB_OUTPUT"
+          done
 
-          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
-          version = data["project"]["version"]
-          expected_tag = f"v{version}"
-          git_ref = os.environ["GIT_REF"].strip()
-          if git_ref.startswith("v") and git_ref != expected_tag:
-              raise SystemExit(
-                  f"git ref / pyproject mismatch: ref={git_ref!r}, expected {expected_tag!r}"
-              )
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"tag={version}\n")
-          PY
+      - name: Record staged manifest and SBOM bindings
+        env:
+          GRANIAN_DIGEST: ${{ steps.stage.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ steps.stage.outputs.nginx_digest }}
+          RAW_DIGEST: ${{ steps.stage.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.resolve-publish-source.outputs.sha }}
+          VERSION: ${{ needs.resolve-publish-source.outputs.version }}
+        run: |
+          jq -s \
+            --arg run_attempt "${{ github.run_attempt }}" \
+            --arg run_id "${{ github.run_id }}" \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg version "$VERSION" \
+            --arg raw "$RAW_DIGEST" \
+            --arg nginx "$NGINX_DIGEST" \
+            --arg granian "$GRANIAN_DIGEST" \
+            '{run_attempt: $run_attempt, run_id: $run_id, source_sha: $source_sha, version: $version, manifests: {raw: $raw, nginx: $nginx, granian: $granian}, components: .}' \
+            /tmp/docker-candidate-components.jsonl \
+            > /tmp/docker-candidate-evidence.json
 
-      - name: Keep image tag in env
-        run: echo "IMAGE_TAG=${{ steps.version.outputs.tag }}" >> $GITHUB_ENV
-
-      - name: Build amd64 nginx image for pre-release tests
-        uses: docker/build-push-action@v6
+      - name: Upload candidate manifest and SBOM evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          context: .
-          target: nginx
-          platforms: linux/amd64
-          push: false
-          load: true
-          tags: emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-nginx-pre
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=nginx
-          cache-to: type=gha,mode=max,scope=nginx
+          name: docker-candidate-evidence-${{ needs.resolve-publish-source.outputs.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/docker-candidate-evidence.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 90
 
-      - name: Smoke-test nginx image before push
+  smoke-candidates:
+    name: smoke staged ${{ matrix.variant }} / ${{ matrix.arch }}
+    if: needs.resolve-publish-source.outputs.requested_mode != 'build-and-test-only'
+    needs: [resolve-publish-source, stage-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [raw, nginx, granian]
+        arch: [amd64, arm64]
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+        with:
+          image: ${{ env.BINFMT_IMAGE }}
+          platforms: arm64
+
+      - name: Pull by digest and smoke runtime
+        env:
+          ARCH: ${{ matrix.arch }}
+          GRANIAN_DIGEST: ${{ needs.stage-images.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ needs.stage-images.outputs.nginx_digest }}
+          RAW_DIGEST: ${{ needs.stage-images.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.resolve-publish-source.outputs.sha }}
+          VARIANT: ${{ matrix.variant }}
         run: |
-          set -eux
-          docker rm -f proxmox-sdk-smoke-nginx 2>/dev/null || true
-          docker run -d --name proxmox-sdk-smoke-nginx \
-            -p 127.0.0.1:18443:8000 \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-nginx-pre
-          for i in $(seq 1 40); do
-            if curl -kfsS --max-time 5 https://127.0.0.1:18443/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-smoke-nginx
+          set -euo pipefail
+          case "$VARIANT" in
+            raw) digest="$RAW_DIGEST"; probe='http://127.0.0.1:8000' ;;
+            nginx) digest="$NGINX_DIGEST"; probe='https://127.0.0.1:8000' ;;
+            granian) digest="$GRANIAN_DIGEST"; probe='https://127.0.0.1:8000' ;;
+            *) echo "Unsupported variant: $VARIANT" >&2; exit 1 ;;
+          esac
+          printf '%s' "$digest" | grep -Eq '^sha256:[0-9a-f]{64}$'
+          image="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-${VARIANT}@${digest}"
+          platform="linux/${ARCH}"
+          container="candidate-${VARIANT}-${ARCH}"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          docker pull --platform "$platform" "$image"
+          docker run -d --platform "$platform" --name "$container" "$image"
+          for attempt in $(seq 1 45); do
+            if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+              --no-check-certificate --spider "${probe}/health" >/dev/null 2>&1; then
+              docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
+                --no-check-certificate --spider "${probe}/version"
               exit 0
             fi
             sleep 2
           done
-          docker logs proxmox-sdk-smoke-nginx
-          docker rm -f proxmox-sdk-smoke-nginx
+          docker logs "$container"
           exit 1
 
-      - name: Build and push nginx Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: nginx
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ inputs.release && format('emersonfelipesp/proxmox-sdk:{0}-nginx', env.IMAGE_TAG) || '' }}
-            ${{ inputs.release && 'emersonfelipesp/proxmox-sdk:latest-nginx' || '' }}
-            emersonfelipesp/proxmox-sdk:dev-nginx
-            emersonfelipesp/proxmox-sdk:sha-${{ steps.source.outputs.sha }}-nginx
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=nginx
-          cache-to: type=gha,mode=max,scope=nginx
-
-      - name: Smoke-test pushed nginx images
-        run: |
-          set -eux
-          if ${{ inputs.release }}; then
-            TAGS="${{ env.IMAGE_TAG }}-nginx latest-nginx dev-nginx sha-${{ steps.source.outputs.sha }}-nginx"
-          else
-            TAGS="dev-nginx sha-${{ steps.source.outputs.sha }}-nginx"
-          fi
-          for TAG in $TAGS; do
-            NAME=$(printf 'proxmox-sdk-smoke-%s' "$TAG" | tr '.:' '-')
-            docker rm -f "$NAME" 2>/dev/null || true
-            docker run -d --name "$NAME" \
-              -p 127.0.0.1:18443:8000 \
-              emersonfelipesp/proxmox-sdk:"$TAG"
-            ok=0
-            for i in $(seq 1 40); do
-              if curl -kfsS --max-time 5 https://127.0.0.1:18443/ >/dev/null 2>&1; then
-                ok=1
-                break
-              fi
-              sleep 2
-            done
-            if [ "$ok" -ne 1 ]; then
-              docker logs "$NAME"
-              docker rm -f "$NAME"
-              exit 1
-            fi
-            docker rm -f "$NAME"
-          done
-
-  docker-granian:
-    if: inputs.mode == 'publish'
-    needs: [docker-seed]
-    name: Docker Hub — granian (granian + mkcert HTTPS)
+  promote-development:
+    name: promote tested development manifests
+    if: needs.resolve-publish-source.outputs.requested_mode == 'publish'
+    needs: [resolve-publish-source, stage-images, smoke-candidates]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: dockerhub-development
     steps:
-      - name: Resolve checkout ref
-        id: checkout_source
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.sha }}
-        run: |
-          set -euo pipefail
-          encoded_ref="$(python3 - <<'PY'
-          import os
-          from urllib.parse import quote
-
-          print(quote(os.environ["SOURCE_REF"], safe=""))
-          PY
-          )"
-          sha="$(gh api "repos/${{ github.repository }}/commits/$encoded_ref" --jq .sha)"
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
         with:
-          ref: ${{ steps.checkout_source.outputs.sha }}
+          driver-opts: image=${{ env.BUILDKIT_IMAGE }}
 
-      - name: Resolve source revision
-        id: source
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Log in to Docker Hub development environment
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-
-      - name: Resolve image version from pyproject
-        id: version
+      - name: Promote all development aliases from candidate digests
         env:
-          GIT_REF: ${{ inputs.source_ref != '' && inputs.source_ref || github.ref_name }}
+          GRANIAN_DIGEST: ${{ needs.stage-images.outputs.granian_digest }}
+          NGINX_DIGEST: ${{ needs.stage-images.outputs.nginx_digest }}
+          RAW_DIGEST: ${{ needs.stage-images.outputs.raw_digest }}
+          SOURCE_SHA: ${{ needs.resolve-publish-source.outputs.sha }}
         run: |
-          python3 <<'PY'
-          import os
-          import pathlib
-          import tomllib
-
-          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
-          version = data["project"]["version"]
-          expected_tag = f"v{version}"
-          git_ref = os.environ["GIT_REF"].strip()
-          if git_ref.startswith("v") and git_ref != expected_tag:
-              raise SystemExit(
-                  f"git ref / pyproject mismatch: ref={git_ref!r}, expected {expected_tag!r}"
-              )
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"tag={version}\n")
-          PY
-
-      - name: Keep image tag in env
-        run: echo "IMAGE_TAG=${{ steps.version.outputs.tag }}" >> $GITHUB_ENV
-
-      - name: Build amd64 granian image for pre-release tests
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: granian
-          platforms: linux/amd64
-          push: false
-          load: true
-          tags: emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-granian-pre
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=granian
-          cache-to: type=gha,mode=max,scope=granian
-
-      - name: Smoke-test granian image before push
-        run: |
-          set -eux
-          docker rm -f proxmox-sdk-smoke-granian 2>/dev/null || true
-          docker run -d --name proxmox-sdk-smoke-granian \
-            -p 127.0.0.1:18444:8000 \
-            emersonfelipesp/proxmox-sdk:${{ env.IMAGE_TAG }}-granian-pre
-          for i in $(seq 1 40); do
-            if curl -kfsS --max-time 5 https://127.0.0.1:18444/ >/dev/null 2>&1; then
-              docker rm -f proxmox-sdk-smoke-granian
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs proxmox-sdk-smoke-granian
-          docker rm -f proxmox-sdk-smoke-granian
-          exit 1
-
-      - name: Build and push granian Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: granian
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ inputs.release && format('emersonfelipesp/proxmox-sdk:{0}-granian', env.IMAGE_TAG) || '' }}
-            ${{ inputs.release && 'emersonfelipesp/proxmox-sdk:latest-granian' || '' }}
-            emersonfelipesp/proxmox-sdk:dev-granian
-            emersonfelipesp/proxmox-sdk:sha-${{ steps.source.outputs.sha }}-granian
-          cache-from: |
-            type=gha,scope=base
-            type=gha,scope=granian
-          cache-to: type=gha,mode=max,scope=granian
-
-      - name: Smoke-test pushed granian images
-        run: |
-          set -eux
-          if ${{ inputs.release }}; then
-            TAGS="${{ env.IMAGE_TAG }}-granian latest-granian dev-granian sha-${{ steps.source.outputs.sha }}-granian"
-          else
-            TAGS="dev-granian sha-${{ steps.source.outputs.sha }}-granian"
-          fi
-          for TAG in $TAGS; do
-            NAME=$(printf 'proxmox-sdk-smoke-%s' "$TAG" | tr '.:' '-')
-            docker rm -f "$NAME" 2>/dev/null || true
-            docker run -d --name "$NAME" \
-              -p 127.0.0.1:18444:8000 \
-              emersonfelipesp/proxmox-sdk:"$TAG"
-            ok=0
-            for i in $(seq 1 40); do
-              if curl -kfsS --max-time 5 https://127.0.0.1:18444/ >/dev/null 2>&1; then
-                ok=1
-                break
-              fi
-              sleep 2
+          set -euo pipefail
+          for variant in raw nginx granian; do
+            case "$variant" in
+              raw) digest="$RAW_DIGEST"; suffix='' ;;
+              nginx) digest="$NGINX_DIGEST"; suffix='-nginx' ;;
+              granian) digest="$GRANIAN_DIGEST"; suffix='-granian' ;;
+            esac
+            candidate="${IMAGE_REPOSITORY}:candidate-${SOURCE_SHA}-${CANDIDATE_RUN_TOKEN}-${variant}@${digest}"
+            dev_tag="${IMAGE_REPOSITORY}:dev${suffix}"
+            trace_tag="${IMAGE_REPOSITORY}:sha-${SOURCE_SHA}${suffix}"
+            docker buildx imagetools create --tag "$dev_tag" --tag "$trace_tag" "$candidate"
+            for alias in "$dev_tag" "$trace_tag"; do
+              alias_digest="$(docker buildx imagetools inspect "$alias" \
+                --format '{{json .Manifest}}' | jq -er '.digest')"
+              test "$alias_digest" = "$digest"
             done
-            if [ "$ok" -ne 1 ]; then
-              docker logs "$NAME"
-              docker rm -f "$NAME"
-              exit 1
-            fi
-            docker rm -f "$NAME"
           done

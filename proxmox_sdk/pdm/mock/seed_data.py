@@ -23,11 +23,7 @@ _DEFAULT_SEED: dict[str, Any] = {
         {
             "id": "pve-cluster-a",
             "type": "pve",
-            "nodes": [
-                {"hostname": "pve-a-1"},
-                {"hostname": "pve-a-2"},
-                {"hostname": "pve-a-3"},
-            ],
+            "nodes": ["pve-a-1", "pve-a-2", "pve-a-3"],
             "authid": "root@pam!pdm",
             "fingerprint": "AA:BB:CC:DD:EE:FF",
             "web-url": "https://pve-a-1.example.com:8006",
@@ -35,17 +31,14 @@ _DEFAULT_SEED: dict[str, Any] = {
         {
             "id": "pve-cluster-b",
             "type": "pve",
-            "nodes": [
-                {"hostname": "pve-b-1"},
-                {"hostname": "pve-b-2"},
-            ],
+            "nodes": ["pve-b-1", "pve-b-2"],
             "authid": "root@pam!pdm",
             "fingerprint": "11:22:33:44:55:66",
         },
         {
             "id": "pbs-main",
             "type": "pbs",
-            "nodes": [{"hostname": "pbs-main"}],
+            "nodes": ["pbs-main"],
             "authid": "root@pam!pdm",
             "fingerprint": "F1:F2:F3:F4:F5:F6",
         },

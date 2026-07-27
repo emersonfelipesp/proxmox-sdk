@@ -6,15 +6,13 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   mirror:
     name: Push branch to GitHub
     runs-on: mirror-host
-    env:
-      GH_TOKEN: ${{ secrets.GH_MIRROR_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GH_MIRROR_TOKEN }}
-      GITEA_SOURCE_TOKEN: ${{ secrets.SOURCE_MIRROR_TOKEN }}
-      GITHUB_OWNER: emersonfelipesp
 
     steps:
       - name: Install GitHub CLI
@@ -55,6 +53,11 @@ jobs:
 
       - name: Mirror triggering branch
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_MIRROR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_MIRROR_TOKEN }}
+          GITEA_SOURCE_TOKEN: ${{ secrets.SOURCE_MIRROR_TOKEN }}
+          GITHUB_OWNER: emersonfelipesp
         run: |
           set -euo pipefail
 

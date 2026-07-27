@@ -497,29 +497,66 @@ proper 504 Gateway Timeout response.
 
 ## Release Process
 
-1. **Bump the version** in `pyproject.toml` (`[project] version`). Use PEP 440 — e.g. `0.0.3`, `0.0.3.post1`, `0.1.0`.
-2. **Run pre-commit and tests** to confirm the tree is clean:
+1. **Prepare lifecycle evidence and an RC version.** Use PEP 440, starting with
+   `X.Y.Zrc1`, and record requirements, design impact, test/coverage scope,
+   defects, operations, and approvals in the private issue/PR record.
+2. **Run the complete local gate** before pushing the version change:
    ```bash
    uv run pre-commit run --all-files
-   uv run pytest
+   uv run pytest -n 4 --cov=proxmox_sdk --cov-report=term-missing tests
    ```
-3. **Commit the version bump:**
-   ```bash
-   git add pyproject.toml
-   git commit -m "chore: bump version to <new-version>"
-   git push origin main
-   ```
-4. **Create and push an annotated tag** (must match `v<pyproject-version>`):
-   ```bash
-   git tag v<new-version>
-   git push origin v<new-version>
-   ```
-5. **Create the GitHub release** (triggers CI to publish to PyPI and Docker Hub):
+3. **Merge through the Gitea-first feature/release workflow.** Create the
+   protected `v<version>` tag only after CI and the adversarial review gate are
+   clean. `.gitea/workflows/publish-package.yml` builds twice under the tag
+   commit's `SOURCE_DATE_EPOCH`, verifies byte-identical output, publishes the
+   Gitea package of record, and downloads the served bytes for a hash check.
+4. **Verify the package record** with `nms git packages`. Promote an RC tag to
+   GitHub only after that record is complete; the `v*rc*` GitHub trigger uses
+   TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
+   `rcN` until validation is clean.
+5. **Create the final package of record**, then copy
+   `.github/RELEASE_EVIDENCE_TEMPLATE.md` into the GitHub Release body, set the
+   exact version, copy `distribution_manifest_sha256` from the protected Gitea
+   evidence artifact, complete every checkbox with product-facing evidence, and
+   remove all private tracker references. GitHub rebuilds that manifest and
+   rejects a digest mismatch before public promotion.
+6. **Publish the final GitHub Release** through the deploy workflow:
    ```bash
    gh release create v<new-version> \
      --title "v<new-version>" \
-     --notes "Release notes here."
+     --notes-file /tmp/proxmox-sdk-release-notes.md
    ```
+7. **Validate public artifacts and downstream consumers.** Confirm PyPI served
+   bytes, all amd64/arm64 Docker post-release checks, evidence artifacts, and
+   downstream version updates before closing the lifecycle record.
+
+The release workflow serializes each ref, derives `SOURCE_DATE_EPOCH` from the
+source commit, and requires two builds to produce the same wheel/sdist SHA256
+pair. Repository metadata preflight is followed by served-byte downloads at
+TestPyPI and PyPI. Existing versions with different or incomplete artifacts
+fail closed; blind `--skip-existing` behavior is forbidden.
+
+PyPI and Docker credentials are available only to protected, artifact-only
+environment jobs. The PyPI postflight wheel filename and SHA256 are passed into
+service-image builds, whose Dockerfile verifies the wheel before local
+installation. Core and service images build without registry credentials,
+produce CycloneDX inventories, and run on amd64 and arm64. Candidate manifests
+are then staged and smoked by digest. The QEMU and BuildKit helpers are pinned
+by reviewed multi-architecture digests. Staging verifies the requested platform
+and provenance labels, binds every Docker archive and SBOM hash to its registry
+manifest digest, and uploads source-SHA-qualified evidence. A single final
+fan-in validates and hashes those evidence documents before writing stable
+aliases, and only after all seven image identities pass. Reruns replace only
+artifacts bearing that same validated source SHA, run ID, and run attempt;
+candidate tags carry the same run token so same-commit CI and release jobs
+cannot overwrite one another.
+
+The repository cannot create environment reviewers, environment secrets,
+deployment-branch rules, protected tags, or isolated Gitea runners. Configure
+those prerequisites exactly as listed in
+[Release evidence and package promotion](release-evidence.md) before enabling a
+publisher. `sha-<commit>` is a commit traceability tag, while the resolved OCI
+manifest digest is the immutable deployment identity.
 
 ## Getting Help
 
