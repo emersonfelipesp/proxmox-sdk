@@ -207,6 +207,22 @@ uv run python -c "from proxmox_sdk.proxmox_cli.cli import cli"
 pytest
 ```
 
+## Continuous Integration
+
+`.gitea/workflows/ci.yml` mirrors the secret-free review gates from GitHub for
+the Gitea-first feature path: pinned workflow tooling, Ruff, ty, Pyright,
+compile/import contracts, the full `latest`/`9.2`/`9.1.11` schema matrix,
+strict documentation, and installed-wheel validation. Pull-request jobs run
+only on the isolated `ci-untrusted-python312` label with read-only repository
+permissions; they must never publish, deploy, push, or receive credentials.
+
+The workflow definition is necessary but not sufficient to claim an
+authoritative merge gate. Operators must also provision an eligible
+organization/repository runner and required branch status checks. Until those
+external controls exist and a PR records successful terminal contexts, retain
+the complete local evidence and do not represent Gitea CI as green or bypass a
+pending context.
+
 ## Security Controls
 
 See [docs/security.md](docs/security.md) for the full reference. Key patterns to follow:

@@ -265,7 +265,8 @@ def test_network_calls_and_tests_have_explicit_bounds() -> None:
     assert "timeout 120s docker pull" in post_text
 
     missing: list[str] = []
-    for path in sorted(GITHUB_WORKFLOWS.glob("*.yml")):
+    paths = [*GITHUB_WORKFLOWS.glob("*.yml"), GITEA_WORKFLOWS / "ci.yml"]
+    for path in sorted(paths):
         workflow = _workflow(path)
         for job_name, job in workflow["jobs"].items():
             if "runs-on" in job and "timeout-minutes" not in job:
@@ -287,7 +288,11 @@ def test_release_evidence_is_a_hard_publication_gate() -> None:
 
 def test_third_party_actions_are_pinned_to_full_commit_shas() -> None:
     unpinned: list[str] = []
-    paths = [*GITHUB_WORKFLOWS.glob("*.yml"), GITEA_WORKFLOWS / "publish-package.yml"]
+    paths = [
+        *GITHUB_WORKFLOWS.glob("*.yml"),
+        GITEA_WORKFLOWS / "ci.yml",
+        GITEA_WORKFLOWS / "publish-package.yml",
+    ]
     for path in sorted(paths):
         workflow = _workflow(path)
         for job_name, job in workflow["jobs"].items():
@@ -311,6 +316,7 @@ def test_permissions_are_read_only_and_tag_terminology_is_truthful() -> None:
         "release-docker-verify.yml",
     ):
         assert _github(name)["permissions"] == {"contents": "read"}
+    assert _gitea("ci.yml")["permissions"] == {"contents": "read"}
     assert _gitea("publish-package.yml")["permissions"] == {"contents": "read"}
     assert _gitea("mirror-github.yml")["permissions"] == {"contents": "read"}
 
