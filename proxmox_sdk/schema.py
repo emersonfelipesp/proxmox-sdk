@@ -461,6 +461,21 @@ class ProxmoxSchemaValue(RootModel[Any]):
                 payload[name] = ProxmoxSchemaValue.model_validate(
                     property_schema if isinstance(property_schema, dict) else {}
                 ).sample_value(seed=f"{seed}_{name}", field_name=name)
+            root_schema = self.root if isinstance(self.root, dict) else {}
+            discriminator = root_schema.get("typeProperty")
+            discriminator_schema = root_schema.get("typeSchema")
+            if isinstance(discriminator, str) and isinstance(discriminator_schema, dict):
+                enum = discriminator_schema.get("enum")
+                branch_title = schema.get("title")
+                if isinstance(enum, list) and branch_title in enum:
+                    payload[discriminator] = deepcopy(branch_title)
+                else:
+                    payload[discriminator] = ProxmoxSchemaValue.model_validate(
+                        discriminator_schema
+                    ).sample_value(
+                        seed=f"{seed}_{discriminator}",
+                        field_name=discriminator,
+                    )
             return payload
 
         additional_properties = schema.get("additionalProperties")

@@ -44,9 +44,9 @@ _DEFAULT_SEED: dict[str, Any] = {
         },
     ],
     "remote_versions": {
-        "pve-cluster-a": {"version": _PVE_VERSION, "release": "1"},
-        "pve-cluster-b": {"version": _PVE_VERSION, "release": "1"},
-        "pbs-main": {"version": "3.4.2", "release": "1"},
+        "pve-cluster-a": {"version": _PVE_VERSION, "release": "1", "repoid": "pve01"},
+        "pve-cluster-b": {"version": _PVE_VERSION, "release": "1", "repoid": "pve02"},
+        "pbs-main": {"version": "3.4.2", "release": "1", "repoid": "pbs01"},
     },
     "pve": {
         "pve-cluster-a": {
@@ -62,7 +62,7 @@ _DEFAULT_SEED: dict[str, Any] = {
                     "status": "running",
                     "node": "pve-a-1",
                     "cpu": 0.12,
-                    "cpus": 4,
+                    "cpus": 4.5,
                     "mem": 2_147_483_648,
                     "maxmem": 4_294_967_296,
                     "uptime": 1_200_000,
@@ -83,7 +83,7 @@ _DEFAULT_SEED: dict[str, Any] = {
                     "name": "staging",
                     "status": "stopped",
                     "node": "pve-a-3",
-                    "cpus": 2,
+                    "cpus": 2.5,
                 },
                 {
                     "vmid": 103,
@@ -135,7 +135,7 @@ _DEFAULT_SEED: dict[str, Any] = {
                     "name": "logs",
                     "status": "running",
                     "node": "pve-a-1",
-                    "cpus": 2,
+                    "cpus": 2.5,
                 },
                 {
                     "vmid": 201,
@@ -235,14 +235,14 @@ _DEFAULT_SEED: dict[str, Any] = {
         "pbs-main": {
             "datastores": [
                 {
-                    "store": "tank",
+                    "name": "tank",
                     "total": 10_000_000_000_000,
                     "used": 4_500_000_000_000,
                     "avail": 5_500_000_000_000,
                     "comment": "primary backup pool",
                 },
                 {
-                    "store": "cold",
+                    "name": "cold",
                     "total": 50_000_000_000_000,
                     "used": 30_000_000_000_000,
                     "avail": 20_000_000_000_000,
@@ -282,33 +282,32 @@ _DEFAULT_SEED: dict[str, Any] = {
         }
     },
     "resources": {
-        "status": [
-            {"remote": "pve-cluster-a", "status": "online"},
-            {"remote": "pve-cluster-b", "status": "online"},
-            {"remote": "pbs-main", "status": "online"},
-        ],
+        "status": {"remote": "pve-cluster-a", "resources": []},
         "subscriptions": [
             {
                 "remote": "pve-cluster-a",
-                "status": "active",
-                "productname": "Proxmox VE Standard",
-                "level": "standard",
+                "state": "active",
+                "node-status": {"pve-a-1": {"status": "active"}},
             },
             {
                 "remote": "pve-cluster-b",
-                "status": "active",
-                "productname": "Proxmox VE Community",
-                "level": "community",
+                "state": "active",
+                "node-status": {"pve-b-1": {"status": "active"}},
             },
             {
                 "remote": "pbs-main",
-                "status": "active",
-                "productname": "Proxmox Backup Server Basic",
-                "level": "basic",
+                "state": "active",
+                "node-status": {"pbs-main": {"status": "active"}},
             },
         ],
     },
-    "metrics": {"status": {"enabled": True, "status": "ok", "last-collection": 1_700_000_000}},
+    "metrics": {
+        "status": [
+            {"remote": "pve-cluster-a", "last-collection": 1_700_000_000},
+            {"remote": "pve-cluster-b", "last-collection": 1_700_000_100},
+            {"remote": "pbs-main", "last-collection": 1_700_000_200},
+        ]
+    },
     "access": {
         "users": [
             {"userid": "root@pam", "enable": True, "comment": "default admin"},
@@ -318,35 +317,35 @@ _DEFAULT_SEED: dict[str, Any] = {
         "acl": [
             {
                 "path": "/",
-                "type": "user",
+                "ugid_type": "user",
                 "ugid": "root@pam",
                 "roleid": "Admin",
                 "propagate": True,
             },
             {
                 "path": "/remote/pve-cluster-a",
-                "type": "user",
+                "ugid_type": "user",
                 "ugid": "ops@pdm",
                 "roleid": "PVEAdmin",
                 "propagate": True,
             },
             {
                 "path": "/remote/pve-cluster-b",
-                "type": "user",
+                "ugid_type": "user",
                 "ugid": "ops@pdm",
                 "roleid": "PVEOperator",
                 "propagate": True,
             },
             {
                 "path": "/",
-                "type": "user",
+                "ugid_type": "user",
                 "ugid": "auditor@pdm",
                 "roleid": "Auditor",
                 "propagate": True,
             },
             {
                 "path": "/remote/pbs-main",
-                "type": "user",
+                "ugid_type": "user",
                 "ugid": "ops@pdm",
                 "roleid": "PBSDatastoreAdmin",
                 "propagate": True,
@@ -358,13 +357,15 @@ _DEFAULT_SEED: dict[str, Any] = {
     "views": [
         {
             "id": "prod-overview",
-            "name": "Production Overview",
-            "comment": "All prod resources across PVE clusters",
+            "include": ["tag=prod"],
+            "include-all": False,
+            "layout": '{"type":"grid"}',
         },
         {
             "id": "backups",
-            "name": "Backups",
-            "comment": "PBS-only view across remotes",
+            "include": ["resource-type=datastore"],
+            "exclude": ["tag=retired"],
+            "include-all": False,
         },
     ],
 }

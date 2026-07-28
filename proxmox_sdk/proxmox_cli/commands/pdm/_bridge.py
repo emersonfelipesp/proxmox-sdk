@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Any
 
 import typer
@@ -18,6 +19,53 @@ from .._common import (
     ensure_service,
     prepare_command,
 )
+
+
+class PDMGuestConfigState(StrEnum):
+    """Schema-supported guest configuration views."""
+
+    PENDING = "pending"
+    ACTIVE = "active"
+
+
+class PDMRRDConsolidation(StrEnum):
+    """Schema-supported RRD consolidation functions."""
+
+    AVERAGE = "AVERAGE"
+    MAX = "MAX"
+
+
+class PDMRRDTimeframe(StrEnum):
+    """Schema-supported RRD time windows."""
+
+    HOUR = "hour"
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+    YEAR = "year"
+    DECADE = "decade"
+
+
+class PDMPVEResourceKind(StrEnum):
+    """Schema-supported PVE resource filters."""
+
+    VM = "vm"
+    STORAGE = "storage"
+    NODE = "node"
+    SDN = "sdn"
+
+
+class PDMGlobalResourceType(StrEnum):
+    """Global resource filters plus the documented VM/CT aliases."""
+
+    STORAGE = "storage"
+    QEMU = "qemu"
+    LXC = "lxc"
+    NETWORK = "network"
+    DATASTORE = "datastore"
+    NODE = "node"
+    VM = "vm"
+    CT = "ct"
 
 
 def _build_pdm_backend_config(ctx_obj: dict[str, Any], *, use_mock: bool) -> BackendConfig:

@@ -28,6 +28,10 @@ def test_version_endpoint(client: TestClient) -> None:
     assert body["data"]["version"].startswith("1.0")
 
 
+def test_ping_endpoint_returns_schema_string(client: TestClient) -> None:
+    assert client.get("/api2/json/ping").json()["data"] == "pong"
+
+
 def test_remotes_list_returns_three(client: TestClient) -> None:
     body = client.get("/api2/json/remotes/remote").json()
     assert len(body["data"]) == 3
@@ -41,15 +45,16 @@ def test_remotes_create_get_delete_round_trip(client: TestClient) -> None:
         ).status_code
         == 200
     )
-    body = client.get("/api2/json/remotes/remote/pve-new").json()
+    assert client.get("/api2/json/remotes/remote/pve-new").json()["data"] is None
+    body = client.get("/api2/json/remotes/remote/pve-new/config").json()
     assert body["data"]["id"] == "pve-new"
     assert client.delete("/api2/json/remotes/remote/pve-new").status_code == 200
-    assert client.get("/api2/json/remotes/remote/pve-new").status_code == 404
+    assert client.get("/api2/json/remotes/remote/pve-new/config").status_code == 404
 
 
 def test_remote_update_persists_field(client: TestClient) -> None:
     client.put("/api2/json/remotes/remote/pve-cluster-a", json={"fingerprint": "ZZ"})
-    body = client.get("/api2/json/remotes/remote/pve-cluster-a").json()
+    body = client.get("/api2/json/remotes/remote/pve-cluster-a/config").json()
     assert body["data"]["fingerprint"] == "ZZ"
 
 
@@ -58,6 +63,8 @@ def test_remote_version_endpoint(client: TestClient) -> None:
     assert body["data"]["version"].startswith("9."), (
         f"expected a 9.x PVE version, got {body['data']['version']!r}"
     )
+    assert body["data"]["release"]
+    assert body["data"]["repoid"]
 
 
 def test_pve_qemu_list_and_lifecycle(client: TestClient) -> None:
@@ -75,50 +82,83 @@ def test_pve_qemu_list_and_lifecycle(client: TestClient) -> None:
 
 
 def test_pve_guest_config(client: TestClient) -> None:
-    body = client.get("/api2/json/pve/remotes/pve-cluster-a/qemu/100/config").json()
+    body = client.get("/api2/json/pve/remotes/pve-cluster-a/qemu/100/config?state=pending").json()
     assert body["data"]["name"] == "web-prod-1"
 
 
 def test_pve_resources_with_type_filter(client: TestClient) -> None:
-    body = client.get("/api2/json/pve/remotes/pve-cluster-a/resources?type=qemu").json()
-    assert all(e["type"] == "qemu" for e in body["data"])
+    body = client.get("/api2/json/pve/remotes/pve-cluster-a/resources?kind=vm").json()
+    assert {entry["type"] for entry in body["data"]} <= {"qemu", "lxc"}
 
 
 def test_pbs_datastore_and_snapshots(client: TestClient) -> None:
     ds = client.get("/api2/json/pbs/remotes/pbs-main/datastore").json()
-    assert {d["store"] for d in ds["data"]} == {"tank", "cold"}
+    assert {d["name"] for d in ds["data"]} == {"tank", "cold"}
     snaps = client.get("/api2/json/pbs/remotes/pbs-main/datastore/tank/snapshots?ns=prod").json()
     assert len(snaps["data"]) == 2
 
 
 def test_pbs_node_rrddata(client: TestClient) -> None:
-    body = client.get("/api2/json/pbs/remotes/pbs-main/rrddata").json()
+    body = client.get("/api2/json/pbs/remotes/pbs-main/rrddata?timeframe=hour&cf=AVERAGE").json()
     assert isinstance(body["data"], list) and body["data"]
 
 
+def test_rrd_routes_require_schema_query_parameters(client: TestClient) -> None:
+    assert client.get("/api2/json/pbs/remotes/pbs-main/rrddata").status_code == 422
+    assert (
+        client.get(
+            "/api2/json/pve/remotes/pve-cluster-a/qemu/100/rrddata?timeframe=hour"
+        ).status_code
+        == 422
+    )
+
+
+def test_pbs_task_status_matches_required_schema(client: TestClient) -> None:
+    status = client.get("/api2/json/pbs/remotes/pbs-main/tasks/UPID%3Apbs%3A1/status").json()[
+        "data"
+    ]
+    assert {"node", "pid", "pstart", "starttime", "status", "type", "upid", "user"} <= set(status)
+    assert status["status"] in {"running", "stopped"}
+
+
 def test_resources_endpoints(client: TestClient) -> None:
-    assert len(client.get("/api2/json/resources/list").json()["data"]) > 0
-    assert len(client.get("/api2/json/resources/status").json()["data"]) == 3
+    resources = client.get("/api2/json/resources/list?resource-type=qemu").json()["data"]
+    flattened = [entry for envelope in resources for entry in envelope["resources"]]
+    assert flattened and all(entry["type"] == "pve-qemu" for entry in flattened)
+    fleet = client.get("/api2/json/resources/list").json()["data"]
+    fleet_types = {entry["type"] for envelope in fleet for entry in envelope["resources"]}
+    assert {"pve-qemu", "pve-node", "pbs-node", "pbs-datastore"} <= fleet_types
+    status = client.get("/api2/json/resources/status").json()["data"]
+    assert isinstance(status, dict)
+    assert {"remote", "resources"} <= status.keys()
     assert len(client.get("/api2/json/resources/subscription").json()["data"]) == 3
 
 
 def test_metrics_status_and_trigger(client: TestClient) -> None:
-    assert (
-        client.get("/api2/json/remotes/metric-collection/status").json()["data"]["enabled"] is True
-    )
+    statuses = client.get("/api2/json/remotes/metric-collection/status").json()["data"]
+    assert isinstance(statuses, list)
+    assert {status["remote"] for status in statuses} == {
+        "pve-cluster-a",
+        "pve-cluster-b",
+        "pbs-main",
+    }
     body = client.post("/api2/json/remotes/metric-collection/trigger").json()
     assert "UPID" in body["data"]
 
 
 def test_views_crud(client: TestClient) -> None:
     assert (
-        client.post("/api2/json/config/views", json={"id": "dev", "name": "Dev"}).status_code == 200
+        client.post(
+            "/api2/json/config/views",
+            json={"id": "dev", "include": ["tag=dev"], "include-all": False},
+        ).status_code
+        == 200
     )
     body = client.get("/api2/json/config/views/dev").json()
-    assert body["data"]["name"] == "Dev"
-    client.put("/api2/json/config/views/dev", json={"comment": "test"})
+    assert body["data"]["include"] == ["tag=dev"]
+    client.put("/api2/json/config/views/dev", json={"layout": '{"type":"grid"}'})
     body = client.get("/api2/json/config/views/dev").json()
-    assert body["data"]["comment"] == "test"
+    assert body["data"]["layout"] == '{"type":"grid"}'
     assert client.delete("/api2/json/config/views/dev").status_code == 200
     assert client.get("/api2/json/config/views/dev").status_code == 404
 
@@ -170,7 +210,7 @@ def test_tfa_add_then_delete(client: TestClient) -> None:
 def test_api_token_crud(client: TestClient) -> None:
     client.post("/api2/json/access/users/ops%40pdm/token/api", json={"comment": "ro"})
     body = client.get("/api2/json/access/users/ops%40pdm/token").json()
-    assert any(t["tokenid"] == "api" for t in body["data"])
+    assert any(t["tokenid"] == "ops@pdm!api" for t in body["data"])
     assert client.delete("/api2/json/access/users/ops%40pdm/token/api").status_code == 200
 
 

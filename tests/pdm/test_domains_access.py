@@ -50,13 +50,22 @@ async def test_acl_list_update_delete():
     sdk, backend = make_pdm_sdk(
         {
             "/api2/json/access/acl": {
-                "data": [{"path": "/", "type": "user", "ugid": "root@pam", "roleid": "Admin"}]
+                "data": [
+                    {
+                        "path": "/",
+                        "ugid_type": "user",
+                        "ugid": "root@pam",
+                        "roleid": "Admin",
+                        "propagate": True,
+                    }
+                ]
             },
         }
     )
     pdm = PDMClient(_sdk=sdk)
     acls = await pdm.access.acl.list()
     assert acls[0].roleid == "Admin"
+    assert acls[0].type == "user"
 
     await pdm.access.acl.update(path="/remote/pve-a", roles="PDMAuditor", users="alice@pdm")
     assert backend.calls[1][0] == "PUT"
@@ -90,14 +99,15 @@ async def test_api_tokens_crud():
     sdk, backend = make_pdm_sdk(
         {
             "/api2/json/access/users/alice%40pdm/token": {
-                "data": [{"tokenid": "api", "privsep": True}]
+                "data": [{"tokenid": "alice@pdm!api", "token-name": "api", "enable": True}]
             },
             "/api2/json/access/users/alice%40pdm/token/api": {"data": None},
         }
     )
     pdm = PDMClient(_sdk=sdk)
     tokens = await pdm.access.tokens.list("alice@pdm")
-    assert tokens[0].tokenid == "api"
+    assert tokens[0].tokenid == "alice@pdm!api"
+    assert tokens[0].token_name == "api"
 
     await pdm.access.tokens.create("alice@pdm", "api", comment="readonly")
     assert backend.calls[1][0] == "POST"

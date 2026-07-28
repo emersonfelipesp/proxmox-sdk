@@ -29,6 +29,53 @@ organises PDM domains:
     operations require a `remote` argument (the registered remote name, e.g.
     `"pve-prod"`) in addition to the resource ID.
 
+### Schema Contract and Provenance
+
+The authoritative PDM wire contract bundled with this release is
+`proxmox_sdk/generated/pdm/latest/openapi.json`, generated from the Proxmox API
+Viewer capture in the adjacent `raw_capture.json`. The `latest` artifact contains
+246 paths and 318 operations. Hand-written domain models intentionally sit at the
+boundary: they preserve the public Python API while validating the captured wire
+cardinality, aliases, required identifiers, and discriminator values.
+
+| Public read | Captured wire shape | SDK result |
+|---|---|---|
+| `version()` | object | `PDMVersion` |
+| `ping()` | string | `str` |
+| `remotes.list()` / `remotes.get()` | array / config object | `list[PDMRemote]` / `PDMRemote` |
+| PVE guest, node, resource, task, and RRD reads | arrays, except guest config | typed model lists / `PDMGuestConfig` |
+| PBS datastore, snapshot, task, and RRD reads | arrays, except task status | typed model lists / `PDMTaskStatus` |
+| `resources.list()` | array of per-remote envelopes | flattened `list[PDMResource]` with `remote` injected |
+| `resources.status()` | one per-remote envelope | `PDMResourceStatus` |
+| subscriptions and metric status | arrays | typed model lists |
+| access and view reads | arrays, except user/view detail | typed model lists / detail model |
+
+Malformed object/list cardinality and missing required identifiers raise
+`PDMResponseContractError`. Messages report only the operation, expected shape,
+received type, and invalid field locations; response values are not included or
+retained as exception context. Operator-controlled `error` strings at every
+typed PDM response boundary are replaced with the static `"remote reported an
+error"` marker before model validation. When a resource
+envelope contains stale resources plus an error, each returned
+`PDMResource.remote_error` carries only that marker. An errored envelope with no
+usable resources raises the same typed, redacted exception.
+
+Resource discriminators are required and closed over the captured local PVE and
+global PDM enums. RRD reads always send the schema-required `timeframe` and `cf`
+parameters; defaults are `hour` and `AVERAGE`. Datastore RRD samples expose
+`disk_used` and `disk_available` separately so available capacity is never
+silently collapsed into used capacity.
+
+!!! warning "Corrected public read shapes"
+    This contract revision corrects previously permissive public return shapes:
+    `ping()` returns a string, metric status returns a list, and resource status
+    returns one status model. Consumers pinned to an earlier SDK should validate
+    these shapes before updating their package constraint.
+
+The schema artifact and generated mock are high-fidelity development evidence,
+not a substitute for version-specific validation against an operator-approved
+live PDM deployment.
+
 ### PDM vs PBS vs PVE Differences
 
 | Aspect | PVE | PBS | PDM |
@@ -146,7 +193,10 @@ List, inspect, and filter the PVE/PBS instances registered with PDM.
 async with PDMClient(...) as pdm:
     remotes = await pdm.remotes.list()
     for remote in remotes:
-        print(f"{remote.id}: {remote.type} — {remote.url}")
+        print(f"{remote.id}: {remote.type} — {remote.web_url}")
+
+    remote = await pdm.remotes.get("pve-prod")
+    version = await pdm.remotes.version("pve-prod")
 ```
 
 ---
@@ -157,17 +207,18 @@ Because PDM spans multiple clusters, most operations require a `remote` name.
 
 ```python
 async with PDMClient(...) as pdm:
-    # List all VMs across a remote
-    vms = await pdm.pve.vms(remote="pve-prod")
+    # List QEMU VMs on a remote
+    vms = await pdm.pve.qemu.list("pve-prod")
     for vm in vms:
         print(f"VM {vm.vmid}: {vm.name} ({vm.status})")
 
     # List all LXC containers
-    cts = await pdm.pve.lxc(remote="pve-prod")
+    cts = await pdm.pve.lxc.list("pve-prod")
 
-    # Get a specific VM
-    vm = await pdm.pve.vm(remote="pve-prod", vmid=100)
-    print(f"VM {vm.vmid} running on node {vm.node}")
+    # Read the pending configuration (the PDM schema default). Use
+    # state="active" to inspect the currently active configuration instead.
+    config = await pdm.pve.qemu.config("pve-prod", 100)
+    print(f"Configured VM name: {config.name}")
 ```
 
 ---
@@ -178,7 +229,7 @@ async with PDMClient(...) as pdm:
 async with PDMClient(...) as pdm:
     datastores = await pdm.pbs.datastores(remote="pbs-backup")
     for ds in datastores:
-        print(f"Datastore: {ds.store}, usage: {ds.used}/{ds.total}")
+        print(f"Datastore: {ds.store} ({ds.comment or 'no comment'})")
 
     snapshots = await pdm.pbs.snapshots(remote="pbs-backup", store="vm-backups")
     for snap in snapshots:
@@ -196,6 +247,11 @@ async with PDMClient(...) as pdm:
     resources = await pdm.resources.list()
     for r in resources:
         print(f"{r.type}/{r.id}: {r.status}")
+        if r.remote_error:
+            print(f"  Resource data for {r.remote} is degraded")
+
+    status = await pdm.resources.status()
+    print(f"Status response for {status.remote}: {len(status.resources)} resources")
 ```
 
 ---
@@ -206,7 +262,7 @@ async with PDMClient(...) as pdm:
 async with PDMClient(...) as pdm:
     subs = await pdm.subscriptions.list()
     for sub in subs:
-        print(f"{sub.remote}: {sub.status} (level: {sub.level})")
+        print(f"{sub.remote}: {sub.state}")
 ```
 
 ---
@@ -215,7 +271,9 @@ async with PDMClient(...) as pdm:
 
 ```python
 async with PDMClient(...) as pdm:
-    metrics = await pdm.metrics.list()
+    statuses = await pdm.metrics.status()
+    for status in statuses:
+        print(f"{status.remote}: last collection {status.last_collection}")
 ```
 
 ---
@@ -225,12 +283,12 @@ async with PDMClient(...) as pdm:
 ```python
 async with PDMClient(...) as pdm:
     # Users
-    users = await pdm.access.users()
+    users = await pdm.access.users.list()
     for user in users:
         print(f"User: {user.userid}")
 
     # ACL entries
-    acl = await pdm.access.acl()
+    acl = await pdm.access.acl.list()
 ```
 
 ---
@@ -252,7 +310,7 @@ async with PDMClient(...) as pdm:
 
 `proxmox-sdk-pdm-mock` is a standalone FastAPI mock for the PDM REST API.
 It ships with a bundled default seed (3 remotes, 16 VMs, 5 CTs, 2 datastores,
-50+ snapshots, 3 users, 5 ACL entries, 2 views) so E2E tests run without a
+3 snapshots, 3 users, 5 ACL entries, 2 views) so E2E tests run without a
 live PDM instance.
 
 ### Starting the mock

@@ -124,6 +124,17 @@ Top-level PDM groups:
 
 Most PDM guest and datastore commands require a `remote` argument. Use
 `proxmox pdm remote list` first when you need the registered remote names.
+The dedicated commands follow the captured PDM routes exactly: remotes use
+`/remotes/remote`, PVE guests are directly under `/pve/remotes/{remote}/qemu`
+or `/lxc`, PBS uses singular `/datastore`, and metric collection is under
+`/remotes/metric-collection`. `pdm resources list --type vm` and `--type ct`
+remain convenient CLI aliases and are sent as the schema values `qemu` and
+`lxc` through the `resource-type` query parameter.
+Guest `config` commands default `--state pending` as defined by the captured
+schema; pass `--state active` explicitly for the active configuration. Every
+PVE/PBS `rrddata` command sends both required query parameters and defaults to
+`--timeframe hour --cf AVERAGE`. Typer rejects values outside the captured
+timeframe, consolidation, and configuration-state enums before making a request.
 
 ## Ceph and PBS Commands
 

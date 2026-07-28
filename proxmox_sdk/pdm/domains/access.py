@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from proxmox_sdk._response_utils import normalize_list, unwrap_data
+from proxmox_sdk._response_utils import unwrap_data
 from proxmox_sdk.pdm import models as m
+from proxmox_sdk.pdm._normalization import validate_model, validate_model_list
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK
@@ -17,15 +18,15 @@ class _UsersOps:
 
     async def list(self) -> list[m.PDMUser]:
         data = await self._sdk.access.users.get()
-        return [m.PDMUser.model_validate(item) for item in normalize_list(data)]
+        return validate_model_list(m.PDMUser, data, operation="GET /access/users")
 
     async def get(self, userid: str) -> m.PDMUser:
-        data = unwrap_data(await self._sdk.access.users(userid).get())
-        if isinstance(data, dict):
-            data.setdefault("userid", userid)
-        else:
-            data = {"userid": userid}
-        return m.PDMUser.model_validate(data)
+        data = await self._sdk.access.users(userid).get()
+        return validate_model(
+            m.PDMUser,
+            data,
+            operation="GET /access/users/{userid}",
+        )
 
     async def create(self, *, userid: str, **fields: Any) -> Any:
         payload = {"userid": userid, **fields}
@@ -49,7 +50,7 @@ class _ACLOps:
 
     async def list(self) -> list[m.PDMACLEntry]:
         data = await self._sdk.access.acl.get()
-        return [m.PDMACLEntry.model_validate(item) for item in normalize_list(data)]
+        return validate_model_list(m.PDMACLEntry, data, operation="GET /access/acl")
 
     async def update(
         self,
@@ -91,7 +92,11 @@ class _TFAOps:
 
     async def list(self, userid: str) -> list[m.PDMTFAEntry]:
         data = await self._sdk.access.tfa(userid).get()
-        return [m.PDMTFAEntry.model_validate(item) for item in normalize_list(data)]
+        return validate_model_list(
+            m.PDMTFAEntry,
+            data,
+            operation="GET /access/tfa/{userid}",
+        )
 
     async def add(self, userid: str, **payload: Any) -> Any:
         return unwrap_data(await self._sdk.access.tfa(userid).post(**payload))
@@ -106,7 +111,11 @@ class _TokenOps:
 
     async def list(self, userid: str) -> list[m.PDMAPIToken]:
         data = await self._sdk.access.users(userid).token.get()
-        return [m.PDMAPIToken.model_validate(item) for item in normalize_list(data)]
+        return validate_model_list(
+            m.PDMAPIToken,
+            data,
+            operation="GET /access/users/{userid}/token",
+        )
 
     async def create(self, userid: str, tokenid: str, **fields: Any) -> Any:
         return unwrap_data(await self._sdk.access.users(userid).token(tokenid).post(**fields))

@@ -122,7 +122,7 @@ def user_passwd(
     """Change the password of a PDM user."""
     _run_request(
         "PUT",
-        "/access/password",
+        f"/access/users/{userid}",
         params={"userid": userid, "password": password},
         **_format_options(output, json_output, yaml_output, markdown_output),
     )

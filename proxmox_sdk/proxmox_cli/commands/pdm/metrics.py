@@ -21,7 +21,7 @@ def metrics_status(
     """Show metric collection status."""
     _run_request(
         "GET",
-        "/config/metrics/status",
+        "/remotes/metric-collection/status",
         params=None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -37,7 +37,7 @@ def metrics_trigger(
     """Manually trigger metric collection."""
     _run_request(
         "POST",
-        "/config/metrics/trigger",
+        "/remotes/metric-collection/trigger",
         params=None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )

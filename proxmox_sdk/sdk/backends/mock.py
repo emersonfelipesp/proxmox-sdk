@@ -70,6 +70,42 @@ def _response_schema(operation: dict[str, Any]) -> dict[str, Any] | None:
         return None
 
 
+def _validate_query_parameters(
+    operation: dict[str, Any],
+    params: dict[str, Any] | None,
+) -> None:
+    """Enforce captured required/enum query contracts in mock mode."""
+
+    supplied = params or {}
+    parameters = operation.get("parameters")
+    if not isinstance(parameters, list):
+        return
+    for parameter in parameters:
+        if not isinstance(parameter, dict) or parameter.get("in") != "query":
+            continue
+        name = parameter.get("name")
+        if not isinstance(name, str):
+            continue
+        if parameter.get("required") is True and name not in supplied:
+            raise ResourceException(
+                status_code=400,
+                status_message="Bad Request",
+                content=f"Missing required query parameter: {name}",
+            )
+        if name not in supplied:
+            continue
+        parameter_schema = parameter.get("schema")
+        if not isinstance(parameter_schema, dict):
+            continue
+        enum = parameter_schema.get("enum")
+        if isinstance(enum, list) and supplied[name] not in enum:
+            raise ResourceException(
+                status_code=400,
+                status_message="Bad Request",
+                content=f"Invalid value for query parameter: {name}",
+            )
+
+
 class MockBackend(AbstractBackend):
     """In-memory mock backend that generates responses from the OpenAPI schema.
 
@@ -166,6 +202,7 @@ class MockBackend(AbstractBackend):
         state_key = path
 
         if method_upper == "GET":
+            _validate_query_parameters(operation, params)
             return self._mock_get(path, operation, state_key, path_params)
 
         if method_upper == "DELETE":

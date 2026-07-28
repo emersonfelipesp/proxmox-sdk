@@ -5,8 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
-from proxmox_sdk._response_utils import normalize_list, unwrap_data
+from proxmox_sdk._response_utils import unwrap_data
 from proxmox_sdk.pdm import models as m
+from proxmox_sdk.pdm._normalization import validate_model, validate_model_list
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.api import ProxmoxSDK
@@ -48,12 +49,16 @@ class RemotesDomain:
     async def list(self) -> list[m.PDMRemote]:
         """GET /remotes/remote — list all configured PVE/PBS remotes."""
         data = await self._sdk.remotes.remote.get()
-        return [m.PDMRemote.model_validate(item) for item in normalize_list(data)]
+        return validate_model_list(m.PDMRemote, data, operation="GET /remotes/remote")
 
     async def get(self, remote: str) -> m.PDMRemote:
-        """GET /remotes/remote/{id} — fetch a single remote by id."""
-        data = unwrap_data(await self._sdk.remotes.remote(remote).get())
-        return m.PDMRemote.model_validate(data or {})
+        """GET /remotes/remote/{id}/config — fetch a single remote configuration."""
+        data = await self._sdk.remotes.remote(remote).config.get()
+        return validate_model(
+            m.PDMRemote,
+            data,
+            operation="GET /remotes/remote/{id}/config",
+        )
 
     async def add(
         self,
@@ -95,5 +100,9 @@ class RemotesDomain:
 
     async def version(self, remote: str) -> m.PDMRemoteVersion:
         """GET /remotes/remote/{id}/version — query a remote's version."""
-        data = unwrap_data(await self._sdk.remotes.remote(remote).version.get())
-        return m.PDMRemoteVersion.model_validate(data or {})
+        data = await self._sdk.remotes.remote(remote).version.get()
+        return validate_model(
+            m.PDMRemoteVersion,
+            data,
+            operation="GET /remotes/remote/{id}/version",
+        )

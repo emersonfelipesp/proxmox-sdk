@@ -69,6 +69,10 @@ async def test_version_through_sdk(pdm_client: PDMClient) -> None:
     assert v.version.startswith("1.0")
 
 
+async def test_ping_through_sdk(pdm_client: PDMClient) -> None:
+    assert await pdm_client.ping() == "pong"
+
+
 async def test_remotes_list_through_sdk(pdm_client: PDMClient) -> None:
     remotes = await pdm_client.remotes.list()
     assert {r.id for r in remotes} == {"pve-cluster-a", "pve-cluster-b", "pbs-main"}
@@ -82,6 +86,19 @@ async def test_pve_qemu_list_and_lifecycle(pdm_client: PDMClient) -> None:
     guests = await pdm_client.pve.qemu.list("pve-cluster-a")
     stopped = next(g for g in guests if g.vmid == 100)
     assert stopped.status == "stopped"
+
+
+async def test_schema_required_read_queries_through_sdk(pdm_client: PDMClient) -> None:
+    config = await pdm_client.pve.qemu.config("pve-cluster-a", 100)
+    assert config.name == "web-prod-1"
+    rrd = await pdm_client.pve.qemu.rrddata("pve-cluster-a", 100)
+    assert rrd
+
+
+async def test_pbs_task_status_through_sdk(pdm_client: PDMClient) -> None:
+    status = await pdm_client.pbs.task_status("pbs-main", "UPID:pbs:1")
+    assert status.status == "stopped"
+    assert status.pid == 4242
 
 
 async def test_pbs_snapshots_filter(pdm_client: PDMClient) -> None:
@@ -98,12 +115,12 @@ async def test_global_resources_and_subscriptions(pdm_client: PDMClient) -> None
 
 
 async def test_views_crud_through_sdk(pdm_client: PDMClient) -> None:
-    await pdm_client.views.create(id="ops-dash", name="Operations")
+    await pdm_client.views.create(id="ops-dash", include=["tag=operations"])
     v = await pdm_client.views.get("ops-dash")
-    assert v.name == "Operations"
-    await pdm_client.views.update("ops-dash", comment="updated")
+    assert v.include == ["tag=operations"]
+    await pdm_client.views.update("ops-dash", layout='{"type":"grid"}')
     v = await pdm_client.views.get("ops-dash")
-    assert v.comment == "updated"
+    assert v.layout == '{"type":"grid"}'
     await pdm_client.views.delete("ops-dash")
 
 
@@ -130,5 +147,9 @@ async def test_acl_round_trip(pdm_client: PDMClient) -> None:
 
 
 async def test_metrics_status_through_sdk(pdm_client: PDMClient) -> None:
-    s = await pdm_client.metrics.status()
-    assert s.enabled is True
+    statuses = await pdm_client.metrics.status()
+    assert {status.remote for status in statuses} == {
+        "pve-cluster-a",
+        "pve-cluster-b",
+        "pbs-main",
+    }

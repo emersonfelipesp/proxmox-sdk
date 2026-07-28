@@ -6,7 +6,14 @@ from typing import Any, Optional
 
 import typer
 
-from ._bridge import _format_options, _run_request
+from ._bridge import (
+    PDMGuestConfigState,
+    PDMPVEResourceKind,
+    PDMRRDConsolidation,
+    PDMRRDTimeframe,
+    _format_options,
+    _run_request,
+)
 
 pve_app = typer.Typer(
     name="pve", help="PDM operations on registered PVE remotes.", no_args_is_help=True
@@ -39,7 +46,7 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
         """List guests on the remote."""
         _run_request(
             "GET",
-            f"/pve/remotes/{remote}/guests/{kind}",
+            f"/pve/remotes/{remote}/{kind}",
             params=None,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -48,6 +55,10 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
     def _config(
         remote: str = typer.Argument(...),
         vmid: int = typer.Argument(...),
+        state: PDMGuestConfigState = typer.Option(
+            PDMGuestConfigState.PENDING,
+            "--state",
+        ),
         output: Optional[str] = typer.Option(None, "--output", "-o"),
         json_output: bool = typer.Option(False, "--json"),
         yaml_output: bool = typer.Option(False, "--yaml"),
@@ -56,8 +67,8 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
         """Show a guest configuration."""
         _run_request(
             "GET",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/config",
-            params=None,
+            f"/pve/remotes/{remote}/{kind}/{vmid}/config",
+            params={"state": state.value},
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
 
@@ -73,7 +84,7 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
         """Start the guest."""
         _run_request(
             "POST",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/start",
+            f"/pve/remotes/{remote}/{kind}/{vmid}/start",
             params=None,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -90,7 +101,7 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
         """Force-stop the guest."""
         _run_request(
             "POST",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/stop",
+            f"/pve/remotes/{remote}/{kind}/{vmid}/stop",
             params=None,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -107,7 +118,7 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
         """Gracefully shut down the guest."""
         _run_request(
             "POST",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/shutdown",
+            f"/pve/remotes/{remote}/{kind}/{vmid}/shutdown",
             params=None,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -129,7 +140,7 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
             params["online"] = True
         _run_request(
             "POST",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/migrate",
+            f"/pve/remotes/{remote}/{kind}/{vmid}/migrate",
             params=params,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -157,7 +168,7 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
             params["online"] = True
         _run_request(
             "POST",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/remote-migrate",
+            f"/pve/remotes/{remote}/{kind}/{vmid}/remote-migrate",
             params=params,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -166,20 +177,18 @@ def _register_guest_commands(group: typer.Typer, kind: str) -> None:
     def _rrddata(
         remote: str = typer.Argument(...),
         vmid: int = typer.Argument(...),
-        timeframe: str = typer.Option("hour", "--timeframe"),
-        cf: Optional[str] = typer.Option(None, "--cf"),
+        timeframe: PDMRRDTimeframe = typer.Option(PDMRRDTimeframe.HOUR, "--timeframe"),
+        cf: PDMRRDConsolidation = typer.Option(PDMRRDConsolidation.AVERAGE, "--cf"),
         output: Optional[str] = typer.Option(None, "--output", "-o"),
         json_output: bool = typer.Option(False, "--json"),
         yaml_output: bool = typer.Option(False, "--yaml"),
         markdown_output: bool = typer.Option(False, "--markdown"),
     ) -> None:
         """Fetch RRD samples for the guest."""
-        params: dict[str, Any] = {"timeframe": timeframe}
-        if cf is not None:
-            params["cf"] = cf
+        params: dict[str, Any] = {"timeframe": timeframe.value, "cf": cf.value}
         _run_request(
             "GET",
-            f"/pve/remotes/{remote}/guests/{kind}/{vmid}/rrddata",
+            f"/pve/remotes/{remote}/{kind}/{vmid}/rrddata",
             params=params,
             **_format_options(output, json_output, yaml_output, markdown_output),
         )
@@ -215,17 +224,15 @@ def pve_node_list(
 def pve_node_rrddata(
     remote: str = typer.Argument(...),
     node: str = typer.Argument(...),
-    timeframe: str = typer.Option("hour", "--timeframe"),
-    cf: Optional[str] = typer.Option(None, "--cf"),
+    timeframe: PDMRRDTimeframe = typer.Option(PDMRRDTimeframe.HOUR, "--timeframe"),
+    cf: PDMRRDConsolidation = typer.Option(PDMRRDConsolidation.AVERAGE, "--cf"),
     output: Optional[str] = typer.Option(None, "--output", "-o"),
     json_output: bool = typer.Option(False, "--json"),
     yaml_output: bool = typer.Option(False, "--yaml"),
     markdown_output: bool = typer.Option(False, "--markdown"),
 ) -> None:
     """Fetch RRD samples for a node."""
-    params: dict[str, Any] = {"timeframe": timeframe}
-    if cf is not None:
-        params["cf"] = cf
+    params: dict[str, Any] = {"timeframe": timeframe.value, "cf": cf.value}
     _run_request(
         "GET",
         f"/pve/remotes/{remote}/nodes/{node}/rrddata",
@@ -237,7 +244,7 @@ def pve_node_rrddata(
 @pve_app.command("resources")
 def pve_resources(
     remote: str = typer.Argument(...),
-    type: Optional[str] = typer.Option(None, "--type"),
+    type: Optional[PDMPVEResourceKind] = typer.Option(None, "--type"),
     output: Optional[str] = typer.Option(None, "--output", "-o"),
     json_output: bool = typer.Option(False, "--json"),
     yaml_output: bool = typer.Option(False, "--yaml"),
@@ -246,7 +253,7 @@ def pve_resources(
     """Query resources on a PVE remote."""
     params: dict[str, Any] = {}
     if type is not None:
-        params["type"] = type
+        params["kind"] = type.value
     _run_request(
         "GET",
         f"/pve/remotes/{remote}/resources",

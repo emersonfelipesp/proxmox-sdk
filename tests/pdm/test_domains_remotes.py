@@ -55,12 +55,12 @@ async def test_remotes_list_normalizes_schema_node_addresses():
 
 async def test_remotes_get_single_remote():
     sdk, backend = make_pdm_sdk(
-        {"/api2/json/remotes/remote/pve-a": {"data": {"id": "pve-a", "type": "pve"}}}
+        {"/api2/json/remotes/remote/pve-a/config": {"data": {"id": "pve-a", "type": "pve"}}}
     )
     pdm = PDMClient(_sdk=sdk)
     r = await pdm.remotes.get("pve-a")
     assert r.id == "pve-a"
-    assert backend.calls[0][1] == "/api2/json/remotes/remote/pve-a"
+    assert backend.calls[0][1] == "/api2/json/remotes/remote/pve-a/config"
 
 
 async def test_remotes_add_posts_payload():
@@ -147,7 +147,11 @@ async def test_remotes_update_rejects_non_list_nodes():
 
 async def test_remote_version_query():
     sdk, backend = make_pdm_sdk(
-        {"/api2/json/remotes/remote/pve-a/version": {"data": {"version": "9.1"}}}
+        {
+            "/api2/json/remotes/remote/pve-a/version": {
+                "data": {"version": "9.1", "release": "1", "repoid": "pve01"}
+            }
+        }
     )
     pdm = PDMClient(_sdk=sdk)
     v = await pdm.remotes.version("pve-a")

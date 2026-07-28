@@ -26,7 +26,7 @@ def remote_list(
     """List registered PDM remotes."""
     _run_request(
         "GET",
-        "/remotes",
+        "/remotes/remote",
         params=None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -43,7 +43,7 @@ def remote_version(
     """Query the version of a registered remote."""
     _run_request(
         "GET",
-        f"/remotes/{remote}/version",
+        f"/remotes/remote/{remote}/version",
         params=None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -71,7 +71,7 @@ def remote_add(
         params["fingerprint"] = fingerprint
     _run_request(
         "POST",
-        "/remotes",
+        "/remotes/remote",
         params=params,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -98,7 +98,7 @@ def remote_update(
         params["authid"] = authid
     _run_request(
         "PUT",
-        f"/remotes/{remote}",
+        f"/remotes/remote/{remote}",
         params=params or None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -115,7 +115,7 @@ def remote_remove(
     """Unregister a remote."""
     _run_request(
         "DELETE",
-        f"/remotes/{remote}",
+        f"/remotes/remote/{remote}",
         params=None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )

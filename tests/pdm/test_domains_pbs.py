@@ -11,7 +11,7 @@ async def test_pbs_datastores_list_injects_remote():
     sdk, backend = make_pdm_sdk(
         {
             "/api2/json/pbs/remotes/pbs-main/datastore": {
-                "data": [{"store": "tank", "total": 1000, "used": 100}]
+                "data": [{"name": "tank", "path": "/mnt/datastore/tank"}]
             }
         }
     )
@@ -53,7 +53,17 @@ async def test_pbs_tasks_list_and_status():
         {
             "/api2/json/pbs/remotes/pbs-main/tasks": {"data": [{"upid": "UPID:pbs:1"}]},
             "/api2/json/pbs/remotes/pbs-main/tasks/UPID%3Apbs%3A1/status": {
-                "data": {"upid": "UPID:pbs:1", "status": "OK"}
+                "data": {
+                    "upid": "UPID:pbs:1",
+                    "node": "pbs-main",
+                    "pid": 4242,
+                    "pstart": 1_700_000_000,
+                    "starttime": 1_700_000_000,
+                    "status": "stopped",
+                    "type": "backup",
+                    "user": "root@pam",
+                    "exitstatus": "OK",
+                }
             },
         }
     )
@@ -61,7 +71,8 @@ async def test_pbs_tasks_list_and_status():
     tasks = await pdm.pbs.tasks("pbs-main")
     assert tasks[0].upid == "UPID:pbs:1"
     status = await pdm.pbs.task_status("pbs-main", "UPID:pbs:1")
-    assert status.status == "OK"
+    assert status.status == "stopped"
+    assert status.exitstatus == "OK"
 
 
 async def test_pbs_node_rrddata():
@@ -72,3 +83,4 @@ async def test_pbs_node_rrddata():
     rrd = await pdm.pbs.node_rrddata("pbs-main")
     assert rrd[0].time == 1
     assert backend.calls[0][1] == "/api2/json/pbs/remotes/pbs-main/rrddata"
+    assert backend.calls[0][2] == {"timeframe": "hour", "cf": "AVERAGE"}

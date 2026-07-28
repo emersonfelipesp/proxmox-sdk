@@ -12,7 +12,7 @@ async def test_qemu_list_returns_guests_with_remote_injected():
         {
             "/api2/json/pve/remotes/pve-a/qemu": {
                 "data": [
-                    {"vmid": 100, "name": "web", "status": "running"},
+                    {"vmid": 100, "name": "web", "status": "running", "cpus": 4.5},
                     {"vmid": 101, "name": "db", "status": "stopped"},
                 ]
             }
@@ -23,14 +23,18 @@ async def test_qemu_list_returns_guests_with_remote_injected():
     assert [g.vmid for g in guests] == [100, 101]
     assert all(g.remote == "pve-a" for g in guests)
     assert all(g.type == "qemu" for g in guests)
+    assert guests[0].cpus == 4.5
     assert backend.calls[0][1] == "/api2/json/pve/remotes/pve-a/qemu"
 
 
 async def test_lxc_list_uses_lxc_path():
-    sdk, backend = make_pdm_sdk({"/api2/json/pve/remotes/pve-a/lxc": {"data": [{"vmid": 200}]}})
+    sdk, backend = make_pdm_sdk(
+        {"/api2/json/pve/remotes/pve-a/lxc": {"data": [{"vmid": 200, "cpus": 2.5}]}}
+    )
     pdm = PDMClient(_sdk=sdk)
     cts = await pdm.pve.lxc.list("pve-a")
     assert cts[0].type == "lxc"
+    assert cts[0].cpus == 2.5
     assert backend.calls[0][1] == "/api2/json/pve/remotes/pve-a/lxc"
 
 
@@ -75,10 +79,10 @@ async def test_qemu_remote_migrate_passes_hyphenated_params():
 
 
 async def test_qemu_config_unwraps_data():
-    sdk, _ = make_pdm_sdk(
+    sdk, backend = make_pdm_sdk(
         {
             "/api2/json/pve/remotes/pve-a/qemu/100/config": {
-                "data": {"name": "web", "cores": 4, "memory": 4096}
+                "data": {"name": "web", "cores": 4, "memory": "current=4096"}
             }
         }
     )
@@ -86,6 +90,8 @@ async def test_qemu_config_unwraps_data():
     cfg = await pdm.pve.qemu.config("pve-a", 100)
     assert cfg.name == "web"
     assert cfg.cores == 4
+    assert cfg.memory == "current=4096"
+    assert (backend.calls[0][2] or {})["state"] == "pending"
 
 
 async def test_qemu_rrddata_passes_timeframe():
@@ -96,6 +102,7 @@ async def test_qemu_rrddata_passes_timeframe():
     rrd = await pdm.pve.qemu.rrddata("pve-a", 100, timeframe="day")
     assert rrd[0].cpu == 0.1
     assert (backend.calls[0][2] or {})["timeframe"] == "day"
+    assert (backend.calls[0][2] or {})["cf"] == "AVERAGE"
 
 
 async def test_pve_nodes_list_injects_remote():
@@ -115,7 +122,7 @@ async def test_pve_resources_with_type_filter():
     pdm = PDMClient(_sdk=sdk)
     res = await pdm.pve.resources("pve-a", type="vm")
     assert res[0].id == "qemu/100"
-    assert (backend.calls[0][2] or {})["type"] == "vm"
+    assert (backend.calls[0][2] or {})["kind"] == "vm"
 
 
 async def test_pve_tasks_list():

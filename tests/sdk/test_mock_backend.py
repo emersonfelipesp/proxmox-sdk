@@ -35,3 +35,37 @@ def test_delete_tombstone_prevents_get_resurrection(monkeypatch: pytest.MonkeyPa
         assert backend._store.get_object(path) is None
 
     asyncio.run(_run())
+
+
+def test_pdm_mock_backend_enforces_required_and_enum_query_parameters(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PROXMOX_MOCK_STORE", "dict")
+    monkeypatch.setenv("PROXMOX_MOCK_STATE_NAMESPACE", f"test_pdm_query_{uuid.uuid4().hex}")
+
+    async def _run() -> None:
+        backend = MockBackend(
+            schema_version="latest",
+            api_path_prefix=SERVICES["PDM"].api_path_prefix,
+            service="PDM",
+        )
+        path = "/api2/json/pve/remotes/pve-a/qemu/100/rrddata"
+
+        with pytest.raises(ResourceException, match="Missing required query parameter: cf"):
+            await backend.request("GET", path, params={"timeframe": "hour"})
+
+        with pytest.raises(ResourceException, match="Invalid value for query parameter: cf"):
+            await backend.request(
+                "GET",
+                path,
+                params={"timeframe": "hour", "cf": "LAST"},
+            )
+
+        response = await backend.request(
+            "GET",
+            path,
+            params={"timeframe": "hour", "cf": "AVERAGE"},
+        )
+        assert isinstance(response, list)
+
+    asyncio.run(_run())

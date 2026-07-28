@@ -35,8 +35,10 @@ are no longer in the CI matrix — regenerate locally with
 
 The generated PDM schema also ships in every wheel at
 `proxmox_sdk/generated/pdm/latest/openapi.json`. CI and release validation run
-typed `PDMClient.mock()` reads from the built wheel outside the source checkout,
-so editable imports cannot hide missing package data.
+all 32 public typed `PDMClient.mock()` read surfaces from the built wheel outside
+the source checkout, so editable imports cannot hide missing package data or
+PDM response-shape drift. Domain boundaries reject malformed cardinality and
+required identifiers with redacted `PDMResponseContractError` failures.
 
 ## Installation
 

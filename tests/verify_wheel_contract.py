@@ -24,7 +24,29 @@ from pathlib import Path
 
 import proxmox_sdk
 from proxmox_sdk.pdm import PDMClient
-from proxmox_sdk.pdm.models import PDMRemote, PDMRemoteNode, PDMVersion
+from proxmox_sdk.pdm.models import (
+    PDMACLEntry,
+    PDMAPIToken,
+    PDMGuest,
+    PDMGuestConfig,
+    PDMMetricCollectionStatus,
+    PDMNode,
+    PDMPBSDatastore,
+    PDMPBSSnapshot,
+    PDMRRDData,
+    PDMRemote,
+    PDMRemoteNode,
+    PDMRemoteVersion,
+    PDMResource,
+    PDMResourceStatus,
+    PDMSubscription,
+    PDMTFAEntry,
+    PDMTask,
+    PDMTaskStatus,
+    PDMUser,
+    PDMVersion,
+    PDMView,
+)
 from proxmox_sdk.schema import available_pdm_sdk_versions, load_pdm_generated_openapi
 
 expected_root = Path(os.environ["PROXMOX_SDK_WHEEL_ROOT"]).resolve()
@@ -40,11 +62,56 @@ if "latest" not in versions:
 
 schema = load_pdm_generated_openapi()
 paths = schema.get("paths") if isinstance(schema, dict) else None
-required_paths = {"/version", "/remotes/remote"}
+required_paths = {
+    "/version",
+    "/ping",
+    "/remotes/remote",
+    "/remotes/remote/{id}/config",
+    "/remotes/remote/{id}/version",
+    "/pve/remotes/{remote}/qemu",
+    "/pve/remotes/{remote}/qemu/{vmid}/config",
+    "/pve/remotes/{remote}/qemu/{vmid}/rrddata",
+    "/pve/remotes/{remote}/lxc",
+    "/pve/remotes/{remote}/lxc/{vmid}/config",
+    "/pve/remotes/{remote}/lxc/{vmid}/rrddata",
+    "/pve/remotes/{remote}/nodes",
+    "/pve/remotes/{remote}/nodes/{node}/rrddata",
+    "/pve/remotes/{remote}/resources",
+    "/pve/remotes/{remote}/tasks",
+    "/pbs/remotes/{remote}/datastore",
+    "/pbs/remotes/{remote}/datastore/{datastore}/rrddata",
+    "/pbs/remotes/{remote}/datastore/{datastore}/snapshots",
+    "/pbs/remotes/{remote}/rrddata",
+    "/pbs/remotes/{remote}/tasks",
+    "/pbs/remotes/{remote}/tasks/{upid}/status",
+    "/resources/list",
+    "/resources/status",
+    "/resources/subscription",
+    "/remotes/metric-collection/status",
+    "/access/users",
+    "/access/users/{userid}",
+    "/access/acl",
+    "/access/tfa/{userid}",
+    "/access/users/{userid}/token",
+    "/config/views",
+    "/config/views/{id}",
+}
 if not isinstance(paths, dict) or not required_paths.issubset(paths):
     raise AssertionError(
         f"Packaged PDM OpenAPI schema lacks required paths: {required_paths!r}"
     )
+
+
+def require_object(label, value, expected_type) -> None:
+    if not isinstance(value, expected_type):
+        raise AssertionError(f"{label} returned {type(value).__name__}, expected {expected_type.__name__}")
+
+
+def require_list(label, values, item_type) -> None:
+    if not isinstance(values, list) or not values:
+        raise AssertionError(f"{label} did not return a populated list: {values!r}")
+    if not all(isinstance(value, item_type) for value in values):
+        raise AssertionError(f"{label} returned an unexpected item type: {values!r}")
 
 
 async def smoke_pdm_client() -> None:
@@ -62,6 +129,80 @@ async def smoke_pdm_client() -> None:
             for remote in remotes
         ):
             raise AssertionError(f"PDM mock remote nodes are not typed: {remotes!r}")
+        require_object("ping", await client.ping(), str)
+        require_object("remotes.get", await client.remotes.get("pve-a"), PDMRemote)
+        require_object(
+            "remotes.version", await client.remotes.version("pve-a"), PDMRemoteVersion
+        )
+
+        require_list("pve.qemu.list", await client.pve.qemu.list("pve-a"), PDMGuest)
+        require_object(
+            "pve.qemu.config", await client.pve.qemu.config("pve-a", 100), PDMGuestConfig
+        )
+        require_list(
+            "pve.qemu.rrddata", await client.pve.qemu.rrddata("pve-a", 100), PDMRRDData
+        )
+        require_list("pve.lxc.list", await client.pve.lxc.list("pve-a"), PDMGuest)
+        require_object(
+            "pve.lxc.config", await client.pve.lxc.config("pve-a", 200), PDMGuestConfig
+        )
+        require_list(
+            "pve.lxc.rrddata", await client.pve.lxc.rrddata("pve-a", 200), PDMRRDData
+        )
+        require_list("pve.nodes", await client.pve.nodes("pve-a"), PDMNode)
+        require_list(
+            "pve.node_rrddata",
+            await client.pve.node_rrddata("pve-a", "node-a"),
+            PDMRRDData,
+        )
+        require_list(
+            "pve.resources", await client.pve.resources("pve-a", type="vm"), PDMResource
+        )
+        require_list("pve.tasks", await client.pve.tasks("pve-a"), PDMTask)
+
+        require_list("pbs.datastores", await client.pbs.datastores("pbs-a"), PDMPBSDatastore)
+        require_list(
+            "pbs.datastore_rrddata",
+            await client.pbs.datastore_rrddata("pbs-a", "tank"),
+            PDMRRDData,
+        )
+        require_list(
+            "pbs.snapshots",
+            await client.pbs.snapshots("pbs-a", "tank", namespace="prod"),
+            PDMPBSSnapshot,
+        )
+        require_list(
+            "pbs.node_rrddata", await client.pbs.node_rrddata("pbs-a"), PDMRRDData
+        )
+        require_list("pbs.tasks", await client.pbs.tasks("pbs-a"), PDMTask)
+        require_object(
+            "pbs.task_status",
+            await client.pbs.task_status("pbs-a", "UPID:pbs:1"),
+            PDMTaskStatus,
+        )
+
+        require_list("resources.list", await client.resources.list(type="vm"), PDMResource)
+        require_object(
+            "resources.status", await client.resources.status(), PDMResourceStatus
+        )
+        require_list(
+            "subscriptions.list", await client.subscriptions.list(), PDMSubscription
+        )
+        require_list("metrics.status", await client.metrics.status(), PDMMetricCollectionStatus)
+
+        require_list("access.users.list", await client.access.users.list(), PDMUser)
+        require_object(
+            "access.users.get", await client.access.users.get("alice@pdm"), PDMUser
+        )
+        require_list("access.acl.list", await client.access.acl.list(), PDMACLEntry)
+        require_list(
+            "access.tfa.list", await client.access.tfa.list("alice@pdm"), PDMTFAEntry
+        )
+        require_list(
+            "access.tokens.list", await client.access.tokens.list("alice@pdm"), PDMAPIToken
+        )
+        require_list("views.list", await client.views.list(), PDMView)
+        require_object("views.get", await client.views.get("ops"), PDMView)
     finally:
         await client.close()
 

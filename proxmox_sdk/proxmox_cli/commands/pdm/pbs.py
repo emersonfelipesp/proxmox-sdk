@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 import typer
 
-from ._bridge import _format_options, _run_request
+from ._bridge import PDMRRDConsolidation, PDMRRDTimeframe, _format_options, _run_request
 
 pbs_app = typer.Typer(
     name="pbs", help="PDM operations on registered PBS remotes.", no_args_is_help=True
@@ -38,7 +38,7 @@ def pbs_datastore_list(
     """List PBS datastores on a remote."""
     _run_request(
         "GET",
-        f"/pbs/remotes/{remote}/datastores",
+        f"/pbs/remotes/{remote}/datastore",
         params=None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -48,20 +48,18 @@ def pbs_datastore_list(
 def pbs_datastore_rrddata(
     remote: str = typer.Argument(...),
     store: str = typer.Argument(...),
-    timeframe: str = typer.Option("hour", "--timeframe"),
-    cf: Optional[str] = typer.Option(None, "--cf"),
+    timeframe: PDMRRDTimeframe = typer.Option(PDMRRDTimeframe.HOUR, "--timeframe"),
+    cf: PDMRRDConsolidation = typer.Option(PDMRRDConsolidation.AVERAGE, "--cf"),
     output: Optional[str] = typer.Option(None, "--output", "-o"),
     json_output: bool = typer.Option(False, "--json"),
     yaml_output: bool = typer.Option(False, "--yaml"),
     markdown_output: bool = typer.Option(False, "--markdown"),
 ) -> None:
     """Fetch RRD samples for a PBS datastore."""
-    params: dict[str, Any] = {"timeframe": timeframe}
-    if cf is not None:
-        params["cf"] = cf
+    params: dict[str, Any] = {"timeframe": timeframe.value, "cf": cf.value}
     _run_request(
         "GET",
-        f"/pbs/remotes/{remote}/datastores/{store}/rrddata",
+        f"/pbs/remotes/{remote}/datastore/{store}/rrddata",
         params=params,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -83,7 +81,7 @@ def pbs_snapshot_list(
         params["ns"] = namespace
     _run_request(
         "GET",
-        f"/pbs/remotes/{remote}/datastores/{store}/snapshots",
+        f"/pbs/remotes/{remote}/datastore/{store}/snapshots",
         params=params or None,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )
@@ -92,20 +90,18 @@ def pbs_snapshot_list(
 @pbs_node_app.command("rrddata")
 def pbs_node_rrddata(
     remote: str = typer.Argument(...),
-    timeframe: str = typer.Option("hour", "--timeframe"),
-    cf: Optional[str] = typer.Option(None, "--cf"),
+    timeframe: PDMRRDTimeframe = typer.Option(PDMRRDTimeframe.HOUR, "--timeframe"),
+    cf: PDMRRDConsolidation = typer.Option(PDMRRDConsolidation.AVERAGE, "--cf"),
     output: Optional[str] = typer.Option(None, "--output", "-o"),
     json_output: bool = typer.Option(False, "--json"),
     yaml_output: bool = typer.Option(False, "--yaml"),
     markdown_output: bool = typer.Option(False, "--markdown"),
 ) -> None:
     """Fetch RRD samples for the PBS node."""
-    params: dict[str, Any] = {"timeframe": timeframe}
-    if cf is not None:
-        params["cf"] = cf
+    params: dict[str, Any] = {"timeframe": timeframe.value, "cf": cf.value}
     _run_request(
         "GET",
-        f"/pbs/remotes/{remote}/node/rrddata",
+        f"/pbs/remotes/{remote}/rrddata",
         params=params,
         **_format_options(output, json_output, yaml_output, markdown_output),
     )

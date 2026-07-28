@@ -19,8 +19,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from proxmox_sdk._response_utils import unwrap_data
 from proxmox_sdk.pdm import models as m
+from proxmox_sdk.pdm._normalization import require_string, validate_model
 from proxmox_sdk.pdm.domains.access import AccessDomain
 from proxmox_sdk.pdm.domains.metrics import MetricsDomain
 from proxmox_sdk.pdm.domains.pbs import PBSDomain
@@ -97,12 +97,12 @@ class PDMClient:
 
     async def version(self) -> m.PDMVersion:
         data: Any = await self._sdk.version.get()
-        return m.PDMVersion.model_validate(unwrap_data(data))
+        return validate_model(m.PDMVersion, data, operation="GET /version")
 
-    async def ping(self) -> dict[str, Any]:
+    async def ping(self) -> str:
         """Call GET /ping — lightweight PDM liveness probe."""
         data: Any = await self._sdk.ping.get()
-        return unwrap_data(data) if isinstance(data, dict) else {}
+        return require_string(data, operation="GET /ping")
 
 
 class SyncPDMClient:
@@ -129,7 +129,7 @@ class SyncPDMClient:
     def version(self) -> m.PDMVersion:
         return self._loop.run_until_complete(self._client.version())
 
-    def ping(self) -> dict[str, Any]:
+    def ping(self) -> str:
         """Call GET /ping — lightweight PDM liveness probe."""
         return self._loop.run_until_complete(self._client.ping())
 

@@ -21,7 +21,9 @@ def test_pdm_service_registered_with_expected_defaults():
 
 
 async def test_version_unwraps_data_envelope():
-    sdk, _ = make_pdm_sdk({"/api2/json/version": {"data": {"version": "1.0.4", "release": "1"}}})
+    sdk, _ = make_pdm_sdk(
+        {"/api2/json/version": {"data": {"version": "1.0.4", "release": "1", "repoid": "abcdef01"}}}
+    )
     pdm = PDMClient(_sdk=sdk)
     v = await pdm.version()
     assert isinstance(v, m.PDMVersion)
@@ -38,7 +40,9 @@ async def test_from_sdk_rejects_non_pdm():
 
 
 async def test_from_sdk_accepts_pdm():
-    sdk, _ = make_pdm_sdk({"/api2/json/version": {"data": {"version": "1.0"}}})
+    sdk, _ = make_pdm_sdk(
+        {"/api2/json/version": {"data": {"version": "1.0", "release": "1", "repoid": "abcdef01"}}}
+    )
     pdm = PDMClient.from_sdk(sdk)
     v = await pdm.version()
     assert v.version == "1.0"
@@ -47,7 +51,9 @@ async def test_from_sdk_accepts_pdm():
 def test_sync_client_blocks_and_returns_typed_models():
     sdk, _ = make_pdm_sdk(
         {
-            "/api2/json/version": {"data": {"version": "1.0.4"}},
+            "/api2/json/version": {
+                "data": {"version": "1.0.4", "release": "1", "repoid": "abcdef01"}
+            },
             "/api2/json/remotes/remote": {"data": [{"id": "pve-a", "type": "pve"}]},
         }
     )

@@ -6,17 +6,19 @@ from typing import Any, Optional
 
 import typer
 
-from ._bridge import _format_options, _run_request
+from ._bridge import PDMGlobalResourceType, _format_options, _run_request
 
 resources_app = typer.Typer(
     name="resources", help="Global cross-remote resources.", no_args_is_help=True
 )
 views_app = typer.Typer(name="views", help="Custom cross-remote dashboards.", no_args_is_help=True)
 
+_RESOURCE_TYPE_ALIASES = {"vm": "qemu", "ct": "lxc"}
+
 
 @resources_app.command("list")
 def resources_list(
-    type: Optional[str] = typer.Option(None, "--type"),
+    type: Optional[PDMGlobalResourceType] = typer.Option(None, "--type"),
     output: Optional[str] = typer.Option(None, "--output", "-o"),
     json_output: bool = typer.Option(False, "--json"),
     yaml_output: bool = typer.Option(False, "--yaml"),
@@ -25,7 +27,7 @@ def resources_list(
     """List global resources across every remote."""
     params: dict[str, Any] = {}
     if type is not None:
-        params["type"] = type
+        params["resource-type"] = _RESOURCE_TYPE_ALIASES.get(type.value, type.value)
     _run_request(
         "GET",
         "/resources/list",

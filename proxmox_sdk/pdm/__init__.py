@@ -28,5 +28,6 @@ See :class:`~proxmox_sdk.pdm.client.PDMClient` for the full API.
 """
 
 from proxmox_sdk.pdm.client import PDMClient, SyncPDMClient
+from proxmox_sdk.pdm.errors import PDMResponseContractError
 
-__all__ = ["PDMClient", "SyncPDMClient"]
+__all__ = ["PDMClient", "PDMResponseContractError", "SyncPDMClient"]

@@ -40,3 +40,25 @@ def test_semantic_nested_object_fields() -> None:
     assert value["maxmem"] == 16 * 1024**3
     assert isinstance(value["vmid"], int)
     assert value["node"].startswith("pve-node-")
+
+
+def test_discriminated_union_sample_includes_matching_type_property() -> None:
+    schema = {
+        "type": "object",
+        "oneOf": [
+            {
+                "title": "pbs-datastore",
+                "type": "object",
+                "properties": {"id": {"type": "string"}},
+            }
+        ],
+        "typeProperty": "type",
+        "typeSchema": {
+            "type": "string",
+            "enum": ["pbs-datastore", "pve-qemu"],
+        },
+    }
+
+    value = sample_value_for_schema(schema, seed="discriminated")
+
+    assert value["type"] == "pbs-datastore"

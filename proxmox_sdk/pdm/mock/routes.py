@@ -14,9 +14,9 @@ import copy
 import json
 import threading
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 
 from proxmox_sdk.pdm.mock.seed_data import get_default_pdm_seed
 
@@ -145,6 +145,10 @@ def register_generated_pdm_mock_routes(
     async def version() -> dict[str, Any]:
         return wrap(mock_state.section("version") or {})
 
+    @app.get(f"{_API_PREFIX}/ping")
+    async def ping() -> dict[str, Any]:
+        return wrap("pong")
+
     # -- /remotes/remote -------------------------------------------------
 
     @app.get(f"{_API_PREFIX}/remotes/remote")
@@ -160,7 +164,15 @@ def register_generated_pdm_mock_routes(
         return wrap(None)
 
     @app.get(f"{_API_PREFIX}/remotes/remote/{{id}}")
-    async def remote_get(id: str) -> dict[str, Any]:
+    async def remote_directory(id: str) -> dict[str, Any]:
+        """Return the schema-defined directory marker, not remote config."""
+
+        if mock_state.find_remote(id) is None:
+            raise HTTPException(status_code=404, detail=f"remote '{id}' not found")
+        return wrap(None)
+
+    @app.get(f"{_API_PREFIX}/remotes/remote/{{id}}/config")
+    async def remote_config(id: str) -> dict[str, Any]:
         r = mock_state.find_remote(id)
         if r is None:
             raise HTTPException(status_code=404, detail=f"remote '{id}' not found")
@@ -196,20 +208,34 @@ def register_generated_pdm_mock_routes(
         return wrap(list(bucket.get("nodes", [])))
 
     @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/nodes/{{node}}/rrddata")
-    async def pve_node_rrd(remote: str, node: str) -> dict[str, Any]:
-        _ = remote, node
+    async def pve_node_rrd(
+        remote: str,
+        node: str,
+        timeframe: Literal["hour", "day", "week", "month", "year", "decade"] = Query(...),
+        cf: Literal["MAX", "AVERAGE"] = Query(...),
+    ) -> dict[str, Any]:
+        _ = remote, node, timeframe, cf
         return wrap(_synthetic_rrd())
 
     @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/resources")
-    async def pve_resources(remote: str, type: str | None = None) -> dict[str, Any]:
+    async def pve_resources(
+        remote: str,
+        kind: Literal["vm", "storage", "node", "sdn"] | None = None,
+    ) -> dict[str, Any]:
         bucket = mock_state._pve_bucket(remote)
         entries: list[dict[str, Any]] = []
         for vm in bucket.get("qemu", []):
-            entries.append({**vm, "id": f"qemu/{vm.get('vmid')}", "type": "qemu"})
+            entries.append(_pve_guest_resource(vm, resource_type="qemu"))
         for ct in bucket.get("lxc", []):
-            entries.append({**ct, "id": f"lxc/{ct.get('vmid')}", "type": "lxc"})
-        if type is not None:
-            entries = [e for e in entries if e.get("type") == type]
+            entries.append(_pve_guest_resource(ct, resource_type="lxc"))
+        for node in bucket.get("nodes", []):
+            entries.append(_pve_node_resource(node))
+        if kind == "vm":
+            entries = [entry for entry in entries if entry.get("type") in {"qemu", "lxc"}]
+        elif kind == "node":
+            entries = [entry for entry in entries if entry.get("type") == "node"]
+        elif kind is not None:
+            entries = []
         return wrap(entries)
 
     @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/tasks")
@@ -222,19 +248,31 @@ def register_generated_pdm_mock_routes(
         return wrap(mock_state.list_guests(remote, kind))
 
     @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/config")
-    async def guest_config(remote: str, kind: str, vmid: int) -> dict[str, Any]:
+    async def guest_config(
+        remote: str,
+        kind: str,
+        vmid: int,
+        state: Literal["pending", "active"] = Query(default="pending"),
+    ) -> dict[str, Any]:
+        _ = state
         g = mock_state.find_guest(remote, kind, vmid)
         if g is None:
             raise HTTPException(status_code=404, detail="guest not found")
-        return wrap(
-            {
-                "name": g.get("name"),
-                "cores": g.get("cpus"),
-                "memory": (g.get("maxmem") or 0) // (1024 * 1024) or None,
-                "ostype": "l26",
-                "boot": "order=scsi0",
-            }
-        )
+        memory = (g.get("maxmem") or 0) // (1024 * 1024) or None
+        if kind == "qemu" and memory is not None:
+            memory = f"current={memory}"
+        cores = g.get("cores")
+        if not isinstance(cores, int) or isinstance(cores, bool):
+            cpus = g.get("cpus")
+            cores = cpus if isinstance(cpus, int) and not isinstance(cpus, bool) else None
+        config = {
+            "name": g.get("name"),
+            "cores": cores,
+            "memory": memory,
+            "ostype": "l26",
+            "boot": "order=scsi0",
+        }
+        return wrap({key: value for key, value in config.items() if value is not None})
 
     @app.post(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/start")
     async def guest_start(remote: str, kind: str, vmid: int) -> dict[str, Any]:
@@ -267,8 +305,14 @@ def register_generated_pdm_mock_routes(
         return wrap(f"UPID:{remote}:0005:remote-migrate:{vmid}")
 
     @app.get(f"{_API_PREFIX}/pve/remotes/{{remote}}/{{kind}}/{{vmid}}/rrddata")
-    async def guest_rrd(remote: str, kind: str, vmid: int) -> dict[str, Any]:
-        _ = remote, kind, vmid
+    async def guest_rrd(
+        remote: str,
+        kind: str,
+        vmid: int,
+        timeframe: Literal["hour", "day", "week", "month", "year", "decade"] = Query(...),
+        cf: Literal["MAX", "AVERAGE"] = Query(...),
+    ) -> dict[str, Any]:
+        _ = remote, kind, vmid, timeframe, cf
         return wrap(_synthetic_rrd())
 
     # -- /pbs/remotes/{remote}/... --------------------------------------
@@ -276,11 +320,25 @@ def register_generated_pdm_mock_routes(
     @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastore")
     async def pbs_datastores(remote: str) -> dict[str, Any]:
         pbs = mock_state.section("pbs") or {}
-        return wrap(list(pbs.get(remote, {}).get("datastores", [])))
+        datastores = []
+        for datastore in pbs.get(remote, {}).get("datastores", []):
+            datastores.append(
+                {
+                    "name": datastore.get("name") or datastore.get("store"),
+                    "comment": datastore.get("comment"),
+                    "path": datastore.get("path", "/mnt/datastore"),
+                }
+            )
+        return wrap(datastores)
 
     @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastore/{{datastore}}/rrddata")
-    async def pbs_datastore_rrd(remote: str, datastore: str) -> dict[str, Any]:
-        _ = remote, datastore
+    async def pbs_datastore_rrd(
+        remote: str,
+        datastore: str,
+        timeframe: Literal["hour", "day", "week", "month", "year", "decade"] = Query(...),
+        cf: Literal["MAX", "AVERAGE"] = Query(...),
+    ) -> dict[str, Any]:
+        _ = remote, datastore, timeframe, cf
         return wrap(_synthetic_rrd())
 
     @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/datastore/{{datastore}}/snapshots")
@@ -289,11 +347,20 @@ def register_generated_pdm_mock_routes(
         snaps = [s for s in pbs.get(remote, {}).get("snapshots", []) if s.get("store") == datastore]
         if ns is not None:
             snaps = [s for s in snaps if s.get("namespace") == ns]
-        return wrap(snaps)
+        return wrap(
+            [
+                {key: value for key, value in snapshot.items() if key not in {"store", "namespace"}}
+                for snapshot in snaps
+            ]
+        )
 
     @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/rrddata")
-    async def pbs_node_rrd(remote: str) -> dict[str, Any]:
-        _ = remote
+    async def pbs_node_rrd(
+        remote: str,
+        timeframe: Literal["hour", "day", "week", "month", "year", "decade"] = Query(...),
+        cf: Literal["MAX", "AVERAGE"] = Query(...),
+    ) -> dict[str, Any]:
+        _ = remote, timeframe, cf
         return wrap(_synthetic_rrd())
 
     @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/tasks")
@@ -303,20 +370,31 @@ def register_generated_pdm_mock_routes(
 
     @app.get(f"{_API_PREFIX}/pbs/remotes/{{remote}}/tasks/{{upid}}/status")
     async def pbs_task_status(remote: str, upid: str) -> dict[str, Any]:
-        return wrap({"upid": upid, "node": remote, "status": "OK"})
+        return wrap(
+            {
+                "upid": upid,
+                "node": remote,
+                "pid": 4242,
+                "pstart": 1_700_000_000,
+                "starttime": 1_700_000_000,
+                "status": "stopped",
+                "type": "backup",
+                "user": "root@pam",
+                "exitstatus": "OK",
+            }
+        )
 
     # -- /resources, /resources/status, /resources/subscription --------
 
-    @app.get(f"{_API_PREFIX}/resources/list")
-    async def resources_list(type: str | None = None) -> dict[str, Any]:
-        entries: list[dict[str, Any]] = []
+    def _resource_envelopes(resource_type: str | None = None) -> list[dict[str, Any]]:
+        envelopes: list[dict[str, Any]] = []
         pve = mock_state.section("pve") or {}
         for remote_id, bucket in pve.items():
+            entries: list[dict[str, Any]] = []
             for vm in bucket.get("qemu", []):
                 entries.append(
                     {
-                        "remote": remote_id,
-                        "type": "qemu",
+                        "type": "pve-qemu",
                         "id": f"qemu/{vm.get('vmid')}",
                         "name": vm.get("name"),
                         "node": vm.get("node"),
@@ -326,21 +404,55 @@ def register_generated_pdm_mock_routes(
             for ct in bucket.get("lxc", []):
                 entries.append(
                     {
-                        "remote": remote_id,
-                        "type": "lxc",
+                        "type": "pve-lxc",
                         "id": f"lxc/{ct.get('vmid')}",
                         "name": ct.get("name"),
                         "node": ct.get("node"),
                         "status": ct.get("status"),
                     }
                 )
-        if type is not None:
-            entries = [e for e in entries if e.get("type") == type]
-        return wrap(entries)
+            for node in bucket.get("nodes", []):
+                entries.append({**_pve_node_resource(node), "type": "pve-node"})
+            entries = _filter_global_resources(entries, resource_type)
+            envelopes.append({"remote": remote_id, "resources": entries})
+        pbs = mock_state.section("pbs") or {}
+        for remote_id, bucket in pbs.items():
+            entries = [
+                {
+                    "type": "pbs-node",
+                    "id": f"node/{remote_id}",
+                    "name": remote_id,
+                }
+            ]
+            for datastore in bucket.get("datastores", []):
+                name = datastore.get("name") or datastore.get("store")
+                total = datastore.get("total")
+                used = datastore.get("used")
+                entry: dict[str, Any] = {
+                    "type": "pbs-datastore",
+                    "id": f"datastore/{name}",
+                    "name": name,
+                    "disk": used,
+                    "maxdisk": total,
+                }
+                if isinstance(total, int) and total > 0 and isinstance(used, int):
+                    entry["usage"] = used / total
+                entries.append(entry)
+            entries = _filter_global_resources(entries, resource_type)
+            envelopes.append({"remote": remote_id, "resources": entries})
+        return envelopes
+
+    @app.get(f"{_API_PREFIX}/resources/list")
+    async def resources_list(
+        resource_type: Literal["storage", "qemu", "lxc", "network", "datastore", "node"]
+        | None = Query(default=None, alias="resource-type"),
+    ) -> dict[str, Any]:
+        return wrap(_resource_envelopes(resource_type))
 
     @app.get(f"{_API_PREFIX}/resources/status")
     async def resources_status() -> dict[str, Any]:
-        return wrap((mock_state.section("resources") or {}).get("status", []))
+        envelopes = _resource_envelopes()
+        return wrap(envelopes[0] if envelopes else {"remote": "none", "resources": []})
 
     @app.get(f"{_API_PREFIX}/resources/subscription")
     async def resources_subscription() -> dict[str, Any]:
@@ -350,7 +462,7 @@ def register_generated_pdm_mock_routes(
 
     @app.get(f"{_API_PREFIX}/remotes/metric-collection/status")
     async def metrics_status() -> dict[str, Any]:
-        return wrap((mock_state.section("metrics") or {}).get("status", {}))
+        return wrap(list((mock_state.section("metrics") or {}).get("status", [])))
 
     @app.post(f"{_API_PREFIX}/remotes/metric-collection/trigger")
     async def metrics_trigger() -> dict[str, Any]:
@@ -469,7 +581,7 @@ def register_generated_pdm_mock_routes(
             acl.append(
                 {
                     "path": path,
-                    "type": "user" if body.get("users") else "group",
+                    "ugid_type": "user" if body.get("users") else "group",
                     "ugid": ugid,
                     "roleid": roles,
                     "propagate": body.get("propagate", True),
@@ -523,11 +635,12 @@ def register_generated_pdm_mock_routes(
         access = dict(mock_state.section("access") or {})
         tokens = dict(access.get("tokens", {}))
         user_tokens = list(tokens.get(userid, []))
-        user_tokens.append({"tokenid": tokenid, **body})
+        full_tokenid = f"{userid}!{tokenid}"
+        user_tokens.append({"tokenid": full_tokenid, "token-name": tokenid, **body})
         tokens[userid] = user_tokens
         access["tokens"] = tokens
         mock_state.write("access", access)
-        return wrap({"tokenid": tokenid, "value": "mock-secret-uuid"})
+        return wrap({"tokenid": full_tokenid, "value": "mock-secret-uuid"})
 
     @app.put(f"{_API_PREFIX}/access/users/{{userid}}/token/{{tokenid}}")
     async def tokens_update(userid: str, tokenid: str, request: Request) -> dict[str, Any]:
@@ -536,7 +649,7 @@ def register_generated_pdm_mock_routes(
         tokens = dict(access.get("tokens", {}))
         user_tokens = list(tokens.get(userid, []))
         for i, t in enumerate(user_tokens):
-            if t.get("tokenid") == tokenid:
+            if t.get("token-name") == tokenid or t.get("tokenid") == tokenid:
                 user_tokens[i] = {**t, **body}
                 tokens[userid] = user_tokens
                 access["tokens"] = tokens
@@ -548,7 +661,11 @@ def register_generated_pdm_mock_routes(
     async def tokens_delete(userid: str, tokenid: str) -> dict[str, Any]:
         access = dict(mock_state.section("access") or {})
         tokens = dict(access.get("tokens", {}))
-        user_tokens = [t for t in tokens.get(userid, []) if t.get("tokenid") != tokenid]
+        user_tokens = [
+            token
+            for token in tokens.get(userid, [])
+            if token.get("token-name") != tokenid and token.get("tokenid") != tokenid
+        ]
         tokens[userid] = user_tokens
         access["tokens"] = tokens
         mock_state.write("access", access)
@@ -606,6 +723,73 @@ async def _read_body(request: Request) -> dict[str, Any]:
         return {k: form[k] for k in form}
     except Exception:
         return {}
+
+
+def _pve_guest_resource(
+    guest: dict[str, Any],
+    *,
+    resource_type: Literal["qemu", "lxc"],
+) -> dict[str, Any]:
+    """Project a guest fixture onto the captured PVE resource schema."""
+
+    vmid = guest.get("vmid")
+    resource = {
+        "type": resource_type,
+        "id": f"{resource_type}/{vmid}",
+        "vmid": vmid,
+        "name": guest.get("name"),
+        "node": guest.get("node"),
+        "status": guest.get("status"),
+        "cpu": guest.get("cpu"),
+        "maxcpu": guest.get("maxcpu", guest.get("cpus")),
+        "mem": guest.get("mem"),
+        "maxmem": guest.get("maxmem"),
+        "disk": guest.get("disk"),
+        "maxdisk": guest.get("maxdisk"),
+        "uptime": guest.get("uptime"),
+        "pool": guest.get("pool"),
+        "tags": guest.get("tags"),
+        "template": guest.get("template"),
+    }
+    return {key: value for key, value in resource.items() if value is not None}
+
+
+def _pve_node_resource(node: dict[str, Any]) -> dict[str, Any]:
+    """Project a node fixture onto the captured PVE resource schema."""
+
+    node_name = node.get("node")
+    resource = {
+        "type": "node",
+        "id": f"node/{node_name}",
+        "node": node_name,
+        "status": node.get("status"),
+        "cpu": node.get("cpu"),
+        "maxcpu": node.get("maxcpu"),
+        "mem": node.get("mem"),
+        "maxmem": node.get("maxmem"),
+        "uptime": node.get("uptime"),
+        "level": node.get("level"),
+    }
+    return {key: value for key, value in resource.items() if value is not None}
+
+
+def _filter_global_resources(
+    resources: list[dict[str, Any]],
+    resource_type: str | None,
+) -> list[dict[str, Any]]:
+    """Apply the global request enum to global response discriminators."""
+
+    if resource_type is None:
+        return resources
+    accepted = {
+        "storage": {"pve-storage"},
+        "qemu": {"pve-qemu"},
+        "lxc": {"pve-lxc"},
+        "network": {"pve-network"},
+        "datastore": {"pbs-datastore"},
+        "node": {"pve-node", "pbs-node"},
+    }[resource_type]
+    return [resource for resource in resources if resource.get("type") in accepted]
 
 
 def _synthetic_rrd() -> list[dict[str, Any]]:

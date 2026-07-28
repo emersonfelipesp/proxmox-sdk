@@ -28,7 +28,7 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 3. **CLI + TUI** - Typer CLI and Textual terminal UI for interactive use
 4. **Codegen pipeline** - Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
 5. **675 operations / 444 endpoints** - Pre-generated Proxmox VE 9.2 API with full OpenAPI schema (9.1.11 retained for backward compatibility)
-6. **318 operations / 246 endpoints** - Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
+6. **318 operations / 246 endpoints** - Pre-generated Proxmox Datacenter Manager (PDM) API with strict typed read-boundary validation
 7. **Rate limiting** - Built-in protection via SlowAPI
 
 ## Package Structure
@@ -70,6 +70,8 @@ proxmox_sdk/
 ├── pdm/                      # Proxmox Datacenter Manager facade
 │   ├── client.py             # PDMClient / SyncPDMClient
 │   ├── models.py             # Pydantic models for PDM responses
+│   ├── errors.py             # Redacted PDMResponseContractError
+│   ├── _normalization.py     # Strict object/list/string and model validation
 │   ├── domains/              # Access, Metrics, PBS, PVE, Remotes, Resources, Views
 │   └── mock/                 # PDM mock routes for proxmox-sdk-pdm-mock
 ├── node/                     # Node-level helpers
@@ -200,6 +202,9 @@ uv sync --locked --group dev
 uv run --locked python -m build --no-isolation
 uv run --locked python tests/verify_wheel_contract.py dist/*.whl
 
+# Verify all 32 schema-backed PDM reads and their CLI route mappings
+uv run pytest tests/pdm/test_schema_read_contract.py tests/cli/test_pdm_commands.py
+
 # Test CLI imports
 uv run python -c "from proxmox_sdk.proxmox_cli.cli import cli"
 
@@ -235,6 +240,7 @@ See [docs/security.md](docs/security.md) for the full reference. Key patterns to
 - **Health endpoint** — Returns `404` for non-localhost callers. `testclient` is only added to the allowlist when `TESTING=1`.
 - **SSH backends** — `SshParamikoBackend` defaults to `WarningPolicy` (not `AutoAddPolicy`). All SSH commands use `shlex.join()`/`shlex.quote()` to prevent shell injection. Temp files use `secrets.token_hex(8)`.
 - **Log sanitization** — `SensitiveDataFilter` in `logger.py` redacts credentials (`password=`, `token_value=`, `PVEAuthCookie=`, `PMGAuthCookie=`, `PBSAuthCookie=`, `CSRFPreventionToken=`, `Authorization=`) from all log output.
+- **PDM response redaction** — Typed PDM contract failures retain neither raw payloads nor Pydantic exception context. Every typed successful PDM model boundary replaces operator-controlled upstream `error` strings with a static degraded-state marker; resource adapters additionally discard nested error extras and bind remote identity to the trusted response envelope or request path.
 - **Credential clearing** — `PROXMOX_API_TOKEN_SECRET`, `PROXMOX_API_PASSWORD`, `PROXMOX_API_OTP` are overwritten with `"********"` in `os.environ` after being read.
 - **Config symlink protection** — `save_config()` refuses to write if the config file or its parent directory is a symlink.
 - **SSL context** — `TicketAuth` receives the same `ssl` context as the main HTTPS backend, so `verify_ssl=False` applies consistently to both auth and API requests.
