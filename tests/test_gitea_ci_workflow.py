@@ -11,6 +11,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = ROOT / ".gitea" / "workflows" / "ci.yml"
 FULL_SHA_ACTION = re.compile(r"^[^\s@]+@[0-9a-f]{40}$")
+GITEA_UPLOAD_ARTIFACT = "actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32"
 
 
 def _workflow() -> dict[str, Any]:
@@ -96,6 +97,9 @@ def test_static_and_syntax_jobs_preserve_github_ci_policy() -> None:
 def test_schema_matrix_runs_the_complete_covered_suite() -> None:
     job = _workflow()["jobs"]["schema-tests"]
     commands = _commands(job)
+    artifact_steps = [
+        step for step in job["steps"] if step.get("name") == "Retain schema coverage evidence"
+    ]
 
     assert job["strategy"]["fail-fast"] == "false"
     assert job["strategy"]["matrix"]["proxmox_schema"] == [
@@ -113,6 +117,8 @@ def test_schema_matrix_runs_the_complete_covered_suite() -> None:
     assert "--cov=proxmox_sdk" in commands
     assert "--cov-branch" in commands
     assert "--cov-report=xml tests" in commands
+    assert len(artifact_steps) == 1
+    assert artifact_steps[0]["uses"] == GITEA_UPLOAD_ARTIFACT
 
 
 def test_docs_and_package_job_validates_the_installed_artifact() -> None:
