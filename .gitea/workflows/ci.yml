@@ -1,0 +1,176 @@
+name: Gitea CI
+
+on:
+  push:
+    branches: [main, testing]
+  pull_request:
+    branches: [main, testing]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gitea-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Static analysis and workflow policy
+    runs-on: ci-untrusted-python312
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact event source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up locked Python tooling
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+          python-version: "3.12.13"
+
+      - name: Sync locked development dependencies
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --group dev
+
+      - name: Validate GitHub and Gitea workflow syntax
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/actionlint
+          curl --fail --show-error --silent --location \
+            --output /tmp/actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          printf '%s  %s\n' "$ACTIONLINT_SHA256" /tmp/actionlint.tar.gz \
+            | sha256sum --check --strict -
+          tar --no-same-owner -xzf /tmp/actionlint.tar.gz \
+            -C /tmp/actionlint actionlint
+          /tmp/actionlint/actionlint -color .github/workflows/*.yml
+          /tmp/actionlint/actionlint -color \
+            -ignore 'label ".*" is unknown' .gitea/workflows/*.yml
+
+      - name: Run Ruff lint
+        run: uv run --locked ruff check .
+
+      - name: Run Ruff formatting gate
+        run: uv run --locked ruff format --check .
+
+      - name: Run ty type checks
+        run: uv run --locked ty check proxmox_sdk tests --output-format concise
+
+      - name: Run Pyright package checks
+        run: uv run --locked pyright proxmox_sdk
+
+  syntax:
+    name: Syntax and import contracts
+    runs-on: ci-untrusted-python312
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact event source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up locked Python tooling
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+          python-version: "3.12.13"
+
+      - name: Sync locked test dependencies
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --extra test --group dev
+
+      - name: Compile package and tests
+        run: uv run --locked python -m compileall proxmox_sdk tests
+
+      - name: Run public import smoke checks
+        run: |
+          set -euo pipefail
+          uv run --locked python -c "import proxmox_sdk.main"
+          uv run --locked python -c "import proxmox_sdk.mock_main"
+          uv run --locked python -c "import proxmox_sdk.pdm_mock_main"
+          uv run --locked python -c "from proxmox_sdk.sdk import ProxmoxSDK"
+          uv run --locked python -c "from proxmox_sdk.sdk.sync import SyncProxmoxSDK"
+          uv run --locked python -c "from proxmox_sdk.proxmox_cli.cli import cli"
+
+  schema-tests:
+    name: Schema regression (${{ matrix.proxmox_schema }})
+    runs-on: ci-untrusted-python312
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        proxmox_schema: [latest, "9.2", "9.1.11"]
+    env:
+      PROXMOX_MOCK_SCHEMA_VERSION: ${{ matrix.proxmox_schema }}
+      PROXMOX_MOCK_STATE_NAMESPACE: gitea_${{ matrix.proxmox_schema }}_${{ github.run_id }}_${{ github.run_attempt }}
+    steps:
+      - name: Checkout exact event source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up locked Python tooling
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+          python-version: "3.12.13"
+
+      - name: Sync locked test dependencies
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --extra test --group dev
+
+      - name: Run complete schema-driven regression suite
+        run: >-
+          uv run --locked pytest -n 4 --cov=proxmox_sdk --cov-branch
+          --cov-report=term-missing --cov-report=xml tests
+
+      - name: Retain schema coverage evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: gitea-proxmox-sdk-coverage-${{ matrix.proxmox_schema }}
+          path: coverage.xml
+          if-no-files-found: error
+          retention-days: 30
+
+  docs-package:
+    name: Strict docs and installed-wheel contract
+    runs-on: ci-untrusted-python312
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact event source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up locked Python tooling
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          enable-cache: true
+          python-version: "3.12.13"
+
+      - name: Sync locked docs and build dependencies
+        run: |
+          set -euo pipefail
+          uv lock --check
+          uv sync --locked --extra docs --group dev
+
+      - name: Build documentation strictly
+        run: uv run --locked mkdocs build --strict
+
+      - name: Build wheel and source distribution
+        run: uv run --locked python -m build --no-isolation
+
+      - name: Validate package metadata
+        run: uv run --locked python -m twine check dist/*
+
+      - name: Verify installed-wheel schemas and PDM contract
+        run: uv run --locked python tests/verify_wheel_contract.py dist/*.whl

@@ -17,10 +17,12 @@ Third-party actions are pinned to reviewed full commit SHAs. Python build tools
 and uv are exact-versioned; package jobs verify `uv.lock`, build twice under the
 event commit's `SOURCE_DATE_EPOCH`, and check out the exact protected event SHA.
 Update an action or tool only by reviewing and recording the new release commit.
-Gitea feature CI is not claimed as an authoritative merge gate without isolated
-PR runners and required branch checks. The package-of-record workflow has
-separate `release-builder` and `release-publisher` labels and remains disabled
-until operators provision those isolated runners and the protected environment.
+Gitea feature CI is defined in `.gitea/workflows/ci.yml` and mirrors the
+secret-free GitHub review policy, but it is not authoritative until operators
+provision isolated PR runners and required branch checks. The package-of-record
+workflow has separate `release-builder` and `release-publisher` labels and
+remains disabled until operators provision those isolated runners and the
+protected environment.
 
 ## Workflow Index
 
@@ -33,6 +35,7 @@ until operators provision those isolated runners and the protected environment.
 | `publish-testpypi.yml` | `v*rc*`, GitHub Release, or manual | Reproducible build, protected TestPyPI/PyPI publication, served-byte verification, hash-bound service images, and one all-image stable promotion fan-in |
 | `schema-update.yml` | Manual (`workflow_dispatch`) or weekly cron (Monday 03:00 UTC) | Detects upstream Proxmox API drift, runs codegen for a new version tag, verifies SHA integrity, opens a PR with a generated schema update |
 | `release-docker-verify.yml` | Successful release workflow | Confirms alias digests and smokes core + all/pve/pbs/pdm images on amd64 and arm64 |
+| `.gitea/workflows/ci.yml` | Push / PR to `main` or `testing` | Read-only Ruff/type/syntax, three-schema regression, strict docs, and installed-wheel gates on an isolated untrusted runner |
 | `.gitea/workflows/publish-package.yml` | Protected `v*` tag | Builds and verifies the Gitea package of record for RC, final, and post releases |
 
 ## CI Job Dependencies
@@ -45,6 +48,12 @@ ci.yml
 ├── test
 └── docker-images (main/testing push only)
     └── build/smoke 3 variants × 2 arches → candidate manifests → dev aliases
+
+.gitea/workflows/ci.yml
+├── static (workflow policy + Ruff + ty + Pyright)
+├── syntax (compileall + public import contracts)
+├── schema-tests (latest + 9.2 + 9.1.11)
+└── docs-package (strict MkDocs + wheel/sdist + installed-wheel verifier)
 ```
 
 ## Docker Image Tags
@@ -67,6 +76,10 @@ ci.yml
 ## Key Rules
 
 - The `uv.lock` at the repo root must stay in sync with `pyproject.toml` because CI runs `uv lock --check` followed by `uv sync --locked`.
+- Gitea feature jobs use read-only permissions and the secret-free
+  `ci-untrusted-python312` label. A workflow file alone is not evidence of an
+  active gate: require an eligible runner plus protected-branch status checks,
+  and never merge while a required context is queued or pending.
 - CI and release preparation must run `tests/verify_wheel_contract.py` against the built wheel so source imports cannot hide missing generated schemas.
 - Release workflows validate that the `pyproject.toml` version matches the Git tag before publishing.
 - TestPyPI, PyPI, and Gitea preflight/postflight checks compare complete artifact

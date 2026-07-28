@@ -372,7 +372,8 @@ Run the focused guard suite locally with:
 uv run pytest tests/test_generated_integrity.py tests/mock/test_routes.py
 ```
 
-The GitHub CI and release workflows run the full test suite across:
+The GitHub CI, the secret-free Gitea feature workflow, and release validation
+run the full test suite across:
 
 ```bash
 PROXMOX_MOCK_SCHEMA_VERSION=latest

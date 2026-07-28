@@ -497,6 +497,25 @@ proper 504 Gateway Timeout response.
 
 ## Release Process
 
+### Gitea feature quality gate
+
+`.gitea/workflows/ci.yml` is the Gitea-first, secret-free counterpart to the
+GitHub review workflow. For pushes and pull requests to `main` or `testing`, it
+checks pinned workflow inputs, Ruff, ty, Pyright, compile/import contracts, all
+three shipped Proxmox schemas (`latest`, `9.2`, and `9.1.11`), strict MkDocs,
+distribution metadata, and the installed-wheel schema/PDM contract.
+
+All jobs use the isolated `ci-untrusted-python312` label and read-only contents
+permission. The workflow has no package-registry, DockerHub, deployment, live
+Proxmox, or repository-write authority. Do not add secrets to make an
+untrusted PR job convenient; credentialed publication remains in protected,
+artifact-only release jobs.
+
+The repository file cannot provision its own runner or branch protection.
+Before treating these contexts as a merge gate, an operator must register an
+eligible organization/repository runner and configure the emitted contexts as
+required. A queued job with `runner_id: 0` is missing evidence, not a pass.
+
 1. **Prepare lifecycle evidence and an RC version.** Use PEP 440, starting with
    `X.Y.Zrc1`, and record requirements, design impact, test/coverage scope,
    defects, operations, and approvals in the private issue/PR record.
