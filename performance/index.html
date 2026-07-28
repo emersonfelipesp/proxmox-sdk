@@ -2982,7 +2982,8 @@ included through <code>pyproject.toml</code> package data:</p>
 <p>Run the focused guard suite locally with:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_generated_integrity.py<span class="w"> </span>tests/mock/test_routes.py
 </span></code></pre></div>
-<p>The GitHub CI and release workflows run the full test suite across:</p>
+<p>The GitHub CI, the secret-free Gitea feature workflow, and release validation
+run the full test suite across:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span>latest
 </span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.2
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.1.11
