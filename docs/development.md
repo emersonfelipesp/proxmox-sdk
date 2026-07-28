@@ -495,8 +495,6 @@ ProxmoxClient now catches aiohttp.ClientTimeout and returns
 proper 504 Gateway Timeout response.
 ```
 
-## Release Process
-
 ### Gitea feature quality gate
 
 `.gitea/workflows/ci.yml` is the Gitea-first, secret-free counterpart to the
@@ -514,7 +512,12 @@ artifact-only release jobs.
 The repository file cannot provision its own runner or branch protection.
 Before treating these contexts as a merge gate, an operator must register an
 eligible organization/repository runner and configure the emitted contexts as
-required. A queued job with `runner_id: 0` is missing evidence, not a pass.
+required. Gitea validates `refs/pull/<N>/head`, not a synthetic merge commit, so
+branch protection must also require the pull-request branch to be current with
+its base before merge. A queued job with `runner_id: 0` is missing evidence, not
+a pass.
+
+## Release Process
 
 1. **Prepare lifecycle evidence and an RC version.** Use PEP 440, starting with
    `X.Y.Zrc1`, and record requirements, design impact, test/coverage scope,

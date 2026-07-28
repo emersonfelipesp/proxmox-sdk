@@ -34,7 +34,6 @@ def test_gitea_ci_has_bounded_read_only_review_triggers() -> None:
         "opened",
         "synchronize",
         "reopened",
-        "ready_for_review",
     ]
     assert "workflow_dispatch" in workflow["on"]
     assert workflow["concurrency"] == {
