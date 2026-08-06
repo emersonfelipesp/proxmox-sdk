@@ -5,15 +5,26 @@ Do not edit by hand. Regenerate from the matching OpenAPI artifact.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr
 
 GENERATED_FOR_PROXMOX_VERSION = "9.1.11"
 GENERATED_SOURCE_SHA256 = "6fb57e0668c0d043fb9f7e8baf387b320c3948acf634ae439f0d748ea744ad63"
-GENERATED_AT = "2026-05-23T21:58:59.668705+00:00"
+GENERATED_AT = "2026-08-06T18:55:02.223780+00:00"
 
 
 class ProxmoxBaseModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra='allow')
+
+
+def _allowed_ints(allowed: tuple[int, ...]) -> AfterValidator:
+    def validate(value: int) -> int:
+        if value not in allowed:
+            raise ValueError('value is not an allowed schema member')
+        return value
+
+    return AfterValidator(validate)
 
 class GetClusterResponse(RootModel[list[dict[str, object]]]):
     """Model for index. Cluster index. response."""
@@ -29,42 +40,42 @@ class GetClusterAcmeAccountResponse(RootModel[list[dict[str, object]]]):
 
 class PostClusterAcmeAccountRequest(ProxmoxBaseModel):
     """Model for register_account. Register a new ACME account with CA. request."""
-    contact: str = Field(..., description='Contact email addresses.')
-    directory: str | None = Field(None, description='URL of ACME CA directory endpoint.')
-    eab_hmac_key: str | None = Field(None, alias="eab-hmac-key", description='HMAC key for External Account Binding.')
-    eab_kid: str | None = Field(None, alias="eab-kid", description='Key Identifier for External Account Binding.')
-    name: str | None = Field(None, description='ACME account config file name.')
-    tos_url: str | None = Field(None, description='URL of CA TermsOfService - setting this indicates agreement.')
+    contact: StrictStr = Field(..., description='Contact email addresses.')
+    directory: StrictStr | None = Field(None, description='URL of ACME CA directory endpoint.')
+    eab_hmac_key: StrictStr | None = Field(None, alias="eab-hmac-key", description='HMAC key for External Account Binding.')
+    eab_kid: StrictStr | None = Field(None, alias="eab-kid", description='Key Identifier for External Account Binding.')
+    name: StrictStr | None = Field(None, description='ACME account config file name.')
+    tos_url: StrictStr | None = Field(None, description='URL of CA TermsOfService - setting this indicates agreement.')
 
-class PostClusterAcmeAccountResponse(RootModel[str]):
+class PostClusterAcmeAccountResponse(RootModel[StrictStr]):
     """Model for register_account. Register a new ACME account with CA. response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
-class DeleteClusterAcmeAccountNameResponse(RootModel[str]):
+class DeleteClusterAcmeAccountNameResponse(RootModel[StrictStr]):
     """Model for deactivate_account. Deactivate existing ACME account at CA. response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class GetClusterAcmeAccountNameResponse(ProxmoxBaseModel):
     """Model for get_account. Return existing ACME account information. response."""
     account: dict[str, object] | None = Field(None)
-    directory: str | None = Field(None, description='URL of ACME CA directory endpoint.')
-    location: str | None = Field(None)
-    tos: str | None = Field(None)
+    directory: StrictStr | None = Field(None, description='URL of ACME CA directory endpoint.')
+    location: StrictStr | None = Field(None)
+    tos: StrictStr | None = Field(None)
 
 class PutClusterAcmeAccountNameRequest(ProxmoxBaseModel):
     """Model for update_account. Update existing ACME account information with CA. Note: not specifying any new account information triggers a refresh. request."""
-    contact: str | None = Field(None, description='Contact email addresses.')
+    contact: StrictStr | None = Field(None, description='Contact email addresses.')
 
-class PutClusterAcmeAccountNameResponse(RootModel[str]):
+class PutClusterAcmeAccountNameResponse(RootModel[StrictStr]):
     """Model for update_account. Update existing ACME account information with CA. Note: not specifying any new account information triggers a refresh. response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class GetClusterAcmeChallengeSchemaResponseItem(ProxmoxBaseModel):
     """Model for challengeschema. Get schema of ACME challenge types. response."""
-    id: str | None = Field(None)
-    name: str | None = Field(None, description='Human readable name, falls back to id')
+    id: StrictStr | None = Field(None)
+    name: StrictStr | None = Field(None, description='Human readable name, falls back to id')
     schema: dict[str, object] | None = Field(None)
-    type: str | None = Field(None)
+    type: StrictStr | None = Field(None)
 
 class GetClusterAcmeChallengeSchemaResponse(RootModel[list[GetClusterAcmeChallengeSchemaResponseItem]]):
     """List of items. challengeschema. Get schema of ACME challenge types. response."""
@@ -72,8 +83,8 @@ class GetClusterAcmeChallengeSchemaResponse(RootModel[list[GetClusterAcmeChallen
 
 class GetClusterAcmeDirectoriesResponseItem(ProxmoxBaseModel):
     """Model for get_directories. Get named known ACME directory endpoints. response."""
-    name: str | None = Field(None)
-    url: str | None = Field(None, description='URL of ACME CA directory endpoint.')
+    name: StrictStr | None = Field(None)
+    url: StrictStr | None = Field(None, description='URL of ACME CA directory endpoint.')
 
 class GetClusterAcmeDirectoriesResponse(RootModel[list[GetClusterAcmeDirectoriesResponseItem]]):
     """List of items. get_directories. Get named known ACME directory endpoints. response."""
@@ -81,20 +92,20 @@ class GetClusterAcmeDirectoriesResponse(RootModel[list[GetClusterAcmeDirectories
 
 class GetClusterAcmeMetaResponse(ProxmoxBaseModel):
     """Model for get_meta. Retrieve ACME Directory Meta Information response."""
-    caa_identities: list[str] | None = Field(None, alias="caaIdentities", description='Hostnames referring to the ACME servers.')
+    caa_identities: list[StrictStr] | None = Field(None, alias="caaIdentities", description='Hostnames referring to the ACME servers.')
     external_account_required: bool | None = Field(None, alias="externalAccountRequired", description='EAB Required')
-    terms_of_service: str | None = Field(None, alias="termsOfService", description='ACME TermsOfService URL.')
-    website: str | None = Field(None, description='URL to more information about the ACME server.')
+    terms_of_service: StrictStr | None = Field(None, alias="termsOfService", description='ACME TermsOfService URL.')
+    website: StrictStr | None = Field(None, description='URL to more information about the ACME server.')
 
 class GetClusterAcmePluginsResponseItem(ProxmoxBaseModel):
     """Model for index. ACME plugin index. response."""
-    api: str | None = Field(None, description='API plugin name')
-    data: str | None = Field(None, description='DNS plugin data. (base64 encoded)')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    api: StrictStr | None = Field(None, description='API plugin name')
+    data: StrictStr | None = Field(None, description='DNS plugin data. (base64 encoded)')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Flag to disable the config.')
-    nodes: str | None = Field(None, description='List of cluster node names.')
-    plugin: str | None = Field(None, description='Unique identifier for ACME plugin instance.')
-    type: str | None = Field(None, description='ACME challenge type.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names.')
+    plugin: StrictStr | None = Field(None, description='Unique identifier for ACME plugin instance.')
+    type: StrictStr | None = Field(None, description='ACME challenge type.')
     validation_delay: int | None = Field(None, alias="validation-delay", description='Extra delay in seconds to wait before requesting validation. Allows to cope with a long TTL of DNS records.')
 
 class GetClusterAcmePluginsResponse(RootModel[list[GetClusterAcmePluginsResponseItem]]):
@@ -103,12 +114,12 @@ class GetClusterAcmePluginsResponse(RootModel[list[GetClusterAcmePluginsResponse
 
 class PostClusterAcmePluginsRequest(ProxmoxBaseModel):
     """Model for add_plugin. Add ACME plugin configuration. request."""
-    api: str | None = Field(None, description='API plugin name')
-    data: str | None = Field(None, description='DNS plugin data. (base64 encoded)')
+    api: StrictStr | None = Field(None, description='API plugin name')
+    data: StrictStr | None = Field(None, description='DNS plugin data. (base64 encoded)')
     disable: bool | None = Field(None, description='Flag to disable the config.')
-    id: str = Field(..., description='ACME Plugin ID name')
-    nodes: str | None = Field(None, description='List of cluster node names.')
-    type: str = Field(..., description='ACME challenge type.')
+    id: StrictStr = Field(..., description='ACME Plugin ID name')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names.')
+    type: StrictStr = Field(..., description='ACME challenge type.')
     validation_delay: int | None = Field(None, alias="validation-delay", description='Extra delay in seconds to wait before requesting validation. Allows to cope with a long TTL of DNS records.')
 
 class PostClusterAcmePluginsResponse(RootModel[None]):
@@ -121,72 +132,72 @@ class DeleteClusterAcmePluginsIdResponse(RootModel[None]):
 
 class GetClusterAcmePluginsIdResponse(ProxmoxBaseModel):
     """Model for get_plugin_config. Get ACME plugin configuration. response."""
-    api: str | None = Field(None, description='API plugin name')
-    data: str | None = Field(None, description='DNS plugin data. (base64 encoded)')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    api: StrictStr | None = Field(None, description='API plugin name')
+    data: StrictStr | None = Field(None, description='DNS plugin data. (base64 encoded)')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Flag to disable the config.')
-    nodes: str | None = Field(None, description='List of cluster node names.')
-    plugin: str = Field(..., description='Unique identifier for ACME plugin instance.')
-    type: str = Field(..., description='ACME challenge type.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names.')
+    plugin: StrictStr = Field(..., description='Unique identifier for ACME plugin instance.')
+    type: StrictStr = Field(..., description='ACME challenge type.')
     validation_delay: int | None = Field(None, alias="validation-delay", description='Extra delay in seconds to wait before requesting validation. Allows to cope with a long TTL of DNS records.')
 
 class PutClusterAcmePluginsIdRequest(ProxmoxBaseModel):
     """Model for update_plugin. Update ACME plugin configuration. request."""
-    api: str | None = Field(None, description='API plugin name')
-    data: str | None = Field(None, description='DNS plugin data. (base64 encoded)')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    api: StrictStr | None = Field(None, description='API plugin name')
+    data: StrictStr | None = Field(None, description='DNS plugin data. (base64 encoded)')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Flag to disable the config.')
-    nodes: str | None = Field(None, description='List of cluster node names.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names.')
     validation_delay: int | None = Field(None, alias="validation-delay", description='Extra delay in seconds to wait before requesting validation. Allows to cope with a long TTL of DNS records.')
 
 class PutClusterAcmePluginsIdResponse(RootModel[None]):
     """Model for update_plugin. Update ACME plugin configuration. response."""
     root: None = Field(...)
 
-class GetClusterAcmeTosResponse(RootModel[str]):
+class GetClusterAcmeTosResponse(RootModel[StrictStr]):
     """Model for get_tos. Retrieve ACME TermsOfService URL from CA. Deprecated, please use /cluster/acme/meta. response."""
-    root: str = Field(..., description='ACME TermsOfService URL.')
+    root: StrictStr = Field(..., description='ACME TermsOfService URL.')
 
 class GetClusterBackupResponseItem(ProxmoxBaseModel):
     """Model for index. List vzdump backup schedule. response."""
     all: bool | None = Field(None, description='Backup all known guest systems on this host.')
     bwlimit: int | None = Field(None, description='Limit I/O bandwidth (in KiB/s).')
-    comment: str | None = Field(None, description='Description for the Job.')
-    compress: str | None = Field(None, description='Compress dump file.')
-    dumpdir: str | None = Field(None, description='Store resulting files to specified directory.')
+    comment: StrictStr | None = Field(None, description='Description for the Job.')
+    compress: StrictStr | None = Field(None, description='Compress dump file.')
+    dumpdir: StrictStr | None = Field(None, description='Store resulting files to specified directory.')
     enabled: bool | None = Field(None, description='Enable or disable the job.')
-    exclude: str | None = Field(None, description='Exclude specified guest systems (assumes --all)')
-    exclude_path: list[str] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
+    exclude: StrictStr | None = Field(None, description='Exclude specified guest systems (assumes --all)')
+    exclude_path: list[StrictStr] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
     fleecing: dict[str, object] | None = Field(None, description='Options for backup fleecing (VM only).')
-    id: str | None = Field(None, description='The job ID.')
+    id: StrictStr | None = Field(None, description='The job ID.')
     ionice: int | None = Field(None, description='Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.')
     lockwait: int | None = Field(None, description='Maximal time to wait for the global lock (minutes).')
-    mailnotification: str | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
-    mailto: str | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
+    mailnotification: StrictStr | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
+    mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     maxfiles: int | None = Field(None, description="Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.")
-    mode: str | None = Field(None, description='Backup mode.')
+    mode: StrictStr | None = Field(None, description='Backup mode.')
     next_run: int | None = Field(None, alias="next-run", description='UNIX timestamp when this backup job will be executed next')
-    node: str | None = Field(None, description='Only run if executed on this node.')
-    notes_template: str | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: str | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
-    pbs_change_detection_mode: str | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
+    node: StrictStr | None = Field(None, description='Only run if executed on this node.')
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: dict[str, object] | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
-    pool: str | None = Field(None, description='Backup all known guest systems included in the specified pool.')
+    pool: StrictStr | None = Field(None, description='Backup all known guest systems included in the specified pool.')
     protected: bool | None = Field(None, description='If true, mark backup(s) as protected.')
     prune_backups: dict[str, object] | None = Field(None, alias="prune-backups", description='Use these retention options instead of those from the storage configuration.')
     quiet: bool | None = Field(None, description='Be quiet.')
     remove: bool | None = Field(None, description="Prune older backups according to 'prune-backups'.")
     repeat_missed: bool | None = Field(None, alias="repeat-missed", description='If true, the job will be run as soon as possible if it was missed while the scheduler was not running.')
-    schedule: str | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
-    script: str | None = Field(None, description='Use specified hook script.')
+    schedule: StrictStr | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
+    script: StrictStr | None = Field(None, description='Use specified hook script.')
     stdexcludes: bool | None = Field(None, description='Exclude temporary files and logs.')
     stop: bool | None = Field(None, description='Stop running backup jobs on this host.')
     stopwait: int | None = Field(None, description='Maximal time to wait until a guest system is stopped (minutes).')
-    storage: str | None = Field(None, description='Store resulting file to this storage.')
-    tmpdir: str | None = Field(None, description='Store temporary files to specified directory.')
-    vmid: str | None = Field(None, description='The ID of the guest system you want to backup.')
+    storage: StrictStr | None = Field(None, description='Store resulting file to this storage.')
+    tmpdir: StrictStr | None = Field(None, description='Store temporary files to specified directory.')
+    vmid: StrictStr | None = Field(None, description='The ID of the guest system you want to backup.')
     zstd: int | None = Field(None, description='Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.')
 
 class GetClusterBackupResponse(RootModel[list[GetClusterBackupResponseItem]]):
@@ -197,42 +208,42 @@ class PostClusterBackupRequest(ProxmoxBaseModel):
     """Model for create_job. Create new vzdump backup job. request."""
     all: bool | None = Field(None, description='Backup all known guest systems on this host.')
     bwlimit: int | None = Field(None, description='Limit I/O bandwidth (in KiB/s).')
-    comment: str | None = Field(None, description='Description for the Job.')
-    compress: str | None = Field(None, description='Compress dump file.')
-    dow: str | None = Field(None, description="Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.")
-    dumpdir: str | None = Field(None, description='Store resulting files to specified directory.')
+    comment: StrictStr | None = Field(None, description='Description for the Job.')
+    compress: StrictStr | None = Field(None, description='Compress dump file.')
+    dow: StrictStr | None = Field(None, description="Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.")
+    dumpdir: StrictStr | None = Field(None, description='Store resulting files to specified directory.')
     enabled: bool | None = Field(None, description='Enable or disable the job.')
-    exclude: str | None = Field(None, description='Exclude specified guest systems (assumes --all)')
-    exclude_path: list[str] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
-    fleecing: str | None = Field(None, description='Options for backup fleecing (VM only).')
-    id: str | None = Field(None, description='Job ID (will be autogenerated).')
+    exclude: StrictStr | None = Field(None, description='Exclude specified guest systems (assumes --all)')
+    exclude_path: list[StrictStr] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
+    fleecing: StrictStr | None = Field(None, description='Options for backup fleecing (VM only).')
+    id: StrictStr | None = Field(None, description='Job ID (will be autogenerated).')
     ionice: int | None = Field(None, description='Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.')
     lockwait: int | None = Field(None, description='Maximal time to wait for the global lock (minutes).')
-    mailnotification: str | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
-    mailto: str | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
+    mailnotification: StrictStr | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
+    mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     maxfiles: int | None = Field(None, description="Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.")
-    mode: str | None = Field(None, description='Backup mode.')
-    node: str | None = Field(None, description='Only run if executed on this node.')
-    notes_template: str | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: str | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
-    pbs_change_detection_mode: str | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
-    performance: str | None = Field(None, description='Other performance-related settings.')
+    mode: StrictStr | None = Field(None, description='Backup mode.')
+    node: StrictStr | None = Field(None, description='Only run if executed on this node.')
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
+    performance: StrictStr | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
-    pool: str | None = Field(None, description='Backup all known guest systems included in the specified pool.')
+    pool: StrictStr | None = Field(None, description='Backup all known guest systems included in the specified pool.')
     protected: bool | None = Field(None, description='If true, mark backup(s) as protected.')
-    prune_backups: str | None = Field(None, alias="prune-backups", description='Use these retention options instead of those from the storage configuration.')
+    prune_backups: StrictStr | None = Field(None, alias="prune-backups", description='Use these retention options instead of those from the storage configuration.')
     quiet: bool | None = Field(None, description='Be quiet.')
     remove: bool | None = Field(None, description="Prune older backups according to 'prune-backups'.")
     repeat_missed: bool | None = Field(None, alias="repeat-missed", description='If true, the job will be run as soon as possible if it was missed while the scheduler was not running.')
-    schedule: str | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
-    script: str | None = Field(None, description='Use specified hook script.')
-    starttime: str | None = Field(None, description="Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.")
+    schedule: StrictStr | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
+    script: StrictStr | None = Field(None, description='Use specified hook script.')
+    starttime: StrictStr | None = Field(None, description="Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.")
     stdexcludes: bool | None = Field(None, description='Exclude temporary files and logs.')
     stop: bool | None = Field(None, description='Stop running backup jobs on this host.')
     stopwait: int | None = Field(None, description='Maximal time to wait until a guest system is stopped (minutes).')
-    storage: str | None = Field(None, description='Store resulting file to this storage.')
-    tmpdir: str | None = Field(None, description='Store temporary files to specified directory.')
-    vmid: str | None = Field(None, description='The ID of the guest system you want to backup.')
+    storage: StrictStr | None = Field(None, description='Store resulting file to this storage.')
+    tmpdir: StrictStr | None = Field(None, description='Store temporary files to specified directory.')
+    vmid: StrictStr | None = Field(None, description='The ID of the guest system you want to backup.')
     zstd: int | None = Field(None, description='Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.')
 
 class PostClusterBackupResponse(RootModel[None]):
@@ -241,7 +252,7 @@ class PostClusterBackupResponse(RootModel[None]):
 
 class GetClusterBackupInfoResponseItem(ProxmoxBaseModel):
     """Model for index. Index for backup info related endpoints response."""
-    subdir: str | None = Field(None, description='API sub-directory endpoint')
+    subdir: StrictStr | None = Field(None, description='API sub-directory endpoint')
 
 class GetClusterBackupInfoResponse(RootModel[list[GetClusterBackupInfoResponseItem]]):
     """List of items. index. Index for backup info related endpoints response."""
@@ -249,8 +260,8 @@ class GetClusterBackupInfoResponse(RootModel[list[GetClusterBackupInfoResponseIt
 
 class GetClusterBackupInfoNotBackedUpResponseItem(ProxmoxBaseModel):
     """Model for get_guests_not_in_backup. Shows all guests which are not covered by any backup job. response."""
-    name: str | None = Field(None, description='Name of the guest')
-    type: str | None = Field(None, description='Type of the guest.')
+    name: StrictStr | None = Field(None, description='Name of the guest')
+    type: StrictStr | None = Field(None, description='Type of the guest.')
     vmid: int | None = Field(None, description='VMID of the guest.')
 
 class GetClusterBackupInfoNotBackedUpResponse(RootModel[list[GetClusterBackupInfoNotBackedUpResponseItem]]):
@@ -265,83 +276,83 @@ class GetClusterBackupIdResponse(ProxmoxBaseModel):
     """Model for read_job. Read vzdump backup job definition. response."""
     all: bool | None = Field(None, description='Backup all known guest systems on this host.')
     bwlimit: int | None = Field(None, description='Limit I/O bandwidth (in KiB/s).')
-    comment: str | None = Field(None, description='Description for the Job.')
-    compress: str | None = Field(None, description='Compress dump file.')
-    dumpdir: str | None = Field(None, description='Store resulting files to specified directory.')
+    comment: StrictStr | None = Field(None, description='Description for the Job.')
+    compress: StrictStr | None = Field(None, description='Compress dump file.')
+    dumpdir: StrictStr | None = Field(None, description='Store resulting files to specified directory.')
     enabled: bool | None = Field(None, description='Enable or disable the job.')
-    exclude: str | None = Field(None, description='Exclude specified guest systems (assumes --all)')
-    exclude_path: list[str] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
+    exclude: StrictStr | None = Field(None, description='Exclude specified guest systems (assumes --all)')
+    exclude_path: list[StrictStr] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
     fleecing: dict[str, object] | None = Field(None, description='Options for backup fleecing (VM only).')
-    id: str = Field(..., description='The job ID.')
+    id: StrictStr = Field(..., description='The job ID.')
     ionice: int | None = Field(None, description='Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.')
     lockwait: int | None = Field(None, description='Maximal time to wait for the global lock (minutes).')
-    mailnotification: str | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
-    mailto: str | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
+    mailnotification: StrictStr | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
+    mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     maxfiles: int | None = Field(None, description="Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.")
-    mode: str | None = Field(None, description='Backup mode.')
+    mode: StrictStr | None = Field(None, description='Backup mode.')
     next_run: int | None = Field(None, alias="next-run", description='UNIX timestamp when this backup job will be executed next')
-    node: str | None = Field(None, description='Only run if executed on this node.')
-    notes_template: str | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: str | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
-    pbs_change_detection_mode: str | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
+    node: StrictStr | None = Field(None, description='Only run if executed on this node.')
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: dict[str, object] | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
-    pool: str | None = Field(None, description='Backup all known guest systems included in the specified pool.')
+    pool: StrictStr | None = Field(None, description='Backup all known guest systems included in the specified pool.')
     protected: bool | None = Field(None, description='If true, mark backup(s) as protected.')
     prune_backups: dict[str, object] | None = Field(None, alias="prune-backups", description='Use these retention options instead of those from the storage configuration.')
     quiet: bool | None = Field(None, description='Be quiet.')
     remove: bool | None = Field(None, description="Prune older backups according to 'prune-backups'.")
     repeat_missed: bool | None = Field(None, alias="repeat-missed", description='If true, the job will be run as soon as possible if it was missed while the scheduler was not running.')
-    schedule: str | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
-    script: str | None = Field(None, description='Use specified hook script.')
+    schedule: StrictStr | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
+    script: StrictStr | None = Field(None, description='Use specified hook script.')
     stdexcludes: bool | None = Field(None, description='Exclude temporary files and logs.')
     stop: bool | None = Field(None, description='Stop running backup jobs on this host.')
     stopwait: int | None = Field(None, description='Maximal time to wait until a guest system is stopped (minutes).')
-    storage: str | None = Field(None, description='Store resulting file to this storage.')
-    tmpdir: str | None = Field(None, description='Store temporary files to specified directory.')
-    vmid: str | None = Field(None, description='The ID of the guest system you want to backup.')
+    storage: StrictStr | None = Field(None, description='Store resulting file to this storage.')
+    tmpdir: StrictStr | None = Field(None, description='Store temporary files to specified directory.')
+    vmid: StrictStr | None = Field(None, description='The ID of the guest system you want to backup.')
     zstd: int | None = Field(None, description='Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.')
 
 class PutClusterBackupIdRequest(ProxmoxBaseModel):
     """Model for update_job. Update vzdump backup job definition. request."""
     all: bool | None = Field(None, description='Backup all known guest systems on this host.')
     bwlimit: int | None = Field(None, description='Limit I/O bandwidth (in KiB/s).')
-    comment: str | None = Field(None, description='Description for the Job.')
-    compress: str | None = Field(None, description='Compress dump file.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    dow: str | None = Field(None, description="Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.")
-    dumpdir: str | None = Field(None, description='Store resulting files to specified directory.')
+    comment: StrictStr | None = Field(None, description='Description for the Job.')
+    compress: StrictStr | None = Field(None, description='Compress dump file.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    dow: StrictStr | None = Field(None, description="Deprecated: Use 'schedule' instead. Day of week selection. 'starttime' and 'dow' will be converted into 'schedule' if used.")
+    dumpdir: StrictStr | None = Field(None, description='Store resulting files to specified directory.')
     enabled: bool | None = Field(None, description='Enable or disable the job.')
-    exclude: str | None = Field(None, description='Exclude specified guest systems (assumes --all)')
-    exclude_path: list[str] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
-    fleecing: str | None = Field(None, description='Options for backup fleecing (VM only).')
+    exclude: StrictStr | None = Field(None, description='Exclude specified guest systems (assumes --all)')
+    exclude_path: list[StrictStr] | None = Field(None, alias="exclude-path", description="Exclude certain files/directories (shell globs). Paths starting with '/' are anchored to the container's root, other paths match relative to each subdirectory.")
+    fleecing: StrictStr | None = Field(None, description='Options for backup fleecing (VM only).')
     ionice: int | None = Field(None, description='Set IO priority when using the BFQ scheduler. For snapshot and suspend mode backups of VMs, this only affects the compressor. A value of 8 means the idle priority is used, otherwise the best-effort priority is used with the specified value.')
     lockwait: int | None = Field(None, description='Maximal time to wait for the global lock (minutes).')
-    mailnotification: str | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
-    mailto: str | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
+    mailnotification: StrictStr | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
+    mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     maxfiles: int | None = Field(None, description="Deprecated: use 'prune-backups' instead. Maximal number of backup files per guest system.")
-    mode: str | None = Field(None, description='Backup mode.')
-    node: str | None = Field(None, description='Only run if executed on this node.')
-    notes_template: str | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: str | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
-    pbs_change_detection_mode: str | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
-    performance: str | None = Field(None, description='Other performance-related settings.')
+    mode: StrictStr | None = Field(None, description='Backup mode.')
+    node: StrictStr | None = Field(None, description='Only run if executed on this node.')
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
+    performance: StrictStr | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
-    pool: str | None = Field(None, description='Backup all known guest systems included in the specified pool.')
+    pool: StrictStr | None = Field(None, description='Backup all known guest systems included in the specified pool.')
     protected: bool | None = Field(None, description='If true, mark backup(s) as protected.')
-    prune_backups: str | None = Field(None, alias="prune-backups", description='Use these retention options instead of those from the storage configuration.')
+    prune_backups: StrictStr | None = Field(None, alias="prune-backups", description='Use these retention options instead of those from the storage configuration.')
     quiet: bool | None = Field(None, description='Be quiet.')
     remove: bool | None = Field(None, description="Prune older backups according to 'prune-backups'.")
     repeat_missed: bool | None = Field(None, alias="repeat-missed", description='If true, the job will be run as soon as possible if it was missed while the scheduler was not running.')
-    schedule: str | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
-    script: str | None = Field(None, description='Use specified hook script.')
-    starttime: str | None = Field(None, description="Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.")
+    schedule: StrictStr | None = Field(None, description='Backup schedule. The format is a subset of `systemd` calendar events.')
+    script: StrictStr | None = Field(None, description='Use specified hook script.')
+    starttime: StrictStr | None = Field(None, description="Deprecated: Use 'schedule' instead. Job Start time. 'starttime' and 'dow' will be converted into 'schedule' if used.")
     stdexcludes: bool | None = Field(None, description='Exclude temporary files and logs.')
     stop: bool | None = Field(None, description='Stop running backup jobs on this host.')
     stopwait: int | None = Field(None, description='Maximal time to wait until a guest system is stopped (minutes).')
-    storage: str | None = Field(None, description='Store resulting file to this storage.')
-    tmpdir: str | None = Field(None, description='Store temporary files to specified directory.')
-    vmid: str | None = Field(None, description='The ID of the guest system you want to backup.')
+    storage: StrictStr | None = Field(None, description='Store resulting file to this storage.')
+    tmpdir: StrictStr | None = Field(None, description='Store temporary files to specified directory.')
+    vmid: StrictStr | None = Field(None, description='The ID of the guest system you want to backup.')
     zstd: int | None = Field(None, description='Zstd threads. N=0 uses half of the available cores, if N is set to a value bigger than 0, N is used as thread count.')
 
 class PutClusterBackupIdResponse(RootModel[None]):
@@ -365,13 +376,13 @@ class PostClusterBulkActionGuestMigrateRequest(ProxmoxBaseModel):
     max_workers: int | None = Field(None, alias="max-workers", description='Defines the maximum number of tasks running concurrently.')
     maxworkers: int | None = Field(None, description="Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.")
     online: bool | None = Field(None, description='Enable live migration for VMs and restart migration for CTs.')
-    target: str = Field(..., description='Target node.')
+    target: StrictStr = Field(..., description='Target node.')
     vms: list[int] | None = Field(None, description='Only consider guests from this list of VMIDs.')
     with_local_disks: bool | None = Field(None, alias="with-local-disks", description='Enable live storage migration for local disk')
 
-class PostClusterBulkActionGuestMigrateResponse(RootModel[str]):
+class PostClusterBulkActionGuestMigrateResponse(RootModel[StrictStr]):
     """Model for migrate. Bulk migrate all guests on the cluster. response."""
-    root: str = Field(..., description='UPID of the worker')
+    root: StrictStr = Field(..., description='UPID of the worker')
 
 class PostClusterBulkActionGuestShutdownRequest(ProxmoxBaseModel):
     """Model for shutdown. Bulk shutdown all guests on the cluster. request."""
@@ -381,9 +392,9 @@ class PostClusterBulkActionGuestShutdownRequest(ProxmoxBaseModel):
     timeout: int | None = Field(None, description='Default shutdown timeout in seconds if none is configured for the guest.')
     vms: list[int] | None = Field(None, description='Only consider guests from this list of VMIDs.')
 
-class PostClusterBulkActionGuestShutdownResponse(RootModel[str]):
+class PostClusterBulkActionGuestShutdownResponse(RootModel[StrictStr]):
     """Model for shutdown. Bulk shutdown all guests on the cluster. response."""
-    root: str = Field(..., description='UPID of the worker')
+    root: StrictStr = Field(..., description='UPID of the worker')
 
 class PostClusterBulkActionGuestStartRequest(ProxmoxBaseModel):
     """Model for start. Bulk start or resume all guests on the cluster. request."""
@@ -392,21 +403,21 @@ class PostClusterBulkActionGuestStartRequest(ProxmoxBaseModel):
     timeout: int | None = Field(None, description='Default start timeout in seconds. Only valid for VMs. (default depends on the guest configuration).')
     vms: list[int] | None = Field(None, description='Only consider guests from this list of VMIDs.')
 
-class PostClusterBulkActionGuestStartResponse(RootModel[str]):
+class PostClusterBulkActionGuestStartResponse(RootModel[StrictStr]):
     """Model for start. Bulk start or resume all guests on the cluster. response."""
-    root: str = Field(..., description='UPID of the worker')
+    root: StrictStr = Field(..., description='UPID of the worker')
 
 class PostClusterBulkActionGuestSuspendRequest(ProxmoxBaseModel):
     """Model for suspend. Bulk suspend all guests on the cluster. request."""
     max_workers: int | None = Field(None, alias="max-workers", description='Defines the maximum number of tasks running concurrently.')
     maxworkers: int | None = Field(None, description="Defines the maximum number of tasks running concurrently. Deprecated, use 'max-workers' instead.")
-    statestorage: str | None = Field(None, description='The storage for the VM state.')
+    statestorage: StrictStr | None = Field(None, description='The storage for the VM state.')
     to_disk: bool | None = Field(None, alias="to-disk", description='If set, suspends the guests to disk. Will be resumed on next start.')
     vms: list[int] | None = Field(None, description='Only consider guests from this list of VMIDs.')
 
-class PostClusterBulkActionGuestSuspendResponse(RootModel[str]):
+class PostClusterBulkActionGuestSuspendResponse(RootModel[StrictStr]):
     """Model for suspend. Bulk suspend all guests on the cluster. response."""
-    root: str = Field(..., description='UPID of the worker')
+    root: StrictStr = Field(..., description='UPID of the worker')
 
 class GetClusterCephResponse(RootModel[list[dict[str, object]]]):
     """Model for cephindex. Cluster ceph index. response."""
@@ -414,8 +425,8 @@ class GetClusterCephResponse(RootModel[list[dict[str, object]]]):
 
 class GetClusterCephFlagsResponseItem(ProxmoxBaseModel):
     """Model for get_all_flags. get the status of all ceph flags response."""
-    description: str | None = Field(None, description='Flag description.')
-    name: str | None = Field(None, description='Flag name.')
+    description: StrictStr | None = Field(None, description='Flag description.')
+    name: StrictStr | None = Field(None, description='Flag name.')
     value: bool | None = Field(None, description='Flag value.')
 
 class GetClusterCephFlagsResponse(RootModel[list[GetClusterCephFlagsResponseItem]]):
@@ -436,9 +447,9 @@ class PutClusterCephFlagsRequest(ProxmoxBaseModel):
     noup: bool | None = Field(None, description='OSDs are not allowed to start.')
     pause: bool | None = Field(None, description='Pauses read and writes.')
 
-class PutClusterCephFlagsResponse(RootModel[str]):
+class PutClusterCephFlagsResponse(RootModel[StrictStr]):
     """Model for set_flags. Set/Unset multiple ceph flags at once. response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class GetClusterCephFlagsFlagResponse(RootModel[bool]):
     """Model for get_flag. Get the status of a specific ceph flag. response."""
@@ -470,15 +481,15 @@ class GetClusterConfigResponse(RootModel[list[dict[str, object]]]):
 
 class PostClusterConfigRequest(ProxmoxBaseModel):
     """Model for create. Generate new cluster configuration. If no links given, default to local IP address as link0. request."""
-    clustername: str = Field(..., description='The name of the cluster.')
-    link_n: str | None = Field(None, alias="link[n]", description='Address and priority information of a single corosync link. (up to 8 links supported; link0..link7)')
+    clustername: StrictStr = Field(..., description='The name of the cluster.')
+    link_n: StrictStr | None = Field(None, alias="link[n]", description='Address and priority information of a single corosync link. (up to 8 links supported; link0..link7)')
     nodeid: int | None = Field(None, description='Node id for this node.')
     token_coefficient: int | None = Field(None, alias="token-coefficient", description="Coefficient used to determine Corosync's token timeout. See the corosync.conf(5) manual for more details.")
     votes: int | None = Field(None, description='Number of votes for this node.')
 
-class PostClusterConfigResponse(RootModel[str]):
+class PostClusterConfigResponse(RootModel[StrictStr]):
     """Model for create. Generate new cluster configuration. If no links given, default to local IP address as link0. response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class GetClusterConfigApiversionResponse(RootModel[int]):
     """Model for join_api_version. Return the version of the cluster join API available on this node. response."""
@@ -486,28 +497,28 @@ class GetClusterConfigApiversionResponse(RootModel[int]):
 
 class GetClusterConfigJoinResponse(ProxmoxBaseModel):
     """Model for join_info. Get information needed to join this cluster over the connected node. response."""
-    config_digest: str = Field(...)
+    config_digest: StrictStr = Field(...)
     nodelist: list[dict[str, object]] = Field(...)
-    preferred_node: str = Field(..., description='The cluster node name.')
+    preferred_node: StrictStr = Field(..., description='The cluster node name.')
     totem: dict[str, object] = Field(...)
 
 class PostClusterConfigJoinRequest(ProxmoxBaseModel):
     """Model for join. Joins this node into an existing cluster. If no links are given, default to IP resolved by node's hostname on single link (fallback fails for clusters with multiple links). request."""
-    fingerprint: str = Field(..., description='Certificate SHA 256 fingerprint.')
+    fingerprint: StrictStr = Field(..., description='Certificate SHA 256 fingerprint.')
     force: bool | None = Field(None, description='Do not throw error if node already exists.')
-    hostname: str = Field(..., description='Hostname (or IP) of an existing cluster member.')
-    link_n: str | None = Field(None, alias="link[n]", description='Address and priority information of a single corosync link. (up to 8 links supported; link0..link7)')
+    hostname: StrictStr = Field(..., description='Hostname (or IP) of an existing cluster member.')
+    link_n: StrictStr | None = Field(None, alias="link[n]", description='Address and priority information of a single corosync link. (up to 8 links supported; link0..link7)')
     nodeid: int | None = Field(None, description='Node id for this node.')
-    password: str = Field(..., description='Superuser (root) password of peer node.')
+    password: StrictStr = Field(..., description='Superuser (root) password of peer node.')
     votes: int | None = Field(None, description='Number of votes for this node')
 
-class PostClusterConfigJoinResponse(RootModel[str]):
+class PostClusterConfigJoinResponse(RootModel[StrictStr]):
     """Model for join. Joins this node into an existing cluster. If no links are given, default to IP resolved by node's hostname on single link (fallback fails for clusters with multiple links). response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class GetClusterConfigNodesResponseItem(ProxmoxBaseModel):
     """Model for nodes. Corosync node list. response."""
-    node: str | None = Field(None)
+    node: StrictStr | None = Field(None)
 
 class GetClusterConfigNodesResponse(RootModel[list[GetClusterConfigNodesResponseItem]]):
     """List of items. nodes. Corosync node list. response."""
@@ -521,16 +532,16 @@ class PostClusterConfigNodesNodeRequest(ProxmoxBaseModel):
     """Model for addnode. Adds a node to the cluster configuration. This call is for internal use. request."""
     apiversion: int | None = Field(None, description='The JOIN_API_VERSION of the new node.')
     force: bool | None = Field(None, description='Do not throw error if node already exists.')
-    link_n: str | None = Field(None, alias="link[n]", description='Address and priority information of a single corosync link. (up to 8 links supported; link0..link7)')
-    new_node_ip: str | None = Field(None, description='IP Address of node to add. Used as fallback if no links are given.')
+    link_n: StrictStr | None = Field(None, alias="link[n]", description='Address and priority information of a single corosync link. (up to 8 links supported; link0..link7)')
+    new_node_ip: StrictStr | None = Field(None, description='IP Address of node to add. Used as fallback if no links are given.')
     nodeid: int | None = Field(None, description='Node id for this node.')
     votes: int | None = Field(None, description='Number of votes for this node')
 
 class PostClusterConfigNodesNodeResponse(ProxmoxBaseModel):
     """Model for addnode. Adds a node to the cluster configuration. This call is for internal use. response."""
-    corosync_authkey: str = Field(...)
-    corosync_conf: str = Field(...)
-    warnings: list[str] = Field(...)
+    corosync_authkey: StrictStr = Field(...)
+    corosync_conf: StrictStr = Field(...)
+    warnings: list[StrictStr] = Field(...)
 
 class GetClusterConfigQdeviceResponse(RootModel[dict[str, object]]):
     """Model for status. Get QDevice status response."""
@@ -546,10 +557,10 @@ class GetClusterFirewallResponse(RootModel[list[dict[str, object]]]):
 
 class GetClusterFirewallAliasesResponseItem(ProxmoxBaseModel):
     """Model for get_aliases. List aliases response."""
-    cidr: str | None = Field(None)
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    name: str | None = Field(None)
+    cidr: StrictStr | None = Field(None)
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    name: StrictStr | None = Field(None)
 
 class GetClusterFirewallAliasesResponse(RootModel[list[GetClusterFirewallAliasesResponseItem]]):
     """List of items. get_aliases. List aliases response."""
@@ -557,9 +568,9 @@ class GetClusterFirewallAliasesResponse(RootModel[list[GetClusterFirewallAliases
 
 class PostClusterFirewallAliasesRequest(ProxmoxBaseModel):
     """Model for create_alias. Create IP or Network Alias. request."""
-    cidr: str = Field(..., description='Network/IP specification in CIDR format.')
-    comment: str | None = Field(None)
-    name: str = Field(..., description='Alias name.')
+    cidr: StrictStr = Field(..., description='Network/IP specification in CIDR format.')
+    comment: StrictStr | None = Field(None)
+    name: StrictStr = Field(..., description='Alias name.')
 
 class PostClusterFirewallAliasesResponse(RootModel[None]):
     """Model for create_alias. Create IP or Network Alias. response."""
@@ -567,7 +578,7 @@ class PostClusterFirewallAliasesResponse(RootModel[None]):
 
 class DeleteClusterFirewallAliasesNameRequest(ProxmoxBaseModel):
     """Model for remove_alias. Remove IP or Network alias. request."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
 
 class DeleteClusterFirewallAliasesNameResponse(RootModel[None]):
     """Model for remove_alias. Remove IP or Network alias. response."""
@@ -579,10 +590,10 @@ class GetClusterFirewallAliasesNameResponse(RootModel[dict[str, object]]):
 
 class PutClusterFirewallAliasesNameRequest(ProxmoxBaseModel):
     """Model for update_alias. Update IP or Network alias. request."""
-    cidr: str = Field(..., description='Network/IP specification in CIDR format.')
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    rename: str | None = Field(None, description='Rename an existing alias.')
+    cidr: StrictStr = Field(..., description='Network/IP specification in CIDR format.')
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    rename: StrictStr | None = Field(None, description='Rename an existing alias.')
 
 class PutClusterFirewallAliasesNameResponse(RootModel[None]):
     """Model for update_alias. Update IP or Network alias. response."""
@@ -590,9 +601,9 @@ class PutClusterFirewallAliasesNameResponse(RootModel[None]):
 
 class GetClusterFirewallGroupsResponseItem(ProxmoxBaseModel):
     """Model for list_security_groups. List security groups. response."""
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    group: str | None = Field(None, description='Security Group name.')
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    group: StrictStr | None = Field(None, description='Security Group name.')
 
 class GetClusterFirewallGroupsResponse(RootModel[list[GetClusterFirewallGroupsResponseItem]]):
     """List of items. list_security_groups. List security groups. response."""
@@ -600,10 +611,10 @@ class GetClusterFirewallGroupsResponse(RootModel[list[GetClusterFirewallGroupsRe
 
 class PostClusterFirewallGroupsRequest(ProxmoxBaseModel):
     """Model for create_security_group. Create new security group. request."""
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    group: str = Field(..., description='Security Group name.')
-    rename: str | None = Field(None, description="Rename/update an existing security group. You can set 'rename' to the same value as 'name' to update the 'comment' of an existing group.")
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    group: StrictStr = Field(..., description='Security Group name.')
+    rename: StrictStr | None = Field(None, description="Rename/update an existing security group. You can set 'rename' to the same value as 'name' to update the 'comment' of an existing group.")
 
 class PostClusterFirewallGroupsResponse(RootModel[None]):
     """Model for create_security_group. Create new security group. response."""
@@ -615,21 +626,21 @@ class DeleteClusterFirewallGroupsGroupResponse(RootModel[None]):
 
 class GetClusterFirewallGroupsGroupResponseItem(ProxmoxBaseModel):
     """Model for get_rules. List rules. response."""
-    action: str | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
-    comment: str | None = Field(None, description='Descriptive comment')
-    dest: str | None = Field(None, description='Restrict packet destination address')
-    dport: str | None = Field(None, description='Restrict TCP/UDP destination port')
+    action: StrictStr | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
+    comment: StrictStr | None = Field(None, description='Descriptive comment')
+    dest: StrictStr | None = Field(None, description='Restrict packet destination address')
+    dport: StrictStr | None = Field(None, description='Restrict TCP/UDP destination port')
     enable: int | None = Field(None, description='Flag to enable/disable a rule')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
-    iface: str | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
+    iface: StrictStr | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
     ipversion: int | None = Field(None, description='IP version (4 or 6) - automatically determined from source/dest addresses')
-    log: str | None = Field(None, description='Log level for firewall rule')
-    macro: str | None = Field(None, description='Use predefined standard macro')
+    log: StrictStr | None = Field(None, description='Log level for firewall rule')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro')
     pos: int | None = Field(None, description='Rule position in the ruleset')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
-    source: str | None = Field(None, description='Restrict packet source address')
-    sport: str | None = Field(None, description='Restrict TCP/UDP source port')
-    type: str | None = Field(None, description='Rule type')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
+    source: StrictStr | None = Field(None, description='Restrict packet source address')
+    sport: StrictStr | None = Field(None, description='Restrict TCP/UDP source port')
+    type: StrictStr | None = Field(None, description='Rule type')
 
 class GetClusterFirewallGroupsGroupResponse(RootModel[list[GetClusterFirewallGroupsGroupResponseItem]]):
     """List of items. get_rules. List rules. response."""
@@ -637,21 +648,21 @@ class GetClusterFirewallGroupsGroupResponse(RootModel[list[GetClusterFirewallGro
 
 class PostClusterFirewallGroupsGroupRequest(ProxmoxBaseModel):
     """Model for create_rule. Create new rule. request."""
-    action: str = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
-    comment: str | None = Field(None, description='Descriptive comment.')
-    dest: str | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dport: str | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    action: StrictStr = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
+    comment: StrictStr | None = Field(None, description='Descriptive comment.')
+    dest: StrictStr | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dport: StrictStr | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
     enable: int | None = Field(None, description='Flag to enable/disable a rule.')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
-    iface: str | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
-    log: str | None = Field(None, description='Log level for firewall rule.')
-    macro: str | None = Field(None, description='Use predefined standard macro.')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
+    iface: StrictStr | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
+    log: StrictStr | None = Field(None, description='Log level for firewall rule.')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro.')
     pos: int | None = Field(None, description='Update rule at position <pos>.')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
-    source: str | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    sport: str | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
-    type: str = Field(..., description='Rule type.')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
+    source: StrictStr | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    sport: StrictStr | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    type: StrictStr = Field(..., description='Rule type.')
 
 class PostClusterFirewallGroupsGroupResponse(RootModel[None]):
     """Model for create_rule. Create new rule. response."""
@@ -659,7 +670,7 @@ class PostClusterFirewallGroupsGroupResponse(RootModel[None]):
 
 class DeleteClusterFirewallGroupsGroupPosRequest(ProxmoxBaseModel):
     """Model for delete_rule. Delete rule. request."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
 
 class DeleteClusterFirewallGroupsGroupPosResponse(RootModel[None]):
     """Model for delete_rule. Delete rule. response."""
@@ -667,40 +678,40 @@ class DeleteClusterFirewallGroupsGroupPosResponse(RootModel[None]):
 
 class GetClusterFirewallGroupsGroupPosResponse(ProxmoxBaseModel):
     """Model for get_rule. Get single rule data. response."""
-    action: str = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
-    comment: str | None = Field(None, description='Descriptive comment')
-    dest: str | None = Field(None, description='Restrict packet destination address')
-    dport: str | None = Field(None, description='Restrict TCP/UDP destination port')
+    action: StrictStr = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
+    comment: StrictStr | None = Field(None, description='Descriptive comment')
+    dest: StrictStr | None = Field(None, description='Restrict packet destination address')
+    dport: StrictStr | None = Field(None, description='Restrict TCP/UDP destination port')
     enable: int | None = Field(None, description='Flag to enable/disable a rule')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
-    iface: str | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
+    iface: StrictStr | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
     ipversion: int | None = Field(None, description='IP version (4 or 6) - automatically determined from source/dest addresses')
-    log: str | None = Field(None, description='Log level for firewall rule')
-    macro: str | None = Field(None, description='Use predefined standard macro')
+    log: StrictStr | None = Field(None, description='Log level for firewall rule')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro')
     pos: int = Field(..., description='Rule position in the ruleset')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
-    source: str | None = Field(None, description='Restrict packet source address')
-    sport: str | None = Field(None, description='Restrict TCP/UDP source port')
-    type: str = Field(..., description='Rule type')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
+    source: StrictStr | None = Field(None, description='Restrict packet source address')
+    sport: StrictStr | None = Field(None, description='Restrict TCP/UDP source port')
+    type: StrictStr = Field(..., description='Rule type')
 
 class PutClusterFirewallGroupsGroupPosRequest(ProxmoxBaseModel):
     """Model for update_rule. Modify rule data. request."""
-    action: str | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
-    comment: str | None = Field(None, description='Descriptive comment.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    dest: str | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dport: str | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    action: StrictStr | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
+    comment: StrictStr | None = Field(None, description='Descriptive comment.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    dest: StrictStr | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dport: StrictStr | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
     enable: int | None = Field(None, description='Flag to enable/disable a rule.')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
-    iface: str | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
-    log: str | None = Field(None, description='Log level for firewall rule.')
-    macro: str | None = Field(None, description='Use predefined standard macro.')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
+    iface: StrictStr | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
+    log: StrictStr | None = Field(None, description='Log level for firewall rule.')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro.')
     moveto: int | None = Field(None, description='Move rule to new position <moveto>. Other arguments are ignored.')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
-    source: str | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    sport: str | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
-    type: str | None = Field(None, description='Rule type.')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
+    source: StrictStr | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    sport: StrictStr | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    type: StrictStr | None = Field(None, description='Rule type.')
 
 class PutClusterFirewallGroupsGroupPosResponse(RootModel[None]):
     """Model for update_rule. Modify rule data. response."""
@@ -708,9 +719,9 @@ class PutClusterFirewallGroupsGroupPosResponse(RootModel[None]):
 
 class GetClusterFirewallIpsetResponseItem(ProxmoxBaseModel):
     """Model for ipset_index. List IPSets response."""
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    name: str | None = Field(None, description='IP set name.')
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    name: StrictStr | None = Field(None, description='IP set name.')
 
 class GetClusterFirewallIpsetResponse(RootModel[list[GetClusterFirewallIpsetResponseItem]]):
     """List of items. ipset_index. List IPSets response."""
@@ -718,10 +729,10 @@ class GetClusterFirewallIpsetResponse(RootModel[list[GetClusterFirewallIpsetResp
 
 class PostClusterFirewallIpsetRequest(ProxmoxBaseModel):
     """Model for create_ipset. Create new IPSet request."""
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    name: str = Field(..., description='IP set name.')
-    rename: str | None = Field(None, description="Rename an existing IPSet. You can set 'rename' to the same value as 'name' to update the 'comment' of an existing IPSet.")
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    name: StrictStr = Field(..., description='IP set name.')
+    rename: StrictStr | None = Field(None, description="Rename an existing IPSet. You can set 'rename' to the same value as 'name' to update the 'comment' of an existing IPSet.")
 
 class PostClusterFirewallIpsetResponse(RootModel[None]):
     """Model for create_ipset. Create new IPSet response."""
@@ -737,9 +748,9 @@ class DeleteClusterFirewallIpsetNameResponse(RootModel[None]):
 
 class GetClusterFirewallIpsetNameResponseItem(ProxmoxBaseModel):
     """Model for get_ipset. List IPSet content response."""
-    cidr: str | None = Field(None)
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    cidr: StrictStr | None = Field(None)
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     nomatch: bool | None = Field(None)
 
 class GetClusterFirewallIpsetNameResponse(RootModel[list[GetClusterFirewallIpsetNameResponseItem]]):
@@ -748,8 +759,8 @@ class GetClusterFirewallIpsetNameResponse(RootModel[list[GetClusterFirewallIpset
 
 class PostClusterFirewallIpsetNameRequest(ProxmoxBaseModel):
     """Model for create_ip. Add IP or Network to IPSet. request."""
-    cidr: str = Field(..., description='Network/IP specification in CIDR format.')
-    comment: str | None = Field(None)
+    cidr: StrictStr = Field(..., description='Network/IP specification in CIDR format.')
+    comment: StrictStr | None = Field(None)
     nomatch: bool | None = Field(None)
 
 class PostClusterFirewallIpsetNameResponse(RootModel[None]):
@@ -758,7 +769,7 @@ class PostClusterFirewallIpsetNameResponse(RootModel[None]):
 
 class DeleteClusterFirewallIpsetNameCidrRequest(ProxmoxBaseModel):
     """Model for remove_ip. Remove IP or Network from IPSet. request."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
 
 class DeleteClusterFirewallIpsetNameCidrResponse(RootModel[None]):
     """Model for remove_ip. Remove IP or Network from IPSet. response."""
@@ -770,8 +781,8 @@ class GetClusterFirewallIpsetNameCidrResponse(RootModel[dict[str, object]]):
 
 class PutClusterFirewallIpsetNameCidrRequest(ProxmoxBaseModel):
     """Model for update_ip. Update IP or Network settings request."""
-    comment: str | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     nomatch: bool | None = Field(None)
 
 class PutClusterFirewallIpsetNameCidrResponse(RootModel[None]):
@@ -780,8 +791,8 @@ class PutClusterFirewallIpsetNameCidrResponse(RootModel[None]):
 
 class GetClusterFirewallMacrosResponseItem(ProxmoxBaseModel):
     """Model for get_macros. List available macros response."""
-    descr: str | None = Field(None, description='More verbose description (if available).')
-    macro: str | None = Field(None, description='Macro name.')
+    descr: StrictStr | None = Field(None, description='More verbose description (if available).')
+    macro: StrictStr | None = Field(None, description='Macro name.')
 
 class GetClusterFirewallMacrosResponse(RootModel[list[GetClusterFirewallMacrosResponseItem]]):
     """List of items. get_macros. List available macros response."""
@@ -791,21 +802,21 @@ class GetClusterFirewallOptionsResponse(ProxmoxBaseModel):
     """Model for get_options. Get Firewall options. response."""
     ebtables: bool | None = Field(None, description='Enable ebtables rules cluster wide.')
     enable: int | None = Field(None, description='Enable or disable the firewall cluster wide.')
-    log_ratelimit: str | None = Field(None, description='Log ratelimiting settings')
-    policy_forward: str | None = Field(None, description='Forward policy.')
-    policy_in: str | None = Field(None, description='Input policy.')
-    policy_out: str | None = Field(None, description='Output policy.')
+    log_ratelimit: StrictBool | Annotated[StrictInt, Field(ge=0, le=1)] | StrictStr | None = Field(None, description='Log ratelimiting settings')
+    policy_forward: StrictStr | None = Field(None, description='Forward policy.')
+    policy_in: StrictStr | None = Field(None, description='Input policy.')
+    policy_out: StrictStr | None = Field(None, description='Output policy.')
 
 class PutClusterFirewallOptionsRequest(ProxmoxBaseModel):
     """Model for set_options. Set Firewall options. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     ebtables: bool | None = Field(None, description='Enable ebtables rules cluster wide.')
     enable: int | None = Field(None, description='Enable or disable the firewall cluster wide.')
-    log_ratelimit: str | None = Field(None, description='Log ratelimiting settings')
-    policy_forward: str | None = Field(None, description='Forward policy.')
-    policy_in: str | None = Field(None, description='Input policy.')
-    policy_out: str | None = Field(None, description='Output policy.')
+    log_ratelimit: StrictStr | None = Field(None, description='Log ratelimiting settings')
+    policy_forward: StrictStr | None = Field(None, description='Forward policy.')
+    policy_in: StrictStr | None = Field(None, description='Input policy.')
+    policy_out: StrictStr | None = Field(None, description='Output policy.')
 
 class PutClusterFirewallOptionsResponse(RootModel[None]):
     """Model for set_options. Set Firewall options. response."""
@@ -813,11 +824,11 @@ class PutClusterFirewallOptionsResponse(RootModel[None]):
 
 class GetClusterFirewallRefsResponseItem(ProxmoxBaseModel):
     """Model for refs. Lists possible IPSet/Alias reference which are allowed in source/dest properties. response."""
-    comment: str | None = Field(None)
-    name: str | None = Field(None)
-    ref: str | None = Field(None)
-    scope: str | None = Field(None)
-    type: str | None = Field(None)
+    comment: StrictStr | None = Field(None)
+    name: StrictStr | None = Field(None)
+    ref: StrictStr | None = Field(None)
+    scope: StrictStr | None = Field(None)
+    type: StrictStr | None = Field(None)
 
 class GetClusterFirewallRefsResponse(RootModel[list[GetClusterFirewallRefsResponseItem]]):
     """List of items. refs. Lists possible IPSet/Alias reference which are allowed in source/dest properties. response."""
@@ -825,21 +836,21 @@ class GetClusterFirewallRefsResponse(RootModel[list[GetClusterFirewallRefsRespon
 
 class GetClusterFirewallRulesResponseItem(ProxmoxBaseModel):
     """Model for get_rules. List rules. response."""
-    action: str | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
-    comment: str | None = Field(None, description='Descriptive comment')
-    dest: str | None = Field(None, description='Restrict packet destination address')
-    dport: str | None = Field(None, description='Restrict TCP/UDP destination port')
+    action: StrictStr | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
+    comment: StrictStr | None = Field(None, description='Descriptive comment')
+    dest: StrictStr | None = Field(None, description='Restrict packet destination address')
+    dport: StrictStr | None = Field(None, description='Restrict TCP/UDP destination port')
     enable: int | None = Field(None, description='Flag to enable/disable a rule')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
-    iface: str | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
+    iface: StrictStr | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
     ipversion: int | None = Field(None, description='IP version (4 or 6) - automatically determined from source/dest addresses')
-    log: str | None = Field(None, description='Log level for firewall rule')
-    macro: str | None = Field(None, description='Use predefined standard macro')
+    log: StrictStr | None = Field(None, description='Log level for firewall rule')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro')
     pos: int | None = Field(None, description='Rule position in the ruleset')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
-    source: str | None = Field(None, description='Restrict packet source address')
-    sport: str | None = Field(None, description='Restrict TCP/UDP source port')
-    type: str | None = Field(None, description='Rule type')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
+    source: StrictStr | None = Field(None, description='Restrict packet source address')
+    sport: StrictStr | None = Field(None, description='Restrict TCP/UDP source port')
+    type: StrictStr | None = Field(None, description='Rule type')
 
 class GetClusterFirewallRulesResponse(RootModel[list[GetClusterFirewallRulesResponseItem]]):
     """List of items. get_rules. List rules. response."""
@@ -847,21 +858,21 @@ class GetClusterFirewallRulesResponse(RootModel[list[GetClusterFirewallRulesResp
 
 class PostClusterFirewallRulesRequest(ProxmoxBaseModel):
     """Model for create_rule. Create new rule. request."""
-    action: str = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
-    comment: str | None = Field(None, description='Descriptive comment.')
-    dest: str | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dport: str | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    action: StrictStr = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
+    comment: StrictStr | None = Field(None, description='Descriptive comment.')
+    dest: StrictStr | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dport: StrictStr | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
     enable: int | None = Field(None, description='Flag to enable/disable a rule.')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
-    iface: str | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
-    log: str | None = Field(None, description='Log level for firewall rule.')
-    macro: str | None = Field(None, description='Use predefined standard macro.')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
+    iface: StrictStr | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
+    log: StrictStr | None = Field(None, description='Log level for firewall rule.')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro.')
     pos: int | None = Field(None, description='Update rule at position <pos>.')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
-    source: str | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    sport: str | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
-    type: str = Field(..., description='Rule type.')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
+    source: StrictStr | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    sport: StrictStr | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    type: StrictStr = Field(..., description='Rule type.')
 
 class PostClusterFirewallRulesResponse(RootModel[None]):
     """Model for create_rule. Create new rule. response."""
@@ -869,7 +880,7 @@ class PostClusterFirewallRulesResponse(RootModel[None]):
 
 class DeleteClusterFirewallRulesPosRequest(ProxmoxBaseModel):
     """Model for delete_rule. Delete rule. request."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
 
 class DeleteClusterFirewallRulesPosResponse(RootModel[None]):
     """Model for delete_rule. Delete rule. response."""
@@ -877,40 +888,40 @@ class DeleteClusterFirewallRulesPosResponse(RootModel[None]):
 
 class GetClusterFirewallRulesPosResponse(ProxmoxBaseModel):
     """Model for get_rule. Get single rule data. response."""
-    action: str = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
-    comment: str | None = Field(None, description='Descriptive comment')
-    dest: str | None = Field(None, description='Restrict packet destination address')
-    dport: str | None = Field(None, description='Restrict TCP/UDP destination port')
+    action: StrictStr = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
+    comment: StrictStr | None = Field(None, description='Descriptive comment')
+    dest: StrictStr | None = Field(None, description='Restrict packet destination address')
+    dport: StrictStr | None = Field(None, description='Restrict TCP/UDP destination port')
     enable: int | None = Field(None, description='Flag to enable/disable a rule')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
-    iface: str | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
+    iface: StrictStr | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
     ipversion: int | None = Field(None, description='IP version (4 or 6) - automatically determined from source/dest addresses')
-    log: str | None = Field(None, description='Log level for firewall rule')
-    macro: str | None = Field(None, description='Use predefined standard macro')
+    log: StrictStr | None = Field(None, description='Log level for firewall rule')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro')
     pos: int = Field(..., description='Rule position in the ruleset')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
-    source: str | None = Field(None, description='Restrict packet source address')
-    sport: str | None = Field(None, description='Restrict TCP/UDP source port')
-    type: str = Field(..., description='Rule type')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
+    source: StrictStr | None = Field(None, description='Restrict packet source address')
+    sport: StrictStr | None = Field(None, description='Restrict TCP/UDP source port')
+    type: StrictStr = Field(..., description='Rule type')
 
 class PutClusterFirewallRulesPosRequest(ProxmoxBaseModel):
     """Model for update_rule. Modify rule data. request."""
-    action: str | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
-    comment: str | None = Field(None, description='Descriptive comment.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    dest: str | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dport: str | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    action: StrictStr | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
+    comment: StrictStr | None = Field(None, description='Descriptive comment.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    dest: StrictStr | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dport: StrictStr | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
     enable: int | None = Field(None, description='Flag to enable/disable a rule.')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
-    iface: str | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
-    log: str | None = Field(None, description='Log level for firewall rule.')
-    macro: str | None = Field(None, description='Use predefined standard macro.')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
+    iface: StrictStr | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
+    log: StrictStr | None = Field(None, description='Log level for firewall rule.')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro.')
     moveto: int | None = Field(None, description='Move rule to new position <moveto>. Other arguments are ignored.')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
-    source: str | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    sport: str | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
-    type: str | None = Field(None, description='Rule type.')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
+    source: StrictStr | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    sport: StrictStr | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    type: StrictStr | None = Field(None, description='Rule type.')
 
 class PutClusterFirewallRulesPosResponse(RootModel[None]):
     """Model for update_rule. Modify rule data. response."""
@@ -918,7 +929,7 @@ class PutClusterFirewallRulesPosResponse(RootModel[None]):
 
 class GetClusterHaResponseItem(ProxmoxBaseModel):
     """Model for index. Directory index. response."""
-    id: str | None = Field(None)
+    id: StrictStr | None = Field(None)
 
 class GetClusterHaResponse(RootModel[list[GetClusterHaResponseItem]]):
     """List of items. index. Directory index. response."""
@@ -926,7 +937,7 @@ class GetClusterHaResponse(RootModel[list[GetClusterHaResponseItem]]):
 
 class GetClusterHaGroupsResponseItem(ProxmoxBaseModel):
     """Model for index. Get HA groups. (deprecated in favor of HA rules) response."""
-    group: str | None = Field(None)
+    group: StrictStr | None = Field(None)
 
 class GetClusterHaGroupsResponse(RootModel[list[GetClusterHaGroupsResponseItem]]):
     """List of items. index. Get HA groups. (deprecated in favor of HA rules) response."""
@@ -934,12 +945,12 @@ class GetClusterHaGroupsResponse(RootModel[list[GetClusterHaGroupsResponseItem]]
 
 class PostClusterHaGroupsRequest(ProxmoxBaseModel):
     """Model for create. Create a new HA group. (deprecated in favor of HA rules) request."""
-    comment: str | None = Field(None, description='Description.')
-    group: str = Field(..., description='The HA group identifier.')
-    nodes: str = Field(..., description='List of cluster node names with optional priority.')
+    comment: StrictStr | None = Field(None, description='Description.')
+    group: StrictStr = Field(..., description='The HA group identifier.')
+    nodes: StrictStr = Field(..., description='List of cluster node names with optional priority.')
     nofailback: bool | None = Field(None, description='The CRM tries to run services on the node with the highest priority. If a node with higher priority comes online, the CRM migrates the service to that node. Enabling nofailback prevents that behavior.')
     restricted: bool | None = Field(None, description='Resources bound to restricted groups may only run on nodes defined by the group.')
-    type: str | None = Field(None, description='Group type.')
+    type: StrictStr | None = Field(None, description='Group type.')
 
 class PostClusterHaGroupsResponse(RootModel[None]):
     """Model for create. Create a new HA group. (deprecated in favor of HA rules) response."""
@@ -955,10 +966,10 @@ class GetClusterHaGroupsGroupResponse(RootModel[dict[str, object]]):
 
 class PutClusterHaGroupsGroupRequest(ProxmoxBaseModel):
     """Model for update. Update ha group configuration. (deprecated in favor of HA rules) request."""
-    comment: str | None = Field(None, description='Description.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    nodes: str | None = Field(None, description='List of cluster node names with optional priority.')
+    comment: StrictStr | None = Field(None, description='Description.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names with optional priority.')
     nofailback: bool | None = Field(None, description='The CRM tries to run services on the node with the highest priority. If a node with higher priority comes online, the CRM migrates the service to that node. Enabling nofailback prevents that behavior.')
     restricted: bool | None = Field(None, description='Resources bound to restricted groups may only run on nodes defined by the group.')
 
@@ -968,7 +979,7 @@ class PutClusterHaGroupsGroupResponse(RootModel[None]):
 
 class GetClusterHaResourcesResponseItem(ProxmoxBaseModel):
     """Model for index. List HA resources. response."""
-    sid: str | None = Field(None)
+    sid: StrictStr | None = Field(None)
 
 class GetClusterHaResourcesResponse(RootModel[list[GetClusterHaResourcesResponseItem]]):
     """List of items. index. List HA resources. response."""
@@ -976,14 +987,14 @@ class GetClusterHaResourcesResponse(RootModel[list[GetClusterHaResourcesResponse
 
 class PostClusterHaResourcesRequest(ProxmoxBaseModel):
     """Model for create. Create a new HA resource. request."""
-    comment: str | None = Field(None, description='Description.')
+    comment: StrictStr | None = Field(None, description='Description.')
     failback: bool | None = Field(None, description='Automatically migrate HA resource to the node with the highest priority according to their node affinity  rules, if a node with a higher priority than the current node comes online.')
-    group: str | None = Field(None, description='The HA group identifier.')
+    group: StrictStr | None = Field(None, description='The HA group identifier.')
     max_relocate: int | None = Field(None, description='Maximal number of resource relocate tries when a resource fails to start.')
     max_restart: int | None = Field(None, description='Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.')
-    sid: str = Field(..., description='HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).')
-    state: str | None = Field(None, description='Requested resource state.')
-    type: str | None = Field(None, description='Resource type.')
+    sid: StrictStr = Field(..., description='HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).')
+    state: StrictStr | None = Field(None, description='Requested resource state.')
+    type: StrictStr | None = Field(None, description='Resource type.')
 
 class PostClusterHaResourcesResponse(RootModel[None]):
     """Model for create. Create a new HA resource. response."""
@@ -999,26 +1010,26 @@ class DeleteClusterHaResourcesSidResponse(RootModel[None]):
 
 class GetClusterHaResourcesSidResponse(ProxmoxBaseModel):
     """Model for read. Read resource configuration. response."""
-    comment: str | None = Field(None, description='Description.')
-    digest: str = Field(..., description='Can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Description.')
+    digest: StrictStr = Field(..., description='Can be used to prevent concurrent modifications.')
     failback: bool | None = Field(None, description='The HA resource is automatically migrated to the node with the highest priority according to their node affinity rule, if a node with a higher priority than the current node comes online.')
-    group: str | None = Field(None, description='The HA group identifier.')
+    group: StrictStr | None = Field(None, description='The HA group identifier.')
     max_relocate: int | None = Field(None, description='Maximal number of service relocate tries when a service fails to start.')
     max_restart: int | None = Field(None, description='Maximal number of tries to restart the service on a node after its start failed.')
-    sid: str = Field(..., description='HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).')
-    state: str | None = Field(None, description='Requested resource state.')
-    type: str = Field(..., description='The type of the resources.')
+    sid: StrictStr = Field(..., description='HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).')
+    state: StrictStr | None = Field(None, description='Requested resource state.')
+    type: StrictStr = Field(..., description='The type of the resources.')
 
 class PutClusterHaResourcesSidRequest(ProxmoxBaseModel):
     """Model for update. Update resource configuration. request."""
-    comment: str | None = Field(None, description='Description.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Description.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     failback: bool | None = Field(None, description='Automatically migrate HA resource to the node with the highest priority according to their node affinity  rules, if a node with a higher priority than the current node comes online.')
-    group: str | None = Field(None, description='The HA group identifier.')
+    group: StrictStr | None = Field(None, description='The HA group identifier.')
     max_relocate: int | None = Field(None, description='Maximal number of resource relocate tries when a resource fails to start.')
     max_restart: int | None = Field(None, description='Maximal number of tries to restart the resource on a node after its start failed. When reached, the HA manager will try to relocate the resource to an eligible node.')
-    state: str | None = Field(None, description='Requested resource state.')
+    state: StrictStr | None = Field(None, description='Requested resource state.')
 
 class PutClusterHaResourcesSidResponse(RootModel[None]):
     """Model for update. Update resource configuration. response."""
@@ -1026,29 +1037,29 @@ class PutClusterHaResourcesSidResponse(RootModel[None]):
 
 class PostClusterHaResourcesSidMigrateRequest(ProxmoxBaseModel):
     """Model for migrate. Request resource migration (online) to another node. request."""
-    node: str = Field(..., description='Target node.')
+    node: StrictStr = Field(..., description='Target node.')
 
 class PostClusterHaResourcesSidMigrateResponse(ProxmoxBaseModel):
     """Model for migrate. Request resource migration (online) to another node. response."""
     blocking_resources: list[dict[str, object]] | None = Field(None, alias="blocking-resources", description='HA resources, which are blocking the given HA resource from being migrated to the requested target node.')
     comigrated_resources: list[object] | None = Field(None, alias="comigrated-resources", description='HA resources, which are migrated to the same requested target node as the given HA resource, because these are in positive affinity with the HA resource.')
-    requested_node: str = Field(..., alias="requested-node", description='Node, which was requested to be migrated to.')
-    sid: str = Field(..., description='HA resource, which is requested to be migrated.')
+    requested_node: StrictStr = Field(..., alias="requested-node", description='Node, which was requested to be migrated to.')
+    sid: StrictStr = Field(..., description='HA resource, which is requested to be migrated.')
 
 class PostClusterHaResourcesSidRelocateRequest(ProxmoxBaseModel):
     """Model for relocate. Request resource relocation to another node. This stops the service on the old node, and restarts it on the target node. request."""
-    node: str = Field(..., description='Target node.')
+    node: StrictStr = Field(..., description='Target node.')
 
 class PostClusterHaResourcesSidRelocateResponse(ProxmoxBaseModel):
     """Model for relocate. Request resource relocation to another node. This stops the service on the old node, and restarts it on the target node. response."""
     blocking_resources: list[dict[str, object]] | None = Field(None, alias="blocking-resources", description='HA resources, which are blocking the given HA resource from being relocated to the requested target node.')
-    comigrated_resources: list[str] | None = Field(None, alias="comigrated-resources", description='HA resources, which are relocated to the same requested target node as the given HA resource, because these are in positive affinity with the HA resource.')
-    requested_node: str = Field(..., alias="requested-node", description='Node, which was requested to be relocated to.')
-    sid: str = Field(..., description='HA resource, which is requested to be relocated.')
+    comigrated_resources: list[StrictStr] | None = Field(None, alias="comigrated-resources", description='HA resources, which are relocated to the same requested target node as the given HA resource, because these are in positive affinity with the HA resource.')
+    requested_node: StrictStr = Field(..., alias="requested-node", description='Node, which was requested to be relocated to.')
+    sid: StrictStr = Field(..., description='HA resource, which is requested to be relocated.')
 
 class GetClusterHaRulesResponseItem(ProxmoxBaseModel):
     """Model for index. Get HA rules. response."""
-    rule: str | None = Field(None)
+    rule: StrictStr | None = Field(None)
 
 class GetClusterHaRulesResponse(RootModel[list[GetClusterHaRulesResponseItem]]):
     """List of items. index. Get HA rules. response."""
@@ -1056,14 +1067,14 @@ class GetClusterHaRulesResponse(RootModel[list[GetClusterHaRulesResponseItem]]):
 
 class PostClusterHaRulesRequest(ProxmoxBaseModel):
     """Model for create_rule. Create HA rule. request."""
-    affinity: str | None = Field(None, description="Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').")
-    comment: str | None = Field(None, description='HA rule description.')
+    affinity: StrictStr | None = Field(None, description="Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').")
+    comment: StrictStr | None = Field(None, description='HA rule description.')
     disable: bool | None = Field(None, description='Whether the HA rule is disabled.')
-    nodes: str | None = Field(None, description='List of cluster node names with optional priority.')
-    resources: str = Field(..., description='List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).')
-    rule: str = Field(..., description='HA rule identifier.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names with optional priority.')
+    resources: StrictStr = Field(..., description='List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).')
+    rule: StrictStr = Field(..., description='HA rule identifier.')
     strict: bool | None = Field(None, description='Describes whether the node affinity rule is strict or non-strict.')
-    type: str = Field(..., description='HA rule type.')
+    type: StrictStr = Field(..., description='HA rule type.')
 
 class PostClusterHaRulesResponse(RootModel[None]):
     """Model for create_rule. Create HA rule. response."""
@@ -1075,20 +1086,20 @@ class DeleteClusterHaRulesRuleResponse(RootModel[None]):
 
 class GetClusterHaRulesRuleResponse(ProxmoxBaseModel):
     """Model for read_rule. Read HA rule. response."""
-    rule: str = Field(..., description='HA rule identifier.')
-    type: str = Field(..., description='HA rule type.')
+    rule: StrictStr = Field(..., description='HA rule identifier.')
+    type: StrictStr = Field(..., description='HA rule type.')
 
 class PutClusterHaRulesRuleRequest(ProxmoxBaseModel):
     """Model for update_rule. Update HA rule. request."""
-    affinity: str | None = Field(None, description="Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').")
-    comment: str | None = Field(None, description='HA rule description.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    affinity: StrictStr | None = Field(None, description="Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').")
+    comment: StrictStr | None = Field(None, description='HA rule description.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Whether the HA rule is disabled.')
-    nodes: str | None = Field(None, description='List of cluster node names with optional priority.')
-    resources: str | None = Field(None, description='List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names with optional priority.')
+    resources: StrictStr | None = Field(None, description='List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).')
     strict: bool | None = Field(None, description='Describes whether the node affinity rule is strict or non-strict.')
-    type: str = Field(..., description='HA rule type.')
+    type: StrictStr = Field(..., description='HA rule type.')
 
 class PutClusterHaRulesRuleResponse(RootModel[None]):
     """Model for update_rule. Update HA rule. response."""
@@ -1104,19 +1115,19 @@ class PostClusterHaStatusArmHaResponse(RootModel[None]):
 
 class GetClusterHaStatusCurrentResponseItem(ProxmoxBaseModel):
     """Model for status. Get HA manager status. response."""
-    armed_state: str | None = Field(None, alias="armed-state", description="For type 'fencing'. Whether HA is armed, on standby, disarming or disarmed.")
-    crm_state: str | None = Field(None, description="For type 'service'. Service state as seen by the CRM.")
+    armed_state: StrictStr | None = Field(None, alias="armed-state", description="For type 'fencing'. Whether HA is armed, on standby, disarming or disarmed.")
+    crm_state: StrictStr | None = Field(None, description="For type 'service'. Service state as seen by the CRM.")
     failback: bool | None = Field(None, description='The HA resource is automatically migrated to the node with the highest priority according to their node affinity rule, if a node with a higher priority than the current node comes online.')
-    id: str | None = Field(None, description='Status entry ID (quorum, master, lrm:<node>, service:<sid>).')
+    id: StrictStr | None = Field(None, description='Status entry ID (quorum, master, lrm:<node>, service:<sid>).')
     max_relocate: int | None = Field(None, description="For type 'service'.")
     max_restart: int | None = Field(None, description="For type 'service'.")
-    node: str | None = Field(None, description='Node associated to status entry.')
+    node: StrictStr | None = Field(None, description='Node associated to status entry.')
     quorate: bool | None = Field(None, description="For type 'quorum'. Whether the cluster is quorate or not.")
-    request_state: str | None = Field(None, description="For type 'service'. Requested service state.")
-    resource_mode: str | None = Field(None, description="For type 'fencing'. How resources are handled while disarmed.")
-    sid: str | None = Field(None, description="For type 'service'. Service ID.")
-    state: str | None = Field(None, description="For type 'service'. Verbose service state.")
-    status: str | None = Field(None, description='Status of the entry (value depends on type).')
+    request_state: StrictStr | None = Field(None, description="For type 'service'. Requested service state.")
+    resource_mode: StrictStr | None = Field(None, description="For type 'fencing'. How resources are handled while disarmed.")
+    sid: StrictStr | None = Field(None, description="For type 'service'. Service ID.")
+    state: StrictStr | None = Field(None, description="For type 'service'. Verbose service state.")
+    status: StrictStr | None = Field(None, description='Status of the entry (value depends on type).')
     timestamp: int | None = Field(None, description="For type 'lrm','master'. Timestamp of the status information.")
     type: object | None = Field(None, description='Type of status entry.')
 
@@ -1126,7 +1137,7 @@ class GetClusterHaStatusCurrentResponse(RootModel[list[GetClusterHaStatusCurrent
 
 class PostClusterHaStatusDisarmHaRequest(ProxmoxBaseModel):
     """Model for disarm-ha. Request disarming the HA stack, releasing all watchdogs cluster-wide. request."""
-    resource_mode: str = Field(..., alias="resource-mode", description="Controls how HA managed resources are handled while disarmed. The current state of resources is not affected. 'freeze': new commands and state changes are not applied. 'ignore': resources are removed from HA tracking and can be managed as if they were not HA managed.")
+    resource_mode: StrictStr = Field(..., alias="resource-mode", description="Controls how HA managed resources are handled while disarmed. The current state of resources is not affected. 'freeze': new commands and state changes are not applied. 'ignore': resources are removed from HA tracking and can be managed as if they were not HA managed.")
 
 class PostClusterHaStatusDisarmHaResponse(RootModel[None]):
     """Model for disarm-ha. Request disarming the HA stack, releasing all watchdogs cluster-wide. response."""
@@ -1138,7 +1149,7 @@ class GetClusterHaStatusManagerStatusResponse(RootModel[dict[str, object]]):
 
 class GetClusterJobsResponseItem(ProxmoxBaseModel):
     """Model for index. Index for jobs related endpoints. response."""
-    subdir: str | None = Field(None, description='API sub-directory endpoint')
+    subdir: StrictStr | None = Field(None, description='API sub-directory endpoint')
 
 class GetClusterJobsResponse(RootModel[list[GetClusterJobsResponseItem]]):
     """List of items. index. Index for jobs related endpoints. response."""
@@ -1146,15 +1157,15 @@ class GetClusterJobsResponse(RootModel[list[GetClusterJobsResponseItem]]):
 
 class GetClusterJobsRealmSyncResponseItem(ProxmoxBaseModel):
     """Model for syncjob_index. List configured realm-sync-jobs. response."""
-    comment: str | None = Field(None, description='A comment for the job.')
+    comment: StrictStr | None = Field(None, description='A comment for the job.')
     enabled: bool | None = Field(None, description='If the job is enabled or not.')
-    id: str | None = Field(None, description='The ID of the entry.')
+    id: StrictStr | None = Field(None, description='The ID of the entry.')
     last_run: int | None = Field(None, alias="last-run", description='Last execution time of the job in seconds since the beginning of the UNIX epoch')
     next_run: int | None = Field(None, alias="next-run", description='Next planned execution time of the job in seconds since the beginning of the UNIX epoch.')
-    realm: str | None = Field(None, description='Authentication domain ID')
-    remove_vanished: str | None = Field(None, alias="remove-vanished", description="A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).")
-    schedule: str | None = Field(None, description='The configured sync schedule.')
-    scope: str | None = Field(None, description='Select what to sync.')
+    realm: StrictStr | None = Field(None, description='Authentication domain ID')
+    remove_vanished: StrictStr | None = Field(None, alias="remove-vanished", description="A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).")
+    schedule: StrictStr | None = Field(None, description='The configured sync schedule.')
+    scope: StrictStr | None = Field(None, description='Select what to sync.')
 
 class GetClusterJobsRealmSyncResponse(RootModel[list[GetClusterJobsRealmSyncResponseItem]]):
     """List of items. syncjob_index. List configured realm-sync-jobs. response."""
@@ -1170,13 +1181,13 @@ class GetClusterJobsRealmSyncIdResponse(RootModel[dict[str, object]]):
 
 class PostClusterJobsRealmSyncIdRequest(ProxmoxBaseModel):
     """Model for create_job. Create new realm-sync job. request."""
-    comment: str | None = Field(None, description='Description for the Job.')
+    comment: StrictStr | None = Field(None, description='Description for the Job.')
     enable_new: bool | None = Field(None, alias="enable-new", description='Enable newly synced users immediately.')
     enabled: bool | None = Field(None, description='Determines if the job is enabled.')
-    realm: str | None = Field(None, description='Authentication domain ID')
-    remove_vanished: str | None = Field(None, alias="remove-vanished", description="A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).")
-    schedule: str = Field(..., description='Backup schedule. The format is a subset of `systemd` calendar events.')
-    scope: str | None = Field(None, description='Select what to sync.')
+    realm: StrictStr | None = Field(None, description='Authentication domain ID')
+    remove_vanished: StrictStr | None = Field(None, alias="remove-vanished", description="A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).")
+    schedule: StrictStr = Field(..., description='Backup schedule. The format is a subset of `systemd` calendar events.')
+    scope: StrictStr | None = Field(None, description='Select what to sync.')
 
 class PostClusterJobsRealmSyncIdResponse(RootModel[None]):
     """Model for create_job. Create new realm-sync job. response."""
@@ -1184,13 +1195,13 @@ class PostClusterJobsRealmSyncIdResponse(RootModel[None]):
 
 class PutClusterJobsRealmSyncIdRequest(ProxmoxBaseModel):
     """Model for update_job. Update realm-sync job definition. request."""
-    comment: str | None = Field(None, description='Description for the Job.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
+    comment: StrictStr | None = Field(None, description='Description for the Job.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
     enable_new: bool | None = Field(None, alias="enable-new", description='Enable newly synced users immediately.')
     enabled: bool | None = Field(None, description='Determines if the job is enabled.')
-    remove_vanished: str | None = Field(None, alias="remove-vanished", description="A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).")
-    schedule: str = Field(..., description='Backup schedule. The format is a subset of `systemd` calendar events.')
-    scope: str | None = Field(None, description='Select what to sync.')
+    remove_vanished: StrictStr | None = Field(None, alias="remove-vanished", description="A semicolon-separated list of things to remove when they or the user vanishes during a sync. The following values are possible: 'entry' removes the user/group when not returned from the sync. 'properties' removes the set properties on existing user/group that do not appear in the source (even custom ones). 'acl' removes acls when the user/group is not returned from the sync. Instead of a list it also can be 'none' (the default).")
+    schedule: StrictStr = Field(..., description='Backup schedule. The format is a subset of `systemd` calendar events.')
+    scope: StrictStr | None = Field(None, description='Select what to sync.')
 
 class PutClusterJobsRealmSyncIdResponse(RootModel[None]):
     """Model for update_job. Update realm-sync job definition. response."""
@@ -1199,7 +1210,7 @@ class PutClusterJobsRealmSyncIdResponse(RootModel[None]):
 class GetClusterJobsScheduleAnalyzeResponseItem(ProxmoxBaseModel):
     """Model for schedule-analyze. Returns a list of future schedule runtimes. response."""
     timestamp: int | None = Field(None, description='UNIX timestamp for the run.')
-    utc: str | None = Field(None, description='UTC timestamp for the run.')
+    utc: StrictStr | None = Field(None, description='UTC timestamp for the run.')
 
 class GetClusterJobsScheduleAnalyzeResponse(RootModel[list[GetClusterJobsScheduleAnalyzeResponseItem]]):
     """List of items. schedule-analyze. Returns a list of future schedule runtimes. response."""
@@ -1216,9 +1227,9 @@ class GetClusterMappingResponse(RootModel[list[dict[str, object]]]):
 class GetClusterMappingDirResponseItem(ProxmoxBaseModel):
     """Model for index. List directory mapping response."""
     checks: list[dict[str, object]] | None = Field(None, description="A list of checks, only present if 'check-node' is set.")
-    description: str | None = Field(None, description='A description of the logical mapping.')
-    id: str | None = Field(None, description='The logical ID of the mapping.')
-    map: list[str] | None = Field(None, description='The entries of the mapping.')
+    description: StrictStr | None = Field(None, description='A description of the logical mapping.')
+    id: StrictStr | None = Field(None, description='The logical ID of the mapping.')
+    map: list[StrictStr] | None = Field(None, description='The entries of the mapping.')
 
 class GetClusterMappingDirResponse(RootModel[list[GetClusterMappingDirResponseItem]]):
     """List of items. index. List directory mapping response."""
@@ -1226,9 +1237,9 @@ class GetClusterMappingDirResponse(RootModel[list[GetClusterMappingDirResponseIt
 
 class PostClusterMappingDirRequest(ProxmoxBaseModel):
     """Model for create. Create a new directory mapping. request."""
-    description: str | None = Field(None, description='Description of the directory mapping')
-    id: str = Field(..., description='The ID of the directory mapping')
-    map: list[str] = Field(..., description='A list of maps for the cluster nodes.')
+    description: StrictStr | None = Field(None, description='Description of the directory mapping')
+    id: StrictStr = Field(..., description='The ID of the directory mapping')
+    map: list[StrictStr] = Field(..., description='A list of maps for the cluster nodes.')
 
 class PostClusterMappingDirResponse(RootModel[None]):
     """Model for create. Create a new directory mapping. response."""
@@ -1244,10 +1255,10 @@ class GetClusterMappingDirIdResponse(RootModel[dict[str, object]]):
 
 class PutClusterMappingDirIdRequest(ProxmoxBaseModel):
     """Model for update. Update a directory mapping. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    description: str | None = Field(None, description='Description of the directory mapping')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    map: list[str] | None = Field(None, description='A list of maps for the cluster nodes.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    description: StrictStr | None = Field(None, description='Description of the directory mapping')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    map: list[StrictStr] | None = Field(None, description='A list of maps for the cluster nodes.')
 
 class PutClusterMappingDirIdResponse(RootModel[None]):
     """Model for update. Update a directory mapping. response."""
@@ -1256,9 +1267,9 @@ class PutClusterMappingDirIdResponse(RootModel[None]):
 class GetClusterMappingPciResponseItem(ProxmoxBaseModel):
     """Model for index. List PCI Hardware Mapping response."""
     checks: list[dict[str, object]] | None = Field(None, description="A list of checks, only present if 'check_node' is set.")
-    description: str | None = Field(None, description='A description of the logical mapping.')
-    id: str | None = Field(None, description='The logical ID of the mapping.')
-    map: list[str] | None = Field(None, description='The entries of the mapping.')
+    description: StrictStr | None = Field(None, description='A description of the logical mapping.')
+    id: StrictStr | None = Field(None, description='The logical ID of the mapping.')
+    map: list[StrictStr] | None = Field(None, description='The entries of the mapping.')
 
 class GetClusterMappingPciResponse(RootModel[list[GetClusterMappingPciResponseItem]]):
     """List of items. index. List PCI Hardware Mapping response."""
@@ -1266,10 +1277,10 @@ class GetClusterMappingPciResponse(RootModel[list[GetClusterMappingPciResponseIt
 
 class PostClusterMappingPciRequest(ProxmoxBaseModel):
     """Model for create. Create a new hardware mapping. request."""
-    description: str | None = Field(None, description='Description of the logical PCI device.')
-    id: str = Field(..., description='The ID of the logical PCI mapping.')
+    description: StrictStr | None = Field(None, description='Description of the logical PCI device.')
+    id: StrictStr = Field(..., description='The ID of the logical PCI mapping.')
     live_migration_capable: bool | None = Field(None, alias="live-migration-capable", description='Marks the device(s) as being able to be live-migrated (Experimental). This needs hardware and driver support to work.')
-    map: list[str] = Field(..., description='A list of maps for the cluster nodes.')
+    map: list[StrictStr] = Field(..., description='A list of maps for the cluster nodes.')
     mdev: bool | None = Field(None, description='Marks the device(s) as being capable of providing mediated devices.')
 
 class PostClusterMappingPciResponse(RootModel[None]):
@@ -1286,11 +1297,11 @@ class GetClusterMappingPciIdResponse(RootModel[dict[str, object]]):
 
 class PutClusterMappingPciIdRequest(ProxmoxBaseModel):
     """Model for update. Update a hardware mapping. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    description: str | None = Field(None, description='Description of the logical PCI device.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    description: StrictStr | None = Field(None, description='Description of the logical PCI device.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     live_migration_capable: bool | None = Field(None, alias="live-migration-capable", description='Marks the device(s) as being able to be live-migrated (Experimental). This needs hardware and driver support to work.')
-    map: list[str] | None = Field(None, description='A list of maps for the cluster nodes.')
+    map: list[StrictStr] | None = Field(None, description='A list of maps for the cluster nodes.')
     mdev: bool | None = Field(None, description='Marks the device(s) as being capable of providing mediated devices.')
 
 class PutClusterMappingPciIdResponse(RootModel[None]):
@@ -1299,10 +1310,10 @@ class PutClusterMappingPciIdResponse(RootModel[None]):
 
 class GetClusterMappingUsbResponseItem(ProxmoxBaseModel):
     """Model for index. List USB Hardware Mappings response."""
-    description: str | None = Field(None, description='A description of the logical mapping.')
+    description: StrictStr | None = Field(None, description='A description of the logical mapping.')
     error: object | None = Field(None, description="A list of errors when 'check_node' is given.")
-    id: str | None = Field(None, description='The logical ID of the mapping.')
-    map: list[str] | None = Field(None, description='The entries of the mapping.')
+    id: StrictStr | None = Field(None, description='The logical ID of the mapping.')
+    map: list[StrictStr] | None = Field(None, description='The entries of the mapping.')
 
 class GetClusterMappingUsbResponse(RootModel[list[GetClusterMappingUsbResponseItem]]):
     """List of items. index. List USB Hardware Mappings response."""
@@ -1310,9 +1321,9 @@ class GetClusterMappingUsbResponse(RootModel[list[GetClusterMappingUsbResponseIt
 
 class PostClusterMappingUsbRequest(ProxmoxBaseModel):
     """Model for create. Create a new hardware mapping. request."""
-    description: str | None = Field(None, description='Description of the logical USB device.')
-    id: str = Field(..., description='The ID of the logical USB mapping.')
-    map: list[str] = Field(..., description='A list of maps for the cluster nodes.')
+    description: StrictStr | None = Field(None, description='Description of the logical USB device.')
+    id: StrictStr = Field(..., description='The ID of the logical USB mapping.')
+    map: list[StrictStr] = Field(..., description='A list of maps for the cluster nodes.')
 
 class PostClusterMappingUsbResponse(RootModel[None]):
     """Model for create. Create a new hardware mapping. response."""
@@ -1328,10 +1339,10 @@ class GetClusterMappingUsbIdResponse(RootModel[dict[str, object]]):
 
 class PutClusterMappingUsbIdRequest(ProxmoxBaseModel):
     """Model for update. Update a hardware mapping. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    description: str | None = Field(None, description='Description of the logical USB device.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    map: list[str] = Field(..., description='A list of maps for the cluster nodes.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    description: StrictStr | None = Field(None, description='Description of the logical USB device.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    map: list[StrictStr] = Field(..., description='A list of maps for the cluster nodes.')
 
 class PutClusterMappingUsbIdResponse(RootModel[None]):
     """Model for update. Update a hardware mapping. response."""
@@ -1348,10 +1359,10 @@ class GetClusterMetricsExportResponse(ProxmoxBaseModel):
 class GetClusterMetricsServerResponseItem(ProxmoxBaseModel):
     """Model for server_index. List configured metric servers. response."""
     disable: bool | None = Field(None, description='Flag to disable the plugin.')
-    id: str | None = Field(None, description='The ID of the entry.')
+    id: StrictStr | None = Field(None, description='The ID of the entry.')
     port: int | None = Field(None, description='Server network port')
-    server: str | None = Field(None, description='Server dns name or IP address')
-    type: str | None = Field(None, description='Plugin type.')
+    server: StrictStr | None = Field(None, description='Server dns name or IP address')
+    type: StrictStr | None = Field(None, description='Plugin type.')
 
 class GetClusterMetricsServerResponse(RootModel[list[GetClusterMetricsServerResponseItem]]):
     """List of items. server_index. List configured metric servers. response."""
@@ -1367,28 +1378,28 @@ class GetClusterMetricsServerIdResponse(RootModel[dict[str, object]]):
 
 class PostClusterMetricsServerIdRequest(ProxmoxBaseModel):
     """Model for create. Create a new external metric server config request."""
-    api_path_prefix: str | None = Field(None, alias="api-path-prefix", description="An API path prefix inserted between '<host>:<port>/' and '/api2/'. Can be useful if the InfluxDB service runs behind a reverse proxy.")
-    bucket: str | None = Field(None, description='The InfluxDB bucket/db. Only necessary when using the http v2 api.')
+    api_path_prefix: StrictStr | None = Field(None, alias="api-path-prefix", description="An API path prefix inserted between '<host>:<port>/' and '/api2/'. Can be useful if the InfluxDB service runs behind a reverse proxy.")
+    bucket: StrictStr | None = Field(None, description='The InfluxDB bucket/db. Only necessary when using the http v2 api.')
     disable: bool | None = Field(None, description='Flag to disable the plugin.')
-    influxdbproto: str | None = Field(None)
+    influxdbproto: StrictStr | None = Field(None)
     max_body_size: int | None = Field(None, alias="max-body-size", description='InfluxDB max-body-size in bytes. Requests are batched up to this size.')
     mtu: int | None = Field(None, description='MTU for metrics transmission over UDP')
-    organization: str | None = Field(None, description='The InfluxDB organization. Only necessary when using the http v2 api. Has no meaning when using v2 compatibility api.')
-    otel_compression: str | None = Field(None, alias="otel-compression", description='Compression algorithm for requests')
-    otel_headers: str | None = Field(None, alias="otel-headers", description='Custom HTTP headers (JSON format, base64 encoded)')
+    organization: StrictStr | None = Field(None, description='The InfluxDB organization. Only necessary when using the http v2 api. Has no meaning when using v2 compatibility api.')
+    otel_compression: StrictStr | None = Field(None, alias="otel-compression", description='Compression algorithm for requests')
+    otel_headers: StrictStr | None = Field(None, alias="otel-headers", description='Custom HTTP headers (JSON format, base64 encoded)')
     otel_max_body_size: int | None = Field(None, alias="otel-max-body-size", description='Maximum request body size in bytes')
-    otel_path: str | None = Field(None, alias="otel-path", description='OTLP endpoint path')
-    otel_protocol: str | None = Field(None, alias="otel-protocol", description='HTTP protocol')
-    otel_resource_attributes: str | None = Field(None, alias="otel-resource-attributes", description='Additional resource attributes as JSON, base64 encoded')
+    otel_path: StrictStr | None = Field(None, alias="otel-path", description='OTLP endpoint path')
+    otel_protocol: StrictStr | None = Field(None, alias="otel-protocol", description='HTTP protocol')
+    otel_resource_attributes: StrictStr | None = Field(None, alias="otel-resource-attributes", description='Additional resource attributes as JSON, base64 encoded')
     otel_timeout: int | None = Field(None, alias="otel-timeout", description='HTTP request timeout in seconds')
     otel_verify_ssl: bool | None = Field(None, alias="otel-verify-ssl", description='Verify SSL certificates')
-    path: str | None = Field(None, description='root graphite path (ex: proxmox.mycluster.mykey)')
+    path: StrictStr | None = Field(None, description='root graphite path (ex: proxmox.mycluster.mykey)')
     port: int = Field(..., description='server network port')
-    proto: str | None = Field(None, description='Protocol to send graphite data. TCP or UDP (default)')
-    server: str = Field(..., description='server dns name or IP address')
+    proto: StrictStr | None = Field(None, description='Protocol to send graphite data. TCP or UDP (default)')
+    server: StrictStr = Field(..., description='server dns name or IP address')
     timeout: int | None = Field(None, description='graphite TCP socket timeout (default=1)')
-    token: str | None = Field(None, description="The InfluxDB access token. Only necessary when using the http v2 api. If the v2 compatibility api is used, use 'user:password' instead.")
-    type: str = Field(..., description='Plugin type.')
+    token: StrictStr | None = Field(None, description="The InfluxDB access token. Only necessary when using the http v2 api. If the v2 compatibility api is used, use 'user:password' instead.")
+    type: StrictStr = Field(..., description='Plugin type.')
     verify_certificate: bool | None = Field(None, alias="verify-certificate", description='Set to 0 to disable certificate verification for https endpoints.')
 
 class PostClusterMetricsServerIdResponse(RootModel[None]):
@@ -1397,29 +1408,29 @@ class PostClusterMetricsServerIdResponse(RootModel[None]):
 
 class PutClusterMetricsServerIdRequest(ProxmoxBaseModel):
     """Model for update. Update metric server configuration. request."""
-    api_path_prefix: str | None = Field(None, alias="api-path-prefix", description="An API path prefix inserted between '<host>:<port>/' and '/api2/'. Can be useful if the InfluxDB service runs behind a reverse proxy.")
-    bucket: str | None = Field(None, description='The InfluxDB bucket/db. Only necessary when using the http v2 api.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    api_path_prefix: StrictStr | None = Field(None, alias="api-path-prefix", description="An API path prefix inserted between '<host>:<port>/' and '/api2/'. Can be useful if the InfluxDB service runs behind a reverse proxy.")
+    bucket: StrictStr | None = Field(None, description='The InfluxDB bucket/db. Only necessary when using the http v2 api.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Flag to disable the plugin.')
-    influxdbproto: str | None = Field(None)
+    influxdbproto: StrictStr | None = Field(None)
     max_body_size: int | None = Field(None, alias="max-body-size", description='InfluxDB max-body-size in bytes. Requests are batched up to this size.')
     mtu: int | None = Field(None, description='MTU for metrics transmission over UDP')
-    organization: str | None = Field(None, description='The InfluxDB organization. Only necessary when using the http v2 api. Has no meaning when using v2 compatibility api.')
-    otel_compression: str | None = Field(None, alias="otel-compression", description='Compression algorithm for requests')
-    otel_headers: str | None = Field(None, alias="otel-headers", description='Custom HTTP headers (JSON format, base64 encoded)')
+    organization: StrictStr | None = Field(None, description='The InfluxDB organization. Only necessary when using the http v2 api. Has no meaning when using v2 compatibility api.')
+    otel_compression: StrictStr | None = Field(None, alias="otel-compression", description='Compression algorithm for requests')
+    otel_headers: StrictStr | None = Field(None, alias="otel-headers", description='Custom HTTP headers (JSON format, base64 encoded)')
     otel_max_body_size: int | None = Field(None, alias="otel-max-body-size", description='Maximum request body size in bytes')
-    otel_path: str | None = Field(None, alias="otel-path", description='OTLP endpoint path')
-    otel_protocol: str | None = Field(None, alias="otel-protocol", description='HTTP protocol')
-    otel_resource_attributes: str | None = Field(None, alias="otel-resource-attributes", description='Additional resource attributes as JSON, base64 encoded')
+    otel_path: StrictStr | None = Field(None, alias="otel-path", description='OTLP endpoint path')
+    otel_protocol: StrictStr | None = Field(None, alias="otel-protocol", description='HTTP protocol')
+    otel_resource_attributes: StrictStr | None = Field(None, alias="otel-resource-attributes", description='Additional resource attributes as JSON, base64 encoded')
     otel_timeout: int | None = Field(None, alias="otel-timeout", description='HTTP request timeout in seconds')
     otel_verify_ssl: bool | None = Field(None, alias="otel-verify-ssl", description='Verify SSL certificates')
-    path: str | None = Field(None, description='root graphite path (ex: proxmox.mycluster.mykey)')
+    path: StrictStr | None = Field(None, description='root graphite path (ex: proxmox.mycluster.mykey)')
     port: int = Field(..., description='server network port')
-    proto: str | None = Field(None, description='Protocol to send graphite data. TCP or UDP (default)')
-    server: str = Field(..., description='server dns name or IP address')
+    proto: StrictStr | None = Field(None, description='Protocol to send graphite data. TCP or UDP (default)')
+    server: StrictStr = Field(..., description='server dns name or IP address')
     timeout: int | None = Field(None, description='graphite TCP socket timeout (default=1)')
-    token: str | None = Field(None, description="The InfluxDB access token. Only necessary when using the http v2 api. If the v2 compatibility api is used, use 'user:password' instead.")
+    token: StrictStr | None = Field(None, description="The InfluxDB access token. Only necessary when using the http v2 api. If the v2 compatibility api is used, use 'user:password' instead.")
     verify_certificate: bool | None = Field(None, alias="verify-certificate", description='Set to 0 to disable certificate verification for https endpoints.')
 
 class PutClusterMetricsServerIdResponse(RootModel[None]):
@@ -1440,11 +1451,11 @@ class GetClusterNotificationsEndpointsResponse(RootModel[list[dict[str, object]]
 
 class GetClusterNotificationsEndpointsGotifyResponseItem(ProxmoxBaseModel):
     """Model for get_gotify_endpoints. Returns a list of all gotify endpoints response."""
-    comment: str | None = Field(None, description='Comment')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    name: str | None = Field(None, description='The name of the endpoint.')
-    origin: str | None = Field(None, description='Show if this entry was created by a user or was built-in')
-    server: str | None = Field(None, description='Server URL')
+    name: StrictStr | None = Field(None, description='The name of the endpoint.')
+    origin: StrictStr | None = Field(None, description='Show if this entry was created by a user or was built-in')
+    server: StrictStr | None = Field(None, description='Server URL')
 
 class GetClusterNotificationsEndpointsGotifyResponse(RootModel[list[GetClusterNotificationsEndpointsGotifyResponseItem]]):
     """List of items. get_gotify_endpoints. Returns a list of all gotify endpoints response."""
@@ -1452,11 +1463,11 @@ class GetClusterNotificationsEndpointsGotifyResponse(RootModel[list[GetClusterNo
 
 class PostClusterNotificationsEndpointsGotifyRequest(ProxmoxBaseModel):
     """Model for create_gotify_endpoint. Create a new gotify endpoint request."""
-    comment: str | None = Field(None, description='Comment')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    name: str = Field(..., description='The name of the endpoint.')
-    server: str = Field(..., description='Server URL')
-    token: str = Field(..., description='Secret token')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
+    server: StrictStr = Field(..., description='Server URL')
+    token: StrictStr = Field(..., description='Secret token')
 
 class PostClusterNotificationsEndpointsGotifyResponse(RootModel[None]):
     """Model for create_gotify_endpoint. Create a new gotify endpoint response."""
@@ -1468,20 +1479,20 @@ class DeleteClusterNotificationsEndpointsGotifyNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsGotifyNameResponse(ProxmoxBaseModel):
     """Model for get_gotify_endpoint. Return a specific gotify endpoint response."""
-    comment: str | None = Field(None, description='Comment')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Comment')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    name: str = Field(..., description='The name of the endpoint.')
-    server: str = Field(..., description='Server URL')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
+    server: StrictStr = Field(..., description='Server URL')
 
 class PutClusterNotificationsEndpointsGotifyNameRequest(ProxmoxBaseModel):
     """Model for update_gotify_endpoint. Update existing gotify endpoint request."""
-    comment: str | None = Field(None, description='Comment')
-    delete: list[str] | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Comment')
+    delete: list[StrictStr] | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    server: str | None = Field(None, description='Server URL')
-    token: str | None = Field(None, description='Secret token')
+    server: StrictStr | None = Field(None, description='Server URL')
+    token: StrictStr | None = Field(None, description='Secret token')
 
 class PutClusterNotificationsEndpointsGotifyNameResponse(RootModel[None]):
     """Model for update_gotify_endpoint. Update existing gotify endpoint response."""
@@ -1489,14 +1500,14 @@ class PutClusterNotificationsEndpointsGotifyNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsSendmailResponseItem(ProxmoxBaseModel):
     """Model for get_sendmail_endpoints. Returns a list of all sendmail endpoints response."""
-    author: str | None = Field(None, description='Author of the mail')
-    comment: str | None = Field(None, description='Comment')
+    author: StrictStr | None = Field(None, description='Author of the mail')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str | None = Field(None, alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    name: str | None = Field(None, description='The name of the endpoint.')
-    origin: str | None = Field(None, description='Show if this entry was created by a user or was built-in')
+    from_address: StrictStr | None = Field(None, alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    name: StrictStr | None = Field(None, description='The name of the endpoint.')
+    origin: StrictStr | None = Field(None, description='Show if this entry was created by a user or was built-in')
 
 class GetClusterNotificationsEndpointsSendmailResponse(RootModel[list[GetClusterNotificationsEndpointsSendmailResponseItem]]):
     """List of items. get_sendmail_endpoints. Returns a list of all sendmail endpoints response."""
@@ -1504,13 +1515,13 @@ class GetClusterNotificationsEndpointsSendmailResponse(RootModel[list[GetCluster
 
 class PostClusterNotificationsEndpointsSendmailRequest(ProxmoxBaseModel):
     """Model for create_sendmail_endpoint. Create a new sendmail endpoint request."""
-    author: str | None = Field(None, description='Author of the mail')
-    comment: str | None = Field(None, description='Comment')
+    author: StrictStr | None = Field(None, description='Author of the mail')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str | None = Field(None, alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    name: str = Field(..., description='The name of the endpoint.')
+    from_address: StrictStr | None = Field(None, alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
 
 class PostClusterNotificationsEndpointsSendmailResponse(RootModel[None]):
     """Model for create_sendmail_endpoint. Create a new sendmail endpoint response."""
@@ -1522,25 +1533,25 @@ class DeleteClusterNotificationsEndpointsSendmailNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsSendmailNameResponse(ProxmoxBaseModel):
     """Model for get_sendmail_endpoint. Return a specific sendmail endpoint response."""
-    author: str | None = Field(None, description='Author of the mail')
-    comment: str | None = Field(None, description='Comment')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    author: StrictStr | None = Field(None, description='Author of the mail')
+    comment: StrictStr | None = Field(None, description='Comment')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str | None = Field(None, alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    name: str = Field(..., description='The name of the endpoint.')
+    from_address: StrictStr | None = Field(None, alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
 
 class PutClusterNotificationsEndpointsSendmailNameRequest(ProxmoxBaseModel):
     """Model for update_sendmail_endpoint. Update existing sendmail endpoint request."""
-    author: str | None = Field(None, description='Author of the mail')
-    comment: str | None = Field(None, description='Comment')
-    delete: list[str] | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    author: StrictStr | None = Field(None, description='Author of the mail')
+    comment: StrictStr | None = Field(None, description='Comment')
+    delete: list[StrictStr] | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str | None = Field(None, alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
+    from_address: StrictStr | None = Field(None, alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
 
 class PutClusterNotificationsEndpointsSendmailNameResponse(RootModel[None]):
     """Model for update_sendmail_endpoint. Update existing sendmail endpoint response."""
@@ -1548,18 +1559,18 @@ class PutClusterNotificationsEndpointsSendmailNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsSmtpResponseItem(ProxmoxBaseModel):
     """Model for get_smtp_endpoints. Returns a list of all smtp endpoints response."""
-    author: str | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
-    comment: str | None = Field(None, description='Comment')
+    author: StrictStr | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str | None = Field(None, alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    mode: str | None = Field(None, description='Determine which encryption method shall be used for the connection.')
-    name: str | None = Field(None, description='The name of the endpoint.')
-    origin: str | None = Field(None, description='Show if this entry was created by a user or was built-in')
+    from_address: StrictStr | None = Field(None, alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    mode: StrictStr | None = Field(None, description='Determine which encryption method shall be used for the connection.')
+    name: StrictStr | None = Field(None, description='The name of the endpoint.')
+    origin: StrictStr | None = Field(None, description='Show if this entry was created by a user or was built-in')
     port: int | None = Field(None, description='The port to be used. Defaults to 465 for TLS based connections, 587 for STARTTLS based connections and port 25 for insecure plain-text connections.')
-    server: str | None = Field(None, description='The address of the SMTP server.')
-    username: str | None = Field(None, description='Username for SMTP authentication')
+    server: StrictStr | None = Field(None, description='The address of the SMTP server.')
+    username: StrictStr | None = Field(None, description='Username for SMTP authentication')
 
 class GetClusterNotificationsEndpointsSmtpResponse(RootModel[list[GetClusterNotificationsEndpointsSmtpResponseItem]]):
     """List of items. get_smtp_endpoints. Returns a list of all smtp endpoints response."""
@@ -1567,18 +1578,18 @@ class GetClusterNotificationsEndpointsSmtpResponse(RootModel[list[GetClusterNoti
 
 class PostClusterNotificationsEndpointsSmtpRequest(ProxmoxBaseModel):
     """Model for create_smtp_endpoint. Create a new smtp endpoint request."""
-    author: str | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
-    comment: str | None = Field(None, description='Comment')
+    author: StrictStr | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str = Field(..., alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    mode: str | None = Field(None, description='Determine which encryption method shall be used for the connection.')
-    name: str = Field(..., description='The name of the endpoint.')
-    password: str | None = Field(None, description='Password for SMTP authentication')
+    from_address: StrictStr = Field(..., alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    mode: StrictStr | None = Field(None, description='Determine which encryption method shall be used for the connection.')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
+    password: StrictStr | None = Field(None, description='Password for SMTP authentication')
     port: int | None = Field(None, description='The port to be used. Defaults to 465 for TLS based connections, 587 for STARTTLS based connections and port 25 for insecure plain-text connections.')
-    server: str = Field(..., description='The address of the SMTP server.')
-    username: str | None = Field(None, description='Username for SMTP authentication')
+    server: StrictStr = Field(..., description='The address of the SMTP server.')
+    username: StrictStr | None = Field(None, description='Username for SMTP authentication')
 
 class PostClusterNotificationsEndpointsSmtpResponse(RootModel[None]):
     """Model for create_smtp_endpoint. Create a new smtp endpoint response."""
@@ -1590,34 +1601,34 @@ class DeleteClusterNotificationsEndpointsSmtpNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsSmtpNameResponse(ProxmoxBaseModel):
     """Model for get_smtp_endpoint. Return a specific smtp endpoint response."""
-    author: str | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
-    comment: str | None = Field(None, description='Comment')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    author: StrictStr | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
+    comment: StrictStr | None = Field(None, description='Comment')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str = Field(..., alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    mode: str | None = Field(None, description='Determine which encryption method shall be used for the connection.')
-    name: str = Field(..., description='The name of the endpoint.')
+    from_address: StrictStr = Field(..., alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    mode: StrictStr | None = Field(None, description='Determine which encryption method shall be used for the connection.')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
     port: int | None = Field(None, description='The port to be used. Defaults to 465 for TLS based connections, 587 for STARTTLS based connections and port 25 for insecure plain-text connections.')
-    server: str = Field(..., description='The address of the SMTP server.')
-    username: str | None = Field(None, description='Username for SMTP authentication')
+    server: StrictStr = Field(..., description='The address of the SMTP server.')
+    username: StrictStr | None = Field(None, description='Username for SMTP authentication')
 
 class PutClusterNotificationsEndpointsSmtpNameRequest(ProxmoxBaseModel):
     """Model for update_smtp_endpoint. Update existing smtp endpoint request."""
-    author: str | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
-    comment: str | None = Field(None, description='Comment')
-    delete: list[str] | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    author: StrictStr | None = Field(None, description="Author of the mail. Defaults to 'Proxmox VE'.")
+    comment: StrictStr | None = Field(None, description='Comment')
+    delete: list[StrictStr] | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    from_address: str | None = Field(None, alias="from-address", description='`From` address for the mail')
-    mailto: list[str] | None = Field(None, description='List of email recipients')
-    mailto_user: list[str] | None = Field(None, alias="mailto-user", description='List of users')
-    mode: str | None = Field(None, description='Determine which encryption method shall be used for the connection.')
-    password: str | None = Field(None, description='Password for SMTP authentication')
+    from_address: StrictStr | None = Field(None, alias="from-address", description='`From` address for the mail')
+    mailto: list[StrictStr] | None = Field(None, description='List of email recipients')
+    mailto_user: list[StrictStr] | None = Field(None, alias="mailto-user", description='List of users')
+    mode: StrictStr | None = Field(None, description='Determine which encryption method shall be used for the connection.')
+    password: StrictStr | None = Field(None, description='Password for SMTP authentication')
     port: int | None = Field(None, description='The port to be used. Defaults to 465 for TLS based connections, 587 for STARTTLS based connections and port 25 for insecure plain-text connections.')
-    server: str | None = Field(None, description='The address of the SMTP server.')
-    username: str | None = Field(None, description='Username for SMTP authentication')
+    server: StrictStr | None = Field(None, description='The address of the SMTP server.')
+    username: StrictStr | None = Field(None, description='Username for SMTP authentication')
 
 class PutClusterNotificationsEndpointsSmtpNameResponse(RootModel[None]):
     """Model for update_smtp_endpoint. Update existing smtp endpoint response."""
@@ -1625,15 +1636,15 @@ class PutClusterNotificationsEndpointsSmtpNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsWebhookResponseItem(ProxmoxBaseModel):
     """Model for get_webhook_endpoints. Returns a list of all webhook endpoints response."""
-    body: str | None = Field(None, description='HTTP body, base64 encoded')
-    comment: str | None = Field(None, description='Comment')
+    body: StrictStr | None = Field(None, description='HTTP body, base64 encoded')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    header: list[str] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    method: str | None = Field(None, description='HTTP method')
-    name: str | None = Field(None, description='The name of the endpoint.')
-    origin: str | None = Field(None, description='Show if this entry was created by a user or was built-in')
-    secret: list[str] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    url: str | None = Field(None, description='Server URL')
+    header: list[StrictStr] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    method: StrictStr | None = Field(None, description='HTTP method')
+    name: StrictStr | None = Field(None, description='The name of the endpoint.')
+    origin: StrictStr | None = Field(None, description='Show if this entry was created by a user or was built-in')
+    secret: list[StrictStr] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    url: StrictStr | None = Field(None, description='Server URL')
 
 class GetClusterNotificationsEndpointsWebhookResponse(RootModel[list[GetClusterNotificationsEndpointsWebhookResponseItem]]):
     """List of items. get_webhook_endpoints. Returns a list of all webhook endpoints response."""
@@ -1641,14 +1652,14 @@ class GetClusterNotificationsEndpointsWebhookResponse(RootModel[list[GetClusterN
 
 class PostClusterNotificationsEndpointsWebhookRequest(ProxmoxBaseModel):
     """Model for create_webhook_endpoint. Create a new webhook endpoint request."""
-    body: str | None = Field(None, description='HTTP body, base64 encoded')
-    comment: str | None = Field(None, description='Comment')
+    body: StrictStr | None = Field(None, description='HTTP body, base64 encoded')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this target')
-    header: list[str] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    method: str = Field(..., description='HTTP method')
-    name: str = Field(..., description='The name of the endpoint.')
-    secret: list[str] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    url: str = Field(..., description='Server URL')
+    header: list[StrictStr] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    method: StrictStr = Field(..., description='HTTP method')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
+    secret: list[StrictStr] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    url: StrictStr = Field(..., description='Server URL')
 
 class PostClusterNotificationsEndpointsWebhookResponse(RootModel[None]):
     """Model for create_webhook_endpoint. Create a new webhook endpoint response."""
@@ -1660,27 +1671,27 @@ class DeleteClusterNotificationsEndpointsWebhookNameResponse(RootModel[None]):
 
 class GetClusterNotificationsEndpointsWebhookNameResponse(ProxmoxBaseModel):
     """Model for get_webhook_endpoint. Return a specific webhook endpoint response."""
-    body: str | None = Field(None, description='HTTP body, base64 encoded')
-    comment: str | None = Field(None, description='Comment')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    body: StrictStr | None = Field(None, description='HTTP body, base64 encoded')
+    comment: StrictStr | None = Field(None, description='Comment')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    header: list[str] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    method: str = Field(..., description='HTTP method')
-    name: str = Field(..., description='The name of the endpoint.')
-    secret: list[str] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    url: str = Field(..., description='Server URL')
+    header: list[StrictStr] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    method: StrictStr = Field(..., description='HTTP method')
+    name: StrictStr = Field(..., description='The name of the endpoint.')
+    secret: list[StrictStr] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    url: StrictStr = Field(..., description='Server URL')
 
 class PutClusterNotificationsEndpointsWebhookNameRequest(ProxmoxBaseModel):
     """Model for update_webhook_endpoint. Update existing webhook endpoint request."""
-    body: str | None = Field(None, description='HTTP body, base64 encoded')
-    comment: str | None = Field(None, description='Comment')
-    delete: list[str] | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    body: StrictStr | None = Field(None, description='HTTP body, base64 encoded')
+    comment: StrictStr | None = Field(None, description='Comment')
+    delete: list[StrictStr] | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this target')
-    header: list[str] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    method: str | None = Field(None, description='HTTP method')
-    secret: list[str] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
-    url: str | None = Field(None, description='Server URL')
+    header: list[StrictStr] | None = Field(None, description='HTTP headers to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    method: StrictStr | None = Field(None, description='HTTP method')
+    secret: list[StrictStr] | None = Field(None, description='Secrets to set. These have to be formatted as a property string in the format name=<name>,value=<base64 of value>')
+    url: StrictStr | None = Field(None, description='Server URL')
 
 class PutClusterNotificationsEndpointsWebhookNameResponse(RootModel[None]):
     """Model for update_webhook_endpoint. Update existing webhook endpoint response."""
@@ -1688,9 +1699,9 @@ class PutClusterNotificationsEndpointsWebhookNameResponse(RootModel[None]):
 
 class GetClusterNotificationsMatcherFieldValuesResponseItem(ProxmoxBaseModel):
     """Model for get_matcher_field_values. Returns known notification metadata fields and their known values response."""
-    comment: str | None = Field(None, description='Additional comment for this value.')
-    field: str | None = Field(None, description='Field this value belongs to.')
-    value: str | None = Field(None, description='Notification metadata value known by the system.')
+    comment: StrictStr | None = Field(None, description='Additional comment for this value.')
+    field: StrictStr | None = Field(None, description='Field this value belongs to.')
+    value: StrictStr | None = Field(None, description='Notification metadata value known by the system.')
 
 class GetClusterNotificationsMatcherFieldValuesResponse(RootModel[list[GetClusterNotificationsMatcherFieldValuesResponseItem]]):
     """List of items. get_matcher_field_values. Returns known notification metadata fields and their known values response."""
@@ -1698,7 +1709,7 @@ class GetClusterNotificationsMatcherFieldValuesResponse(RootModel[list[GetCluste
 
 class GetClusterNotificationsMatcherFieldsResponseItem(ProxmoxBaseModel):
     """Model for get_matcher_fields. Returns known notification metadata fields response."""
-    name: str | None = Field(None, description='Name of the field.')
+    name: StrictStr | None = Field(None, description='Name of the field.')
 
 class GetClusterNotificationsMatcherFieldsResponse(RootModel[list[GetClusterNotificationsMatcherFieldsResponseItem]]):
     """List of items. get_matcher_fields. Returns known notification metadata fields response."""
@@ -1706,16 +1717,16 @@ class GetClusterNotificationsMatcherFieldsResponse(RootModel[list[GetClusterNoti
 
 class GetClusterNotificationsMatchersResponseItem(ProxmoxBaseModel):
     """Model for get_matchers. Returns a list of all matchers response."""
-    comment: str | None = Field(None, description='Comment')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this matcher')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
-    match_calendar: list[str] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
-    match_field: list[str] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
-    match_severity: list[str] | None = Field(None, alias="match-severity", description='Notification severities to match')
-    mode: str | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
-    name: str | None = Field(None, description='Name of the matcher.')
-    origin: str | None = Field(None, description='Show if this entry was created by a user or was built-in')
-    target: list[str] | None = Field(None, description='Targets to notify on match')
+    match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
+    match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
+    match_severity: list[StrictStr] | None = Field(None, alias="match-severity", description='Notification severities to match')
+    mode: StrictStr | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
+    name: StrictStr | None = Field(None, description='Name of the matcher.')
+    origin: StrictStr | None = Field(None, description='Show if this entry was created by a user or was built-in')
+    target: list[StrictStr] | None = Field(None, description='Targets to notify on match')
 
 class GetClusterNotificationsMatchersResponse(RootModel[list[GetClusterNotificationsMatchersResponseItem]]):
     """List of items. get_matchers. Returns a list of all matchers response."""
@@ -1723,15 +1734,15 @@ class GetClusterNotificationsMatchersResponse(RootModel[list[GetClusterNotificat
 
 class PostClusterNotificationsMatchersRequest(ProxmoxBaseModel):
     """Model for create_matcher. Create a new matcher request."""
-    comment: str | None = Field(None, description='Comment')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this matcher')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
-    match_calendar: list[str] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
-    match_field: list[str] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
-    match_severity: list[str] | None = Field(None, alias="match-severity", description='Notification severities to match')
-    mode: str | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
-    name: str = Field(..., description='Name of the matcher.')
-    target: list[str] | None = Field(None, description='Targets to notify on match')
+    match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
+    match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
+    match_severity: list[StrictStr] | None = Field(None, alias="match-severity", description='Notification severities to match')
+    mode: StrictStr | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
+    name: StrictStr = Field(..., description='Name of the matcher.')
+    target: list[StrictStr] | None = Field(None, description='Targets to notify on match')
 
 class PostClusterNotificationsMatchersResponse(RootModel[None]):
     """Model for create_matcher. Create a new matcher response."""
@@ -1743,29 +1754,29 @@ class DeleteClusterNotificationsMatchersNameResponse(RootModel[None]):
 
 class GetClusterNotificationsMatchersNameResponse(ProxmoxBaseModel):
     """Model for get_matcher. Return a specific matcher response."""
-    comment: str | None = Field(None, description='Comment')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Comment')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this matcher')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
-    match_calendar: list[str] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
-    match_field: list[str] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
-    match_severity: list[str] | None = Field(None, alias="match-severity", description='Notification severities to match')
-    mode: str | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
-    name: str = Field(..., description='Name of the matcher.')
-    target: list[str] | None = Field(None, description='Targets to notify on match')
+    match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
+    match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
+    match_severity: list[StrictStr] | None = Field(None, alias="match-severity", description='Notification severities to match')
+    mode: StrictStr | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
+    name: StrictStr = Field(..., description='Name of the matcher.')
+    target: list[StrictStr] | None = Field(None, description='Targets to notify on match')
 
 class PutClusterNotificationsMatchersNameRequest(ProxmoxBaseModel):
     """Model for update_matcher. Update existing matcher request."""
-    comment: str | None = Field(None, description='Comment')
-    delete: list[str] | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Comment')
+    delete: list[StrictStr] | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this matcher')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
-    match_calendar: list[str] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
-    match_field: list[str] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
-    match_severity: list[str] | None = Field(None, alias="match-severity", description='Notification severities to match')
-    mode: str | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
-    target: list[str] | None = Field(None, description='Targets to notify on match')
+    match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
+    match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
+    match_severity: list[StrictStr] | None = Field(None, alias="match-severity", description='Notification severities to match')
+    mode: StrictStr | None = Field(None, description="Choose between 'all' and 'any' for when multiple properties are specified")
+    target: list[StrictStr] | None = Field(None, description='Targets to notify on match')
 
 class PutClusterNotificationsMatchersNameResponse(RootModel[None]):
     """Model for update_matcher. Update existing matcher response."""
@@ -1773,11 +1784,11 @@ class PutClusterNotificationsMatchersNameResponse(RootModel[None]):
 
 class GetClusterNotificationsTargetsResponseItem(ProxmoxBaseModel):
     """Model for get_all_targets. Returns a list of all entities that can be used as notification targets. response."""
-    comment: str | None = Field(None, description='Comment')
+    comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Show if this target is disabled')
-    name: str | None = Field(None, description='Name of the target.')
-    origin: str | None = Field(None, description='Show if this entry was created by a user or was built-in')
-    type: str | None = Field(None, description='Type of the target.')
+    name: StrictStr | None = Field(None, description='Name of the target.')
+    origin: StrictStr | None = Field(None, description='Show if this entry was created by a user or was built-in')
+    type: StrictStr | None = Field(None, description='Type of the target.')
 
 class GetClusterNotificationsTargetsResponse(RootModel[list[GetClusterNotificationsTargetsResponseItem]]):
     """List of items. get_all_targets. Returns a list of all entities that can be used as notification targets. response."""
@@ -1793,30 +1804,30 @@ class GetClusterOptionsResponse(RootModel[dict[str, object]]):
 
 class PutClusterOptionsRequest(ProxmoxBaseModel):
     """Model for set_options. Set datacenter options. request."""
-    bwlimit: str | None = Field(None, description='Set I/O bandwidth limit for various operations (in KiB/s).')
-    consent_text: str | None = Field(None, alias="consent-text", description='Consent text that is displayed before logging in.')
-    console: str | None = Field(None, description='Select the default Console viewer. You can either use the builtin java applet (VNC; deprecated and maps to html5), an external virt-viewer comtatible application (SPICE), an HTML5 based vnc viewer (noVNC), or an HTML5 based console client (xtermjs). If the selected viewer is not available (e.g. SPICE not activated for the VM), the fallback is noVNC.')
-    crs: str | None = Field(None, description='Cluster resource scheduling settings.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    description: str | None = Field(None, description='Datacenter description. Shown in the web-interface datacenter notes panel. This is saved as comment inside the configuration file.')
-    email_from: str | None = Field(None, description='Specify email address to send notification from (default is root@$hostname)')
-    fencing: str | None = Field(None, description="Set the fencing mode of the HA cluster. Hardware mode needs a valid configuration of fence devices in /etc/pve/ha/fence.cfg. With both all two modes are used.\n\nWARNING: 'hardware' and 'both' are EXPERIMENTAL & WIP")
-    ha: str | None = Field(None, description='Cluster wide HA settings.')
-    http_proxy: str | None = Field(None, description="Specify external http proxy which is used for downloads (example: 'http://username:password@host:port/')")
-    keyboard: str | None = Field(None, description='Default keybord layout for vnc server.')
-    language: str | None = Field(None, description='Default GUI language.')
-    mac_prefix: str | None = Field(None, description="Prefix for the auto-generated MAC addresses of virtual guests. The default 'BC:24:11' is the OUI assigned by the IEEE to Proxmox Server Solutions GmbH for a 24-bit large MAC block. You're allowed to use this in local networks, i.e., those not directly reachable by the public (e.g., in a LAN or behind NAT).")
+    bwlimit: StrictStr | None = Field(None, description='Set I/O bandwidth limit for various operations (in KiB/s).')
+    consent_text: StrictStr | None = Field(None, alias="consent-text", description='Consent text that is displayed before logging in.')
+    console: StrictStr | None = Field(None, description='Select the default Console viewer. You can either use the builtin java applet (VNC; deprecated and maps to html5), an external virt-viewer comtatible application (SPICE), an HTML5 based vnc viewer (noVNC), or an HTML5 based console client (xtermjs). If the selected viewer is not available (e.g. SPICE not activated for the VM), the fallback is noVNC.')
+    crs: StrictStr | None = Field(None, description='Cluster resource scheduling settings.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    description: StrictStr | None = Field(None, description='Datacenter description. Shown in the web-interface datacenter notes panel. This is saved as comment inside the configuration file.')
+    email_from: StrictStr | None = Field(None, description='Specify email address to send notification from (default is root@$hostname)')
+    fencing: StrictStr | None = Field(None, description="Set the fencing mode of the HA cluster. Hardware mode needs a valid configuration of fence devices in /etc/pve/ha/fence.cfg. With both all two modes are used.\n\nWARNING: 'hardware' and 'both' are EXPERIMENTAL & WIP")
+    ha: StrictStr | None = Field(None, description='Cluster wide HA settings.')
+    http_proxy: StrictStr | None = Field(None, description="Specify external http proxy which is used for downloads (example: 'http://username:password@host:port/')")
+    keyboard: StrictStr | None = Field(None, description='Default keybord layout for vnc server.')
+    language: StrictStr | None = Field(None, description='Default GUI language.')
+    mac_prefix: StrictStr | None = Field(None, description="Prefix for the auto-generated MAC addresses of virtual guests. The default 'BC:24:11' is the OUI assigned by the IEEE to Proxmox Server Solutions GmbH for a 24-bit large MAC block. You're allowed to use this in local networks, i.e., those not directly reachable by the public (e.g., in a LAN or behind NAT).")
     max_workers: int | None = Field(None, description="Defines how many workers (per node) are maximal started  on actions like 'stopall VMs' or task from the ha-manager.")
-    migration: str | None = Field(None, description='For cluster wide migration settings.')
+    migration: StrictStr | None = Field(None, description='For cluster wide migration settings.')
     migration_unsecure: bool | None = Field(None, description="Migration is secure using SSH tunnel by default. For secure private networks you can disable it to speed up migration. Deprecated, use the 'migration' property instead!")
-    next_id: str | None = Field(None, alias="next-id", description='Control the range for the free VMID auto-selection pool.')
-    notify: str | None = Field(None, description='Cluster-wide notification settings.')
-    registered_tags: str | None = Field(None, alias="registered-tags", description="A list of tags that require a `Sys.Modify` on '/' to set and delete. Tags set here that are also in 'user-tag-access' also require `Sys.Modify`.")
-    replication: str | None = Field(None, description='For cluster wide replication settings.')
-    tag_style: str | None = Field(None, alias="tag-style", description='Tag style options.')
-    u2f: str | None = Field(None, description='u2f')
-    user_tag_access: str | None = Field(None, alias="user-tag-access", description='Privilege options for user-settable tags')
-    webauthn: str | None = Field(None, description='webauthn configuration')
+    next_id: StrictStr | None = Field(None, alias="next-id", description='Control the range for the free VMID auto-selection pool.')
+    notify: StrictStr | None = Field(None, description='Cluster-wide notification settings.')
+    registered_tags: StrictStr | None = Field(None, alias="registered-tags", description="A list of tags that require a `Sys.Modify` on '/' to set and delete. Tags set here that are also in 'user-tag-access' also require `Sys.Modify`.")
+    replication: StrictStr | None = Field(None, description='For cluster wide replication settings.')
+    tag_style: StrictStr | None = Field(None, alias="tag-style", description='Tag style options.')
+    u2f: StrictStr | None = Field(None, description='u2f')
+    user_tag_access: StrictStr | None = Field(None, alias="user-tag-access", description='Privilege options for user-settable tags')
+    webauthn: StrictStr | None = Field(None, description='webauthn configuration')
 
 class PutClusterOptionsResponse(RootModel[None]):
     """Model for set_options. Set datacenter options. response."""
@@ -1824,17 +1835,17 @@ class PutClusterOptionsResponse(RootModel[None]):
 
 class GetClusterReplicationResponseItem(ProxmoxBaseModel):
     """Model for index. List replication jobs. response."""
-    comment: str | None = Field(None, description='Description.')
+    comment: StrictStr | None = Field(None, description='Description.')
     disable: bool | None = Field(None, description='Flag to disable/deactivate the entry.')
     guest: int | None = Field(None, description='Guest ID.')
-    id: str | None = Field(None, description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
+    id: StrictStr | None = Field(None, description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
     jobnum: int | None = Field(None, description='Unique, sequential ID assigned to each job.')
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
-    remove_job: str | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
-    schedule: str | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
-    source: str | None = Field(None, description='For internal use, to detect if the guest was stolen.')
-    target: str | None = Field(None, description='Target node.')
-    type: str | None = Field(None, description='Section type.')
+    remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
+    schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
+    target: StrictStr | None = Field(None, description='Target node.')
+    type: StrictStr | None = Field(None, description='Section type.')
 
 class GetClusterReplicationResponse(RootModel[list[GetClusterReplicationResponseItem]]):
     """List of items. index. List replication jobs. response."""
@@ -1842,15 +1853,15 @@ class GetClusterReplicationResponse(RootModel[list[GetClusterReplicationResponse
 
 class PostClusterReplicationRequest(ProxmoxBaseModel):
     """Model for create. Create a new replication job request."""
-    comment: str | None = Field(None, description='Description.')
+    comment: StrictStr | None = Field(None, description='Description.')
     disable: bool | None = Field(None, description='Flag to disable/deactivate the entry.')
-    id: str = Field(..., description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
+    id: StrictStr = Field(..., description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
-    remove_job: str | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
-    schedule: str | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
-    source: str | None = Field(None, description='For internal use, to detect if the guest was stolen.')
-    target: str = Field(..., description='Target node.')
-    type: str = Field(..., description='Section type.')
+    remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
+    schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
+    target: StrictStr = Field(..., description='Target node.')
+    type: StrictStr = Field(..., description='Section type.')
 
 class PostClusterReplicationResponse(RootModel[None]):
     """Model for create. Create a new replication job response."""
@@ -1867,29 +1878,29 @@ class DeleteClusterReplicationIdResponse(RootModel[None]):
 
 class GetClusterReplicationIdResponse(ProxmoxBaseModel):
     """Model for read. Read replication job configuration. response."""
-    comment: str | None = Field(None, description='Description.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Description.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Flag to disable/deactivate the entry.')
     guest: int = Field(..., description='Guest ID.')
-    id: str = Field(..., description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
+    id: StrictStr = Field(..., description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
     jobnum: int = Field(..., description='Unique, sequential ID assigned to each job.')
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
-    remove_job: str | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
-    schedule: str | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
-    source: str | None = Field(None, description='For internal use, to detect if the guest was stolen.')
-    target: str = Field(..., description='Target node.')
-    type: str = Field(..., description='Section type.')
+    remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
+    schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
+    target: StrictStr = Field(..., description='Target node.')
+    type: StrictStr = Field(..., description='Section type.')
 
 class PutClusterReplicationIdRequest(ProxmoxBaseModel):
     """Model for update. Update replication job configuration. request."""
-    comment: str | None = Field(None, description='Description.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    comment: StrictStr | None = Field(None, description='Description.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Flag to disable/deactivate the entry.')
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
-    remove_job: str | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
-    schedule: str | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
-    source: str | None = Field(None, description='For internal use, to detect if the guest was stolen.')
+    remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
+    schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
 
 class PutClusterReplicationIdResponse(RootModel[None]):
     """Model for update. Update replication job configuration. response."""
@@ -1898,39 +1909,39 @@ class PutClusterReplicationIdResponse(RootModel[None]):
 class GetClusterResourcesResponseItem(ProxmoxBaseModel):
     """Model for resources. Resources index (cluster wide). response."""
     cgroup_mode: int | None = Field(None, alias="cgroup-mode", description="The cgroup mode the node operates under (for type 'node').")
-    content: str | None = Field(None, description="Allowed storage content types (for type 'storage').")
+    content: StrictStr | None = Field(None, description="Allowed storage content types (for type 'storage').")
     cpu: float | None = Field(None, description="CPU utilization (for types 'node', 'qemu' and 'lxc').")
     disk: int | None = Field(None, description="Used disk space in bytes (for type 'storage'), used root image space for VMs (for types 'qemu' and 'lxc').")
     diskread: int | None = Field(None, description="The number of bytes the guest read from its block devices since the guest was started. This info is not available for all storage types. (for types 'qemu' and 'lxc')")
     diskwrite: int | None = Field(None, description="The number of bytes the guest wrote to its block devices since the guest was started. This info is not available for all storage types. (for types 'qemu' and 'lxc')")
-    hastate: str | None = Field(None, description='HA service status (for HA managed VMs).')
-    id: str | None = Field(None, description='Resource id.')
-    level: str | None = Field(None, description="Support level (for type 'node').")
-    lock: str | None = Field(None, description="The guest's current config lock (for types 'qemu' and 'lxc')")
+    hastate: StrictStr | None = Field(None, description='HA service status (for HA managed VMs).')
+    id: StrictStr | None = Field(None, description='Resource id.')
+    level: StrictStr | None = Field(None, description="Support level (for type 'node').")
+    lock: StrictStr | None = Field(None, description="The guest's current config lock (for types 'qemu' and 'lxc')")
     maxcpu: float | None = Field(None, description="Number of available CPUs (for types 'node', 'qemu' and 'lxc').")
     maxdisk: int | None = Field(None, description="Storage size in bytes (for type 'storage'), root image size for VMs (for types 'qemu' and 'lxc').")
     maxmem: int | None = Field(None, description="Number of available memory in bytes (for types 'node', 'qemu' and 'lxc').")
     mem: int | None = Field(None, description="Used memory in bytes (for types 'node', 'qemu' and 'lxc').")
     memhost: int | None = Field(None, description="Used memory in bytes from the point of view of the host (for types 'qemu').")
-    name: str | None = Field(None, description='Name of the resource.')
+    name: StrictStr | None = Field(None, description='Name of the resource.')
     netin: int | None = Field(None, description="The amount of traffic in bytes that was sent to the guest over the network since it was started. (for types 'qemu' and 'lxc')")
     netout: int | None = Field(None, description="The amount of traffic in bytes that was sent from the guest over the network since it was started. (for types 'qemu' and 'lxc')")
-    network: str | None = Field(None, description="The name of a Network entity (for type 'network').")
-    network_type: str | None = Field(None, alias="network-type", description="The type of network resource (for type 'network').")
-    node: str | None = Field(None, description="The cluster node name (for types 'node', 'storage', 'qemu', and 'lxc').")
-    plugintype: str | None = Field(None, description='More specific type, if available.')
-    pool: str | None = Field(None, description="The pool name (for types 'pool', 'qemu' and 'lxc').")
-    protocol: str | None = Field(None, description="The protocol of a fabric (for type 'network', network-type 'fabric').")
-    sdn: str | None = Field(None, description="The name of an SDN entity (for type 'sdn')")
+    network: StrictStr | None = Field(None, description="The name of a Network entity (for type 'network').")
+    network_type: StrictStr | None = Field(None, alias="network-type", description="The type of network resource (for type 'network').")
+    node: StrictStr | None = Field(None, description="The cluster node name (for types 'node', 'storage', 'qemu', and 'lxc').")
+    plugintype: StrictStr | None = Field(None, description='More specific type, if available.')
+    pool: StrictStr | None = Field(None, description="The pool name (for types 'pool', 'qemu' and 'lxc').")
+    protocol: StrictStr | None = Field(None, description="The protocol of a fabric (for type 'network', network-type 'fabric').")
+    sdn: StrictStr | None = Field(None, description="The name of an SDN entity (for type 'sdn')")
     shared: bool | None = Field(None, description='Determines whether the storage is shared')
-    status: str | None = Field(None, description='Resource type dependent status.')
-    storage: str | None = Field(None, description="The storage identifier (for type 'storage').")
-    tags: str | None = Field(None, description="The guest's tags (for types 'qemu' and 'lxc')")
+    status: StrictStr | None = Field(None, description='Resource type dependent status.')
+    storage: StrictStr | None = Field(None, description="The storage identifier (for type 'storage').")
+    tags: StrictStr | None = Field(None, description="The guest's tags (for types 'qemu' and 'lxc')")
     template: bool | None = Field(None, description="Determines if the guest is a template. (for types 'qemu' and 'lxc')")
-    type: str | None = Field(None, description='Resource type.')
+    type: StrictStr | None = Field(None, description='Resource type.')
     uptime: int | None = Field(None, description="Uptime of node or virtual guest in seconds (for types 'node', 'qemu' and 'lxc').")
     vmid: int | None = Field(None, description="The numerical vmid (for types 'qemu' and 'lxc').")
-    zone_type: str | None = Field(None, alias="zone-type", description="The type of an SDN zone (for type 'sdn').")
+    zone_type: StrictStr | None = Field(None, alias="zone-type", description="The type of an SDN zone (for type 'sdn').")
 
 class GetClusterResourcesResponse(RootModel[list[GetClusterResourcesResponseItem]]):
     """List of items. resources. Resources index (cluster wide). response."""
@@ -1938,7 +1949,7 @@ class GetClusterResourcesResponse(RootModel[list[GetClusterResourcesResponseItem
 
 class GetClusterSdnResponseItem(ProxmoxBaseModel):
     """Model for index. Directory index. response."""
-    id: str | None = Field(None)
+    id: StrictStr | None = Field(None)
 
 class GetClusterSdnResponse(RootModel[list[GetClusterSdnResponseItem]]):
     """List of items. index. Directory index. response."""
@@ -1946,30 +1957,30 @@ class GetClusterSdnResponse(RootModel[list[GetClusterSdnResponseItem]]):
 
 class PutClusterSdnRequest(ProxmoxBaseModel):
     """Model for reload. Apply sdn controller changes && reload. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     release_lock: bool | None = Field(None, alias="release-lock", description='When lock-token has been provided and configuration successfully committed, release the lock automatically afterwards')
 
-class PutClusterSdnResponse(RootModel[str]):
+class PutClusterSdnResponse(RootModel[StrictStr]):
     """Model for reload. Apply sdn controller changes && reload. response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class GetClusterSdnControllersResponseItem(ProxmoxBaseModel):
     """Model for index. SDN controllers index. response."""
     asn: int | None = Field(None, description='The local ASN of the controller. BGP & EVPN only.')
     bgp_multipath_as_relax: bool | None = Field(None, alias="bgp-multipath-as-relax", description='Consider different AS paths of equal length for multipath computation. BGP only.')
-    controller: str | None = Field(None, description='Name of the controller.')
-    digest: str | None = Field(None, description='Digest of the controller section.')
+    controller: StrictStr | None = Field(None, description='Name of the controller.')
+    digest: StrictStr | None = Field(None, description='Digest of the controller section.')
     ebgp: bool | None = Field(None, description='Enable eBGP (remote-as external). BGP only.')
     ebgp_multihop: int | None = Field(None, alias="ebgp-multihop", description='Set maximum amount of hops for eBGP peers. Needs ebgp set to 1. BGP only.')
-    isis_domain: str | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain. IS-IS only.')
-    isis_ifaces: str | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active. IS-IS only.')
-    isis_net: str | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network. IS-IS only.')
-    loopback: str | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP. BGP only.')
-    node: str | None = Field(None, description='Node(s) where this controller is active.')
-    peers: str | None = Field(None, description='Comma-separated list of the peers IP addresses.')
+    isis_domain: StrictStr | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain. IS-IS only.')
+    isis_ifaces: StrictStr | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active. IS-IS only.')
+    isis_net: StrictStr | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network. IS-IS only.')
+    loopback: StrictStr | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP. BGP only.')
+    node: StrictStr | None = Field(None, description='Node(s) where this controller is active.')
+    peers: StrictStr | None = Field(None, description='Comma-separated list of the peers IP addresses.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
-    state: str | None = Field(None, description='State of the SDN configuration object.')
-    type: str | None = Field(None, description='Type of the controller')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
+    type: StrictStr | None = Field(None, description='Type of the controller')
 
 class GetClusterSdnControllersResponse(RootModel[list[GetClusterSdnControllersResponseItem]]):
     """List of items. index. SDN controllers index. response."""
@@ -1979,18 +1990,18 @@ class PostClusterSdnControllersRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn controller object. request."""
     asn: int | None = Field(None, description='autonomous system number')
     bgp_multipath_as_path_relax: bool | None = Field(None, alias="bgp-multipath-as-path-relax", description='Consider different AS paths of equal length for multipath computation.')
-    controller: str = Field(..., description='The SDN controller object identifier.')
+    controller: StrictStr = Field(..., description='The SDN controller object identifier.')
     ebgp: bool | None = Field(None, description='Enable eBGP (remote-as external).')
     ebgp_multihop: int | None = Field(None, alias="ebgp-multihop", description='Set maximum amount of hops for eBGP peers.')
-    fabric: str | None = Field(None, description='SDN fabric to use as underlay for this EVPN controller.')
-    isis_domain: str | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain.')
-    isis_ifaces: str | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active.')
-    isis_net: str | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network.')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    loopback: str | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP.')
-    node: str | None = Field(None, description='The cluster node name.')
-    peers: str | None = Field(None, description='peers address list.')
-    type: str = Field(..., description='Plugin type.')
+    fabric: StrictStr | None = Field(None, description='SDN fabric to use as underlay for this EVPN controller.')
+    isis_domain: StrictStr | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain.')
+    isis_ifaces: StrictStr | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active.')
+    isis_net: StrictStr | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network.')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    loopback: StrictStr | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP.')
+    node: StrictStr | None = Field(None, description='The cluster node name.')
+    peers: StrictStr | None = Field(None, description='peers address list.')
+    type: StrictStr = Field(..., description='Plugin type.')
 
 class PostClusterSdnControllersResponse(RootModel[None]):
     """Model for create. Create a new sdn controller object. response."""
@@ -1998,7 +2009,7 @@ class PostClusterSdnControllersResponse(RootModel[None]):
 
 class DeleteClusterSdnControllersControllerRequest(ProxmoxBaseModel):
     """Model for delete. Delete sdn controller object configuration. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnControllersControllerResponse(RootModel[None]):
     """Model for delete. Delete sdn controller object configuration. response."""
@@ -2008,36 +2019,36 @@ class GetClusterSdnControllersControllerResponse(ProxmoxBaseModel):
     """Model for read. Read sdn controller configuration. response."""
     asn: int | None = Field(None, description='The local ASN of the controller. BGP & EVPN only.')
     bgp_multipath_as_relax: bool | None = Field(None, alias="bgp-multipath-as-relax", description='Consider different AS paths of equal length for multipath computation. BGP only.')
-    controller: str = Field(..., description='Name of the controller.')
-    digest: str | None = Field(None, description='Digest of the controller section.')
+    controller: StrictStr = Field(..., description='Name of the controller.')
+    digest: StrictStr | None = Field(None, description='Digest of the controller section.')
     ebgp: bool | None = Field(None, description='Enable eBGP (remote-as external). BGP only.')
     ebgp_multihop: int | None = Field(None, alias="ebgp-multihop", description='Set maximum amount of hops for eBGP peers. Needs ebgp set to 1. BGP only.')
-    isis_domain: str | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain. IS-IS only.')
-    isis_ifaces: str | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active. IS-IS only.')
-    isis_net: str | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network. IS-IS only.')
-    loopback: str | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP. BGP only.')
-    node: str | None = Field(None, description='Node(s) where this controller is active.')
-    peers: str | None = Field(None, description='Comma-separated list of the peers IP addresses.')
+    isis_domain: StrictStr | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain. IS-IS only.')
+    isis_ifaces: StrictStr | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active. IS-IS only.')
+    isis_net: StrictStr | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network. IS-IS only.')
+    loopback: StrictStr | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP. BGP only.')
+    node: StrictStr | None = Field(None, description='Node(s) where this controller is active.')
+    peers: StrictStr | None = Field(None, description='Comma-separated list of the peers IP addresses.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
-    state: str | None = Field(None, description='State of the SDN configuration object.')
-    type: str = Field(..., description='Type of the controller')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
+    type: StrictStr = Field(..., description='Type of the controller')
 
 class PutClusterSdnControllersControllerRequest(ProxmoxBaseModel):
     """Model for update. Update sdn controller object configuration. request."""
     asn: int | None = Field(None, description='autonomous system number')
     bgp_multipath_as_path_relax: bool | None = Field(None, alias="bgp-multipath-as-path-relax", description='Consider different AS paths of equal length for multipath computation.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     ebgp: bool | None = Field(None, description='Enable eBGP (remote-as external).')
     ebgp_multihop: int | None = Field(None, alias="ebgp-multihop", description='Set maximum amount of hops for eBGP peers.')
-    fabric: str | None = Field(None, description='SDN fabric to use as underlay for this EVPN controller.')
-    isis_domain: str | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain.')
-    isis_ifaces: str | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active.')
-    isis_net: str | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network.')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    loopback: str | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP.')
-    node: str | None = Field(None, description='The cluster node name.')
-    peers: str | None = Field(None, description='peers address list.')
+    fabric: StrictStr | None = Field(None, description='SDN fabric to use as underlay for this EVPN controller.')
+    isis_domain: StrictStr | None = Field(None, alias="isis-domain", description='Name of the IS-IS domain.')
+    isis_ifaces: StrictStr | None = Field(None, alias="isis-ifaces", description='Comma-separated list of interfaces where IS-IS should be active.')
+    isis_net: StrictStr | None = Field(None, alias="isis-net", description='Network Entity title for this node in the IS-IS network.')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    loopback: StrictStr | None = Field(None, description='Name of the loopback/dummy interface that provides the Router-IP.')
+    node: StrictStr | None = Field(None, description='The cluster node name.')
+    peers: StrictStr | None = Field(None, description='peers address list.')
 
 class PutClusterSdnControllersControllerResponse(RootModel[None]):
     """Model for update. Update sdn controller object configuration. response."""
@@ -2045,8 +2056,8 @@ class PutClusterSdnControllersControllerResponse(RootModel[None]):
 
 class GetClusterSdnDnsResponseItem(ProxmoxBaseModel):
     """Model for index. SDN dns index. response."""
-    dns: str | None = Field(None)
-    type: str | None = Field(None)
+    dns: StrictStr | None = Field(None)
+    type: StrictStr | None = Field(None)
 
 class GetClusterSdnDnsResponse(RootModel[list[GetClusterSdnDnsResponseItem]]):
     """List of items. index. SDN dns index. response."""
@@ -2054,15 +2065,15 @@ class GetClusterSdnDnsResponse(RootModel[list[GetClusterSdnDnsResponseItem]]):
 
 class PostClusterSdnDnsRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn dns object. request."""
-    dns: str = Field(..., description='The SDN dns object identifier.')
-    fingerprint: str | None = Field(None, description='Certificate SHA 256 fingerprint.')
-    key: str = Field(...)
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    dns: StrictStr = Field(..., description='The SDN dns object identifier.')
+    fingerprint: StrictStr | None = Field(None, description='Certificate SHA 256 fingerprint.')
+    key: StrictStr = Field(...)
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     reversemaskv6: int | None = Field(None)
     reversev6mask: int | None = Field(None)
     ttl: int | None = Field(None)
-    type: str = Field(..., description='Plugin type.')
-    url: str = Field(...)
+    type: StrictStr = Field(..., description='Plugin type.')
+    url: StrictStr = Field(...)
 
 class PostClusterSdnDnsResponse(RootModel[None]):
     """Model for create. Create a new sdn dns object. response."""
@@ -2070,7 +2081,7 @@ class PostClusterSdnDnsResponse(RootModel[None]):
 
 class DeleteClusterSdnDnsDnsRequest(ProxmoxBaseModel):
     """Model for delete. Delete sdn dns object configuration. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnDnsDnsResponse(RootModel[None]):
     """Model for delete. Delete sdn dns object configuration. response."""
@@ -2082,14 +2093,14 @@ class GetClusterSdnDnsDnsResponse(RootModel[dict[str, object]]):
 
 class PutClusterSdnDnsDnsRequest(ProxmoxBaseModel):
     """Model for update. Update sdn dns object configuration. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    fingerprint: str | None = Field(None, description='Certificate SHA 256 fingerprint.')
-    key: str | None = Field(None)
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    fingerprint: StrictStr | None = Field(None, description='Certificate SHA 256 fingerprint.')
+    key: StrictStr | None = Field(None)
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     reversemaskv6: int | None = Field(None)
     ttl: int | None = Field(None)
-    url: str | None = Field(None)
+    url: StrictStr | None = Field(None)
 
 class PutClusterSdnDnsDnsResponse(RootModel[None]):
     """Model for update. Update sdn dns object configuration. response."""
@@ -2097,12 +2108,12 @@ class PutClusterSdnDnsDnsResponse(RootModel[None]):
 
 class GetClusterSdnDryRunResponse(ProxmoxBaseModel):
     """Model for dry-run. Dry-run the SDN apply action and return the difference between the current configuration and the pending configuration response."""
-    frr_diff: str | None = Field(None, alias="frr-diff", description='The difference between the current and pending FRR configuration.')
-    interfaces_diff: str | None = Field(None, alias="interfaces-diff", description='The difference between the current and pending /etc/network/interfaces.d/sdn configuration.')
+    frr_diff: StrictStr | None = Field(None, alias="frr-diff", description='The difference between the current and pending FRR configuration.')
+    interfaces_diff: StrictStr | None = Field(None, alias="interfaces-diff", description='The difference between the current and pending /etc/network/interfaces.d/sdn configuration.')
 
 class GetClusterSdnFabricsResponseItem(ProxmoxBaseModel):
     """Model for index. SDN Fabrics Index response."""
-    subdir: str | None = Field(None)
+    subdir: StrictStr | None = Field(None)
 
 class GetClusterSdnFabricsResponse(RootModel[list[GetClusterSdnFabricsResponseItem]]):
     """List of items. index. SDN Fabrics Index response."""
@@ -2115,15 +2126,15 @@ class GetClusterSdnFabricsAllResponse(ProxmoxBaseModel):
 
 class GetClusterSdnFabricsFabricResponseItem(ProxmoxBaseModel):
     """Model for index. SDN Fabrics Index response."""
-    area: str | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
+    area: StrictStr | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
     csnp_interval: float | None = Field(None, description='The csnp_interval property for Openfabric')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     hello_interval: float | None = Field(None, description='The hello_interval property for Openfabric')
-    id: str | None = Field(None, description='Identifier for SDN fabrics')
-    ip6_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    ip_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    protocol: str | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
+    id: StrictStr | None = Field(None, description='Identifier for SDN fabrics')
+    ip6_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    ip_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    protocol: StrictStr | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
 
 class GetClusterSdnFabricsFabricResponse(RootModel[list[GetClusterSdnFabricsFabricResponseItem]]):
     """List of items. index. SDN Fabrics Index response."""
@@ -2131,15 +2142,15 @@ class GetClusterSdnFabricsFabricResponse(RootModel[list[GetClusterSdnFabricsFabr
 
 class PostClusterSdnFabricsFabricRequest(ProxmoxBaseModel):
     """Model for add_fabric. Add a fabric request."""
-    area: str | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
+    area: StrictStr | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
     csnp_interval: float | None = Field(None, description='The csnp_interval property for Openfabric')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     hello_interval: float | None = Field(None, description='The hello_interval property for Openfabric')
-    id: str = Field(..., description='Identifier for SDN fabrics')
-    ip6_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    ip_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    protocol: str = Field(..., description='Type of configuration entry in an SDN Fabric section config')
+    id: StrictStr = Field(..., description='Identifier for SDN fabrics')
+    ip6_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    ip_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
 
 class PostClusterSdnFabricsFabricResponse(RootModel[None]):
     """Model for add_fabric. Add a fabric response."""
@@ -2151,27 +2162,27 @@ class DeleteClusterSdnFabricsFabricIdResponse(RootModel[None]):
 
 class GetClusterSdnFabricsFabricIdResponse(ProxmoxBaseModel):
     """Model for get_fabric. Update a fabric response."""
-    area: str | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
+    area: StrictStr | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
     csnp_interval: float | None = Field(None, description='The csnp_interval property for Openfabric')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     hello_interval: float | None = Field(None, description='The hello_interval property for Openfabric')
-    id: str = Field(..., description='Identifier for SDN fabrics')
-    ip6_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    ip_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    protocol: str = Field(..., description='Type of configuration entry in an SDN Fabric section config')
+    id: StrictStr = Field(..., description='Identifier for SDN fabrics')
+    ip6_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    ip_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
 
 class PutClusterSdnFabricsFabricIdRequest(ProxmoxBaseModel):
     """Model for update_fabric. Update a fabric request."""
-    area: str | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
+    area: StrictStr | None = Field(None, description='OSPF area. Either a IPv4 address or a 32-bit number. Gets validated in rust.')
     csnp_interval: float | None = Field(None, description='The csnp_interval property for Openfabric')
-    delete: list[str] = Field(...)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    delete: list[StrictStr] = Field(...)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     hello_interval: float | None = Field(None, description='The hello_interval property for Openfabric')
-    ip6_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    ip_prefix: str | None = Field(None, description='The IP prefix for Node IPs')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    protocol: str = Field(..., description='Type of configuration entry in an SDN Fabric section config')
+    ip6_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    ip_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
 
 class PutClusterSdnFabricsFabricIdResponse(RootModel[None]):
     """Model for update_fabric. Update a fabric response."""
@@ -2179,14 +2190,14 @@ class PutClusterSdnFabricsFabricIdResponse(RootModel[None]):
 
 class GetClusterSdnFabricsNodeResponseItem(ProxmoxBaseModel):
     """Model for list_nodes. SDN Fabrics Index response."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    fabric_id: str | None = Field(None, description='Identifier for SDN fabrics')
-    interfaces: list[str] | None = Field(None)
-    ip: str | None = Field(None, description='IPv4 address for this node')
-    ip6: str | None = Field(None, description='IPv6 address for this node')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    node_id: str | None = Field(None, description='Identifier for nodes in an SDN fabric')
-    protocol: str | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    fabric_id: StrictStr | None = Field(None, description='Identifier for SDN fabrics')
+    interfaces: list[StrictStr] | None = Field(None)
+    ip: StrictStr | None = Field(None, description='IPv4 address for this node')
+    ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    node_id: StrictStr | None = Field(None, description='Identifier for nodes in an SDN fabric')
+    protocol: StrictStr | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
 
 class GetClusterSdnFabricsNodeResponse(RootModel[list[GetClusterSdnFabricsNodeResponseItem]]):
     """List of items. list_nodes. SDN Fabrics Index response."""
@@ -2194,14 +2205,14 @@ class GetClusterSdnFabricsNodeResponse(RootModel[list[GetClusterSdnFabricsNodeRe
 
 class GetClusterSdnFabricsNodeFabricIdResponseItem(ProxmoxBaseModel):
     """Model for list_nodes_fabric. SDN Fabrics Index response."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    fabric_id: str | None = Field(None, description='Identifier for SDN fabrics')
-    interfaces: list[str] | None = Field(None)
-    ip: str | None = Field(None, description='IPv4 address for this node')
-    ip6: str | None = Field(None, description='IPv6 address for this node')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    node_id: str | None = Field(None, description='Identifier for nodes in an SDN fabric')
-    protocol: str | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    fabric_id: StrictStr | None = Field(None, description='Identifier for SDN fabrics')
+    interfaces: list[StrictStr] | None = Field(None)
+    ip: StrictStr | None = Field(None, description='IPv4 address for this node')
+    ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    node_id: StrictStr | None = Field(None, description='Identifier for nodes in an SDN fabric')
+    protocol: StrictStr | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
 
 class GetClusterSdnFabricsNodeFabricIdResponse(RootModel[list[GetClusterSdnFabricsNodeFabricIdResponseItem]]):
     """List of items. list_nodes_fabric. SDN Fabrics Index response."""
@@ -2209,13 +2220,13 @@ class GetClusterSdnFabricsNodeFabricIdResponse(RootModel[list[GetClusterSdnFabri
 
 class PostClusterSdnFabricsNodeFabricIdRequest(ProxmoxBaseModel):
     """Model for add_node. Add a node request."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    interfaces: list[str] = Field(...)
-    ip: str | None = Field(None, description='IPv4 address for this node')
-    ip6: str | None = Field(None, description='IPv6 address for this node')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    node_id: str = Field(..., description='Identifier for nodes in an SDN fabric')
-    protocol: str = Field(..., description='Type of configuration entry in an SDN Fabric section config')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    interfaces: list[StrictStr] = Field(...)
+    ip: StrictStr | None = Field(None, description='IPv4 address for this node')
+    ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    node_id: StrictStr = Field(..., description='Identifier for nodes in an SDN fabric')
+    protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
 
 class PostClusterSdnFabricsNodeFabricIdResponse(RootModel[None]):
     """Model for add_node. Add a node response."""
@@ -2227,24 +2238,24 @@ class DeleteClusterSdnFabricsNodeFabricIdNodeIdResponse(RootModel[None]):
 
 class GetClusterSdnFabricsNodeFabricIdNodeIdResponse(ProxmoxBaseModel):
     """Model for get_node. Get a node response."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    fabric_id: str = Field(..., description='Identifier for SDN fabrics')
-    interfaces: list[str] = Field(...)
-    ip: str | None = Field(None, description='IPv4 address for this node')
-    ip6: str | None = Field(None, description='IPv6 address for this node')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    node_id: str = Field(..., description='Identifier for nodes in an SDN fabric')
-    protocol: str = Field(..., description='Type of configuration entry in an SDN Fabric section config')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    fabric_id: StrictStr = Field(..., description='Identifier for SDN fabrics')
+    interfaces: list[StrictStr] = Field(...)
+    ip: StrictStr | None = Field(None, description='IPv4 address for this node')
+    ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    node_id: StrictStr = Field(..., description='Identifier for nodes in an SDN fabric')
+    protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
 
 class PutClusterSdnFabricsNodeFabricIdNodeIdRequest(ProxmoxBaseModel):
     """Model for update_node. Update a node request."""
-    delete: list[str] | None = Field(None)
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    interfaces: list[str] = Field(...)
-    ip: str | None = Field(None, description='IPv4 address for this node')
-    ip6: str | None = Field(None, description='IPv6 address for this node')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    protocol: str = Field(..., description='Type of configuration entry in an SDN Fabric section config')
+    delete: list[StrictStr] | None = Field(None)
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    interfaces: list[StrictStr] = Field(...)
+    ip: StrictStr | None = Field(None, description='IPv4 address for this node')
+    ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
 
 class PutClusterSdnFabricsNodeFabricIdNodeIdResponse(RootModel[None]):
     """Model for update_node. Update a node response."""
@@ -2252,8 +2263,8 @@ class PutClusterSdnFabricsNodeFabricIdNodeIdResponse(RootModel[None]):
 
 class GetClusterSdnIpamsResponseItem(ProxmoxBaseModel):
     """Model for index. SDN ipams index. response."""
-    ipam: str | None = Field(None)
-    type: str | None = Field(None)
+    ipam: StrictStr | None = Field(None)
+    type: StrictStr | None = Field(None)
 
 class GetClusterSdnIpamsResponse(RootModel[list[GetClusterSdnIpamsResponseItem]]):
     """List of items. index. SDN ipams index. response."""
@@ -2261,13 +2272,13 @@ class GetClusterSdnIpamsResponse(RootModel[list[GetClusterSdnIpamsResponseItem]]
 
 class PostClusterSdnIpamsRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn ipam object. request."""
-    fingerprint: str | None = Field(None, description='Certificate SHA 256 fingerprint.')
-    ipam: str = Field(..., description='The SDN ipam object identifier.')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    fingerprint: StrictStr | None = Field(None, description='Certificate SHA 256 fingerprint.')
+    ipam: StrictStr = Field(..., description='The SDN ipam object identifier.')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     section: int | None = Field(None)
-    token: str | None = Field(None)
-    type: str = Field(..., description='Plugin type.')
-    url: str | None = Field(None)
+    token: StrictStr | None = Field(None)
+    type: StrictStr = Field(..., description='Plugin type.')
+    url: StrictStr | None = Field(None)
 
 class PostClusterSdnIpamsResponse(RootModel[None]):
     """Model for create. Create a new sdn ipam object. response."""
@@ -2275,7 +2286,7 @@ class PostClusterSdnIpamsResponse(RootModel[None]):
 
 class DeleteClusterSdnIpamsIpamRequest(ProxmoxBaseModel):
     """Model for delete. Delete sdn ipam object configuration. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnIpamsIpamResponse(RootModel[None]):
     """Model for delete. Delete sdn ipam object configuration. response."""
@@ -2287,13 +2298,13 @@ class GetClusterSdnIpamsIpamResponse(RootModel[dict[str, object]]):
 
 class PutClusterSdnIpamsIpamRequest(ProxmoxBaseModel):
     """Model for update. Update sdn ipam object configuration. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    fingerprint: str | None = Field(None, description='Certificate SHA 256 fingerprint.')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    fingerprint: StrictStr | None = Field(None, description='Certificate SHA 256 fingerprint.')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     section: int | None = Field(None)
-    token: str | None = Field(None)
-    url: str | None = Field(None)
+    token: StrictStr | None = Field(None)
+    url: StrictStr | None = Field(None)
 
 class PutClusterSdnIpamsIpamResponse(RootModel[None]):
     """Model for update. Update sdn ipam object configuration. response."""
@@ -2306,7 +2317,7 @@ class GetClusterSdnIpamsIpamStatusResponse(RootModel[list[object]]):
 class DeleteClusterSdnLockRequest(ProxmoxBaseModel):
     """Model for release_lock. Release global lock for SDN configuration request."""
     force: bool | None = Field(None, description='if true, allow releasing lock without providing the token')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnLockResponse(RootModel[None]):
     """Model for release_lock. Release global lock for SDN configuration response."""
@@ -2316,13 +2327,13 @@ class PostClusterSdnLockRequest(ProxmoxBaseModel):
     """Model for lock. Acquire global lock for SDN configuration request."""
     allow_pending: bool | None = Field(None, alias="allow-pending", description='if true, allow acquiring lock even though there are pending changes')
 
-class PostClusterSdnLockResponse(RootModel[str]):
+class PostClusterSdnLockResponse(RootModel[StrictStr]):
     """Model for lock. Acquire global lock for SDN configuration response."""
-    root: str = Field(...)
+    root: StrictStr = Field(...)
 
 class PostClusterSdnRollbackRequest(ProxmoxBaseModel):
     """Model for rollback. Rollback pending changes to SDN configuration request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     release_lock: bool | None = Field(None, alias="release-lock", description='When lock-token has been provided and configuration successfully rollbacked, release the lock automatically afterwards')
 
 class PostClusterSdnRollbackResponse(RootModel[None]):
@@ -2331,16 +2342,16 @@ class PostClusterSdnRollbackResponse(RootModel[None]):
 
 class GetClusterSdnVnetsResponseItem(ProxmoxBaseModel):
     """Model for index. SDN vnets index. response."""
-    alias: str | None = Field(None, description='Alias name of the VNet.')
-    digest: str | None = Field(None, description='Digest of the VNet section.')
+    alias: StrictStr | None = Field(None, description='Alias name of the VNet.')
+    digest: StrictStr | None = Field(None, description='Digest of the VNet section.')
     isolate_ports: bool | None = Field(None, alias="isolate-ports", description='If true, sets the isolated property for all interfaces on the bridge of this VNet.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
-    state: str | None = Field(None, description='State of the SDN configuration object.')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
     tag: int | None = Field(None, description='VLAN Tag (for VLAN or QinQ zones) or VXLAN VNI (for VXLAN or EVPN zones).')
-    type: str | None = Field(None, description='Type of the VNet.')
+    type: StrictStr | None = Field(None, description='Type of the VNet.')
     vlanaware: bool | None = Field(None, description='Allow VLANs to pass through this VNet.')
-    vnet: str | None = Field(None, description='Name of the VNet.')
-    zone: str | None = Field(None, description='Name of the zone this VNet belongs to.')
+    vnet: StrictStr | None = Field(None, description='Name of the VNet.')
+    zone: StrictStr | None = Field(None, description='Name of the zone this VNet belongs to.')
 
 class GetClusterSdnVnetsResponse(RootModel[list[GetClusterSdnVnetsResponseItem]]):
     """List of items. index. SDN vnets index. response."""
@@ -2348,14 +2359,14 @@ class GetClusterSdnVnetsResponse(RootModel[list[GetClusterSdnVnetsResponseItem]]
 
 class PostClusterSdnVnetsRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn vnet object. request."""
-    alias: str | None = Field(None, description='Alias name of the VNet.')
+    alias: StrictStr | None = Field(None, description='Alias name of the VNet.')
     isolate_ports: bool | None = Field(None, alias="isolate-ports", description='If true, sets the isolated property for all interfaces on the bridge of this VNet.')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     tag: int | None = Field(None, description='VLAN Tag (for VLAN or QinQ zones) or VXLAN VNI (for VXLAN or EVPN zones).')
-    type: str | None = Field(None, description='Type of the VNet.')
+    type: StrictStr | None = Field(None, description='Type of the VNet.')
     vlanaware: bool | None = Field(None, description='Allow VLANs to pass through this vnet.')
-    vnet: str = Field(..., description='The SDN vnet object identifier.')
-    zone: str = Field(..., description='Name of the zone this VNet belongs to.')
+    vnet: StrictStr = Field(..., description='The SDN vnet object identifier.')
+    zone: StrictStr = Field(..., description='Name of the zone this VNet belongs to.')
 
 class PostClusterSdnVnetsResponse(RootModel[None]):
     """Model for create. Create a new sdn vnet object. response."""
@@ -2363,7 +2374,7 @@ class PostClusterSdnVnetsResponse(RootModel[None]):
 
 class DeleteClusterSdnVnetsVnetRequest(ProxmoxBaseModel):
     """Model for delete. Delete sdn vnet object configuration. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnVnetsVnetResponse(RootModel[None]):
     """Model for delete. Delete sdn vnet object configuration. response."""
@@ -2371,27 +2382,27 @@ class DeleteClusterSdnVnetsVnetResponse(RootModel[None]):
 
 class GetClusterSdnVnetsVnetResponse(ProxmoxBaseModel):
     """Model for read. Read sdn vnet configuration. response."""
-    alias: str | None = Field(None, description='Alias name of the VNet.')
-    digest: str | None = Field(None, description='Digest of the VNet section.')
+    alias: StrictStr | None = Field(None, description='Alias name of the VNet.')
+    digest: StrictStr | None = Field(None, description='Digest of the VNet section.')
     isolate_ports: bool | None = Field(None, alias="isolate-ports", description='If true, sets the isolated property for all interfaces on the bridge of this VNet.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
-    state: str | None = Field(None, description='State of the SDN configuration object.')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
     tag: int | None = Field(None, description='VLAN Tag (for VLAN or QinQ zones) or VXLAN VNI (for VXLAN or EVPN zones).')
-    type: str = Field(..., description='Type of the VNet.')
+    type: StrictStr = Field(..., description='Type of the VNet.')
     vlanaware: bool | None = Field(None, description='Allow VLANs to pass through this VNet.')
-    vnet: str = Field(..., description='Name of the VNet.')
-    zone: str | None = Field(None, description='Name of the zone this VNet belongs to.')
+    vnet: StrictStr = Field(..., description='Name of the VNet.')
+    zone: StrictStr | None = Field(None, description='Name of the zone this VNet belongs to.')
 
 class PutClusterSdnVnetsVnetRequest(ProxmoxBaseModel):
     """Model for update. Update sdn vnet object configuration. request."""
-    alias: str | None = Field(None, description='Alias name of the VNet.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    alias: StrictStr | None = Field(None, description='Alias name of the VNet.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     isolate_ports: bool | None = Field(None, alias="isolate-ports", description='If true, sets the isolated property for all interfaces on the bridge of this VNet.')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     tag: int | None = Field(None, description='VLAN Tag (for VLAN or QinQ zones) or VXLAN VNI (for VXLAN or EVPN zones).')
     vlanaware: bool | None = Field(None, description='Allow VLANs to pass through this vnet.')
-    zone: str | None = Field(None, description='Name of the zone this VNet belongs to.')
+    zone: StrictStr | None = Field(None, description='Name of the zone this VNet belongs to.')
 
 class PutClusterSdnVnetsVnetResponse(RootModel[None]):
     """Model for update. Update sdn vnet object configuration. response."""
@@ -2404,16 +2415,16 @@ class GetClusterSdnVnetsVnetFirewallResponse(RootModel[list[dict[str, object]]])
 class GetClusterSdnVnetsVnetFirewallOptionsResponse(ProxmoxBaseModel):
     """Model for get_options. Get vnet firewall options. response."""
     enable: bool | None = Field(None, description='Enable/disable firewall rules.')
-    log_level_forward: str | None = Field(None, description='Log level for forwarded traffic.')
-    policy_forward: str | None = Field(None, description='Forward policy.')
+    log_level_forward: StrictStr | None = Field(None, description='Log level for forwarded traffic.')
+    policy_forward: StrictStr | None = Field(None, description='Forward policy.')
 
 class PutClusterSdnVnetsVnetFirewallOptionsRequest(ProxmoxBaseModel):
     """Model for set_options. Set Firewall options. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     enable: bool | None = Field(None, description='Enable/disable firewall rules.')
-    log_level_forward: str | None = Field(None, description='Log level for forwarded traffic.')
-    policy_forward: str | None = Field(None, description='Forward policy.')
+    log_level_forward: StrictStr | None = Field(None, description='Log level for forwarded traffic.')
+    policy_forward: StrictStr | None = Field(None, description='Forward policy.')
 
 class PutClusterSdnVnetsVnetFirewallOptionsResponse(RootModel[None]):
     """Model for set_options. Set Firewall options. response."""
@@ -2421,21 +2432,21 @@ class PutClusterSdnVnetsVnetFirewallOptionsResponse(RootModel[None]):
 
 class GetClusterSdnVnetsVnetFirewallRulesResponseItem(ProxmoxBaseModel):
     """Model for get_rules. List rules. response."""
-    action: str | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
-    comment: str | None = Field(None, description='Descriptive comment')
-    dest: str | None = Field(None, description='Restrict packet destination address')
-    dport: str | None = Field(None, description='Restrict TCP/UDP destination port')
+    action: StrictStr | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
+    comment: StrictStr | None = Field(None, description='Descriptive comment')
+    dest: StrictStr | None = Field(None, description='Restrict packet destination address')
+    dport: StrictStr | None = Field(None, description='Restrict TCP/UDP destination port')
     enable: int | None = Field(None, description='Flag to enable/disable a rule')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
-    iface: str | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
+    iface: StrictStr | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
     ipversion: int | None = Field(None, description='IP version (4 or 6) - automatically determined from source/dest addresses')
-    log: str | None = Field(None, description='Log level for firewall rule')
-    macro: str | None = Field(None, description='Use predefined standard macro')
+    log: StrictStr | None = Field(None, description='Log level for firewall rule')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro')
     pos: int | None = Field(None, description='Rule position in the ruleset')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
-    source: str | None = Field(None, description='Restrict packet source address')
-    sport: str | None = Field(None, description='Restrict TCP/UDP source port')
-    type: str | None = Field(None, description='Rule type')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
+    source: StrictStr | None = Field(None, description='Restrict packet source address')
+    sport: StrictStr | None = Field(None, description='Restrict TCP/UDP source port')
+    type: StrictStr | None = Field(None, description='Rule type')
 
 class GetClusterSdnVnetsVnetFirewallRulesResponse(RootModel[list[GetClusterSdnVnetsVnetFirewallRulesResponseItem]]):
     """List of items. get_rules. List rules. response."""
@@ -2443,21 +2454,21 @@ class GetClusterSdnVnetsVnetFirewallRulesResponse(RootModel[list[GetClusterSdnVn
 
 class PostClusterSdnVnetsVnetFirewallRulesRequest(ProxmoxBaseModel):
     """Model for create_rule. Create new rule. request."""
-    action: str = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
-    comment: str | None = Field(None, description='Descriptive comment.')
-    dest: str | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dport: str | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    action: StrictStr = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
+    comment: StrictStr | None = Field(None, description='Descriptive comment.')
+    dest: StrictStr | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dport: StrictStr | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
     enable: int | None = Field(None, description='Flag to enable/disable a rule.')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
-    iface: str | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
-    log: str | None = Field(None, description='Log level for firewall rule.')
-    macro: str | None = Field(None, description='Use predefined standard macro.')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
+    iface: StrictStr | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
+    log: StrictStr | None = Field(None, description='Log level for firewall rule.')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro.')
     pos: int | None = Field(None, description='Update rule at position <pos>.')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
-    source: str | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    sport: str | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
-    type: str = Field(..., description='Rule type.')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
+    source: StrictStr | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    sport: StrictStr | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    type: StrictStr = Field(..., description='Rule type.')
 
 class PostClusterSdnVnetsVnetFirewallRulesResponse(RootModel[None]):
     """Model for create_rule. Create new rule. response."""
@@ -2465,7 +2476,7 @@ class PostClusterSdnVnetsVnetFirewallRulesResponse(RootModel[None]):
 
 class DeleteClusterSdnVnetsVnetFirewallRulesPosRequest(ProxmoxBaseModel):
     """Model for delete_rule. Delete rule. request."""
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
 
 class DeleteClusterSdnVnetsVnetFirewallRulesPosResponse(RootModel[None]):
     """Model for delete_rule. Delete rule. response."""
@@ -2473,40 +2484,40 @@ class DeleteClusterSdnVnetsVnetFirewallRulesPosResponse(RootModel[None]):
 
 class GetClusterSdnVnetsVnetFirewallRulesPosResponse(ProxmoxBaseModel):
     """Model for get_rule. Get single rule data. response."""
-    action: str = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
-    comment: str | None = Field(None, description='Descriptive comment')
-    dest: str | None = Field(None, description='Restrict packet destination address')
-    dport: str | None = Field(None, description='Restrict TCP/UDP destination port')
+    action: StrictStr = Field(..., description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name")
+    comment: StrictStr | None = Field(None, description='Descriptive comment')
+    dest: StrictStr | None = Field(None, description='Restrict packet destination address')
+    dport: StrictStr | None = Field(None, description='Restrict TCP/UDP destination port')
     enable: int | None = Field(None, description='Flag to enable/disable a rule')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
-    iface: str | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'")
+    iface: StrictStr | None = Field(None, description='Network interface name. You have to use network configuration key names for VMs and containers')
     ipversion: int | None = Field(None, description='IP version (4 or 6) - automatically determined from source/dest addresses')
-    log: str | None = Field(None, description='Log level for firewall rule')
-    macro: str | None = Field(None, description='Use predefined standard macro')
+    log: StrictStr | None = Field(None, description='Log level for firewall rule')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro')
     pos: int = Field(..., description='Rule position in the ruleset')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
-    source: str | None = Field(None, description='Restrict packet source address')
-    sport: str | None = Field(None, description='Restrict TCP/UDP source port')
-    type: str = Field(..., description='Rule type')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'")
+    source: StrictStr | None = Field(None, description='Restrict packet source address')
+    sport: StrictStr | None = Field(None, description='Restrict TCP/UDP source port')
+    type: StrictStr = Field(..., description='Rule type')
 
 class PutClusterSdnVnetsVnetFirewallRulesPosRequest(ProxmoxBaseModel):
     """Model for update_rule. Modify rule data. request."""
-    action: str | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
-    comment: str | None = Field(None, description='Descriptive comment.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    dest: str | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dport: str | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    action: StrictStr | None = Field(None, description="Rule action ('ACCEPT', 'DROP', 'REJECT') or security group name.")
+    comment: StrictStr | None = Field(None, description='Descriptive comment.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    dest: StrictStr | None = Field(None, description="Restrict packet destination address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dport: StrictStr | None = Field(None, description="Restrict TCP/UDP destination port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
     enable: int | None = Field(None, description='Flag to enable/disable a rule.')
-    icmp_type: str | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
-    iface: str | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
-    log: str | None = Field(None, description='Log level for firewall rule.')
-    macro: str | None = Field(None, description='Use predefined standard macro.')
+    icmp_type: StrictStr | None = Field(None, alias="icmp-type", description="Specify icmp-type. Only valid if proto equals 'icmp' or 'icmpv6'/'ipv6-icmp'.")
+    iface: StrictStr | None = Field(None, description="Network interface name. You have to use network configuration key names for VMs and containers ('net\\d+'). Host related rules can use arbitrary strings.")
+    log: StrictStr | None = Field(None, description='Log level for firewall rule.')
+    macro: StrictStr | None = Field(None, description='Use predefined standard macro.')
     moveto: int | None = Field(None, description='Move rule to new position <moveto>. Other arguments are ignored.')
-    proto: str | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
-    source: str | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
-    sport: str | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
-    type: str | None = Field(None, description='Rule type.')
+    proto: StrictStr | None = Field(None, description="IP protocol. You can use protocol names ('tcp'/'udp') or simple numbers, as defined in '/etc/protocols'.")
+    source: StrictStr | None = Field(None, description="Restrict packet source address. This can refer to a single IP address, an IP set ('+ipsetname') or an IP alias definition. You can also specify an address range like '20.34.101.207-201.3.9.99', or a list of IP addresses and networks (entries are separated by comma). Please do not mix IPv4 and IPv6 addresses inside such lists.")
+    sport: StrictStr | None = Field(None, description="Restrict TCP/UDP source port. You can use service names or simple numbers (0-65535), as defined in '/etc/services'. Port ranges can be specified with '\\d+:\\d+', for example '80:85', and you can use comma separated list to match several ports or ranges.")
+    type: StrictStr | None = Field(None, description='Rule type.')
 
 class PutClusterSdnVnetsVnetFirewallRulesPosResponse(RootModel[None]):
     """Model for update_rule. Modify rule data. response."""
@@ -2514,9 +2525,9 @@ class PutClusterSdnVnetsVnetFirewallRulesPosResponse(RootModel[None]):
 
 class DeleteClusterSdnVnetsVnetIpsRequest(ProxmoxBaseModel):
     """Model for ipdelete. Delete IP Mappings in a VNet request."""
-    ip: str = Field(..., description='The IP address to delete')
-    mac: str | None = Field(None, description='Unicast MAC address.')
-    zone: str = Field(..., description='The SDN zone object identifier.')
+    ip: StrictStr = Field(..., description='The IP address to delete')
+    mac: StrictStr | None = Field(None, description='Unicast MAC address.')
+    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
 
 class DeleteClusterSdnVnetsVnetIpsResponse(RootModel[None]):
     """Model for ipdelete. Delete IP Mappings in a VNet response."""
@@ -2524,9 +2535,9 @@ class DeleteClusterSdnVnetsVnetIpsResponse(RootModel[None]):
 
 class PostClusterSdnVnetsVnetIpsRequest(ProxmoxBaseModel):
     """Model for ipcreate. Create IP Mapping in a VNet request."""
-    ip: str = Field(..., description='The IP address to associate with the given MAC address')
-    mac: str | None = Field(None, description='Unicast MAC address.')
-    zone: str = Field(..., description='The SDN zone object identifier.')
+    ip: StrictStr = Field(..., description='The IP address to associate with the given MAC address')
+    mac: StrictStr | None = Field(None, description='Unicast MAC address.')
+    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
 
 class PostClusterSdnVnetsVnetIpsResponse(RootModel[None]):
     """Model for ipcreate. Create IP Mapping in a VNet response."""
@@ -2534,10 +2545,10 @@ class PostClusterSdnVnetsVnetIpsResponse(RootModel[None]):
 
 class PutClusterSdnVnetsVnetIpsRequest(ProxmoxBaseModel):
     """Model for ipupdate. Update IP Mapping in a VNet request."""
-    ip: str = Field(..., description='The IP address to associate with the given MAC address')
-    mac: str | None = Field(None, description='Unicast MAC address.')
+    ip: StrictStr = Field(..., description='The IP address to associate with the given MAC address')
+    mac: StrictStr | None = Field(None, description='Unicast MAC address.')
     vmid: int | None = Field(None, description='The (unique) ID of the VM.')
-    zone: str = Field(..., description='The SDN zone object identifier.')
+    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
 
 class PutClusterSdnVnetsVnetIpsResponse(RootModel[None]):
     """Model for ipupdate. Update IP Mapping in a VNet response."""
@@ -2549,14 +2560,14 @@ class GetClusterSdnVnetsVnetSubnetsResponse(RootModel[list[dict[str, object]]]):
 
 class PostClusterSdnVnetsVnetSubnetsRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn subnet object. request."""
-    dhcp_dns_server: str | None = Field(None, alias="dhcp-dns-server", description='IP address for the DNS server')
-    dhcp_range: list[str] | None = Field(None, alias="dhcp-range", description='A list of DHCP ranges for this subnet')
-    dnszoneprefix: str | None = Field(None, description="dns domain zone prefix  ex: 'adm' -> <hostname>.adm.mydomain.com")
-    gateway: str | None = Field(None, description='Subnet Gateway: Will be assign on vnet for layer3 zones')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    dhcp_dns_server: StrictStr | None = Field(None, alias="dhcp-dns-server", description='IP address for the DNS server')
+    dhcp_range: list[StrictStr] | None = Field(None, alias="dhcp-range", description='A list of DHCP ranges for this subnet')
+    dnszoneprefix: StrictStr | None = Field(None, description="dns domain zone prefix  ex: 'adm' -> <hostname>.adm.mydomain.com")
+    gateway: StrictStr | None = Field(None, description='Subnet Gateway: Will be assign on vnet for layer3 zones')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     snat: bool | None = Field(None, description='enable masquerade for this subnet if pve-firewall')
-    subnet: str = Field(..., description='The SDN subnet object identifier.')
-    type: str = Field(...)
+    subnet: StrictStr = Field(..., description='The SDN subnet object identifier.')
+    type: StrictStr = Field(...)
 
 class PostClusterSdnVnetsVnetSubnetsResponse(RootModel[None]):
     """Model for create. Create a new sdn subnet object. response."""
@@ -2564,7 +2575,7 @@ class PostClusterSdnVnetsVnetSubnetsResponse(RootModel[None]):
 
 class DeleteClusterSdnVnetsVnetSubnetsSubnetRequest(ProxmoxBaseModel):
     """Model for delete. Delete sdn subnet object configuration. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnVnetsVnetSubnetsSubnetResponse(RootModel[None]):
     """Model for delete. Delete sdn subnet object configuration. response."""
@@ -2576,13 +2587,13 @@ class GetClusterSdnVnetsVnetSubnetsSubnetResponse(RootModel[dict[str, object]]):
 
 class PutClusterSdnVnetsVnetSubnetsSubnetRequest(ProxmoxBaseModel):
     """Model for update. Update sdn subnet object configuration. request."""
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    dhcp_dns_server: str | None = Field(None, alias="dhcp-dns-server", description='IP address for the DNS server')
-    dhcp_range: list[str] | None = Field(None, alias="dhcp-range", description='A list of DHCP ranges for this subnet')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
-    dnszoneprefix: str | None = Field(None, description="dns domain zone prefix  ex: 'adm' -> <hostname>.adm.mydomain.com")
-    gateway: str | None = Field(None, description='Subnet Gateway: Will be assign on vnet for layer3 zones')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    dhcp_dns_server: StrictStr | None = Field(None, alias="dhcp-dns-server", description='IP address for the DNS server')
+    dhcp_range: list[StrictStr] | None = Field(None, alias="dhcp-range", description='A list of DHCP ranges for this subnet')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    dnszoneprefix: StrictStr | None = Field(None, description="dns domain zone prefix  ex: 'adm' -> <hostname>.adm.mydomain.com")
+    gateway: StrictStr | None = Field(None, description='Subnet Gateway: Will be assign on vnet for layer3 zones')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     snat: bool | None = Field(None, description='enable masquerade for this subnet if pve-firewall')
 
 class PutClusterSdnVnetsVnetSubnetsSubnetResponse(RootModel[None]):
@@ -2592,32 +2603,32 @@ class PutClusterSdnVnetsVnetSubnetsSubnetResponse(RootModel[None]):
 class GetClusterSdnZonesResponseItem(ProxmoxBaseModel):
     """Model for index. SDN zones index. response."""
     advertise_subnets: bool | None = Field(None, alias="advertise-subnets", description='Advertise IP prefixes (Type-5 routes) instead of MAC/IP pairs (Type-2 routes). EVPN zone only.')
-    bridge: str | None = Field(None, description='the bridge for which VLANs should be managed. VLAN & QinQ zone only.')
+    bridge: StrictStr | None = Field(None, description='the bridge for which VLANs should be managed. VLAN & QinQ zone only.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning. VLAN zone only.')
-    controller: str | None = Field(None, description='ID of the controller for this zone. EVPN zone only.')
-    dhcp: str | None = Field(None, description='Name of DHCP server backend for this zone.')
-    digest: str | None = Field(None, description='Digest of the controller section.')
+    controller: StrictStr | None = Field(None, description='ID of the controller for this zone. EVPN zone only.')
+    dhcp: StrictStr | None = Field(None, description='Name of DHCP server backend for this zone.')
+    digest: StrictStr | None = Field(None, description='Digest of the controller section.')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages. EVPN zone only.')
-    dns: str | None = Field(None, description='ID of the DNS server for this zone.')
-    dnszone: str | None = Field(None, description='Domain name for this zone.')
-    exitnodes: str | None = Field(None, description='List of PVE Nodes that should act as exit node for this zone. EVPN zone only.')
+    dns: StrictStr | None = Field(None, description='ID of the DNS server for this zone.')
+    dnszone: StrictStr | None = Field(None, description='Domain name for this zone.')
+    exitnodes: StrictStr | None = Field(None, description='List of PVE Nodes that should act as exit node for this zone. EVPN zone only.')
     exitnodes_local_routing: bool | None = Field(None, alias="exitnodes-local-routing", description='Create routes on the exit nodes, so they can connect to EVPN guests. EVPN zone only.')
-    exitnodes_primary: str | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first. EVPN zone only.')
-    ipam: str | None = Field(None, description='ID of the IPAM for this zone.')
-    mac: str | None = Field(None, description='MAC address of the anycast router for this zone.')
+    exitnodes_primary: StrictStr | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first. EVPN zone only.')
+    ipam: StrictStr | None = Field(None, description='ID of the IPAM for this zone.')
+    mac: StrictStr | None = Field(None, description='MAC address of the anycast router for this zone.')
     mtu: int | None = Field(None, description='MTU of the zone, will be used for the created VNet bridges.')
-    nodes: str | None = Field(None, description='Nodes where this zone should be created.')
-    peers: str | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes. VXLAN zone only.')
+    nodes: StrictStr | None = Field(None, description='Nodes where this zone should be created.')
+    peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes. VXLAN zone only.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
-    reversedns: str | None = Field(None, description='ID of the reverse DNS server for this zone.')
-    rt_import: str | None = Field(None, alias="rt-import", description='Route-Targets that should be imported into the VRF of this zone via BGP. EVPN zone only.')
-    state: str | None = Field(None, description='State of the SDN configuration object.')
+    reversedns: StrictStr | None = Field(None, description='ID of the reverse DNS server for this zone.')
+    rt_import: StrictStr | None = Field(None, alias="rt-import", description='Route-Targets that should be imported into the VRF of this zone via BGP. EVPN zone only.')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
     tag: int | None = Field(None, description='Service-VLAN Tag (outer VLAN). QinQ zone only')
-    type: str | None = Field(None, description='Type of the zone.')
-    vlan_protocol: str | None = Field(None, alias="vlan-protocol", description='VLAN protocol for the creation of the QinQ zone. QinQ zone only.')
+    type: StrictStr | None = Field(None, description='Type of the zone.')
+    vlan_protocol: StrictStr | None = Field(None, alias="vlan-protocol", description='VLAN protocol for the creation of the QinQ zone. QinQ zone only.')
     vrf_vxlan: int | None = Field(None, alias="vrf-vxlan", description='VNI for the zone VRF. EVPN zone only.')
     vxlan_port: int | None = Field(None, alias="vxlan-port", description='UDP port that should be used for the VXLAN tunnel (default 4789). VXLAN zone only.')
-    zone: str | None = Field(None, description='Name of the zone.')
+    zone: StrictStr | None = Field(None, description='Name of the zone.')
 
 class GetClusterSdnZonesResponse(RootModel[list[GetClusterSdnZonesResponseItem]]):
     """List of items. index. SDN zones index. response."""
@@ -2626,32 +2637,32 @@ class GetClusterSdnZonesResponse(RootModel[list[GetClusterSdnZonesResponseItem]]
 class PostClusterSdnZonesRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn zone object. request."""
     advertise_subnets: bool | None = Field(None, alias="advertise-subnets", description='Advertise IP prefixes (Type-5 routes) instead of MAC/IP pairs (Type-2 routes).')
-    bridge: str | None = Field(None, description='The bridge for which VLANs should be managed.')
+    bridge: StrictStr | None = Field(None, description='The bridge for which VLANs should be managed.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning.')
-    controller: str | None = Field(None, description='Controller for this zone.')
-    dhcp: str | None = Field(None, description='Type of the DHCP backend for this zone')
+    controller: StrictStr | None = Field(None, description='Controller for this zone.')
+    dhcp: StrictStr | None = Field(None, description='Type of the DHCP backend for this zone')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages.')
-    dns: str | None = Field(None, description='dns api server')
-    dnszone: str | None = Field(None, description='dns domain zone  ex: mydomain.com')
+    dns: StrictStr | None = Field(None, description='dns api server')
+    dnszone: StrictStr | None = Field(None, description='dns domain zone  ex: mydomain.com')
     dp_id: int | None = Field(None, alias="dp-id", description='Faucet dataplane id')
-    exitnodes: str | None = Field(None, description='List of cluster node names.')
+    exitnodes: StrictStr | None = Field(None, description='List of cluster node names.')
     exitnodes_local_routing: bool | None = Field(None, alias="exitnodes-local-routing", description='Allow exitnodes to connect to EVPN guests.')
-    exitnodes_primary: str | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first.')
-    fabric: str | None = Field(None, description='SDN fabric to use as underlay for this VXLAN zone.')
-    ipam: str | None = Field(None, description='use a specific ipam')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    mac: str | None = Field(None, description='Anycast logical router mac address.')
+    exitnodes_primary: StrictStr | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first.')
+    fabric: StrictStr | None = Field(None, description='SDN fabric to use as underlay for this VXLAN zone.')
+    ipam: StrictStr | None = Field(None, description='use a specific ipam')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    mac: StrictStr | None = Field(None, description='Anycast logical router mac address.')
     mtu: int | None = Field(None, description='MTU of the zone, will be used for the created VNet bridges.')
-    nodes: str | None = Field(None, description='List of cluster node names.')
-    peers: str | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes.')
-    reversedns: str | None = Field(None, description='reverse dns api server')
-    rt_import: str | None = Field(None, alias="rt-import", description='List of Route Targets that should be imported into the VRF of the zone.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names.')
+    peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes.')
+    reversedns: StrictStr | None = Field(None, description='reverse dns api server')
+    rt_import: StrictStr | None = Field(None, alias="rt-import", description='List of Route Targets that should be imported into the VRF of the zone.')
     tag: int | None = Field(None, description='Service-VLAN Tag (outer VLAN)')
-    type: str = Field(..., description='Plugin type.')
-    vlan_protocol: str | None = Field(None, alias="vlan-protocol", description='Which VLAN protocol should be used for the creation of the QinQ zone.')
+    type: StrictStr = Field(..., description='Plugin type.')
+    vlan_protocol: StrictStr | None = Field(None, alias="vlan-protocol", description='Which VLAN protocol should be used for the creation of the QinQ zone.')
     vrf_vxlan: int | None = Field(None, alias="vrf-vxlan", description='VNI for the zone VRF.')
     vxlan_port: int | None = Field(None, alias="vxlan-port", description='UDP port that should be used for the VXLAN tunnel (default 4789).')
-    zone: str = Field(..., description='The SDN zone object identifier.')
+    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
 
 class PostClusterSdnZonesResponse(RootModel[None]):
     """Model for create. Create a new sdn zone object. response."""
@@ -2659,7 +2670,7 @@ class PostClusterSdnZonesResponse(RootModel[None]):
 
 class DeleteClusterSdnZonesZoneRequest(ProxmoxBaseModel):
     """Model for delete. Delete sdn zone object configuration. request."""
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
 
 class DeleteClusterSdnZonesZoneResponse(RootModel[None]):
     """Model for delete. Delete sdn zone object configuration. response."""
@@ -2668,60 +2679,60 @@ class DeleteClusterSdnZonesZoneResponse(RootModel[None]):
 class GetClusterSdnZonesZoneResponse(ProxmoxBaseModel):
     """Model for read. Read sdn zone configuration. response."""
     advertise_subnets: bool | None = Field(None, alias="advertise-subnets", description='Advertise IP prefixes (Type-5 routes) instead of MAC/IP pairs (Type-2 routes). EVPN zone only.')
-    bridge: str | None = Field(None, description='the bridge for which VLANs should be managed. VLAN & QinQ zone only.')
+    bridge: StrictStr | None = Field(None, description='the bridge for which VLANs should be managed. VLAN & QinQ zone only.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning. VLAN zone only.')
-    controller: str | None = Field(None, description='ID of the controller for this zone. EVPN zone only.')
-    dhcp: str | None = Field(None, description='Name of DHCP server backend for this zone.')
-    digest: str | None = Field(None, description='Digest of the controller section.')
+    controller: StrictStr | None = Field(None, description='ID of the controller for this zone. EVPN zone only.')
+    dhcp: StrictStr | None = Field(None, description='Name of DHCP server backend for this zone.')
+    digest: StrictStr | None = Field(None, description='Digest of the controller section.')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages. EVPN zone only.')
-    dns: str | None = Field(None, description='ID of the DNS server for this zone.')
-    dnszone: str | None = Field(None, description='Domain name for this zone.')
-    exitnodes: str | None = Field(None, description='List of PVE Nodes that should act as exit node for this zone. EVPN zone only.')
+    dns: StrictStr | None = Field(None, description='ID of the DNS server for this zone.')
+    dnszone: StrictStr | None = Field(None, description='Domain name for this zone.')
+    exitnodes: StrictStr | None = Field(None, description='List of PVE Nodes that should act as exit node for this zone. EVPN zone only.')
     exitnodes_local_routing: bool | None = Field(None, alias="exitnodes-local-routing", description='Create routes on the exit nodes, so they can connect to EVPN guests. EVPN zone only.')
-    exitnodes_primary: str | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first. EVPN zone only.')
-    ipam: str | None = Field(None, description='ID of the IPAM for this zone.')
-    mac: str | None = Field(None, description='MAC address of the anycast router for this zone.')
+    exitnodes_primary: StrictStr | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first. EVPN zone only.')
+    ipam: StrictStr | None = Field(None, description='ID of the IPAM for this zone.')
+    mac: StrictStr | None = Field(None, description='MAC address of the anycast router for this zone.')
     mtu: int | None = Field(None, description='MTU of the zone, will be used for the created VNet bridges.')
-    nodes: str | None = Field(None, description='Nodes where this zone should be created.')
-    peers: str | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes. VXLAN zone only.')
+    nodes: StrictStr | None = Field(None, description='Nodes where this zone should be created.')
+    peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes. VXLAN zone only.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
-    reversedns: str | None = Field(None, description='ID of the reverse DNS server for this zone.')
-    rt_import: str | None = Field(None, alias="rt-import", description='Route-Targets that should be imported into the VRF of this zone via BGP. EVPN zone only.')
-    state: str | None = Field(None, description='State of the SDN configuration object.')
+    reversedns: StrictStr | None = Field(None, description='ID of the reverse DNS server for this zone.')
+    rt_import: StrictStr | None = Field(None, alias="rt-import", description='Route-Targets that should be imported into the VRF of this zone via BGP. EVPN zone only.')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
     tag: int | None = Field(None, description='Service-VLAN Tag (outer VLAN). QinQ zone only')
-    type: str = Field(..., description='Type of the zone.')
-    vlan_protocol: str | None = Field(None, alias="vlan-protocol", description='VLAN protocol for the creation of the QinQ zone. QinQ zone only.')
+    type: StrictStr = Field(..., description='Type of the zone.')
+    vlan_protocol: StrictStr | None = Field(None, alias="vlan-protocol", description='VLAN protocol for the creation of the QinQ zone. QinQ zone only.')
     vrf_vxlan: int | None = Field(None, alias="vrf-vxlan", description='VNI for the zone VRF. EVPN zone only.')
     vxlan_port: int | None = Field(None, alias="vxlan-port", description='UDP port that should be used for the VXLAN tunnel (default 4789). VXLAN zone only.')
-    zone: str = Field(..., description='Name of the zone.')
+    zone: StrictStr = Field(..., description='Name of the zone.')
 
 class PutClusterSdnZonesZoneRequest(ProxmoxBaseModel):
     """Model for update. Update sdn zone object configuration. request."""
     advertise_subnets: bool | None = Field(None, alias="advertise-subnets", description='Advertise IP prefixes (Type-5 routes) instead of MAC/IP pairs (Type-2 routes).')
-    bridge: str | None = Field(None, description='The bridge for which VLANs should be managed.')
+    bridge: StrictStr | None = Field(None, description='The bridge for which VLANs should be managed.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning.')
-    controller: str | None = Field(None, description='Controller for this zone.')
-    delete: str | None = Field(None, description='A list of settings you want to delete.')
-    dhcp: str | None = Field(None, description='Type of the DHCP backend for this zone')
-    digest: str | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    controller: StrictStr | None = Field(None, description='Controller for this zone.')
+    delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
+    dhcp: StrictStr | None = Field(None, description='Type of the DHCP backend for this zone')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages.')
-    dns: str | None = Field(None, description='dns api server')
-    dnszone: str | None = Field(None, description='dns domain zone  ex: mydomain.com')
+    dns: StrictStr | None = Field(None, description='dns api server')
+    dnszone: StrictStr | None = Field(None, description='dns domain zone  ex: mydomain.com')
     dp_id: int | None = Field(None, alias="dp-id", description='Faucet dataplane id')
-    exitnodes: str | None = Field(None, description='List of cluster node names.')
+    exitnodes: StrictStr | None = Field(None, description='List of cluster node names.')
     exitnodes_local_routing: bool | None = Field(None, alias="exitnodes-local-routing", description='Allow exitnodes to connect to EVPN guests.')
-    exitnodes_primary: str | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first.')
-    fabric: str | None = Field(None, description='SDN fabric to use as underlay for this VXLAN zone.')
-    ipam: str | None = Field(None, description='use a specific ipam')
-    lock_token: str | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
-    mac: str | None = Field(None, description='Anycast logical router mac address.')
+    exitnodes_primary: StrictStr | None = Field(None, alias="exitnodes-primary", description='Force traffic through this exitnode first.')
+    fabric: StrictStr | None = Field(None, description='SDN fabric to use as underlay for this VXLAN zone.')
+    ipam: StrictStr | None = Field(None, description='use a specific ipam')
+    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    mac: StrictStr | None = Field(None, description='Anycast logical router mac address.')
     mtu: int | None = Field(None, description='MTU of the zone, will be used for the created VNet bridges.')
-    nodes: str | None = Field(None, description='List of cluster node names.')
-    peers: str | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes.')
-    reversedns: str | None = Field(None, description='reverse dns api server')
-    rt_import: str | None = Field(None, alias="rt-import", description='List of Route Targets that should be imported into the VRF of the zone.')
+    nodes: StrictStr | None = Field(None, description='List of cluster node names.')
+    peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes.')
+    reversedns: StrictStr | None = Field(None, description='reverse dns api server')
+    rt_import: StrictStr | None = Field(None, alias="rt-import", description='List of Route Targets that should be imported into the VRF of the zone.')
     tag: int | None = Field(None, description='Service-VLAN Tag (outer VLAN)')
-    vlan_protocol: str | None = Field(None, alias="vlan-protocol", description='Which VLAN protocol should be used for the creation of the QinQ zone.')
+    vlan_protocol: StrictStr | None = Field(None, alias="vlan-protocol", description='Which VLAN protocol should be used for the creation of the QinQ zone.')
     vrf_vxlan: int | None = Field(None, alias="vrf-vxlan", description='VNI for the zone VRF.')
     vxlan_port: int | None = Field(None, alias="vxlan-port", description='UDP port that should be used for the VXLAN tunnel (default 4789).')
 
@@ -2731,16 +2742,16 @@ class PutClusterSdnZonesZoneResponse(RootModel[None]):
 
 class GetClusterStatusResponseItem(ProxmoxBaseModel):
     """Model for get_status. Get cluster status information. response."""
-    id: str | None = Field(None)
-    ip: str | None = Field(None, description='[node] IP of the resolved nodename.')
-    level: str | None = Field(None, description='[node] Proxmox VE Subscription level, indicates if eligible for enterprise support as well as access to the stable Proxmox VE Enterprise Repository.')
+    id: StrictStr | None = Field(None)
+    ip: StrictStr | None = Field(None, description='[node] IP of the resolved nodename.')
+    level: StrictStr | None = Field(None, description='[node] Proxmox VE Subscription level, indicates if eligible for enterprise support as well as access to the stable Proxmox VE Enterprise Repository.')
     local: bool | None = Field(None, description='[node] Indicates if this is the responding node.')
-    name: str | None = Field(None)
+    name: StrictStr | None = Field(None)
     nodeid: int | None = Field(None, description='[node] ID of the node from the corosync configuration.')
     nodes: int | None = Field(None, description='[cluster] Nodes count, including offline nodes.')
     online: bool | None = Field(None, description='[node] Indicates if the node is online or offline.')
     quorate: bool | None = Field(None, description='[cluster] Indicates if there is a majority of nodes online to make decisions')
-    type: str | None = Field(None, description='Indicates the type, either cluster or node. The type defines the object properties e.g. quorate available for type cluster.')
+    type: StrictStr | None = Field(None, description='Indicates the type, either cluster or node. The type defines the object properties e.g. quorate available for type cluster.')
     version: int | None = Field(None, description='[cluster] Current version of the corosync configuration file.')
 
 class GetClusterStatusResponse(RootModel[list[GetClusterStatusResponseItem]]):
@@ -2749,7 +2760,7 @@ class GetClusterStatusResponse(RootModel[list[GetClusterStatusResponseItem]]):
 
 class GetClusterTasksResponseItem(ProxmoxBaseModel):
     """Model for tasks. List recent tasks (cluster wide). response."""
-    upid: str | None = Field(None)
+    upid: StrictStr | None = Field(None)
 
 class GetClusterTasksResponse(RootModel[list[GetClusterTasksResponseItem]]):
     """List of items. tasks. List recent tasks (cluster wide). response."""

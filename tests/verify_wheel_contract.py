@@ -23,8 +23,10 @@ import os
 from pathlib import Path
 
 import proxmox_sdk
+from pydantic import ValidationError
 from proxmox_sdk.pdm import PDMClient
 from proxmox_sdk.pdm.models import PDMRemote, PDMRemoteNode, PDMVersion
+from proxmox_sdk.routes.generated_artifacts import load_operation_model
 from proxmox_sdk.schema import available_pdm_sdk_versions, load_pdm_generated_openapi
 
 expected_root = Path(os.environ["PROXMOX_SDK_WHEEL_ROOT"]).resolve()
@@ -45,6 +47,55 @@ if not isinstance(paths, dict) or not required_paths.issubset(paths):
     raise AssertionError(
         f"Packaged PDM OpenAPI schema lacks required paths: {required_paths!r}"
     )
+
+for tag in ("latest", "9.2", "9.1.11"):
+    model = load_operation_model(tag, "get_nodes_node_qemu_vmid_config", "response")
+    if model is None:
+        raise AssertionError(f"Packaged PVE response model is missing for {tag}")
+
+    accepted = model.model_validate(
+        {
+            "agent": True,
+            "cpu": "host",
+            "digest": "wheel-digest",
+            "memory": 4096,
+        }
+    )
+    if accepted.agent is not True or accepted.memory != 4096 or accepted.cpu != "host":
+        raise AssertionError(f"Packaged PVE scalar contract is not typed for {tag}")
+
+    for field, value in (
+        ("agent", 1.0),
+        ("agent", b"1"),
+        ("memory", True),
+        ("memory", 4096.0),
+        ("memory", b"4096"),
+        ("cpu", b"host"),
+    ):
+        try:
+            model.model_validate({"digest": "wheel-digest", field: value})
+        except ValidationError as exc:
+            locations = [tuple(error["loc"]) for error in exc.errors()]
+            if not locations or any(location[0] != field for location in locations):
+                raise AssertionError(
+                    f"Packaged PVE model for {tag} rejected the wrong field: {exc}"
+                ) from exc
+        else:
+            raise AssertionError(
+                f"Packaged PVE model for {tag} accepted {field}={value!r}"
+            )
+
+    schema = model.model_json_schema()["properties"]
+    agent_integer = next(
+        arm for arm in schema["agent"]["anyOf"] if arm.get("type") == "integer"
+    )
+    memory_integer = next(
+        arm for arm in schema["memory"]["anyOf"] if arm.get("type") == "integer"
+    )
+    if agent_integer.get("minimum") != 0 or agent_integer.get("maximum") != 1:
+        raise AssertionError(f"Packaged PVE agent constraints are missing for {tag}")
+    if memory_integer.get("minimum") != 16:
+        raise AssertionError(f"Packaged PVE memory constraints are missing for {tag}")
 
 
 async def smoke_pdm_client() -> None:
@@ -86,7 +137,7 @@ def _validate_member_path(info: zipfile.ZipInfo) -> None:
 
 
 def verify_wheel(wheel_path: Path) -> None:
-    """Inspect and execute the PDM contract from one built wheel."""
+    """Inspect and execute the PVE/PDM contracts from one built wheel."""
 
     if not wheel_path.is_file() or wheel_path.suffix != ".whl":
         raise WheelContractError(f"Expected a wheel file, got {wheel_path}")
@@ -127,7 +178,7 @@ def verify_wheel(wheel_path: Path) -> None:
                 part.strip() for part in (completed.stdout, completed.stderr) if part.strip()
             )
             raise WheelContractError(
-                f"Installed-wheel PDM smoke failed for {wheel_path.name}:\n{details}"
+                f"Installed-wheel schema smoke failed for {wheel_path.name}:\n{details}"
             )
 
 
@@ -141,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     wheel_path = Path(arguments[0]).resolve()
     verify_wheel(wheel_path)
-    print(f"Verified installed-wheel PDM contract: {wheel_path.name}")
+    print(f"Verified installed-wheel PVE/PDM contracts: {wheel_path.name}")
     return 0
 
 

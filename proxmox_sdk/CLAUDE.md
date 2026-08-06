@@ -41,6 +41,20 @@ headers, cookies, passwords, tickets, CSRF tokens, or API token values.
 - `proxmox-sdk-mock` — standalone PVE mock server.
 - `proxmox-sdk-pdm-mock` — standalone Proxmox Datacenter Manager mock server (default port 8443).
 
+Generated response models retain Proxmox composite string fields, while also
+accepting the native integer or boolean scalar documented by a format's single
+`default_key`. This compatibility applies to responses only; request fields and
+string-default/free-form composites remain strict strings. Native response
+arms are strict and preserve captured integer range/multiple/enum constraints;
+boolean formats accept only booleans and exact integer flags `0`/`1`, never
+coercive floats or arbitrary integers. Every generated string annotation is
+strict (including request and non-widened response fields), and integer enums
+remain visible in generated JSON Schema as well as enforced at runtime.
+Non-finite numeric bounds and non-positive/non-finite multiples fail closed to
+the strict-string form. The installed-wheel verifier exercises these strict
+PVE scalar contracts for all three shipped schema tags as well as the PDM
+schema/client smoke, preventing a stale archive from hiding behind source tests.
+
 ## Typed Service Facades
 
 High-level service-specific clients are available alongside the low-level `ProxmoxSDK`:
