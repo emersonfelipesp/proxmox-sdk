@@ -184,7 +184,8 @@ uv run python -c "import proxmox_sdk.mock_main"
 uv run python -c "from proxmox_sdk.sdk import ProxmoxSDK"
 uv run python -c "from proxmox_sdk.sdk.sync import SyncProxmoxSDK"
 
-# Build and verify runtime artifacts from the wheel, outside the source tree
+# Build and verify all shipped PVE/PDM runtime contracts from the wheel,
+# outside the source tree
 uv lock --check
 uv sync --locked --group dev
 uv run --locked python -m build --no-isolation

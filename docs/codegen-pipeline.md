@@ -132,6 +132,26 @@ The builder adds:
 `proxmox_codegen/pydantic_generator.py` converts the OpenAPI response schemas
 into **Pydantic v2** model classes.
 
+Proxmox sometimes documents a composite property as a JSON string while its
+response uses the native scalar represented by the format's `default_key`.
+For response fields only, the generator preserves the composite string form
+and also accepts a documented integer or boolean default scalar. Other
+composite values, including disk, network, and free-form strings, remain
+strict strings. The rule is driven only by the captured OpenAPI `format`
+metadata, not by field names, endpoint paths, or downstream-consumer patches.
+The widened arms use strict scalar validators: integer fields preserve their
+captured minimum, maximum, multiple, and enum constraints, while boolean
+formats accept only native booleans or exact integer flags `0` and `1`. They do
+not coerce floats or booleans into integers, or arbitrary numbers into booleans.
+All generated string annotations use Pydantic's strict string validator, so
+request fields and non-widened response composites also reject bytes instead
+of silently decoding them. Integer enum constraints are enforced at runtime
+and emitted in `model_json_schema()` alongside their numeric constraints.
+Malformed numeric metadata fails closed: non-finite bounds and a non-positive
+or non-finite `multipleOf` disable native-integer widening for that field, so
+the generated model remains `StrictStr` instead of emitting an unusable or
+unsafe Pydantic constraint.
+
 The generator writes two model layouts:
 
 - `pydantic_models.py` — compatibility aggregate containing every generated

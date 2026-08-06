@@ -53,7 +53,7 @@ protected environment.
 ci.yml
 ├── lint
 ├── syntax
-├── package (build + metadata + installed-wheel PDM contract)
+├── package (build + metadata + installed-wheel PVE/PDM contracts)
 ├── test
 └── docker-images (main/testing push only)
     └── build/smoke 3 variants × 2 arches → candidate manifests → dev aliases
@@ -89,7 +89,10 @@ ci.yml
   `ci-untrusted-python312` label. A workflow file alone is not evidence of an
   active gate: require an eligible runner plus protected-branch status checks,
   and never merge while a required context is queued or pending.
-- CI and release preparation must run `tests/verify_wheel_contract.py` against the built wheel so source imports cannot hide missing generated schemas.
+- CI and release preparation must run `tests/verify_wheel_contract.py` against
+  the built wheel so source imports cannot hide missing or stale generated
+  schemas. It validates strict PVE scalar behavior and JSON Schema constraints
+  for `latest`, `9.2`, and `9.1.11`, plus the PDM schema/client smoke.
 - Release workflows validate that the `pyproject.toml` version matches the Git tag before publishing.
 - TestPyPI, PyPI, and Gitea preflight/postflight checks compare complete artifact
   sets and hash bytes downloaded from the repository. Never replace this with

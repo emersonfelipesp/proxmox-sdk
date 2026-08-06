@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from copy import deepcopy
 
 from proxmox_sdk.proxmox_codegen.utils import (
@@ -23,7 +24,100 @@ def _resolved_schema(schema: dict[str, object] | None) -> dict[str, object] | No
     return schema
 
 
-def _python_type(schema: dict[str, object] | None) -> str:
+def _number_literal(value: object) -> str | None:
+    """Return a safe Python literal for a JSON Schema numeric constraint."""
+
+    if type(value) not in {int, float}:
+        return None
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    return repr(value)
+
+
+def _integer_constraint_metadata(schema: dict[str, object]) -> list[str] | None:
+    """Translate supported integer JSON Schema constraints to Pydantic metadata.
+
+    ``None`` means the source constraint is malformed and the compatibility
+    widening must fail closed instead of silently discarding it.
+    """
+
+    field_arguments: list[str] = []
+    for schema_name, field_name in (
+        ("minimum", "ge"),
+        ("maximum", "le"),
+        ("exclusiveMinimum", "gt"),
+        ("exclusiveMaximum", "lt"),
+        ("multipleOf", "multiple_of"),
+    ):
+        if schema_name not in schema:
+            continue
+        literal = _number_literal(schema[schema_name])
+        if literal is None:
+            return None
+        if schema_name == "multipleOf" and schema[schema_name] <= 0:
+            return None
+        field_arguments.append(f"{field_name}={literal}")
+
+    if "enum" in schema:
+        enum = schema["enum"]
+        if not isinstance(enum, list) or not enum or any(type(value) is not int for value in enum):
+            return None
+        field_arguments.append(f"json_schema_extra={{'enum': {enum!r}}}")
+    metadata = [f"Field({', '.join(field_arguments)})"] if field_arguments else []
+    if "enum" in schema:
+        metadata.append(f"_allowed_ints({tuple(enum)!r})")
+    return metadata
+
+
+def _legacy_response_scalar_type(schema: dict[str, object]) -> str | None:
+    """Return a strict, constraint-preserving type for a legacy response.
+
+    Proxmox declares some values as strings because their expanded form is a
+    comma-separated property string. Responses may instead contain the native
+    scalar represented by the format's single ``default_key`` entry. Restrict
+    this compatibility rule to integer and boolean defaults so composite disk,
+    network, and other free-form strings are not widened.
+    """
+
+    format_schema = schema.get("format")
+    if not isinstance(format_schema, dict):
+        return None
+
+    marked_entries = [
+        value
+        for value in format_schema.values()
+        if isinstance(value, dict) and "default_key" in value
+    ]
+    if len(marked_entries) != 1:
+        return None
+
+    default_entry = marked_entries[0]
+    default_key = default_entry["default_key"]
+    if type(default_key) is not int or default_key != 1:
+        return None
+    default_type = default_entry.get("type")
+    if not isinstance(default_type, str):
+        return None
+
+    if default_type == "boolean":
+        # Proxmox emits native booleans and, on older endpoints, exact integer
+        # flags. Keep both representations without accepting 1.0, 2, or other
+        # values that Pydantic's coercive ``bool`` validator would normalize.
+        return "StrictBool | Annotated[StrictInt, Field(ge=0, le=1)]"
+    if default_type != "integer":
+        return None
+
+    metadata = _integer_constraint_metadata(default_entry)
+    if metadata is None:
+        return None
+    if not metadata:
+        return "StrictInt"
+    return f"Annotated[StrictInt, {', '.join(metadata)}]"
+
+
+def _python_type(
+    schema: dict[str, object] | None, *, allow_legacy_response_scalar: bool = False
+) -> str:
     schema = _resolved_schema(schema)
     if not isinstance(schema, dict):
         return "object"
@@ -31,7 +125,11 @@ def _python_type(schema: dict[str, object] | None) -> str:
     if schema_type == "null":
         return "None"
     if schema_type == "string":
-        return "str"
+        if allow_legacy_response_scalar:
+            scalar_type = _legacy_response_scalar_type(schema)
+            if scalar_type is not None:
+                return f"{scalar_type} | StrictStr"
+        return "StrictStr"
     if schema_type == "integer":
         return "int"
     if schema_type == "number":
@@ -39,7 +137,11 @@ def _python_type(schema: dict[str, object] | None) -> str:
     if schema_type == "boolean":
         return "bool"
     if schema_type == "array":
-        item_type = _python_type(schema.get("items", {}))
+        items_schema = schema.get("items")
+        item_type = _python_type(
+            items_schema if isinstance(items_schema, dict) else {},
+            allow_legacy_response_scalar=allow_legacy_response_scalar,
+        )
         return f"list[{item_type}]"
     if schema_type == "object":
         return "dict[str, object]"
@@ -47,13 +149,22 @@ def _python_type(schema: dict[str, object] | None) -> str:
 
 
 def _generate_object_model(
-    model_name: str, schema: dict[str, object], docstring: str | None = None
+    model_name: str,
+    schema: dict[str, object],
+    docstring: str | None = None,
+    *,
+    allow_legacy_response_scalars: bool = False,
 ) -> str:
     properties = schema.get("properties", {}) if isinstance(schema, dict) else {}
     required = set(schema.get("required", [])) if isinstance(schema, dict) else set()
 
     if not properties:
-        return _generate_root_model(model_name, {"type": "object"}, docstring=docstring)
+        return _generate_root_model(
+            model_name,
+            {"type": "object"},
+            docstring=docstring,
+            allow_legacy_response_scalars=allow_legacy_response_scalars,
+        )
 
     lines = [f"class {model_name}(BaseModel):"]
 
@@ -66,7 +177,10 @@ def _generate_object_model(
         if not isinstance(prop_schema, dict):
             prop_schema = {}
         field_name = slugify_identifier(prop_name)
-        field_type = _python_type(prop_schema)
+        field_type = _python_type(
+            prop_schema,
+            allow_legacy_response_scalar=allow_legacy_response_scalars,
+        )
         is_required = prop_name in required
         default_expr = "..." if is_required else "None"
         alias_expr = f', alias="{prop_name}"' if field_name != prop_name else ""
@@ -83,9 +197,16 @@ def _generate_object_model(
 
 
 def _generate_root_model(
-    model_name: str, schema: dict[str, object], docstring: str | None = None
+    model_name: str,
+    schema: dict[str, object],
+    docstring: str | None = None,
+    *,
+    allow_legacy_response_scalars: bool = False,
 ) -> str:
-    field_type = _python_type(schema)
+    field_type = _python_type(
+        schema,
+        allow_legacy_response_scalar=allow_legacy_response_scalars,
+    )
     description = schema.get("description")
     description_expr = (
         f", description={description!r}" if isinstance(description, str) and description else ""
@@ -105,7 +226,11 @@ def _generate_root_model(
 
 
 def _generate_model_from_schema(
-    model_name: str, schema: dict[str, object], docstring: str | None = None
+    model_name: str,
+    schema: dict[str, object],
+    docstring: str | None = None,
+    *,
+    allow_legacy_response_scalars: bool = False,
 ) -> list[str]:
     schema = _resolved_schema(schema) or {}
     if (
@@ -122,7 +247,12 @@ def _generate_model_from_schema(
         item_docstring = docstring or schema["items"].get("description")
         list_docstring = docstring or schema.get("description")
         return [
-            _generate_object_model(item_model_name, schema["items"], docstring=item_docstring),
+            _generate_object_model(
+                item_model_name,
+                schema["items"],
+                docstring=item_docstring,
+                allow_legacy_response_scalars=allow_legacy_response_scalars,
+            ),
             "\n".join(
                 [
                     f"class {model_name}(RootModel[list[{item_model_name}]]):",
@@ -132,8 +262,22 @@ def _generate_model_from_schema(
             ),
         ]
     if schema.get("type") == "object":
-        return [_generate_object_model(model_name, schema, docstring=docstring)]
-    return [_generate_root_model(model_name, schema, docstring=docstring)]
+        return [
+            _generate_object_model(
+                model_name,
+                schema,
+                docstring=docstring,
+                allow_legacy_response_scalars=allow_legacy_response_scalars,
+            )
+        ]
+    return [
+        _generate_root_model(
+            model_name,
+            schema,
+            docstring=docstring,
+            allow_legacy_response_scalars=allow_legacy_response_scalars,
+        )
+    ]
 
 
 def _request_schema_for_operation(
@@ -197,7 +341,9 @@ def generate_pydantic_models_from_openapi(  # noqa: C901
         "",
         "from __future__ import annotations",
         "",
-        "from pydantic import BaseModel, ConfigDict, Field, RootModel",
+        "from typing import Annotated",
+        "",
+        "from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr",
         "",
         f'GENERATED_FOR_PROXMOX_VERSION = "{resolved_version}"',
         f'GENERATED_SOURCE_SHA256 = "{source_sha256 or ""}"',
@@ -206,6 +352,15 @@ def generate_pydantic_models_from_openapi(  # noqa: C901
         "",
         "class ProxmoxBaseModel(BaseModel):",
         "    model_config = ConfigDict(populate_by_name=True, extra='allow')",
+        "",
+        "",
+        "def _allowed_ints(allowed: tuple[int, ...]) -> AfterValidator:",
+        "    def validate(value: int) -> int:",
+        "        if value not in allowed:",
+        "            raise ValueError('value is not an allowed schema member')",
+        "        return value",
+        "",
+        "    return AfterValidator(validate)",
         "",
     ]
 
@@ -260,7 +415,10 @@ def generate_pydantic_models_from_openapi(  # noqa: C901
                 if resp_model_name not in seen_models:
                     resp_docstring = f"{operation_doc} response" if operation_doc else None
                     model_blocks = _generate_model_from_schema(
-                        resp_model_name, resp_schema, docstring=resp_docstring
+                        resp_model_name,
+                        resp_schema,
+                        docstring=resp_docstring,
+                        allow_legacy_response_scalars=True,
                     )
                     seen_models.add(resp_model_name)
                     if len(model_blocks) > 1:
@@ -304,7 +462,9 @@ def _module_header(
         "",
         "from __future__ import annotations",
         "",
-        "from pydantic import BaseModel, ConfigDict, Field, RootModel",
+        "from typing import Annotated",
+        "",
+        "from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr",
         "",
         f'GENERATED_FOR_PROXMOX_VERSION = "{version_tag}"',
         f'GENERATED_SOURCE_SHA256 = "{source_sha256}"',
@@ -313,6 +473,15 @@ def _module_header(
         "",
         "class ProxmoxBaseModel(BaseModel):",
         "    model_config = ConfigDict(populate_by_name=True, extra='allow')",
+        "",
+        "",
+        "def _allowed_ints(allowed: tuple[int, ...]) -> AfterValidator:",
+        "    def validate(value: int) -> int:",
+        "        if value not in allowed:",
+        "            raise ValueError('value is not an allowed schema member')",
+        "        return value",
+        "",
+        "    return AfterValidator(validate)",
         "",
     ]
 
@@ -406,6 +575,7 @@ def generate_pydantic_model_shards_from_openapi(  # noqa: C901
                         resp_model_name,
                         resp_schema,
                         docstring=resp_docstring,
+                        allow_legacy_response_scalars=True,
                     )
                     group_seen.add(resp_model_name)
                     if len(model_blocks) > 1:
