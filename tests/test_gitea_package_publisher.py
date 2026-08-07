@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import base64
+import gzip
 import hashlib
 import io
 import json
+import os
 import tarfile
 import zipfile
 from collections.abc import Callable
@@ -43,7 +45,12 @@ def _wheel() -> bytes:
         "Requires-Python: >=3.11\n\n"
     ).encode()
     with zipfile.ZipFile(result, "w") as archive:
-        archive.writestr(f"proxmox_sdk-{VERSION}.dist-info/METADATA", metadata)
+        info = zipfile.ZipInfo(
+            f"proxmox_sdk-{VERSION}.dist-info/METADATA",
+            date_time=(2020, 1, 1, 0, 0, 0),
+        )
+        info.external_attr = 0o100644 << 16
+        archive.writestr(info, metadata)
     return result.getvalue()
 
 
@@ -56,10 +63,12 @@ def _sdist() -> bytes:
         "Summary: test package\n"
         "Requires-Python: >=3.11\n\n"
     ).encode()
-    with tarfile.open(fileobj=result, mode="w:gz") as archive:
-        info = tarfile.TarInfo(f"proxmox_sdk-{VERSION}/PKG-INFO")
-        info.size = len(metadata)
-        archive.addfile(info, io.BytesIO(metadata))
+    with gzip.GzipFile(fileobj=result, mode="wb", mtime=0) as compressed:
+        with tarfile.open(fileobj=compressed, mode="w") as archive:
+            info = tarfile.TarInfo(f"proxmox_sdk-{VERSION}/PKG-INFO")
+            info.size = len(metadata)
+            info.mtime = 0
+            archive.addfile(info, io.BytesIO(metadata))
     return result.getvalue()
 
 
@@ -292,11 +301,6 @@ def _publish(
         artifact_zip=artifact,
         work=tmp_path / "verify-work",
     )
-    staging = tmp_path / "staging"
-    sealed = tmp_path / "sealed"
-    publisher.write_verified_staging(candidate, staging)
-    publisher.seal_verified_staging(staging, sealed)
-    candidate = publisher.load_sealed_candidate(sealed)
     events.append("credential:load")
     registry = FakeRegistry(events)
     publisher.publish_verified_candidate(candidate, registry)
@@ -517,6 +521,8 @@ def test_candidate_tar_traversal_is_rejected(tmp_path: Path) -> None:
 
 
 def test_publisher_rejects_modified_root_sealed_handoff(tmp_path: Path) -> None:
+    if os.geteuid() != 0:
+        pytest.skip("root-owned handoff mutation requires a root test process")
     artifact, digest = _artifact_zip(tmp_path)
     client = FakeGitea(digest)
     candidate = publisher.verify_candidate(
@@ -537,6 +543,43 @@ def test_publisher_rejects_modified_root_sealed_handoff(tmp_path: Path) -> None:
     wheel.chmod(0o400)
     with pytest.raises(publisher.PublisherError, match="digest mismatch"):
         publisher.load_sealed_candidate(sealed)
+
+
+def test_root_sealed_handoff_round_trip_publishes_verified_bytes(tmp_path: Path) -> None:
+    if os.geteuid() != 0:
+        pytest.skip("root-owned handoff sealing requires a root test process")
+    artifact, digest = _artifact_zip(tmp_path)
+    client = FakeGitea(digest)
+    candidate = publisher.verify_candidate(
+        client,
+        policy=publisher.PublisherPolicy(1, (publisher.EXPECTED_OWNER,), ()),
+        rebuilder=FakeRebuilder(client.events),
+        run_id=RUN_ID,
+        artifact_zip=artifact,
+        work=tmp_path / "verify-work",
+    )
+    staging = tmp_path / "staging"
+    sealed = tmp_path / "sealed"
+    publisher.write_verified_staging(candidate, staging)
+    publisher.seal_verified_staging(staging, sealed)
+
+    loaded = publisher.load_sealed_candidate(sealed)
+    registry = FakeRegistry(client.events)
+    publisher.publish_verified_candidate(loaded, registry)
+
+    assert loaded.artifact_name == candidate.artifact_name
+    assert loaded.candidate_sha256 == candidate.candidate_sha256
+    assert loaded.distribution_manifest_sha256 == candidate.distribution_manifest_sha256
+    assert loaded.gitea_provenance_sha256 == candidate.gitea_provenance_sha256
+    assert loaded.metadata == candidate.metadata
+    assert loaded.run_id == candidate.run_id
+    assert loaded.source_sha == candidate.source_sha
+    assert loaded.tag == candidate.tag
+    assert loaded.version == candidate.version
+    assert {name: publisher._sha256(path) for name, path in loaded.distributions.items()} == {
+        name: publisher._sha256(path) for name, path in candidate.distributions.items()
+    }
+    assert set(registry.uploaded) == set(candidate.distributions)
 
 
 def test_registry_credential_rejects_symlink_and_open_permissions(tmp_path: Path) -> None:
