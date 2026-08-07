@@ -20,9 +20,10 @@ Update an action or tool only by reviewing and recording the new release commit.
 Gitea feature CI is defined in `.gitea/workflows/ci.yml` and mirrors the
 secret-free GitHub review policy, but it is not authoritative until operators
 provision isolated PR runners and required branch checks. The package-of-record
-workflow has separate `release-builder` and `release-publisher` labels and
-remains disabled until operators provision those isolated runners and the
-protected environment.
+workflow only builds and attests on `ci-untrusted-python312` with no package
+authority. A separately installed host verifier rebuilds and byte-compares the
+exact tag before root-sealing a handoff; only a separate publisher process can
+read the systemd package credential.
 
 ## Workflow Index
 
@@ -36,7 +37,7 @@ protected environment.
 | `schema-update.yml` | Manual (`workflow_dispatch`) or weekly cron (Monday 03:00 UTC) | Detects upstream Proxmox API drift, runs codegen for a new version tag, verifies SHA integrity, opens a PR with a generated schema update |
 | `release-docker-verify.yml` | Successful release workflow | Confirms alias digests and smokes core + all/pve/pbs/pdm images on amd64 and arm64 |
 | `.gitea/workflows/ci.yml` | Push / PR to `main` or `testing` | Read-only Ruff/type/syntax, three-schema regression, strict docs, and installed-wheel gates on an isolated untrusted runner |
-| `.gitea/workflows/publish-package.yml` | Protected `v*` tag | Builds and verifies the Gitea package of record for RC, final, and post releases |
+| `.gitea/workflows/publish-package.yml` | Protected `v*` tag | Builds, attests, and uploads a credential-free package candidate for external rebuild/verification and publication |
 
 ## CI Job Dependencies
 

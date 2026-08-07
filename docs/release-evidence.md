@@ -12,42 +12,55 @@ eligible for public PyPI and Docker Hub promotion.
 2. Create a PEP 440 release-candidate version such as `X.Y.Zrc1` and push the
    matching protected `vX.Y.Zrc1` tag. The Gitea package workflow builds the
    wheel and sdist twice under one `SOURCE_DATE_EPOCH`, requires identical
-   SHA256 values, runs the full test suite, and publishes the exact pair to the
-   Gitea Package Registry.
-   The Gitea jobs use the server-compatible v3 artifact transport, with the
-   exact source SHA, run ID, and attempt in the handoff name. The builder uses
-   uv to provision the locked Python runtime and release tools; it must not
-   depend on mutable host Python, `jq`, or other manually installed utilities.
-   Gitea scopes artifacts to a run attempt. If the publisher fails after the
-   builder succeeds, rerun **all jobs**, not only the failed publisher job; the
-   workflow rejects a publisher-only rerun before touching package credentials.
-   A complete rerun is idempotent: the preflight accepts only exact existing
-   bytes, stages only a missing wheel or sdist after verifying the existing
-   subset, and recreates the complete verification evidence. Unexpected files
-   or a served-byte mismatch fail closed. Exact-version classification uses a
-   pinned Python packaging parser, including normalized project names,
-   equivalent PEP 440 spellings, wheels, and legacy installable archives.
-   Missing files are copied into a fresh, verifier-created staging directory;
-   persistent-runner leftovers are never reused as publisher input.
-3. Verify the Gitea package evidence artifact and the package listing through
-   `nms git packages`. Do not promote a tag whose package record is absent or
-   whose served bytes differ from the build manifest.
-4. Promote the RC tag to GitHub. The `v*rc*` trigger publishes the same pair to
+   SHA256 values, runs the full test suite, writes the canonical cross-system
+   distribution manifest, a separate source/run/workflow-bound Gitea
+   provenance document, and `SHA256SUMS`, then uploads one deterministic tar.
+   The sole job runs on `ci-untrusted-python312` with read-only contents and
+   explicit `packages: none`. No Gitea Actions job, runner, environment, user,
+   organization, or repository secret may hold a package credential.
+3. Wait for that exact workflow run and its sole builder job to finish
+   successfully. Download the source-SHA/run-ID/attempt-scoped Actions ZIP from
+   that run into `/var/lib/proxmox-sdk-publisher/inbox/<run-id>.zip`. The
+   deployed Gitea-compatible v3 artifact protocol has no authoritative unique
+   artifact ID in the REST artifact API, so the separately stored job log is
+   the server-side binding: it records the artifact name and SHA256 of the
+   candidate tar that the host publisher must reproduce.
+4. Start `proxmox-sdk-gitea-verify@<run-id>.service`. The credential-free
+   verifier requires the exact owner/repository, workflow path,
+   successful run and job identities, untrusted runner label, annotated tag,
+   pinned `v*` protection identity and allowlists created before the run, main
+   ancestry, tag/commit/version agreement,
+   tagged workflow digest/policy, log-bound candidate digest, closed tar member
+   set, both evidence documents, `SHA256SUMS`, distribution hashes, and
+   wheel/sdist metadata. It downloads the exact tagged source, rebuilds twice
+   in the immutable host build environment, and requires byte equality with the
+   untrusted Actions candidate. Its root finalizer rehashes and seals the closed
+   handoff. Only then start `proxmox-sdk-gitea-publisher@<run-id>.service`; that
+   separate process receives only the encrypted registry credential, rehashes
+   the root-sealed handoff, performs an idempotent same-origin upload, downloads
+   served bytes, requires the exact two-file set, and writes
+   `/var/lib/proxmox-sdk-publisher/evidence/<run-id>.json`.
+   A partial prior upload is repaired only when every existing byte matches;
+   extra or mismatched files fail closed.
+5. Verify the package listing through `nms git packages` and archive the host
+   evidence. Do not promote a tag whose package record is absent or whose served
+   bytes differ from the build manifest.
+6. Promote the RC tag to GitHub. The `v*rc*` trigger publishes the same pair to
    TestPyPI and validates the bytes served by TestPyPI across Python 3.11, 3.12,
    and 3.13 and all supported schema fixtures. Iterate with `rcN` until clean.
-5. Create the final protected tag on Gitea and require its final package record
+7. Create the final protected tag on Gitea and require its final package record
    to pass the same byte-level verification.
-6. Copy `.github/RELEASE_EVIDENCE_TEMPLATE.md` into the public GitHub Release
-   body, set the exact version, copy the Gitea evidence artifact's
-   `distribution_manifest_sha256`, complete every evidence item, and remove all
+8. Copy `.github/RELEASE_EVIDENCE_TEMPLATE.md` into the public GitHub Release
+   body, set the exact version, copy `distribution_manifest_sha256` from the
+   external host publisher evidence, complete every evidence item, and remove all
    private tracker references. The public workflow rebuilds the manifest and
    rejects a digest mismatch, missing/unchecked evidence, a version mismatch,
    or internal evidence.
-7. Publish the non-prerelease GitHub Release. PyPI publication runs in a
+9. Publish the non-prerelease GitHub Release. PyPI publication runs in a
    protected, artifact-only job. A later job downloads the project wheel back
    from PyPI, hashes the served bytes, and makes that exact wheel the only
    project payload accepted by service-image builds.
-8. Core and service images build without registry credentials, run on amd64 and
+10. Core and service images build without registry credentials, run on amd64 and
    arm64 under a digest-pinned QEMU helper where needed, and emit CycloneDX
    inventories. BuildKit is likewise selected by a reviewed multi-architecture
    digest. Protected jobs load the tested Docker archives, verify the requested
@@ -56,7 +69,7 @@ eligible for public PyPI and Docker Hub promotion.
    is pulled by digest and smoked on both platforms before one final fan-in job
    verifies all per-architecture evidence and writes version, `latest`, and
    commit-traceability aliases.
-9. Retain the distribution, served-PyPI, candidate-manifest, SBOM, and final
+11. Retain the distribution, served-PyPI, candidate-manifest, SBOM, and final
    promotion evidence artifacts. The post-release workflow rechecks alias
    digests and runs all seven image identities on both architectures.
 
@@ -77,14 +90,35 @@ must configure all of the following before enabling publication:
 | `dockerhub-candidate` | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` | Protected `main`/`testing` and protected release tags only |
 | `dockerhub-development` | Docker Hub credentials | Protected `main`/`testing` only |
 | `dockerhub-release` | Docker Hub credentials | Required reviewer; protected final/post release tags only |
-| `gitea-package-registry` | `GITEA_PACKAGE_USERNAME`, `GITEA_PACKAGE_TOKEN` | Required reviewer; protected `v*` tags only |
+| Gitea package registry | systemd encrypted `registry.json` credential on the external publisher host | Exact protected annotated `v*` tags only; never available to Gitea Actions |
 
-Remove the corresponding repository-scoped publisher secrets after the
-environment secrets are configured. Protect tag creation, restrict environment
-administrators, and require the `pypi`/`dockerhub-release` reviewer to confirm
-the Gitea package-of-record and RC evidence. Provision isolated Gitea runner
-labels `release-builder` (no publisher secret) and `release-publisher`
-(environment access only); do not place either label on a general PR runner.
+Remove the corresponding GitHub repository-scoped publisher secrets after the
+GitHub environment secrets are configured. Never store the Gitea package PAT as
+a Gitea Actions user, owner, repository, environment, or runner secret: any
+same-repository workflow can target an eligible runner, and Gitea environments
+do not form a sufficient credential boundary. There is no `release-publisher`
+runner. The only Gitea release job uses the same untrusted label as review CI.
+
+Install `tools/gitea_package_publisher.py`, its Python runtime, the reviewed
+`nms` binary at `/opt/proxmox-sdk-publisher/bin/nms`, and both systemd units into
+root-owned read-only paths before tag creation. The immutable Python 3.13.14
+interpreter must contain exactly `build==1.5.0`, `packaging==26.0`,
+`pyproject-hooks==1.2.0`, `setuptools==83.0.0`, and `wheel==0.47.0`;
+it is never resolved or installed during a release. Record all installed-file SHA256
+identities in the private release evidence; never run tools from a tag checkout.
+Provision a read-only Gitea credential at
+`/etc/proxmox-sdk-publisher/gitea-read.json` for `nms git` evidence reads and an
+encrypted systemd credential named `registry.json` containing only `username`
+and `token`. Copy `tools/publisher-policy.example.json` to root-owned
+`/etc/proxmox-sdk-publisher/policy.json`, replace the invalid zero with the exact
+server-assigned `v*` protection ID, and pin the approved user/team allowlists.
+The rule's server `created_at` and `updated_at` must predate the workflow run;
+no release may proceed until that external rule exists. Credential
+values must never appear in an environment variable,
+command argument, log, repository secret, or committed configuration. Protect
+tag creation, require annotated tags and the exact `v*` protection, restrict
+publisher-host administrators, and require the public-release reviewer to
+confirm the Gitea package record and host evidence.
 
 ## Reproducibility and digest terminology
 

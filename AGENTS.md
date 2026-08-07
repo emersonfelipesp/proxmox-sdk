@@ -280,15 +280,19 @@ workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
    defect, operations, and approval evidence, then prepare `X.Y.ZrcN`.
 2. Merge through Gitea review and push the protected matching tag. The Gitea
    workflow builds the wheel/sdist twice under the commit `SOURCE_DATE_EPOCH`,
-   runs all gates, publishes the package of record, and verifies served bytes.
-   Its isolated runner provisions Python through pinned uv and passes artifacts
-   over the Gitea-compatible v3 protocol with source/run/attempt-bound names.
+   runs all gates, and uploads an attested source/run/attempt-bound candidate on
+   `ci-untrusted-python312` with `packages: none`. No Actions job or runner may
+   hold package credentials. The separately installed verifier validates the
+   exact workflow/job and preexisting pinned tag protection, rebuilds the tag
+   twice in an immutable host environment, byte-compares the candidate, and
+   root-seals a handoff. A separate publisher process receives only the package
+   credential, rehashes that handoff, and verifies the served bytes.
 3. Verify the record with `nms git packages`, promote the RC tag, and require the
    GitHub `v*rc*` TestPyPI matrix to pass. RCs cannot reach public PyPI or stable
    Docker tags.
 4. After a clean RC, create and verify the final Gitea package of record. Fill
    `.github/RELEASE_EVIDENCE_TEMPLATE.md` with public product evidence and the
-   Gitea evidence artifact's `distribution_manifest_sha256`, then publish the
+   external host evidence's `distribution_manifest_sha256`, then publish the
    matching non-prerelease GitHub Release. GitHub rebuilds that manifest and
    rejects a mismatch.
 5. The public workflow publishes from artifacts in protected environments,
@@ -302,12 +306,12 @@ workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
    archive the retained distribution, PyPI, SBOM, manifest, promotion, coverage,
    and defect evidence.
 
-Configure the `testpypi`, `pypi`, `dockerhub-candidate`,
-`dockerhub-development`, `dockerhub-release`, and `gitea-package-registry`
-environments exactly as documented. Environment secrets, required reviewers,
-deployment branch/tag policies, protected tags, and isolated Gitea
-`release-builder`/`release-publisher` runners are external prerequisites and
-cannot be created by workflow YAML.
+Configure the GitHub `testpypi`, `pypi`, `dockerhub-candidate`,
+`dockerhub-development`, and `dockerhub-release` environments exactly as
+documented. Configure the external Gitea publisher host, systemd credentials,
+exact annotated `v*` protection, and untrusted Actions runner separately. The
+package PAT must never exist in Gitea Actions secrets, runner environments,
+command arguments, logs, or committed configuration.
 
 An OCI digest is the immutable image identity. A `sha-<commit>` alias is a
 commit traceability tag, not an immutable object. Docker Hub has no multi-image

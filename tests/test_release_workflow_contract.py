@@ -2,25 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
-import os
 import re
-import ssl
-import subprocess
-import sys
-import threading
-from datetime import datetime, timedelta, timezone
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from ipaddress import ip_address
 from pathlib import Path
 from typing import Any
 
 import yaml
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import NameOID
 
 ROOT = Path(__file__).resolve().parents[1]
 GITHUB_WORKFLOWS = ROOT / ".github" / "workflows"
@@ -44,42 +30,6 @@ def _gitea(name: str) -> dict[str, Any]:
 
 def _uses(job: dict[str, Any]) -> list[str]:
     return [step["uses"] for step in job.get("steps", []) if "uses" in step]
-
-
-def _embedded_gitea_verifier() -> str:
-    publish = _gitea("publish-package.yml")["jobs"]["publish-package"]
-    create = next(
-        step
-        for step in publish["steps"]
-        if step.get("name") == "Create bounded same-origin package verifier"
-    )
-    marker = "script = textwrap.dedent(r'''\n"
-    start = create["run"].index(marker) + len(marker)
-    end = create["run"].index("\n''').lstrip()", start)
-    return create["run"][start:end]
-
-
-def _classify_gitea_artifacts(
-    tmp_path: Path,
-    *,
-    local: set[str],
-    remote: set[str],
-    require_present: bool = False,
-    local_hashes: dict[str, str] | None = None,
-    remote_hashes: dict[str, str] | None = None,
-) -> subprocess.CompletedProcess[str]:
-    verifier = tmp_path / "verify.py"
-    verifier.write_text(_embedded_gitea_verifier(), encoding="utf-8")
-    env = os.environ.copy()
-    env["LOCAL_FILENAMES_JSON"] = json.dumps(sorted(local))
-    env["REMOTE_FILENAMES_JSON"] = json.dumps(sorted(remote))
-    if local_hashes is not None and remote_hashes is not None:
-        env["LOCAL_HASHES_JSON"] = json.dumps(local_hashes, sort_keys=True)
-        env["REMOTE_HASHES_JSON"] = json.dumps(remote_hashes, sort_keys=True)
-    command = [sys.executable, str(verifier), "--classify-only"]
-    if require_present:
-        command.append("--require-present")
-    return subprocess.run(command, check=False, capture_output=True, text=True, env=env)
 
 
 def test_release_triggers_and_manual_modes_are_fail_closed() -> None:
@@ -116,7 +66,6 @@ def test_credentialed_jobs_are_protected_and_artifact_only() -> None:
             "promote-development",
             "dockerhub-development",
         ),
-        (_gitea("publish-package.yml"), "publish-package", "gitea-package-registry"),
     ]
     for workflow, job_name, environment in jobs:
         job = workflow["jobs"][job_name]
@@ -205,67 +154,70 @@ def test_repository_publication_hashes_served_bytes_and_binds_project_wheel() ->
 def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
     gitea = _gitea("publish-package.yml")
     assert gitea["on"]["push"]["tags"] == ["v*"]
-    assert gitea["jobs"]["prepare-package"]["runs-on"] == "release-builder"
-    assert gitea["jobs"]["publish-package"]["runs-on"] == "release-publisher"
+    assert set(gitea["jobs"]) == {"prepare-package"}
+    prepare = gitea["jobs"]["prepare-package"]
+    assert prepare["runs-on"] == "ci-untrusted-python312"
+    assert gitea["permissions"] == {"contents": "read", "packages": "none"}
     gitea_text = (GITEA_WORKFLOWS / "publish-package.yml").read_text(encoding="utf-8")
-    assert "gitea-package-evidence" in gitea_text
-    assert "Served-byte mismatch" in gitea_text
-    assert "GITEA_PACKAGE_USERNAME" in gitea_text
-    assert "Distribution manifest is not bound" in gitea_text
+    secret_names = set(re.findall(r"secrets\.([A-Z0-9_]+)", gitea_text))
+    assert secret_names == set()
+    for forbidden in (
+        "release-publisher",
+        "TWINE_USERNAME",
+        "TWINE_PASSWORD",
+        "GITEA_PACKAGE_TOKEN",
+        "packages: write",
+        "pypa/gh-action-pypi-publish",
+        "twine upload",
+    ):
+        assert forbidden not in gitea_text
     assert "Prerelease publication is restricted to rc versions" in gitea_text
     assert "local or development segments" in gitea_text
-    assert '"source_sha": source_sha' in gitea_text
     assert "github.server_url" in gitea_text
-    assert "git.nmulti.cloud" not in gitea_text
+    assert "https://git.nmulti.cloud" in gitea_text
     assert "actions/setup-python@" not in gitea_text
     assert 'python-version: "3.13.14"' in gitea_text
     assert "uv run --locked python - <<'PY'" in gitea_text
     assert "jq --arg" not in gitea_text
     assert "actions/upload-artifact@c6a3b2bd78b3985e4b2f15397fec357f0fd808de" in gitea_text
-    assert "actions/download-artifact@ad191675b41f6a5b46da9a048cb6893812da158b" in gitea_text
-    prepare = gitea["jobs"]["prepare-package"]
-    publish = gitea["jobs"]["publish-package"]
-    assert prepare["outputs"]["artifact_attempt"] == "${{ steps.meta.outputs.artifact_attempt }}"
-    assert prepare["outputs"]["artifact_name"] == "${{ steps.meta.outputs.artifact_name }}"
     meta = next(
-        step
-        for step in prepare["steps"]
-        if step.get("name") == "Validate protected tag and package metadata"
+        step for step in prepare["steps"] if step.get("name") == "Validate tag and package metadata"
     )
     assert meta["env"]["RELEASE_RUN_ID"] == "${{ github.run_id }}"
     assert meta["env"]["RELEASE_RUN_ATTEMPT"] == "${{ github.run_attempt }}"
     assert 're.fullmatch(r"[1-9][0-9]*", run_id)' in meta["run"]
     assert 're.fullmatch(r"[1-9][0-9]*", run_attempt)' in meta["run"]
     upload = next(
-        step for step in prepare["steps"] if step.get("name") == "Upload package candidate"
-    )
-    download = next(
-        step
-        for step in publish["steps"]
-        if step.get("name") == "Download validated package candidate only"
+        step for step in prepare["steps"] if step.get("name") == "Upload attested package candidate"
     )
     assert upload["with"]["name"] == "${{ steps.meta.outputs.artifact_name }}"
-    assert download["with"]["name"] == "${{ needs.prepare-package.outputs.artifact_name }}"
-    publisher = next(
-        step
-        for step in publish["steps"]
-        if step.get("name") == "Upload package of record with pinned PyPA publisher"
+    assert upload["with"]["path"] == "release-artifacts/proxmox-sdk-gitea-candidate.tar"
+    assert "PROXMOX_SDK_CANDIDATE_SHA256=" in gitea_text
+    assert 'workflow_path=".gitea/workflows/publish-package.yml"' in gitea_text
+    assert "workflow_sha256=sha256" in gitea_text
+    assert 'provenance_path = pathlib.Path("release-artifacts/gitea-provenance.json")' in gitea_text
+    assert "distribution_manifest_sha256=distribution_manifest_sha256" in gitea_text
+    assert "manifest.update(\n              source_sha=" in gitea_text
+
+    verifier_unit = (ROOT / "tools" / "proxmox-sdk-gitea-verify@.service").read_text(
+        encoding="utf-8"
     )
-    assert publisher["with"]["packages-dir"] == "${{ steps.preflight.outputs.publish_dir }}/"
-    rerun_guard = next(
-        step for step in publish["steps"] if step.get("name") == "Reject publisher-only reruns"
+    publisher_unit = (ROOT / "tools" / "proxmox-sdk-gitea-publisher@.service").read_text(
+        encoding="utf-8"
     )
-    assert rerun_guard["env"] == {
-        "CURRENT_ATTEMPT": "${{ github.run_attempt }}",
-        "PRODUCER_ATTEMPT": "${{ needs.prepare-package.outputs.artifact_attempt }}",
-    }
-    assert '"$PRODUCER_ATTEMPT" != "$CURRENT_ATTEMPT"' in rerun_guard["run"]
-    assert "rerun all jobs" in rerun_guard["run"]
-    assert (
-        "gitea-package-evidence-${{ needs.prepare-package.outputs.version }}-"
-        "${{ needs.prepare-package.outputs.source_sha }}-${{ github.run_id }}-"
-        "${{ github.run_attempt }}"
-    ) in gitea_text
+    assert "registry.json" not in verifier_unit
+    assert "gitea-read.json" not in publisher_unit
+    assert "policy.json" not in publisher_unit
+    assert "gitea_package_publisher.py verify" in verifier_unit
+    assert "gitea_package_publisher.py seal" in verifier_unit
+    assert "gitea_package_publisher.py publish" in publisher_unit
+    assert "/opt/proxmox-sdk-publisher/bin/nms" in (
+        ROOT / "tools" / "gitea_package_publisher.py"
+    ).read_text(encoding="utf-8")
+    for unit in (verifier_unit, publisher_unit):
+        assert "uv " not in unit
+        assert "pip " not in unit
+        assert "twine" not in unit.lower()
 
     release_text = (GITHUB_WORKFLOWS / "publish-testpypi.yml").read_text(encoding="utf-8")
     assert 'tags: ["v*rc*"]' in release_text
@@ -273,231 +225,20 @@ def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
     assert "needs.prepare-release.outputs.is_final == 'true'" in release_text
 
 
-def test_gitea_partial_package_recovery_is_executable(tmp_path: Path) -> None:
-    wheel = "proxmox_sdk-0.0.13.post3-py3-none-any.whl"
-    sdist = "proxmox_sdk-0.0.13.post3.tar.gz"
-    local = {wheel, sdist}
-
-    for remote, expected_missing in (
-        (set(), local),
-        ({wheel}, {sdist}),
-        ({sdist}, {wheel}),
-        (local, set()),
-    ):
-        result = _classify_gitea_artifacts(tmp_path, local=local, remote=remote)
-        assert result.returncode == 0, result.stderr
-        assert set(json.loads(result.stdout)) == expected_missing
-
-    incomplete = _classify_gitea_artifacts(
-        tmp_path,
-        local=local,
-        remote={wheel},
-        require_present=True,
+def test_no_gitea_workflow_or_runner_receives_package_credentials() -> None:
+    forbidden = (
+        "release-publisher",
+        "TWINE_PASSWORD",
+        "TWINE_USERNAME",
+        "GITEA_PACKAGE_TOKEN",
+        "GITEA_PACKAGE_USERNAME",
+        ".pypirc",
+        "packages: write",
     )
-    assert incomplete.returncode != 0
-    assert "Gitea is missing artifacts" in incomplete.stderr
-
-    unexpected = _classify_gitea_artifacts(
-        tmp_path,
-        local=local,
-        remote={wheel, "unexpected.whl"},
-    )
-    assert unexpected.returncode != 0
-    assert "Gitea has unexpected artifacts" in unexpected.stderr
-
-    good_sha = "a" * 64
-    bad_sha = "b" * 64
-    mismatch = _classify_gitea_artifacts(
-        tmp_path,
-        local=local,
-        remote={wheel},
-        local_hashes={wheel: good_sha},
-        remote_hashes={wheel: bad_sha},
-    )
-    assert mismatch.returncode != 0
-    assert "Served-byte mismatch" in mismatch.stderr
-
-
-def test_gitea_verifier_rejects_extra_installable_archive_end_to_end(tmp_path: Path) -> None:
-    wheel = "proxmox_sdk-0.0.13.post3-py3-none-any.whl"
-    sdist = "proxmox_sdk-0.0.13.post3.tar.gz"
-    pip_source_suffixes = (
-        ".zip",
-        ".tar.gz",
-        ".tgz",
-        ".tar",
-        ".tar.bz2",
-        ".tbz",
-        ".tar.xz",
-        ".txz",
-        ".tlz",
-        ".tar.lz",
-        ".tar.lzma",
-    )
-    extras = tuple(f"proxmox-sdk-0.0.13-3{suffix}" for suffix in pip_source_suffixes) + (
-        "proxmox_sdk-0.0.13.post3-1-py3-none-any.whl",
-        "proxmox_sdk-0.0.13.post3.zip",
-        "Proxmox.SDK-0.0.13.post3.zip",
-        "proxmox_sdk-0.0.13post3.zip",
-    )
-    artifacts = {wheel: b"wheel", sdist: b"sdist"}
-    index_names = (wheel, sdist, *extras)
-
-    class IndexHandler(BaseHTTPRequestHandler):
-        def do_GET(self) -> None:  # noqa: N802
-            if self.path == "/simple/proxmox-sdk/":
-                links = "".join(f'<a href="/packages/{name}">{name}</a>' for name in index_names)
-                payload = links.encode()
-            elif self.path.startswith("/packages/"):
-                filename = self.path.removeprefix("/packages/")
-                payload = artifacts.get(filename)
-                if payload is None:
-                    self.send_error(404)
-                    return
-            else:
-                self.send_error(404)
-                return
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(payload)))
-            self.end_headers()
-            self.wfile.write(payload)
-
-        def log_message(self, format: str, *args: object) -> None:  # noqa: A002
-            return
-
-    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "localhost")])
-    now = datetime.now(timezone.utc)
-    certificate = (
-        x509.CertificateBuilder()
-        .subject_name(subject)
-        .issuer_name(issuer)
-        .public_key(key.public_key())
-        .serial_number(x509.random_serial_number())
-        .not_valid_before(now - timedelta(minutes=1))
-        .not_valid_after(now + timedelta(days=1))
-        .add_extension(
-            x509.SubjectAlternativeName(
-                [x509.DNSName("localhost"), x509.IPAddress(ip_address("127.0.0.1"))]
-            ),
-            critical=False,
-        )
-        .sign(key, hashes.SHA256())
-    )
-    cert_path = tmp_path / "localhost.pem"
-    key_path = tmp_path / "localhost-key.pem"
-    cert_path.write_bytes(certificate.public_bytes(serialization.Encoding.PEM))
-    key_path.write_bytes(
-        key.private_bytes(
-            serialization.Encoding.PEM,
-            serialization.PrivateFormat.PKCS8,
-            serialization.NoEncryption(),
-        )
-    )
-
-    server = ThreadingHTTPServer(("127.0.0.1", 0), IndexHandler)
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain(cert_path, key_path)
-    server.socket = context.wrap_socket(server.socket, server_side=True)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        verifier = tmp_path / "verify.py"
-        verifier.write_text(_embedded_gitea_verifier(), encoding="utf-8")
-        dist = tmp_path / "dist"
-        dist.mkdir()
-        for filename, payload in artifacts.items():
-            (dist / filename).write_bytes(payload)
-        release_artifacts = tmp_path / "release-artifacts"
-        release_artifacts.mkdir()
-        manifest = {
-            "artifacts": {
-                filename: hashlib.sha256(payload).hexdigest()
-                for filename, payload in artifacts.items()
-            },
-            "source_sha": "a" * 40,
-            "version": "0.0.13.post3",
-        }
-        (release_artifacts / "distribution-manifest.json").write_text(
-            json.dumps(manifest), encoding="utf-8"
-        )
-        env = os.environ.copy()
-        env.update(
-            {
-                "GITHUB_OUTPUT": str(tmp_path / "output"),
-                "PACKAGE_NAME": "proxmox-sdk",
-                "PACKAGE_TOKEN": "test-token",
-                "PACKAGE_USERNAME": "test-user",
-                "RUNNER_TEMP": str(tmp_path),
-                "SIMPLE_INDEX_URL": f"https://127.0.0.1:{server.server_port}/simple",
-                "SOURCE_SHA": "a" * 40,
-                "SSL_CERT_FILE": str(cert_path),
-                "VERSION": "0.0.13.post3",
-            }
-        )
-        for args in ([], ["--require-present"]):
-            result = subprocess.run(
-                [sys.executable, str(verifier), *args],
-                cwd=tmp_path,
-                env=env,
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            assert result.returncode != 0
-            assert "Gitea has unexpected artifacts" in result.stderr
-            for extra in extras:
-                assert extra in result.stderr
-
-        index_names = (
-            wheel,
-            sdist,
-            "other_project-0.0.13.post3.zip",
-            "proxmox_sdk-0.0.14.zip",
-        )
-        for args in ([], ["--require-present"]):
-            result = subprocess.run(
-                [sys.executable, str(verifier), *args],
-                cwd=tmp_path,
-                env=env,
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            assert result.returncode == 0, result.stderr
-
-        index_names = (wheel,)
-        stale = tmp_path / "publish-dist"
-        stale.mkdir()
-        (stale / "stale.whl").write_bytes(b"stale")
-        staged_directories: list[Path] = []
-        for _ in range(2):
-            output_path = tmp_path / "output"
-            output_path.write_text("", encoding="utf-8")
-            result = subprocess.run(
-                [sys.executable, str(verifier)],
-                cwd=tmp_path,
-                env=env,
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            assert result.returncode == 0, result.stderr
-            outputs = dict(
-                line.split("=", 1) for line in output_path.read_text(encoding="utf-8").splitlines()
-            )
-            assert outputs["upload_required"] == "true"
-            staged = tmp_path / outputs["publish_dir"]
-            assert {path.name for path in staged.iterdir()} == {sdist}
-            assert (staged / sdist).read_bytes() == artifacts[sdist]
-            staged_directories.append(staged.resolve())
-        assert staged_directories[0] != staged_directories[1]
-        assert (stale / "stale.whl").read_bytes() == b"stale"
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=5)
+    for path in GITEA_WORKFLOWS.glob("*.yml"):
+        text = path.read_text(encoding="utf-8")
+        for value in forbidden:
+            assert value not in text, f"{value!r} must not appear in {path.name}"
 
 
 def test_current_python_base_and_direct_apk_inputs_are_pinned() -> None:
@@ -643,7 +384,10 @@ def test_permissions_are_read_only_and_tag_terminology_is_truthful() -> None:
     ):
         assert _github(name)["permissions"] == {"contents": "read"}
     assert _gitea("ci.yml")["permissions"] == {"contents": "read"}
-    assert _gitea("publish-package.yml")["permissions"] == {"contents": "read"}
+    assert _gitea("publish-package.yml")["permissions"] == {
+        "contents": "read",
+        "packages": "none",
+    }
     assert _gitea("mirror-github.yml")["permissions"] == {"contents": "read"}
 
     schema = _github("schema-update.yml")

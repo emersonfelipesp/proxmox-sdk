@@ -1,0 +1,36 @@
+[Unit]
+Description=Verify and independently rebuild proxmox-sdk Gitea candidate from run %i
+After=network-online.target
+Wants=network-online.target
+Before=proxmox-sdk-gitea-publisher@%i.service
+ConditionPathExists=!/var/lib/proxmox-sdk-publisher/verified/%i
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=proxmox-sdk-verifier
+Group=proxmox-sdk-verifier
+UMask=0077
+LoadCredential=gitea-read.json:/etc/proxmox-sdk-publisher/gitea-read.json
+LoadCredential=policy.json:/etc/proxmox-sdk-publisher/policy.json
+ExecStart=/opt/proxmox-sdk-publisher/bin/python /opt/proxmox-sdk-publisher/gitea_package_publisher.py verify --run-id %i --artifact-zip /var/lib/proxmox-sdk-publisher/inbox/%i.zip --staging /var/lib/proxmox-sdk-publisher/staging/%i
+# The '+' prefix runs only this fixed, root-owned finalizer as root. It rehashes
+# the closed staging set before moving it into a root-owned read-only handoff.
+ExecStartPost=+/opt/proxmox-sdk-publisher/bin/python /opt/proxmox-sdk-publisher/gitea_package_publisher.py seal --staging /var/lib/proxmox-sdk-publisher/staging/%i --handoff /var/lib/proxmox-sdk-publisher/verified/%i
+KillMode=control-group
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/proxmox-sdk-publisher/staging /var/lib/proxmox-sdk-publisher/verified
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

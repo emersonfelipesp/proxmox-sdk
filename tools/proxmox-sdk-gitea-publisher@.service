@@ -1,0 +1,31 @@
+[Unit]
+Description=Publish root-sealed proxmox-sdk Gitea candidate from Actions run %i
+Requires=proxmox-sdk-gitea-verify@%i.service
+After=network-online.target proxmox-sdk-gitea-verify@%i.service
+Wants=network-online.target
+ConditionPathExists=/var/lib/proxmox-sdk-publisher/verified/%i
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+LoadCredentialEncrypted=registry.json:/etc/credstore.encrypted/proxmox-sdk-registry.json
+ExecStart=/opt/proxmox-sdk-publisher/bin/python /opt/proxmox-sdk-publisher/gitea_package_publisher.py publish --handoff /var/lib/proxmox-sdk-publisher/verified/%i --evidence /var/lib/proxmox-sdk-publisher/evidence/%i.json
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectSystem=strict
+ReadOnlyPaths=/var/lib/proxmox-sdk-publisher/verified
+ReadWritePaths=/var/lib/proxmox-sdk-publisher/evidence
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
