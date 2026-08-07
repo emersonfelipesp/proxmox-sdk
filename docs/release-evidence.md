@@ -14,6 +14,21 @@ eligible for public PyPI and Docker Hub promotion.
    wheel and sdist twice under one `SOURCE_DATE_EPOCH`, requires identical
    SHA256 values, runs the full test suite, and publishes the exact pair to the
    Gitea Package Registry.
+   The Gitea jobs use the server-compatible v3 artifact transport, with the
+   exact source SHA, run ID, and attempt in the handoff name. The builder uses
+   uv to provision the locked Python runtime and release tools; it must not
+   depend on mutable host Python, `jq`, or other manually installed utilities.
+   Gitea scopes artifacts to a run attempt. If the publisher fails after the
+   builder succeeds, rerun **all jobs**, not only the failed publisher job; the
+   workflow rejects a publisher-only rerun before touching package credentials.
+   A complete rerun is idempotent: the preflight accepts only exact existing
+   bytes, stages only a missing wheel or sdist after verifying the existing
+   subset, and recreates the complete verification evidence. Unexpected files
+   or a served-byte mismatch fail closed. Exact-version classification uses a
+   pinned Python packaging parser, including normalized project names,
+   equivalent PEP 440 spellings, wheels, and legacy installable archives.
+   Missing files are copied into a fresh, verifier-created staging directory;
+   persistent-runner leftovers are never reused as publisher input.
 3. Verify the Gitea package evidence artifact and the package listing through
    `nms git packages`. Do not promote a tag whose package record is absent or
    whose served bytes differ from the build manifest.
