@@ -202,6 +202,7 @@ proxmox-sdk/
 │               └── models/             # Lazy route-group Pydantic shards
 │
 ├── tests/                        # Test suite
+├── tools/                        # Root-installed, external release publisher boundary
 ├── docs/                         # MkDocs documentation
 ├── pyproject.toml                # Project config and dependencies
 ├── mkdocs.yml                    # Documentation config
@@ -506,8 +507,9 @@ distribution metadata, and the installed-wheel schema/PDM contract.
 All jobs use the isolated `ci-untrusted-python312` label and read-only contents
 permission. The workflow has no package-registry, DockerHub, deployment, live
 Proxmox, or repository-write authority. Do not add secrets to make an
-untrusted PR job convenient; credentialed publication remains in protected,
-artifact-only release jobs.
+untrusted job convenient. The Gitea package candidate workflow uses this same
+credential-free boundary; publication occurs only in the separately installed
+host publisher documented below.
 
 The repository file cannot provision its own runner or branch protection.
 Before treating these contexts as a merge gate, an operator must register an
@@ -530,32 +532,29 @@ a pass.
 3. **Merge through the Gitea-first feature/release workflow.** Create the
    protected `v<version>` tag only after CI and the adversarial review gate are
    clean. `.gitea/workflows/publish-package.yml` builds twice under the tag
-   commit's `SOURCE_DATE_EPOCH`, verifies byte-identical output, publishes the
-   Gitea package of record, and downloads the served bytes for a hash check.
-   Its builder-to-publisher handoff uses the Gitea-compatible v3 artifact
-   protocol and a source-SHA/run-ID/attempt-scoped artifact name. Python and
-   release tools are provisioned by locked uv commands, so a recreated runner
-   does not require a manually seeded Python tool cache or `jq` installation.
-   Because Gitea artifacts are attempt-scoped, recover a publisher failure with
-   **rerun all jobs**. A publisher-only rerun is rejected before credentials are
-   used; the complete rerun rebuilds, then verifies or idempotently reuses the
-   exact package bytes before producing fresh evidence. If an interrupted
-   upload left only the wheel or sdist, preflight verifies that file and stages
-   only its missing peer; extra files or mismatched bytes fail closed.
-   The verifier provisions `packaging==26.0` explicitly and canonicalizes both
-   distribution names and PEP 440 versions so alternate filename spellings
-   cannot evade the closed-set comparison.
-   Each recovery preflight creates a fresh publisher staging directory and
-   exposes that exact path as a step output, so a prior self-hosted-runner
-   failure cannot poison or block the next full-workflow attempt.
+   commit's `SOURCE_DATE_EPOCH`, verifies byte-identical output, attests the
+   exact source/workflow/run/artifact identities, and uploads one candidate tar
+   on `ci-untrusted-python312`. It has `packages: none`, contains no publisher
+   job, and receives no package credential through any Gitea secret or runner.
+   Download the successful run's exact artifact as
+   `/var/lib/proxmox-sdk-publisher/inbox/<run-id>.zip`, then start
+   `proxmox-sdk-gitea-verify@<run-id>.service`. The preinstalled verifier checks
+   repository, workflow, job, pinned preexisting tag protection, main ancestry,
+   tagged metadata, payload/evidence hashes, and independently rebuilds twice
+   from the exact tagged source before root-sealing a byte-identical handoff.
+   Then start `proxmox-sdk-gitea-publisher@<run-id>.service`; only this separate
+   process receives the registry credential. It rehashes the handoff,
+   idempotently repairs only a matching partial upload, and requires exact
+   served bytes. Install and operate both units
+   exactly as described in [Release evidence and package promotion](release-evidence.md).
 4. **Verify the package record** with `nms git packages`. Promote an RC tag to
    GitHub only after that record is complete; the `v*rc*` GitHub trigger uses
    TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
    `rcN` until validation is clean.
 5. **Create the final package of record**, then copy
    `.github/RELEASE_EVIDENCE_TEMPLATE.md` into the GitHub Release body, set the
-   exact version, copy `distribution_manifest_sha256` from the protected Gitea
-   evidence artifact, complete every checkbox with product-facing evidence, and
+   exact version, copy `distribution_manifest_sha256` from the external host
+   publisher evidence, complete every checkbox with product-facing evidence, and
    remove all private tracker references. GitHub rebuilds that manifest and
    rejects a digest mismatch before public promotion.
 6. **Publish the final GitHub Release** through the deploy workflow:
