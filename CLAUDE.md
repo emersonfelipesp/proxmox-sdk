@@ -271,6 +271,8 @@ workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
 2. Merge through Gitea review and push the protected matching tag. The Gitea
    workflow builds the wheel/sdist twice under the commit `SOURCE_DATE_EPOCH`,
    runs all gates, publishes the package of record, and verifies served bytes.
+   Its isolated runner provisions Python through pinned uv and passes artifacts
+   over the Gitea-compatible v3 protocol with source/run/attempt-bound names.
 3. Verify the record with `nms git packages`, promote the RC tag, and require the
    GitHub `v*rc*` TestPyPI matrix to pass. RCs cannot reach public PyPI or stable
    Docker tags.

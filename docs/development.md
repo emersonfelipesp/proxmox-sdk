@@ -532,6 +532,22 @@ a pass.
    clean. `.gitea/workflows/publish-package.yml` builds twice under the tag
    commit's `SOURCE_DATE_EPOCH`, verifies byte-identical output, publishes the
    Gitea package of record, and downloads the served bytes for a hash check.
+   Its builder-to-publisher handoff uses the Gitea-compatible v3 artifact
+   protocol and a source-SHA/run-ID/attempt-scoped artifact name. Python and
+   release tools are provisioned by locked uv commands, so a recreated runner
+   does not require a manually seeded Python tool cache or `jq` installation.
+   Because Gitea artifacts are attempt-scoped, recover a publisher failure with
+   **rerun all jobs**. A publisher-only rerun is rejected before credentials are
+   used; the complete rerun rebuilds, then verifies or idempotently reuses the
+   exact package bytes before producing fresh evidence. If an interrupted
+   upload left only the wheel or sdist, preflight verifies that file and stages
+   only its missing peer; extra files or mismatched bytes fail closed.
+   The verifier provisions `packaging==26.0` explicitly and canonicalizes both
+   distribution names and PEP 440 versions so alternate filename spellings
+   cannot evade the closed-set comparison.
+   Each recovery preflight creates a fresh publisher staging directory and
+   exposes that exact path as a step output, so a prior self-hosted-runner
+   failure cannot poison or block the next full-workflow attempt.
 4. **Verify the package record** with `nms git packages`. Promote an RC tag to
    GitHub only after that record is complete; the `v*rc*` GitHub trigger uses
    TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
