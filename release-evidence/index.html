@@ -1999,19 +1999,47 @@ eligible for public PyPI and Docker Hub promotion.</p>
 <li>Create a PEP 440 release-candidate version such as <code>X.Y.Zrc1</code> and push the
    matching protected <code>vX.Y.Zrc1</code> tag. The Gitea package workflow builds the
    wheel and sdist twice under one <code>SOURCE_DATE_EPOCH</code>, requires identical
-   SHA256 values, runs the full test suite, and publishes the exact pair to the
-   Gitea Package Registry.</li>
-<li>Verify the Gitea package evidence artifact and the package listing through
-   <code>nms git packages</code>. Do not promote a tag whose package record is absent or
-   whose served bytes differ from the build manifest.</li>
+   SHA256 values, runs the full test suite, writes the canonical cross-system
+   distribution manifest, a separate source/run/workflow-bound Gitea
+   provenance document, and <code>SHA256SUMS</code>, then uploads one deterministic tar.
+   The sole job runs on <code>ci-untrusted-python312</code> with read-only contents and
+   explicit <code>packages: none</code>. No Gitea Actions job, runner, environment, user,
+   organization, or repository secret may hold a package credential.</li>
+<li>Wait for that exact workflow run and its sole builder job to finish
+   successfully. Download the source-SHA/run-ID/attempt-scoped Actions ZIP from
+   that run into <code>/var/lib/proxmox-sdk-publisher/inbox/&lt;run-id&gt;.zip</code>. The
+   deployed Gitea-compatible v3 artifact protocol has no authoritative unique
+   artifact ID in the REST artifact API, so the separately stored job log is
+   the server-side binding: it records the artifact name and SHA256 of the
+   candidate tar that the host publisher must reproduce.</li>
+<li>Start <code>proxmox-sdk-gitea-verify@&lt;run-id&gt;.service</code>. The credential-free
+   verifier requires the exact owner/repository, workflow path,
+   successful run and job identities, untrusted runner label, annotated tag,
+   pinned <code>v*</code> protection identity and allowlists created before the run, main
+   ancestry, tag/commit/version agreement,
+   tagged workflow digest/policy, log-bound candidate digest, closed tar member
+   set, both evidence documents, <code>SHA256SUMS</code>, distribution hashes, and
+   wheel/sdist metadata. It downloads the exact tagged source, rebuilds twice
+   in the immutable host build environment, and requires byte equality with the
+   untrusted Actions candidate. Its root finalizer rehashes and seals the closed
+   handoff. Only then start <code>proxmox-sdk-gitea-publisher@&lt;run-id&gt;.service</code>; that
+   separate process receives only the encrypted registry credential, rehashes
+   the root-sealed handoff, performs an idempotent same-origin upload, downloads
+   served bytes, requires the exact two-file set, and writes
+   <code>/var/lib/proxmox-sdk-publisher/evidence/&lt;run-id&gt;.json</code>.
+   A partial prior upload is repaired only when every existing byte matches;
+   extra or mismatched files fail closed.</li>
+<li>Verify the package listing through <code>nms git packages</code> and archive the host
+   evidence. Do not promote a tag whose package record is absent or whose served
+   bytes differ from the build manifest.</li>
 <li>Promote the RC tag to GitHub. The <code>v*rc*</code> trigger publishes the same pair to
    TestPyPI and validates the bytes served by TestPyPI across Python 3.11, 3.12,
    and 3.13 and all supported schema fixtures. Iterate with <code>rcN</code> until clean.</li>
 <li>Create the final protected tag on Gitea and require its final package record
    to pass the same byte-level verification.</li>
 <li>Copy <code>.github/RELEASE_EVIDENCE_TEMPLATE.md</code> into the public GitHub Release
-   body, set the exact version, copy the Gitea evidence artifact's
-   <code>distribution_manifest_sha256</code>, complete every evidence item, and remove all
+   body, set the exact version, copy <code>distribution_manifest_sha256</code> from the
+   external host publisher evidence, complete every evidence item, and remove all
    private tracker references. The public workflow rebuilds the manifest and
    rejects a digest mismatch, missing/unchecked evidence, a version mismatch,
    or internal evidence.</li>
@@ -2074,18 +2102,38 @@ must configure all of the following before enabling publication:</p>
 <td>Required reviewer; protected final/post release tags only</td>
 </tr>
 <tr>
-<td><code>gitea-package-registry</code></td>
-<td><code>GITEA_PACKAGE_USERNAME</code>, <code>GITEA_PACKAGE_TOKEN</code></td>
-<td>Required reviewer; protected <code>v*</code> tags only</td>
+<td>Gitea package registry</td>
+<td>systemd encrypted <code>registry.json</code> credential on the external publisher host</td>
+<td>Exact protected annotated <code>v*</code> tags only; never available to Gitea Actions</td>
 </tr>
 </tbody>
 </table>
-<p>Remove the corresponding repository-scoped publisher secrets after the
-environment secrets are configured. Protect tag creation, restrict environment
-administrators, and require the <code>pypi</code>/<code>dockerhub-release</code> reviewer to confirm
-the Gitea package-of-record and RC evidence. Provision isolated Gitea runner
-labels <code>release-builder</code> (no publisher secret) and <code>release-publisher</code>
-(environment access only); do not place either label on a general PR runner.</p>
+<p>Remove the corresponding GitHub repository-scoped publisher secrets after the
+GitHub environment secrets are configured. Never store the Gitea package PAT as
+a Gitea Actions user, owner, repository, environment, or runner secret: any
+same-repository workflow can target an eligible runner, and Gitea environments
+do not form a sufficient credential boundary. There is no <code>release-publisher</code>
+runner. The only Gitea release job uses the same untrusted label as review CI.</p>
+<p>Install <code>tools/gitea_package_publisher.py</code>, its Python runtime, the reviewed
+<code>nms</code> binary at <code>/opt/proxmox-sdk-publisher/bin/nms</code>, and both systemd units into
+root-owned read-only paths before tag creation. The immutable Python 3.13.14
+interpreter must contain exactly <code>build==1.5.0</code>, <code>packaging==26.0</code>,
+<code>pyproject-hooks==1.2.0</code>, <code>setuptools==83.0.0</code>, and <code>wheel==0.47.0</code>;
+it is never resolved or installed during a release. Record all installed-file SHA256
+identities in the private release evidence; never run tools from a tag checkout.
+Provision a read-only Gitea credential at
+<code>/etc/proxmox-sdk-publisher/gitea-read.json</code> for <code>nms git</code> evidence reads and an
+encrypted systemd credential named <code>registry.json</code> containing only <code>username</code>
+and <code>token</code>. Copy <code>tools/publisher-policy.example.json</code> to root-owned
+<code>/etc/proxmox-sdk-publisher/policy.json</code>, replace the invalid zero with the exact
+server-assigned <code>v*</code> protection ID, and pin the approved user/team allowlists.
+The rule's server <code>created_at</code> and <code>updated_at</code> must predate the workflow run;
+no release may proceed until that external rule exists. Credential
+values must never appear in an environment variable,
+command argument, log, repository secret, or committed configuration. Protect
+tag creation, require annotated tags and the exact <code>v*</code> protection, restrict
+publisher-host administrators, and require the public-release reviewer to
+confirm the Gitea package record and host evidence.</p>
 <h2 id="reproducibility-and-digest-terminology">Reproducibility and digest terminology<a class="headerlink" href="#reproducibility-and-digest-terminology" title="Permanent link">&para;</a></h2>
 <p>The Python wheel and sdist are required to reproduce byte for byte under the
 tag commit timestamp. Container inputs are constrained by the reviewed

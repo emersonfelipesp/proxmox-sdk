@@ -2959,12 +2959,13 @@
 </span><span id="__span-9-80"><a id="__codelineno-9-80" name="__codelineno-9-80" href="#__codelineno-9-80"></a>│               └── models/             # Lazy route-group Pydantic shards
 </span><span id="__span-9-81"><a id="__codelineno-9-81" name="__codelineno-9-81" href="#__codelineno-9-81"></a>│
 </span><span id="__span-9-82"><a id="__codelineno-9-82" name="__codelineno-9-82" href="#__codelineno-9-82"></a>├── tests/                        # Test suite
-</span><span id="__span-9-83"><a id="__codelineno-9-83" name="__codelineno-9-83" href="#__codelineno-9-83"></a>├── docs/                         # MkDocs documentation
-</span><span id="__span-9-84"><a id="__codelineno-9-84" name="__codelineno-9-84" href="#__codelineno-9-84"></a>├── pyproject.toml                # Project config and dependencies
-</span><span id="__span-9-85"><a id="__codelineno-9-85" name="__codelineno-9-85" href="#__codelineno-9-85"></a>├── mkdocs.yml                    # Documentation config
-</span><span id="__span-9-86"><a id="__codelineno-9-86" name="__codelineno-9-86" href="#__codelineno-9-86"></a>├── Dockerfile                    # Container image
-</span><span id="__span-9-87"><a id="__codelineno-9-87" name="__codelineno-9-87" href="#__codelineno-9-87"></a>├── README.md                     # Main README
-</span><span id="__span-9-88"><a id="__codelineno-9-88" name="__codelineno-9-88" href="#__codelineno-9-88"></a>└── CLAUDE.md                     # Agent index and contributor guide
+</span><span id="__span-9-83"><a id="__codelineno-9-83" name="__codelineno-9-83" href="#__codelineno-9-83"></a>├── tools/                        # Root-installed, external release publisher boundary
+</span><span id="__span-9-84"><a id="__codelineno-9-84" name="__codelineno-9-84" href="#__codelineno-9-84"></a>├── docs/                         # MkDocs documentation
+</span><span id="__span-9-85"><a id="__codelineno-9-85" name="__codelineno-9-85" href="#__codelineno-9-85"></a>├── pyproject.toml                # Project config and dependencies
+</span><span id="__span-9-86"><a id="__codelineno-9-86" name="__codelineno-9-86" href="#__codelineno-9-86"></a>├── mkdocs.yml                    # Documentation config
+</span><span id="__span-9-87"><a id="__codelineno-9-87" name="__codelineno-9-87" href="#__codelineno-9-87"></a>├── Dockerfile                    # Container image
+</span><span id="__span-9-88"><a id="__codelineno-9-88" name="__codelineno-9-88" href="#__codelineno-9-88"></a>├── README.md                     # Main README
+</span><span id="__span-9-89"><a id="__codelineno-9-89" name="__codelineno-9-89" href="#__codelineno-9-89"></a>└── CLAUDE.md                     # Agent index and contributor guide
 </span></code></pre></div>
 <h2 id="key-modules">Key Modules<a class="headerlink" href="#key-modules" title="Permanent link">&para;</a></h2>
 <h3 id="mainpy-dual-mode-fastapi-app"><code>main.py</code> — Dual-mode FastAPI app<a class="headerlink" href="#mainpy-dual-mode-fastapi-app" title="Permanent link">&para;</a></h3>
@@ -3208,8 +3209,9 @@ distribution metadata, and the installed-wheel schema/PDM contract.</p>
 <p>All jobs use the isolated <code>ci-untrusted-python312</code> label and read-only contents
 permission. The workflow has no package-registry, DockerHub, deployment, live
 Proxmox, or repository-write authority. Do not add secrets to make an
-untrusted PR job convenient; credentialed publication remains in protected,
-artifact-only release jobs.</p>
+untrusted job convenient. The Gitea package candidate workflow uses this same
+credential-free boundary; publication occurs only in the separately installed
+host publisher documented below.</p>
 <p>The repository file cannot provision its own runner or branch protection.
 Before treating these contexts as a merge gate, an operator must register an
 eligible organization/repository runner and configure the emitted contexts as
@@ -3229,16 +3231,29 @@ a pass.</p>
 <li><strong>Merge through the Gitea-first feature/release workflow.</strong> Create the
    protected <code>v&lt;version&gt;</code> tag only after CI and the adversarial review gate are
    clean. <code>.gitea/workflows/publish-package.yml</code> builds twice under the tag
-   commit's <code>SOURCE_DATE_EPOCH</code>, verifies byte-identical output, publishes the
-   Gitea package of record, and downloads the served bytes for a hash check.</li>
+   commit's <code>SOURCE_DATE_EPOCH</code>, verifies byte-identical output, attests the
+   exact source/workflow/run/artifact identities, and uploads one candidate tar
+   on <code>ci-untrusted-python312</code>. It has <code>packages: none</code>, contains no publisher
+   job, and receives no package credential through any Gitea secret or runner.
+   Download the successful run's exact artifact as
+   <code>/var/lib/proxmox-sdk-publisher/inbox/&lt;run-id&gt;.zip</code>, then start
+   <code>proxmox-sdk-gitea-verify@&lt;run-id&gt;.service</code>. The preinstalled verifier checks
+   repository, workflow, job, pinned preexisting tag protection, main ancestry,
+   tagged metadata, payload/evidence hashes, and independently rebuilds twice
+   from the exact tagged source before root-sealing a byte-identical handoff.
+   Then start <code>proxmox-sdk-gitea-publisher@&lt;run-id&gt;.service</code>; only this separate
+   process receives the registry credential. It rehashes the handoff,
+   idempotently repairs only a matching partial upload, and requires exact
+   served bytes. Install and operate both units
+   exactly as described in <a href="../release-evidence/">Release evidence and package promotion</a>.</li>
 <li><strong>Verify the package record</strong> with <code>nms git packages</code>. Promote an RC tag to
    GitHub only after that record is complete; the <code>v*rc*</code> GitHub trigger uses
    TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
    <code>rcN</code> until validation is clean.</li>
 <li><strong>Create the final package of record</strong>, then copy
    <code>.github/RELEASE_EVIDENCE_TEMPLATE.md</code> into the GitHub Release body, set the
-   exact version, copy <code>distribution_manifest_sha256</code> from the protected Gitea
-   evidence artifact, complete every checkbox with product-facing evidence, and
+   exact version, copy <code>distribution_manifest_sha256</code> from the external host
+   publisher evidence, complete every checkbox with product-facing evidence, and
    remove all private tracker references. GitHub rebuilds that manifest and
    rejects a digest mismatch before public promotion.</li>
 <li><strong>Publish the final GitHub Release</strong> through the deploy workflow:

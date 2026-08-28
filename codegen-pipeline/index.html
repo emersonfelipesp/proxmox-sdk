@@ -2451,6 +2451,25 @@ number if the schema is regenerated.</p>
 <h2 id="stage-5-pydantic-generator-pydantic_generatorpy">Stage 5: Pydantic Generator (<code>pydantic_generator.py</code>)<a class="headerlink" href="#stage-5-pydantic-generator-pydantic_generatorpy" title="Permanent link">&para;</a></h2>
 <p><code>proxmox_codegen/pydantic_generator.py</code> converts the OpenAPI response schemas
 into <strong>Pydantic v2</strong> model classes.</p>
+<p>Proxmox sometimes documents a composite property as a JSON string while its
+response uses the native scalar represented by the format's <code>default_key</code>.
+For response fields only, the generator preserves the composite string form
+and also accepts a documented integer or boolean default scalar. Other
+composite values, including disk, network, and free-form strings, remain
+strict strings. The rule is driven only by the captured OpenAPI <code>format</code>
+metadata, not by field names, endpoint paths, or downstream-consumer patches.
+The widened arms use strict scalar validators: integer fields preserve their
+captured minimum, maximum, multiple, and enum constraints, while boolean
+formats accept only native booleans or exact integer flags <code>0</code> and <code>1</code>. They do
+not coerce floats or booleans into integers, or arbitrary numbers into booleans.
+All generated string annotations use Pydantic's strict string validator, so
+request fields and non-widened response composites also reject bytes instead
+of silently decoding them. Integer enum constraints are enforced at runtime
+and emitted in <code>model_json_schema()</code> alongside their numeric constraints.
+Malformed numeric metadata fails closed: non-finite bounds and a non-positive
+or non-finite <code>multipleOf</code> disable native-integer widening for that field, so
+the generated model remains <code>StrictStr</code> instead of emitting an unusable or
+unsafe Pydantic constraint.</p>
 <p>The generator writes two model layouts:</p>
 <ul>
 <li><code>pydantic_models.py</code> — compatibility aggregate containing every generated
