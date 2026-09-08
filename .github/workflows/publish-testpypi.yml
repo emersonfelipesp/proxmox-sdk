@@ -74,7 +74,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EVENT_SHA"
           git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
           git merge-base --is-ancestor "$EVENT_SHA" refs/remotes/origin/main
-          python - <<'PY'
+          uv run --locked python - <<'PY'
           import os
           import pathlib
           import re

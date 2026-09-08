@@ -19,7 +19,7 @@ import pytest
 from tools import gitea_package_publisher as publisher
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = "0.0.14.post1"
+VERSION = "0.0.14.post2"
 SOURCE_SHA = "a" * 40
 TAG_OBJECT_SHA = "b" * 40
 RUN_ID = 715
