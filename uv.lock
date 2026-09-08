@@ -2156,7 +2156,7 @@ wheels = [
 
 [[package]]
 name = "proxmox-sdk"
-version = "0.0.14"
+version = "0.0.14.post1"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -2230,6 +2230,7 @@ test = [
 [package.dev-dependencies]
 dev = [
     { name = "build" },
+    { name = "packaging" },
     { name = "pre-commit" },
     { name = "pyright" },
     { name = "pytest" },
@@ -2296,6 +2297,7 @@ provides-extras = ["pbs", "pdm", "ssh", "cli", "otel", "all", "test", "playwrigh
 [package.metadata.requires-dev]
 dev = [
     { name = "build", specifier = "==1.5.0" },
+    { name = "packaging", specifier = ">=24.0" },
     { name = "pre-commit", specifier = ">=4.3.0" },
     { name = "pyright", specifier = ">=1.1.380" },
     { name = "pytest", specifier = ">=9.0.3" },
