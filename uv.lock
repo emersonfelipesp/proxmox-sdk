@@ -2156,7 +2156,7 @@ wheels = [
 
 [[package]]
 name = "proxmox-sdk"
-version = "0.0.13.post4"
+version = "0.0.14"
 source = { editable = "." }
 dependencies = [
     { name = "aiohttp" },
@@ -2267,7 +2267,7 @@ requires-dist = [
     { name = "playwright", marker = "extra == 'playwright'", specifier = ">=1.58.0" },
     { name = "playwright", marker = "extra == 'test'", specifier = ">=1.58.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.3.0" },
-    { name = "pydantic", specifier = "==2.13.3" },
+    { name = "pydantic", specifier = ">=2.13.3,<2.14.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.380" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=9.0.3" },
