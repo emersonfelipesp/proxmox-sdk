@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import io
+import json
 import logging
 import posixpath
 import re
@@ -19,6 +20,8 @@ from proxmox_sdk.sdk.exceptions import (
     ProxmoxConnectionError,
     ProxmoxTimeoutError,
     ResourceException,
+    ResponseTooLargeError,
+    UnsupportedResponseEncodingError,
 )
 from proxmox_sdk.sdk.resource import _filter_none
 
@@ -204,14 +207,82 @@ class HttpsBackend(AbstractBackend):
         data: dict[str, Any] | None = None,
     ) -> Any:
         """Execute an HTTPS request against the Proxmox API."""
+        return await self._request(method, path, params=params, data=data)
+
+    async def request_bounded(
+        self,
+        method: str,
+        path: str,
+        *,
+        max_response_bytes: int,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+    ) -> Any:
+        """Execute a request with a pre-materialization response byte limit."""
+        if (
+            not isinstance(max_response_bytes, int)
+            or isinstance(max_response_bytes, bool)
+            or max_response_bytes <= 0
+        ):
+            raise ValueError("max_response_bytes must be a positive integer")
+        if method.upper() != "GET" or (data and _has_file(data)):
+            raise ValueError("bounded responses support GET requests only")
+        return await self._request(
+            method,
+            path,
+            params=params,
+            data=data,
+            max_response_bytes=max_response_bytes,
+        )
+
+    async def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        max_response_bytes: int | None = None,
+    ) -> Any:
+        """Execute an HTTPS request against the Proxmox API."""
         session = await self._ensure_session()
         await self._ensure_authenticated(session)
-
         clean_params = (_filter_none(params) or None) if params else None
         clean_data = _filter_none(data) if data else None
-
         method = method.upper()
         url = self._url_for(path)
+        headers, cookies = self._request_auth(session, method)
+        if max_response_bytes is not None:
+            headers["Accept-Encoding"] = "identity"
+
+        if clean_data and _has_file(clean_data):
+            return await self._upload(
+                session,
+                method,
+                url,
+                clean_data,
+                headers,
+                cookies,
+                clean_params,
+                self._proxy,
+            )
+        clean_params, json_body = self._request_payload(method, clean_params, clean_data)
+        return await self._request_with_retries(
+            session,
+            method,
+            path,
+            url,
+            headers,
+            cookies,
+            clean_params,
+            json_body,
+            max_response_bytes,
+        )
+
+    def _request_auth(
+        self, session: aiohttp.ClientSession, method: str
+    ) -> tuple[dict[str, str], dict[str, str]]:
+        """Build request authentication without allowing cookie re-quoting."""
         headers = {
             "Accept": "application/json",
             **self._auth.build_headers(method),
@@ -228,47 +299,60 @@ class HttpsBackend(AbstractBackend):
             self._purge_jar_auth_cookie(session)
             headers["Cookie"] = "; ".join(f"{name}={value}" for name, value in cookies.items())
             cookies = {}
-        proxy = self._proxy
+        return headers, cookies
 
-        # Detect file uploads (io.IOBase values in data dict)
-        if clean_data and _has_file(clean_data):
-            return await self._upload(
-                session, method, url, clean_data, headers, cookies, clean_params, proxy
-            )
-
-        # Regular JSON request
+    @staticmethod
+    def _request_payload(
+        method: str,
+        clean_params: dict[str, Any] | None,
+        clean_data: dict[str, Any] | None,
+    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+        """Place filtered request data in the provider's expected location."""
         json_body = clean_data if method not in ("GET", "DELETE") else None
         if method in ("GET", "DELETE") and clean_data:
-            # For GET/DELETE, merge data into params (edge cases)
             if clean_params:
                 clean_params.update(clean_data)
             else:
                 clean_params = clean_data
-            json_body = None
+        return clean_params, json_body
 
-        # Only safe methods are retried to avoid accidental double-mutation.
+    async def _request_with_retries(
+        self,
+        session: aiohttp.ClientSession,
+        method: str,
+        path: str,
+        url: str,
+        headers: dict[str, str],
+        cookies: dict[str, str],
+        params: dict[str, Any] | None,
+        json_body: dict[str, Any] | None,
+        max_response_bytes: int | None,
+    ) -> Any:
+        """Execute safe-method retries while retaining typed transport errors."""
         is_safe = method in ("GET", "HEAD")
         attempts = self._max_retries + 1 if is_safe else 1
         last_exc: ResourceException | None = None
+        request_kwargs = self._request_options(
+            method,
+            url,
+            headers,
+            cookies,
+            params,
+            json_body,
+            max_response_bytes,
+        )
 
         for attempt in range(attempts):
-            if attempt > 0:
-                delay = min(self._retry_backoff * (2 ** (attempt - 1)), 30.0)
-                await asyncio.sleep(delay)
+            await self._wait_for_retry(attempt)
 
             try:
-                async with session.request(
-                    method=method,
-                    url=url,
-                    headers=headers,
-                    cookies=cookies,
-                    params=clean_params,
-                    json=json_body,
-                    ssl=self._ssl,
-                    timeout=self._timeout,
-                    proxy=proxy,
-                ) as resp:
-                    return await self._handle_response(resp, method, path)
+                async with session.request(**request_kwargs) as resp:
+                    return await self._handle_response(
+                        resp,
+                        method,
+                        path,
+                        max_response_bytes=max_response_bytes,
+                    )
 
             except asyncio.TimeoutError as exc:
                 logger.warning("Request timed out: %s %s (attempt %d)", method, path, attempt + 1)
@@ -317,6 +401,38 @@ class HttpsBackend(AbstractBackend):
 
         assert last_exc is not None
         raise last_exc
+
+    def _request_options(
+        self,
+        method: str,
+        url: str,
+        headers: dict[str, str],
+        cookies: dict[str, str],
+        params: dict[str, Any] | None,
+        json_body: dict[str, Any] | None,
+        max_response_bytes: int | None,
+    ) -> dict[str, Any]:
+        """Build aiohttp options while preserving unbounded session defaults."""
+        options: dict[str, Any] = {
+            "method": method,
+            "url": url,
+            "headers": headers,
+            "cookies": cookies,
+            "params": params,
+            "json": json_body,
+            "ssl": self._ssl,
+            "timeout": self._timeout,
+            "proxy": self._proxy,
+        }
+        if max_response_bytes is not None:
+            options["auto_decompress"] = False
+        return options
+
+    async def _wait_for_retry(self, attempt: int) -> None:
+        """Apply capped exponential backoff after the first attempt."""
+        if attempt > 0:
+            delay = min(self._retry_backoff * (2 ** (attempt - 1)), 30.0)
+            await asyncio.sleep(delay)
 
     async def close(self) -> None:
         """Close the underlying aiohttp session.
@@ -463,12 +579,17 @@ class HttpsBackend(AbstractBackend):
         resp: aiohttp.ClientResponse,
         method: str,
         path: str,
+        *,
+        max_response_bytes: int | None = None,
     ) -> Any:
         """Parse and unwrap a Proxmox API response."""
-        try:
-            raw = await resp.json(content_type=None)
-        except Exception:
-            raw = {"data": await resp.text()}
+        if max_response_bytes is None:
+            try:
+                raw = await resp.json(content_type=None)
+            except Exception:
+                raw = {"data": await resp.text()}
+        else:
+            raw = await self._read_bounded_json(resp, max_response_bytes)
 
         if resp.status >= 400:
             errors = (
@@ -485,6 +606,25 @@ class HttpsBackend(AbstractBackend):
         if isinstance(raw, dict) and "data" in raw:
             return raw["data"]
         return raw
+
+    async def _read_bounded_json(
+        self, resp: aiohttp.ClientResponse, max_response_bytes: int
+    ) -> Any:
+        """Read and decode JSON without buffering more than the caller's limit."""
+        content_encoding = resp.headers.get("content-encoding", "identity").lower()
+        if content_encoding not in {"", "identity"}:
+            raise UnsupportedResponseEncodingError()
+        if resp.content_length is not None and resp.content_length > max_response_bytes:
+            raise ResponseTooLargeError(max_response_bytes)
+        body = bytearray()
+        async for chunk in resp.content.iter_chunked(min(65_536, max_response_bytes + 1)):
+            if len(body) + len(chunk) > max_response_bytes:
+                raise ResponseTooLargeError(max_response_bytes)
+            body.extend(chunk)
+        try:
+            return json.loads(body)
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return {"data": body.decode(errors="replace")}
 
     async def _upload(
         self,

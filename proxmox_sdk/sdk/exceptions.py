@@ -36,6 +36,21 @@ class BackendNotAvailableError(ProxmoxSDKError):
     """Raised when a required optional backend dependency is not installed."""
 
 
+class ResponseTooLargeError(ProxmoxSDKError):
+    """Raised before a bounded response can exceed its configured byte limit."""
+
+    def __init__(self, maximum_bytes: int) -> None:
+        self.maximum_bytes = maximum_bytes
+        super().__init__(f"Response exceeds the {maximum_bytes}-byte limit")
+
+
+class UnsupportedResponseEncodingError(ProxmoxSDKError):
+    """Raised when a bounded response uses transport content encoding."""
+
+    def __init__(self) -> None:
+        super().__init__("Bounded responses require identity content encoding")
+
+
 class CephCapabilityUnsupportedError(ProxmoxSDKError):
     """Raised when a Ceph provider cannot service a requested operation.
 
@@ -75,6 +90,8 @@ __all__ = [
     "ResourceException",
     "AuthenticationError",
     "BackendNotAvailableError",
+    "ResponseTooLargeError",
+    "UnsupportedResponseEncodingError",
     "CephCapabilityUnsupportedError",
     "ProxmoxTimeoutError",
     "ProxmoxConnectionError",

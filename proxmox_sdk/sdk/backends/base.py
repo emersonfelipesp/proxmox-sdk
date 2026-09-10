@@ -62,4 +62,21 @@ class TicketCapableBackend(Protocol):
         ...
 
 
-__all__ = ["AbstractBackend", "TicketCapableBackend"]
+@runtime_checkable
+class BoundedResponseBackend(Protocol):
+    """Backend capability for enforcing a byte limit before materialization."""
+
+    async def request_bounded(
+        self,
+        method: str,
+        path: str,
+        *,
+        max_response_bytes: int,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+    ) -> Any:
+        """Execute a request while enforcing a response byte limit."""
+        ...
+
+
+__all__ = ["AbstractBackend", "BoundedResponseBackend", "TicketCapableBackend"]

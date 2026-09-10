@@ -6,6 +6,8 @@ from proxmox_sdk.sdk.exceptions import (
     BackendNotAvailableError,
     ProxmoxSDKError,
     ResourceException,
+    ResponseTooLargeError,
+    UnsupportedResponseEncodingError,
 )
 from proxmox_sdk.sdk.sync import SyncProxmoxSDK
 from proxmox_sdk.sdk.tools.files import Files
@@ -18,6 +20,8 @@ __all__ = [
     "AuthenticationError",
     "BackendNotAvailableError",
     "ProxmoxSDKError",
+    "ResponseTooLargeError",
+    "UnsupportedResponseEncodingError",
     "Tasks",
     "Files",
 ]

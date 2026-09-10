@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiohttp
@@ -24,11 +25,18 @@ from proxmox_sdk.sdk.services import SERVICES
 
 
 def _make_json_response(status: int, body: dict) -> AsyncMock:
-    """Build a mock aiohttp response that returns *body* from .json()."""
-    resp = AsyncMock()
+    """Build a mock aiohttp response that streams the encoded body."""
+    encoded = json.dumps(body).encode()
+    resp = MagicMock()
     resp.status = status
     resp.reason = "OK" if status < 400 else "Error"
-    resp.json = AsyncMock(return_value=body)
+    resp.headers = {}
+    resp.content_length = len(encoded)
+
+    async def chunks(_size: int):
+        yield encoded
+
+    resp.content.iter_chunked = chunks
 
     # Support async context manager (async with session.request(...) as resp)
     cm = AsyncMock()

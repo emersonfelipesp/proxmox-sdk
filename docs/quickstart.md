@@ -169,6 +169,29 @@ async def main():
 asyncio.run(main())
 ```
 
+For HTTPS reads whose provider-controlled response must be bounded before it is
+held in memory, use `get_bounded()` with a positive byte limit:
+
+```python
+async with ProxmoxSDK(
+    host="pve.example.com",
+    user="monitoring@pve",
+    token_name="metrics",
+    token_value="secret",
+) as proxmox:
+    metrics = await proxmox.cluster.metrics.export.get_bounded(
+        1_048_576,
+        history=False,
+    )
+```
+
+The HTTPS transport requests identity encoding and enforces the limit while
+reading the response, including chunked responses. It raises
+`ResponseTooLargeError` without retaining the response body when the limit is
+crossed. A provider that ignores identity encoding is rejected before body
+iteration. The bounded operation is GET-only, and backends that cannot enforce
+the bound raise `BackendNotAvailableError` before dispatch.
+
 ### Sync SDK (No async/await)
 
 ```python

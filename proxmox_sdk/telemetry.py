@@ -6,10 +6,12 @@ import os
 import socket
 import threading
 import uuid
+from collections.abc import Awaitable
 from typing import Any
 
 from proxmox_sdk import __version__
-from proxmox_sdk.sdk.backends.base import AbstractBackend
+from proxmox_sdk.sdk.backends.base import AbstractBackend, BoundedResponseBackend
+from proxmox_sdk.sdk.exceptions import BackendNotAvailableError
 
 _TRUE_VALUES = frozenset({"1", "true", "yes", "on"})
 _TRACER: Any | None = None
@@ -194,13 +196,47 @@ class TracingBackend(AbstractBackend):
         params: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
     ) -> Any:
+        return await self._trace_dispatch(
+            method,
+            path,
+            self._inner.request(method, path, params=params, data=data),
+        )
+
+    async def request_bounded(
+        self,
+        method: str,
+        path: str,
+        *,
+        max_response_bytes: int,
+        params: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+    ) -> Any:
+        """Preserve tracing while forwarding a bounded response request."""
+        if not isinstance(self._inner, BoundedResponseBackend):
+            raise BackendNotAvailableError(
+                "The selected backend does not support bounded responses"
+            )
+        return await self._trace_dispatch(
+            method,
+            path,
+            self._inner.request_bounded(
+                method,
+                path,
+                max_response_bytes=max_response_bytes,
+                params=params,
+                data=data,
+            ),
+        )
+
+    async def _trace_dispatch(self, method: str, path: str, dispatch: Awaitable[Any]) -> Any:
+        """Trace one prepared backend dispatch without exposing its arguments."""
         tracer = _ensure_tracer(self._otel_enabled)
         if tracer is None:
-            return await self._inner.request(method, path, params=params, data=data)
+            return await dispatch
 
         otel = _load_otel()
         if otel is None:
-            return await self._inner.request(method, path, params=params, data=data)
+            return await dispatch
 
         method_upper = method.upper()
         attributes = {
@@ -218,7 +254,7 @@ class TracingBackend(AbstractBackend):
             set_status_on_exception=False,
         ) as span:
             try:
-                return await self._inner.request(method, path, params=params, data=data)
+                return await dispatch
             except Exception as exc:
                 span.record_exception(_safe_error(exc))
                 span.set_status(

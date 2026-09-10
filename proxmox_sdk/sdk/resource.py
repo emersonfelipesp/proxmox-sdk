@@ -115,6 +115,29 @@ class ProxmoxResource:
             params=_filter_none(params) or None,
         )
 
+    async def get_bounded(self, max_response_bytes: int, *path_args: str, **params: Any) -> Any:
+        """HTTP GET with a byte limit enforced before response materialization."""
+        from proxmox_sdk.sdk.backends.base import BoundedResponseBackend
+        from proxmox_sdk.sdk.exceptions import BackendNotAvailableError
+
+        if (
+            not isinstance(max_response_bytes, int)
+            or isinstance(max_response_bytes, bool)
+            or max_response_bytes <= 0
+        ):
+            raise ValueError("max_response_bytes must be a positive integer")
+        resource = self._extend(*path_args)
+        if not isinstance(resource._backend, BoundedResponseBackend):
+            raise BackendNotAvailableError(
+                "The selected backend does not support bounded responses"
+            )
+        return await resource._backend.request_bounded(
+            "GET",
+            resource._path,
+            max_response_bytes=max_response_bytes,
+            params=_filter_none(params) or None,
+        )
+
     async def post(self, *path_args: str, **data: Any) -> Any:
         """HTTP POST — create a resource."""
         resource = self._extend(*path_args)

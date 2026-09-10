@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import ssl
 import time
 from typing import TYPE_CHECKING, Any
@@ -16,6 +17,36 @@ if TYPE_CHECKING:
 
 # Proxmox tickets are valid for 2 hours; renew after 1 hour (same as proxmoxer).
 _TICKET_RENEW_INTERVAL: float = 3600.0
+_MAX_TICKET_RESPONSE_BYTES = 64 * 1024
+
+
+async def _read_ticket_json(response: aiohttp.ClientResponse) -> dict[str, Any]:
+    """Read a small identity-encoded authentication response."""
+    encoding = response.headers.get("content-encoding", "identity").lower()
+    if encoding not in {"", "identity"}:
+        raise AuthenticationError("Proxmox authentication response encoding is unsupported")
+    if response.content_length is not None and response.content_length > _MAX_TICKET_RESPONSE_BYTES:
+        raise AuthenticationError("Proxmox authentication response is too large")
+    body = bytearray()
+    async for chunk in response.content.iter_chunked(16 * 1024):
+        if len(body) + len(chunk) > _MAX_TICKET_RESPONSE_BYTES:
+            raise AuthenticationError("Proxmox authentication response is too large")
+        body.extend(chunk)
+    try:
+        raw = json.loads(body)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise AuthenticationError("Proxmox authentication returned invalid JSON") from exc
+    if not isinstance(raw, dict):
+        raise AuthenticationError("Proxmox authentication returned invalid JSON")
+    return raw
+
+
+def _ticket_payload(username: str, password: str, tfa_challenge: str | None) -> dict[str, Any]:
+    """Build the authentication form without retaining optional empty fields."""
+    payload: dict[str, Any] = {"username": username, "password": password}
+    if tfa_challenge is not None:
+        payload["tfa-challenge"] = tfa_challenge
+    return payload
 
 
 class TicketAuth:
@@ -195,30 +226,20 @@ class TicketAuth:
         Raises:
             AuthenticationError: On failure.
         """
-        payload: dict[str, Any] = {
-            "username": self._username,
-            "password": password,
-        }
-        if tfa_challenge is not None:
-            payload["tfa-challenge"] = tfa_challenge
+        payload = _ticket_payload(self._username, password, tfa_challenge)
 
-        post_kwargs: dict[str, Any] = {"data": payload, "proxy": proxy}
+        post_kwargs: dict[str, Any] = {
+            "data": payload,
+            "proxy": proxy,
+            "headers": {"Accept-Encoding": "identity"},
+            "auto_decompress": False,
+        }
         if ssl is not None:
             post_kwargs["ssl"] = ssl
 
         try:
             async with session.post(ticket_url, **post_kwargs) as response:
-                try:
-                    raw = await response.json(content_type=None)
-                except (ValueError, aiohttp.ContentTypeError) as exc:
-                    # A reverse proxy or gateway can return a non-JSON body (e.g.
-                    # an HTML 502 page). Surface it as a typed AuthenticationError
-                    # instead of leaking a raw JSONDecodeError to the caller.
-                    body = (await response.text())[:200]
-                    raise AuthenticationError(
-                        f"Proxmox authentication returned a non-JSON response "
-                        f"(HTTP {response.status}): {body!r}"
-                    ) from exc
+                raw = await _read_ticket_json(response)
 
                 if response.status != 200:
                     detail = raw.get("errors") or raw.get("data") or str(raw)
