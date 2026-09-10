@@ -7,6 +7,8 @@ on:
 # This workflow is an untrusted producer. It must never receive package,
 # deployment, or repository-write credentials; publication is performed by the
 # separately installed host publisher after independent provenance checks.
+# Do not derive canonical provenance from github.server_url: Gitea can expose a
+# valid internal runner-facing origin there.
 permissions:
   contents: read
   packages: none
@@ -49,7 +51,6 @@ jobs:
           RELEASE_REPOSITORY: ${{ github.repository }}
           RELEASE_RUN_ATTEMPT: ${{ github.run_attempt }}
           RELEASE_RUN_ID: ${{ github.run_id }}
-          RELEASE_SERVER_URL: ${{ github.server_url }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EVENT_SHA"
@@ -87,8 +88,6 @@ jobs:
               raise SystemExit("Tag does not match pyproject version")
           if os.environ["RELEASE_REPOSITORY"] != "emersonfelipesp/proxmox-sdk":
               raise SystemExit("Unexpected repository identity")
-          if os.environ["RELEASE_SERVER_URL"] != "https://git.nmulti.cloud":
-              raise SystemExit("Unexpected Gitea server identity")
           run_id = os.environ["RELEASE_RUN_ID"]
           run_attempt = os.environ["RELEASE_RUN_ATTEMPT"]
           if re.fullmatch(r"[1-9][0-9]*", run_id) is None:
@@ -138,7 +137,7 @@ jobs:
           RELEASE_REPOSITORY: ${{ github.repository }}
           RELEASE_RUN_ATTEMPT: ${{ github.run_attempt }}
           RELEASE_RUN_ID: ${{ github.run_id }}
-          RELEASE_SERVER_URL: ${{ github.server_url }}
+          CANONICAL_SERVER_URL: https://git.nmulti.cloud
           SOURCE_DATE_EPOCH: ${{ steps.meta.outputs.source_date_epoch }}
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
@@ -180,7 +179,7 @@ jobs:
               repository=os.environ["RELEASE_REPOSITORY"],
               run_attempt=int(os.environ["RELEASE_RUN_ATTEMPT"]),
               run_id=int(os.environ["RELEASE_RUN_ID"]),
-              server_url=os.environ["RELEASE_SERVER_URL"],
+              server_url=os.environ["CANONICAL_SERVER_URL"],
               source_sha=os.environ["EVENT_SHA"],
               tag=os.environ["EVENT_REF"].removeprefix("refs/tags/"),
               version=os.environ["VERSION"],

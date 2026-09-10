@@ -225,6 +225,23 @@ def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
     assert "needs.prepare-release.outputs.is_final == 'true'" in release_text
 
 
+def test_gitea_candidate_uses_canonical_public_server_provenance() -> None:
+    prepare = _gitea("publish-package.yml")["jobs"]["prepare-package"]
+    metadata = next(
+        step for step in prepare["steps"] if step.get("name") == "Validate tag and package metadata"
+    )
+    attestation = next(
+        step
+        for step in prepare["steps"]
+        if step.get("name") == "Bind attestation to the workflow run and candidate bytes"
+    )
+
+    assert "RELEASE_SERVER_URL" not in metadata["env"]
+    assert attestation["env"]["CANONICAL_SERVER_URL"] == "https://git.nmulti.cloud"
+    assert 'server_url=os.environ["CANONICAL_SERVER_URL"]' in attestation["run"]
+    assert "${{ github.server_url }}" not in str(prepare["steps"])
+
+
 def test_no_gitea_workflow_or_runner_receives_package_credentials() -> None:
     forbidden = (
         "release-publisher",

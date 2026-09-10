@@ -282,7 +282,9 @@ workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
    workflow builds the wheel/sdist twice under the commit `SOURCE_DATE_EPOCH`,
    runs all gates, and uploads an attested source/run/attempt-bound candidate on
    `ci-untrusted-python312` with `packages: none`. No Actions job or runner may
-   hold package credentials. The separately installed verifier validates the
+   hold package credentials. Candidate provenance records the canonical public
+   Gitea URL instead of the runner-facing `github.server_url`. The separately
+   installed verifier independently validates the canonical origin and the
    exact workflow/job and preexisting pinned tag protection, rebuilds the tag
    twice in an immutable host environment, byte-compares the candidate, and
    root-seals a handoff. A separate publisher process receives only the package
