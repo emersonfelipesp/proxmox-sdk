@@ -2004,7 +2004,12 @@ eligible for public PyPI and Docker Hub promotion.</p>
    provenance document, and <code>SHA256SUMS</code>, then uploads one deterministic tar.
    The sole job runs on <code>ci-untrusted-python312</code> with read-only contents and
    explicit <code>packages: none</code>. No Gitea Actions job, runner, environment, user,
-   organization, or repository secret may hold a package credential.</li>
+   organization, or repository secret may hold a package credential.
+   Candidate provenance records the canonical public server identity
+   <code>https://git.nmulti.cloud</code>; it does not consume the runner-facing
+   <code>github.server_url</code>, which can legitimately contain the server's internal
+   configured origin. The external verifier independently proves the canonical
+   origin through its fixed Gitea reader and the repository clone URL.</li>
 <li>Wait for that exact workflow run and its sole builder job to finish
    successfully. Download the source-SHA/run-ID/attempt-scoped Actions ZIP from
    that run into <code>/var/lib/proxmox-sdk-publisher/inbox/&lt;run-id&gt;.zip</code>. The
