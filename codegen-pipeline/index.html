@@ -1459,6 +1459,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redirect-and-browser-origin-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Redirect and Browser-Origin Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#api-key-auth" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2229,6 +2240,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#redirect-and-browser-origin-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Redirect and Browser-Origin Policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#api-key-auth" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2359,10 +2381,12 @@ metadata, and lazy model shards. The generated artifacts are checked into
 <p><code>proxmox_codegen/crawler.py</code> uses <strong>Playwright</strong> to drive a headless browser against the Proxmox API Viewer web application. The Proxmox API Viewer renders its endpoint tree from an embedded <code>apidoc.js</code> file rather than serving plain JSON, so a browser is required to execute the JavaScript.</p>
 <p>The crawler:</p>
 <ol>
-<li>Navigates to the Proxmox API Viewer at <code>https://&lt;host&gt;:8006</code></li>
-<li>Waits for <code>apidoc.js</code> to load and the tree to render</li>
-<li>Recursively expands every tree node</li>
-<li>For each endpoint, captures: path, HTTP methods, parameters, request/response schemas, descriptions</li>
+<li>Installs browser request and WebSocket guards before creating the page.</li>
+<li>Navigates to the Proxmox API Viewer at <code>https://&lt;host&gt;:8006</code>.</li>
+<li>Waits for <code>apidoc.js</code> to load and the tree to render.</li>
+<li>Recursively expands every tree node.</li>
+<li>For each endpoint, captures the path, HTTP methods, parameters,
+   request/response schemas, and descriptions.</li>
 </ol>
 <pre class="mermaid"><code>sequenceDiagram
     participant CLI as proxmox-cli codegen
@@ -2646,6 +2670,21 @@ trusting a cached number if the schema is regenerated).</p>
 - IPv4-mapped IPv6 (<code>::ffff:...</code>)
 - 6to4 addresses (<code>2002::/16</code>)</p>
 <p>Only addresses that resolve to public Proxmox VE API endpoints are allowed by default.</p>
+<h3 id="redirect-and-browser-origin-policy">Redirect and Browser-Origin Policy<a class="headerlink" href="#redirect-and-browser-origin-policy" title="Permanent link">&para;</a></h3>
+<p>Codegen never follows HTTP redirects. The direct <code>apidoc.js</code> downloader rejects
+every 3xx response before reading its body. The Playwright crawler installs its
+request guard before the initial navigation and aborts every redirected browser
+request before Chromium contacts the destination. It reports the prior response
+status and safe <code>Location</code> host through <code>ProxmoxRedirectError</code>; when Chromium
+cannot expose the prior status, the exception uses the generic 300 status.</p>
+<p>All browser requests are also restricted to the validated source origin: the
+same scheme, hostname, and effective port. Cross-origin scripts, stylesheets,
+images, API calls, and later top-level navigations are aborted, so browser
+subresources cannot steer the crawl to another public, private, loopback, or
+metadata origin. The API Viewer does not require WebSockets, so the crawler
+refuses every WebSocket before Chromium connects to its server. These guards
+are shared by the PVE and PDM codegen flows. Redirect failures propagate
+unchanged through both the synchronous and asynchronous crawler entry points.</p>
 <h3 id="api-key-auth">API Key Auth<a class="headerlink" href="#api-key-auth" title="Permanent link">&para;</a></h3>
 <p>All codegen endpoints require <code>Authorization: Bearer &lt;CODEGEN_API_KEY&gt;</code>. The key is set via the <code>CODEGEN_API_KEY</code> environment variable at server startup.</p>
 <h3 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h3>
