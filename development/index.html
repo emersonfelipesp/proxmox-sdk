@@ -2959,7 +2959,7 @@
 </span><span id="__span-9-80"><a id="__codelineno-9-80" name="__codelineno-9-80" href="#__codelineno-9-80"></a>│               └── models/             # Lazy route-group Pydantic shards
 </span><span id="__span-9-81"><a id="__codelineno-9-81" name="__codelineno-9-81" href="#__codelineno-9-81"></a>│
 </span><span id="__span-9-82"><a id="__codelineno-9-82" name="__codelineno-9-82" href="#__codelineno-9-82"></a>├── tests/                        # Test suite
-</span><span id="__span-9-83"><a id="__codelineno-9-83" name="__codelineno-9-83" href="#__codelineno-9-83"></a>├── tools/                        # Root-installed, external release publisher boundary
+</span><span id="__span-9-83"><a id="__codelineno-9-83" name="__codelineno-9-83" href="#__codelineno-9-83"></a>├── tools/                        # Gitea Actions and compatible host release publisher
 </span><span id="__span-9-84"><a id="__codelineno-9-84" name="__codelineno-9-84" href="#__codelineno-9-84"></a>├── docs/                         # MkDocs documentation
 </span><span id="__span-9-85"><a id="__codelineno-9-85" name="__codelineno-9-85" href="#__codelineno-9-85"></a>├── pyproject.toml                # Project config and dependencies
 </span><span id="__span-9-86"><a id="__codelineno-9-86" name="__codelineno-9-86" href="#__codelineno-9-86"></a>├── mkdocs.yml                    # Documentation config
@@ -3206,12 +3206,12 @@ GitHub review workflow. For pushes and pull requests to <code>main</code> or <co
 checks pinned workflow inputs, Ruff, ty, Pyright, compile/import contracts, all
 three shipped Proxmox schemas (<code>latest</code>, <code>9.2</code>, and <code>9.1.11</code>), strict MkDocs,
 distribution metadata, and the installed-wheel schema/PDM contract.</p>
-<p>All jobs use the isolated <code>ci-untrusted-python312</code> label and read-only contents
-permission. The workflow has no package-registry, DockerHub, deployment, live
-Proxmox, or repository-write authority. Do not add secrets to make an
-untrusted job convenient. The Gitea package candidate workflow uses this same
-credential-free boundary; publication occurs only in the separately installed
-host publisher documented below.</p>
+<p>All review jobs use the isolated <code>ci-untrusted-python312</code> label and read-only
+contents permission. The review workflow has no package-registry, DockerHub,
+deployment, live Proxmox, or repository-write authority. Do not add secrets to
+make an untrusted job convenient. The tag-only Gitea package workflow uses the
+same disposable label, but only its final bounded publication step receives the
+dedicated <code>PACKAGE_WRITE_TOKEN</code> described below.</p>
 <p>The repository file cannot provision its own runner or branch protection.
 Before treating these contexts as a merge gate, an operator must register an
 eligible organization/repository runner and configure the emitted contexts as
@@ -3233,38 +3233,41 @@ a pass.</p>
    clean. <code>.gitea/workflows/publish-package.yml</code> builds twice under the tag
    commit's <code>SOURCE_DATE_EPOCH</code>, verifies byte-identical output, attests the
    exact source/workflow/run/artifact identities, and uploads one candidate tar
-   on <code>ci-untrusted-python312</code>. It has <code>packages: none</code>, contains no publisher
-   job, and receives no package credential through any Gitea secret or runner.
-   Download the successful run's exact artifact as
-   <code>/var/lib/proxmox-sdk-publisher/inbox/&lt;run-id&gt;.zip</code>, then start
-   <code>proxmox-sdk-gitea-verify@&lt;run-id&gt;.service</code>. The preinstalled verifier checks
-   repository, workflow, job, pinned preexisting tag protection, main ancestry,
-   tagged metadata, payload/evidence hashes, and independently rebuilds twice
-   from the exact tagged source before root-sealing a byte-identical handoff.
-   Then start <code>proxmox-sdk-gitea-publisher@&lt;run-id&gt;.service</code>; only this separate
-   process receives the registry credential. It rehashes the handoff,
-   idempotently repairs only a matching partial upload, and requires exact
-   served bytes. Install and operate both units
-   exactly as described in <a href="../release-evidence/">Release evidence and package promotion</a>.</li>
-<li><strong>Verify the package record</strong> with <code>nms git packages</code>. Promote an RC tag to
+   on <code>ci-untrusted-python312</code> without credentials. A second credential-free job
+   anonymously fetches the exact tag and canonical <code>main</code>, validates the
+   attestation, rebuilds twice in independent Git worktrees, requires byte
+   equality, and emits a bounded exact seal. A third job binds the helper to the
+   immutable event SHA and downloads only that seal. Only its final five-minute
+   step receives <code>PACKAGE_WRITE_TOKEN</code>; it rehashes the seal, permits only an
+   absent or exact two-file registry state with the correct repository
+   association, publishes with Twine, and verifies both served files through
+   bounded registry API reads. Partial, extra, mismatched, redirected,
+   oversized, timed-out, or wrongly associated states fail closed. The retained
+   systemd units are an optional compatibility path, not a release prerequisite.</li>
+<li><strong>Verify the package record</strong> with all three read paths:</li>
+</ol>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>nms<span class="w"> </span>git<span class="w"> </span>packages<span class="w"> </span>latest<span class="w"> </span>--type<span class="w"> </span>pypi<span class="w"> </span>--name<span class="w"> </span>proxmox-sdk<span class="w"> </span>--owner<span class="w"> </span>emersonfelipesp
+</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>nms<span class="w"> </span>git<span class="w"> </span>packages<span class="w"> </span>detail<span class="w"> </span>--type<span class="w"> </span>pypi<span class="w"> </span>--name<span class="w"> </span>proxmox-sdk<span class="w"> </span>--version<span class="w"> </span>&lt;version&gt;<span class="w"> </span>--owner<span class="w"> </span>emersonfelipesp
+</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>nms<span class="w"> </span>git<span class="w"> </span>packages<span class="w"> </span>files<span class="w"> </span>--type<span class="w"> </span>pypi<span class="w"> </span>--name<span class="w"> </span>proxmox-sdk<span class="w"> </span>--version<span class="w"> </span>&lt;version&gt;<span class="w"> </span>--owner<span class="w"> </span>emersonfelipesp
+</span></code></pre></div>
+<p>Promote an RC tag to
    GitHub only after that record is complete; the <code>v*rc*</code> GitHub trigger uses
    TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
-   <code>rcN</code> until validation is clean.</li>
-<li><strong>Create the final package of record</strong>, then copy
+   <code>rcN</code> until validation is clean.
+5. <strong>Create the final package of record</strong>, then copy
    <code>.github/RELEASE_EVIDENCE_TEMPLATE.md</code> into the GitHub Release body, set the
-   exact version, copy <code>distribution_manifest_sha256</code> from the external host
-   publisher evidence, complete every checkbox with product-facing evidence, and
-   remove all private tracker references. GitHub rebuilds that manifest and
-   rejects a digest mismatch before public promotion.</li>
-<li><strong>Publish the final GitHub Release</strong> through the deploy workflow:
-   <div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v&lt;new-version&gt;<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-24-2"><a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">  </span>--title<span class="w"> </span><span class="s2">&quot;v&lt;new-version&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-24-3"><a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">  </span>--notes-file<span class="w"> </span>/tmp/proxmox-sdk-release-notes.md
-</span></code></pre></div></li>
-<li><strong>Validate public artifacts and downstream consumers.</strong> Confirm PyPI served
+   exact version, copy <code>distribution_manifest_sha256</code> from the verified Gitea
+   provenance, complete every checkbox with product-facing evidence, and remove
+   all private tracker references. GitHub rebuilds that manifest and
+   rejects a digest mismatch before public promotion.
+6. <strong>Publish the final GitHub Release</strong> through the deploy workflow:
+   <div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>gh<span class="w"> </span>release<span class="w"> </span>create<span class="w"> </span>v&lt;new-version&gt;<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-25-2"><a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="w">  </span>--title<span class="w"> </span><span class="s2">&quot;v&lt;new-version&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-25-3"><a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span>--notes-file<span class="w"> </span>/tmp/proxmox-sdk-release-notes.md
+</span></code></pre></div>
+7. <strong>Validate public artifacts and downstream consumers.</strong> Confirm PyPI served
    bytes, all amd64/arm64 Docker post-release checks, evidence artifacts, and
-   downstream version updates before closing the lifecycle record.</li>
-</ol>
+   downstream version updates before closing the lifecycle record.</p>
 <p>The release workflow serializes each ref, derives <code>SOURCE_DATE_EPOCH</code> from the
 source commit, and requires two builds to produce the same wheel/sdist SHA256
 pair. Repository metadata preflight is followed by served-byte downloads at
@@ -3288,8 +3291,11 @@ cannot overwrite one another.</p>
 deployment-branch rules, protected tags, or isolated Gitea runners. Configure
 those prerequisites exactly as listed in
 <a href="../release-evidence/">Release evidence and package promotion</a> before enabling a
-publisher. <code>sha-&lt;commit&gt;</code> is a commit traceability tag, while the resolved OCI
-manifest digest is the immutable deployment identity.</p>
+publisher. Configure the repository secret <code>PACKAGE_WRITE_TOKEN</code> as a dedicated
+repository-scoped <code>write:package</code> credential; it must not grant source or
+administrative write authority. A missing secret is a hard publication failure.
+<code>sha-&lt;commit&gt;</code> is a commit traceability tag, while the resolved OCI manifest
+digest is the immutable deployment identity.</p>
 <h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Issues:</strong> https://github.com/emersonfelipesp/proxmox-sdk/issues</li>
