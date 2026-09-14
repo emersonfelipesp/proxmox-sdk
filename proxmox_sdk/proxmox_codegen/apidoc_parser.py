@@ -5,8 +5,11 @@ from __future__ import annotations
 import json
 import ssl
 import warnings
+from typing import Any
 from urllib.error import URLError
-from urllib.request import urlopen
+from urllib.request import HTTPErrorProcessor, HTTPSHandler, Request, build_opener
+
+from proxmox_sdk.sdk.exceptions import ProxmoxRedirectError
 
 PROXMOX_API_VIEWER_URL = "https://pve.proxmox.com/pve-docs/api-viewer/"
 PROXMOX_APIDOC_JS_URL = "https://pve.proxmox.com/pve-docs/api-viewer/apidoc.js"
@@ -15,15 +18,42 @@ PDM_API_VIEWER_URL = "https://pdm.proxmox.com/docs/api-viewer/"
 PDM_APIDOC_JS_URL = "https://pdm.proxmox.com/docs/api-viewer/apidoc.js"
 
 
+class _RefuseRedirects(HTTPErrorProcessor):
+    """Reject every urllib 3xx response before redirect handling or body reads."""
+
+    def http_response(self, request: Any, response: Any) -> Any:
+        if 300 <= response.code < 400:
+            status = response.code
+            location = response.headers.get("Location")
+            response.close()
+            raise ProxmoxRedirectError(status, location)
+        return super().http_response(request, response)
+
+    https_response = http_response
+
+
+def _open_url(
+    url: str | Request,
+    timeout: int,
+    *,
+    context: ssl.SSLContext | None = None,
+) -> Any:
+    """Open ``url`` with redirect following disabled."""
+    handlers: list[Any] = [_RefuseRedirects()]
+    if context is not None:
+        handlers.append(HTTPSHandler(context=context))
+    return build_opener(*handlers).open(url, timeout=timeout)
+
+
 def fetch_apidoc_js(
-    url: str = PROXMOX_APIDOC_JS_URL,
+    url: str | Request = PROXMOX_APIDOC_JS_URL,
     timeout: int = 60,
     allow_insecure: bool = False,
 ) -> str:
     """Download the upstream Proxmox `apidoc.js` source file.
 
     Args:
-        url: URL to fetch the apidoc.js file from.
+        url: URL or prepared urllib request for the apidoc.js file.
         timeout: Request timeout in seconds.
         allow_insecure: If True, retry with SSL verification disabled when the
             initial request fails due to an SSL error. This should only be used
@@ -32,9 +62,11 @@ def fetch_apidoc_js(
 
     Raises:
         URLError: On network errors, or SSL errors when ``allow_insecure=False``.
+        ProxmoxRedirectError: If the endpoint returns any HTTP 3xx response,
+            including ``304 Not Modified``.
     """
     try:
-        with urlopen(url, timeout=timeout) as response:
+        with _open_url(url, timeout) as response:
             return response.read().decode("utf-8")
     except URLError as error:
         if not isinstance(getattr(error, "reason", None), ssl.SSLError):
@@ -55,7 +87,7 @@ def fetch_apidoc_js(
         insecure_context = ssl.create_default_context()
         insecure_context.check_hostname = False
         insecure_context.verify_mode = ssl.CERT_NONE
-        with urlopen(url, timeout=timeout, context=insecure_context) as response:
+        with _open_url(url, timeout, context=insecure_context) as response:
             return response.read().decode("utf-8")
 
 

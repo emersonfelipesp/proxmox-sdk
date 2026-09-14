@@ -64,7 +64,12 @@ class TicketCapableBackend(Protocol):
 
 @runtime_checkable
 class BoundedResponseBackend(Protocol):
-    """Backend capability for enforcing a byte limit before materialization."""
+    """Backend capability for enforcing a byte limit before materialization.
+
+    HTTP implementations must refuse every 3xx response before reading its
+    body. They must never follow redirects, so authentication material cannot
+    be forwarded to another origin outside the bounded-response contract.
+    """
 
     async def request_bounded(
         self,
@@ -75,7 +80,11 @@ class BoundedResponseBackend(Protocol):
         params: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
     ) -> Any:
-        """Execute a request while enforcing a response byte limit."""
+        """Execute a request while enforcing a response byte limit.
+
+        Raises:
+            ProxmoxRedirectError: The endpoint returned an HTTP redirect.
+        """
         ...
 
 

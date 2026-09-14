@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from urllib.parse import urlsplit
 
 
 class ProxmoxSDKError(Exception):
@@ -34,6 +35,22 @@ class AuthenticationError(ProxmoxSDKError):
 
 class BackendNotAvailableError(ProxmoxSDKError):
     """Raised when a required optional backend dependency is not installed."""
+
+
+class ProxmoxRedirectError(ProxmoxSDKError):
+    """Raised before body reads for every HTTP 3xx, including 304."""
+
+    def __init__(self, status: int, location: str | None = None) -> None:
+        self.status = status
+        try:
+            self.location_host = urlsplit(location).hostname if location else None
+        except ValueError:
+            self.location_host = None
+
+        message = f"HTTP redirect {status} refused"
+        if self.location_host:
+            message = f"{message} (location host: {self.location_host})"
+        super().__init__(message)
 
 
 class ResponseTooLargeError(ProxmoxSDKError):
@@ -90,6 +107,7 @@ __all__ = [
     "ResourceException",
     "AuthenticationError",
     "BackendNotAvailableError",
+    "ProxmoxRedirectError",
     "ResponseTooLargeError",
     "UnsupportedResponseEncodingError",
     "CephCapabilityUnsupportedError",

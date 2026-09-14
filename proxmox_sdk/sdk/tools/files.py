@@ -11,6 +11,8 @@ from urllib.parse import urlparse
 
 import aiohttp
 
+from proxmox_sdk.sdk.exceptions import ProxmoxRedirectError
+
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.resource import ProxmoxResource
 
@@ -187,6 +189,10 @@ class Files:
 
         Returns:
             Task status dict (if ``blocking_status``) or raw API result.
+
+        Raises:
+            ProxmoxRedirectError: If a checksum auto-discovery probe receives
+                any HTTP 3xx response, including ``304 Not Modified``.
         """
         resolved_filename = filename or url.rstrip("/").rsplit("/", 1)[-1]
         resolved_content = content_type or _infer_content_type(resolved_filename)
@@ -231,6 +237,11 @@ class Files:
 
         Returns:
             ``(algorithm, hex_digest)`` tuple, or ``None`` if not found.
+
+        Raises:
+            ProxmoxRedirectError: If any checksum location returns an HTTP 3xx
+                response. Redirect bodies are not read and targets are not
+                contacted.
         """
         if not _is_safe_probe_url(url):
             logger.warning(
@@ -287,9 +298,15 @@ def _compute_file_checksum(path: str, algorithm: str) -> str:
 
 
 async def _fetch_single_hash(session: aiohttp.ClientSession, url: str) -> str | None:
-    """Fetch a URL and return its body as a stripped string if it looks like a hex digest."""
+    """Fetch a digest without following redirects or reading their bodies."""
     try:
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+        async with session.get(
+            url,
+            timeout=aiohttp.ClientTimeout(total=10),
+            allow_redirects=False,
+        ) as resp:
+            if 300 <= resp.status < 400:
+                raise ProxmoxRedirectError(resp.status, resp.headers.get("Location"))
             if resp.status != 200:
                 return None
             text = (await resp.text()).strip().split()[0]
@@ -297,6 +314,8 @@ async def _fetch_single_hash(session: aiohttp.ClientSession, url: str) -> str | 
                 c in "0123456789abcdefABCDEF" for c in text
             ):
                 return text.lower()
+    except ProxmoxRedirectError:
+        raise
     except Exception:  # noqa: BLE001
         pass
     return None
@@ -307,9 +326,15 @@ async def _fetch_hash_from_sums(
     sums_url: str,
     filename: str,
 ) -> str | None:
-    """Fetch a checksum index file and find the hash for ``filename``."""
+    """Fetch a checksum index without following redirects or reading their bodies."""
     try:
-        async with session.get(sums_url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+        async with session.get(
+            sums_url,
+            timeout=aiohttp.ClientTimeout(total=10),
+            allow_redirects=False,
+        ) as resp:
+            if 300 <= resp.status < 400:
+                raise ProxmoxRedirectError(resp.status, resp.headers.get("Location"))
             if resp.status != 200:
                 return None
             for line in (await resp.text()).splitlines():
@@ -318,6 +343,8 @@ async def _fetch_hash_from_sums(
                     digest, name = parts[0], parts[-1].lstrip("*")
                     if name == filename or name.endswith(f"/{filename}"):
                         return digest.lower()
+    except ProxmoxRedirectError:
+        raise
     except Exception:  # noqa: BLE001
         pass
     return None

@@ -49,10 +49,12 @@ All pipeline stages are orchestrated by `generate_proxmox_codegen_bundle()` in
 
 The crawler:
 
-1. Navigates to the Proxmox API Viewer at `https://<host>:8006`
-2. Waits for `apidoc.js` to load and the tree to render
-3. Recursively expands every tree node
-4. For each endpoint, captures: path, HTTP methods, parameters, request/response schemas, descriptions
+1. Installs browser request and WebSocket guards before creating the page.
+2. Navigates to the Proxmox API Viewer at `https://<host>:8006`.
+3. Waits for `apidoc.js` to load and the tree to render.
+4. Recursively expands every tree node.
+5. For each endpoint, captures the path, HTTP methods, parameters,
+   request/response schemas, and descriptions.
 
 ```mermaid
 sequenceDiagram
@@ -322,6 +324,24 @@ Blocked addresses:
 - 6to4 addresses (`2002::/16`)
 
 Only addresses that resolve to public Proxmox VE API endpoints are allowed by default.
+
+### Redirect and Browser-Origin Policy
+
+Codegen never follows HTTP redirects. The direct `apidoc.js` downloader rejects
+every 3xx response before reading its body. The Playwright crawler installs its
+request guard before the initial navigation and aborts every redirected browser
+request before Chromium contacts the destination. It reports the prior response
+status and safe `Location` host through `ProxmoxRedirectError`; when Chromium
+cannot expose the prior status, the exception uses the generic 300 status.
+
+All browser requests are also restricted to the validated source origin: the
+same scheme, hostname, and effective port. Cross-origin scripts, stylesheets,
+images, API calls, and later top-level navigations are aborted, so browser
+subresources cannot steer the crawl to another public, private, loopback, or
+metadata origin. The API Viewer does not require WebSockets, so the crawler
+refuses every WebSocket before Chromium connects to its server. These guards
+are shared by the PVE and PDM codegen flows. Redirect failures propagate
+unchanged through both the synchronous and asynchronous crawler entry points.
 
 ### API Key Auth
 

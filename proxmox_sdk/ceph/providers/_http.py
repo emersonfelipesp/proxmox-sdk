@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Any, Protocol, Self, runtime_checkable
 
 from proxmox_sdk.sdk.exceptions import (
     ProxmoxConnectionError,
+    ProxmoxRedirectError,
     ResourceException,
 )
 
@@ -61,7 +62,12 @@ class AsyncTransport(Protocol):
 
 
 class AiohttpTransport:
-    """Default transport backed by a lazily-created ``aiohttp`` session."""
+    """Default transport backed by a lazily-created ``aiohttp`` session.
+
+    Redirects are never followed. Every HTTP 3xx response, including
+    ``304 Not Modified``, raises :class:`ProxmoxRedirectError` before its body
+    is read.
+    """
 
     def __init__(self, *, verify_ssl: bool = True, timeout: int = DEFAULT_TIMEOUT) -> None:
         self._verify_ssl = verify_ssl
@@ -110,7 +116,13 @@ class AiohttpTransport:
                 json=json,
                 data=data,
                 ssl=ssl_param,
+                allow_redirects=False,
             ) as response:
+                if 300 <= response.status < 400:
+                    raise ProxmoxRedirectError(
+                        response.status,
+                        response.headers.get("Location"),
+                    )
                 text = await response.text()
                 body: Any = None
                 if text:

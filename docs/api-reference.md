@@ -401,6 +401,20 @@ Proxmox API proxy endpoints have no rate limiting. The `/codegen/*` endpoints ar
 
 See [Security](security.md) for details.
 
+## Redirect Policy
+
+Every SDK-owned HTTP transport refuses every HTTP 3xx response, including
+`304 Not Modified`, and raises `ProxmoxRedirectError` before reading the
+response body. This includes ordinary and bounded HTTPS requests, the
+ticket-authentication endpoint, multipart uploads, direct Ceph Dashboard/RGW/RBD
+provider requests, checksum auto-discovery probes, and codegen `apidoc.js`
+downloads. The transports never forward authentication cookies, CSRF headers,
+Dashboard credentials or bearer tokens, RGW authorization headers, upload
+bodies, or checksum probes through a redirect. A public checksum URL that
+redirects to a loopback or private address fails with the same typed exception.
+The exception reports the status and destination hostname without retaining the
+full `Location` value.
+
 ## Versioning
 
 The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 9.2** (with `latest` mirroring 9.2; 9.1.11 retained).

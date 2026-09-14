@@ -53,3 +53,6 @@ proxmox_openapi/generated/proxmox/*
 *.key
 *.crt
 .proxmox-cli/
+
+# Local build output used by review gates (mkdocs --site-dir .tmp/site)
+.tmp/

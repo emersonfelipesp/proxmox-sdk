@@ -200,7 +200,7 @@ sequenceDiagram
     H->>P: HTTPS GET
     P-->>H: 200 {"data": {...}}
     H-->>B: aiohttp.ClientResponse
-    B->>B: _handle_response() — extract .data field, raise ResourceException on 4xx/5xx
+    B->>B: _handle_response() — reject 3xx, extract .data, raise ResourceException on 4xx/5xx
     B-->>R: unwrapped dict / list
 ```
 
@@ -406,6 +406,7 @@ ProxmoxSDKError (base)
 │   ├── ProxmoxTimeoutError    Request exceeded timeout (status_code=504)
 │   └── ProxmoxConnectionError TCP refused, DNS failure, SSL error (status_code=503)
 ├── AuthenticationError        Bad credentials, NeedTFA without OTP, or auth timeout
+├── ProxmoxRedirectError       Every HTTP 3xx, including 304, refused before body read
 └── BackendNotAvailableError   Optional backend dep (paramiko, openssh_wrapper) missing
 ```
 
@@ -426,6 +427,16 @@ except ResourceException as e:
     # Proxmox returned 4xx/5xx
     print(e.status_code, e.errors)
 ```
+
+`ProxmoxRedirectError` subclasses `ProxmoxSDKError` directly. Its `status`
+attribute contains the 3xx status, and `location_host` contains only the parsed
+destination hostname when one is present. The full `Location` header is never
+retained. The redirect is rejected before the response body is read. This
+contract applies to ordinary and bounded HTTPS requests, ticket authentication,
+multipart uploads, direct Ceph Dashboard/RGW/RBD provider transport, checksum
+auto-discovery probes, and codegen `apidoc.js` downloads. Checksum probes raise
+the same exception when a public URL redirects toward a loopback or private
+address; they never dispatch the redirected request.
 
 `HttpsBackend.request()` maps `aiohttp` exceptions to these types:
 

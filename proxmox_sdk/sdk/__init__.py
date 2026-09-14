@@ -4,6 +4,7 @@ from proxmox_sdk.sdk.api import ProxmoxSDK
 from proxmox_sdk.sdk.exceptions import (
     AuthenticationError,
     BackendNotAvailableError,
+    ProxmoxRedirectError,
     ProxmoxSDKError,
     ResourceException,
     ResponseTooLargeError,
@@ -19,6 +20,7 @@ __all__ = [
     "ResourceException",
     "AuthenticationError",
     "BackendNotAvailableError",
+    "ProxmoxRedirectError",
     "ProxmoxSDKError",
     "ResponseTooLargeError",
     "UnsupportedResponseEncodingError",

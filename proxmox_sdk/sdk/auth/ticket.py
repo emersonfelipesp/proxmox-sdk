@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 import aiohttp
 
-from proxmox_sdk.sdk.exceptions import AuthenticationError
+from proxmox_sdk.sdk.exceptions import AuthenticationError, ProxmoxRedirectError
 
 if TYPE_CHECKING:
     from proxmox_sdk.sdk.services import ServiceConfig
@@ -112,6 +112,7 @@ class TicketAuth:
 
         Raises:
             AuthenticationError: If authentication fails.
+            ProxmoxRedirectError: If the ticket endpoint returns a redirect.
         """
         ticket, csrf = await self._request_ticket(
             session, ticket_url, self._password, ssl=ssl, proxy=proxy
@@ -225,6 +226,7 @@ class TicketAuth:
 
         Raises:
             AuthenticationError: On failure.
+            ProxmoxRedirectError: If the ticket endpoint returns a redirect.
         """
         payload = _ticket_payload(self._username, password, tfa_challenge)
 
@@ -233,12 +235,18 @@ class TicketAuth:
             "proxy": proxy,
             "headers": {"Accept-Encoding": "identity"},
             "auto_decompress": False,
+            "allow_redirects": False,
         }
         if ssl is not None:
             post_kwargs["ssl"] = ssl
 
         try:
             async with session.post(ticket_url, **post_kwargs) as response:
+                if 300 <= response.status < 400:
+                    raise ProxmoxRedirectError(
+                        response.status,
+                        response.headers.get("Location"),
+                    )
                 raw = await _read_ticket_json(response)
 
                 if response.status != 200:

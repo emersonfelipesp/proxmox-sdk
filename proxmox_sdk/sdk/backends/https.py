@@ -18,6 +18,7 @@ from proxmox_sdk.sdk.auth.base import AuthStrategy, EnsurableAuthStrategy
 from proxmox_sdk.sdk.backends.base import AbstractBackend
 from proxmox_sdk.sdk.exceptions import (
     ProxmoxConnectionError,
+    ProxmoxRedirectError,
     ProxmoxTimeoutError,
     ResourceException,
     ResponseTooLargeError,
@@ -206,7 +207,7 @@ class HttpsBackend(AbstractBackend):
         params: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
     ) -> Any:
-        """Execute an HTTPS request against the Proxmox API."""
+        """Execute a request while refusing every HTTP 3xx, including 304."""
         return await self._request(method, path, params=params, data=data)
 
     async def request_bounded(
@@ -412,7 +413,7 @@ class HttpsBackend(AbstractBackend):
         json_body: dict[str, Any] | None,
         max_response_bytes: int | None,
     ) -> dict[str, Any]:
-        """Build aiohttp options while preserving unbounded session defaults."""
+        """Build aiohttp options with redirect following disabled."""
         options: dict[str, Any] = {
             "method": method,
             "url": url,
@@ -423,6 +424,7 @@ class HttpsBackend(AbstractBackend):
             "ssl": self._ssl,
             "timeout": self._timeout,
             "proxy": self._proxy,
+            "allow_redirects": False,
         }
         if max_response_bytes is not None:
             options["auto_decompress"] = False
@@ -582,7 +584,10 @@ class HttpsBackend(AbstractBackend):
         *,
         max_response_bytes: int | None = None,
     ) -> Any:
-        """Parse and unwrap a Proxmox API response."""
+        """Reject every 3xx before reading, then parse and unwrap the response."""
+        if 300 <= resp.status < 400:
+            raise ProxmoxRedirectError(resp.status, resp.headers.get("Location"))
+
         if max_response_bytes is None:
             try:
                 raw = await resp.json(content_type=None)
@@ -664,6 +669,7 @@ class HttpsBackend(AbstractBackend):
                 ssl=self._ssl,
                 timeout=aiohttp.ClientTimeout(total=3600),  # uploads can be slow
                 proxy=proxy,
+                allow_redirects=False,
             ) as resp:
                 return await self._handle_response(resp, method, url)
 

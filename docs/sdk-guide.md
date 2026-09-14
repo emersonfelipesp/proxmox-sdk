@@ -175,6 +175,7 @@ from proxmox_sdk import (
     BackendNotAvailableError,
     ProxmoxTimeoutError,
     ProxmoxConnectionError,
+    ProxmoxRedirectError,
 )
 
 try:
@@ -185,6 +186,9 @@ except ProxmoxTimeoutError as e:
 except ProxmoxConnectionError as e:
     # TCP connection refused, DNS failure, or SSL error (status_code=503)
     print(f"Cannot reach Proxmox: {e.content}")
+except ProxmoxRedirectError as e:
+    # Redirects are refused before any response body is read
+    print(f"Redirect refused: HTTP {e.status}, destination host={e.location_host}")
 except ResourceException as e:
     # HTTP >= 400 from the Proxmox API — also catches the two above
     print(f"API error: {e.status_code} - {e.status_message}")
@@ -196,6 +200,20 @@ except BackendNotAvailableError:
 ```
 
 `ProxmoxTimeoutError` and `ProxmoxConnectionError` both subclass `ResourceException`, so existing `except ResourceException` handlers continue to work without changes.
+
+The HTTPS backend raises `ProxmoxRedirectError` for every 3xx response,
+including `304 Not Modified`, and never follows the redirect. This policy covers
+ordinary and bounded requests, ticket authentication, multipart uploads, direct
+Ceph Dashboard/RGW/RBD provider requests, SDK-host checksum auto-discovery
+probes, codegen `apidoc.js` downloads, and the Playwright browser crawl. The
+browser guard also aborts cross-origin subresources before dispatch. A redirect
+from a public checksum or browser-crawl URL to a loopback or private address
+therefore fails with `ProxmoxRedirectError` before any redirected request or
+response-body read. The crawler also refuses every WebSocket before Chromium
+connects to its server. The exception's
+`location_host` attribute contains only the destination hostname, or `None` when
+the `Location` header is relative, missing, or malformed. The full `Location`
+value is not retained in the exception.
 
 ---
 

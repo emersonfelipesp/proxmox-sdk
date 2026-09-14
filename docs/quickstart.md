@@ -189,8 +189,19 @@ The HTTPS transport requests identity encoding and enforces the limit while
 reading the response, including chunked responses. It raises
 `ResponseTooLargeError` without retaining the response body when the limit is
 crossed. A provider that ignores identity encoding is rejected before body
-iteration. The bounded operation is GET-only, and backends that cannot enforce
-the bound raise `BackendNotAvailableError` before dispatch.
+iteration. Bounded reads never follow HTTP redirects, including same-origin
+redirects. The same refusal applies to ordinary HTTPS requests, ticket
+authentication, multipart uploads, direct Ceph Dashboard/RGW/RBD provider
+requests, checksum auto-discovery probes, codegen `apidoc.js` downloads, and the
+Playwright browser crawl. The browser guard also aborts every request outside
+the validated source origin, including cross-origin subresources, and refuses
+every WebSocket before Chromium connects to its server.
+Any 3xx response, including `304 Not Modified`, raises `ProxmoxRedirectError`
+before the response body is read; checksum probes use this same exception
+instead of following a public URL into a loopback or private network. The
+exception exposes the status and only the destination host, never the full
+`Location` value. The bounded operation is GET-only, and backends that cannot
+enforce the bound raise `BackendNotAvailableError` before dispatch.
 
 ### Sync SDK (No async/await)
 

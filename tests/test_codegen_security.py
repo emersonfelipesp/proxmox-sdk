@@ -1,10 +1,98 @@
+from __future__ import annotations
+
+from collections.abc import Iterator
+from contextlib import contextmanager
+from http.client import HTTPResponse
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
+from urllib.request import Request
+
 import pytest
 
+from proxmox_sdk.proxmox_codegen.apidoc_parser import fetch_apidoc_js
 from proxmox_sdk.proxmox_codegen.security import (
     SSRFProtectionError,
     validate_source_url,
     validate_version_tag,
 )
+from proxmox_sdk.sdk.exceptions import ProxmoxRedirectError
+
+
+@contextmanager
+def _serve_http(
+    handler: type[BaseHTTPRequestHandler],
+) -> Iterator[ThreadingHTTPServer]:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield server
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join()
+
+
+@pytest.mark.parametrize("prepared_request", [False, True], ids=["url", "request"])
+def test_apidoc_downloader_refuses_redirect_at_opener_level(
+    monkeypatch: pytest.MonkeyPatch,
+    prepared_request: bool,
+) -> None:
+    target_requests = 0
+    origin_requests = 0
+
+    class TargetHandler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:
+            nonlocal target_requests
+            target_requests += 1
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"const apiSchema = [];")
+
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    with _serve_http(TargetHandler) as target_server:
+        target_port = int(target_server.server_address[1])
+        target_url = f"http://127.0.0.1:{target_port}/target?secret=hidden"
+
+        class RedirectHandler(BaseHTTPRequestHandler):
+            def do_GET(self) -> None:
+                nonlocal origin_requests
+                origin_requests += 1
+                body = b"redirect body must not be read"
+                self.send_response(302)
+                self.send_header("Location", target_url)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, format: str, *args: object) -> None:
+                pass
+
+        with _serve_http(RedirectHandler) as origin_server:
+            origin_port = int(origin_server.server_address[1])
+            origin_url = f"http://127.0.0.1:{origin_port}/apidoc.js"
+            url: str | Request = Request(origin_url) if prepared_request else origin_url
+
+            def fail_if_read(
+                self: HTTPResponse,
+                amt: int | None = None,
+                decode_content: bool | None = None,
+                cache_content: bool = False,
+            ) -> bytes:
+                del self, amt, decode_content, cache_content
+                raise AssertionError("the redirect response body was read")
+
+            monkeypatch.setattr(HTTPResponse, "read", fail_if_read)
+            with pytest.raises(ProxmoxRedirectError) as exc_info:
+                fetch_apidoc_js(url)
+
+    assert exc_info.value.status == 302
+    assert exc_info.value.location_host == "127.0.0.1"
+    assert "secret=hidden" not in str(exc_info.value)
+    assert origin_requests == 1
+    assert target_requests == 0
 
 
 class TestSSRFProtection:
