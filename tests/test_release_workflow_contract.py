@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,18 +152,28 @@ def test_repository_publication_hashes_served_bytes_and_binds_project_wheel() ->
     assert '"proxmox-sdk==${PROXMOX_SDK_VERSION}"' not in dockerfile
 
 
-def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
+def test_gitea_package_workflow_topology_and_runner_lanes() -> None:
     gitea = _gitea("publish-package.yml")
     assert gitea["on"]["push"]["tags"] == ["v*"]
-    assert set(gitea["jobs"]) == {"prepare-package"}
+    assert set(gitea["jobs"]) == {"prepare-package", "verify-and-seal", "publish-candidate"}
     prepare = gitea["jobs"]["prepare-package"]
+    verify = gitea["jobs"]["verify-and-seal"]
+    publish = gitea["jobs"]["publish-candidate"]
     assert prepare["runs-on"] == "ci-untrusted-python312"
+    assert verify["runs-on"] == "release-builder"
+    assert publish["runs-on"] == "release-publisher"
+    assert not str(verify["runs-on"]).startswith("ci-untrusted-")
+    assert not str(publish["runs-on"]).startswith("ci-untrusted-")
+    assert verify["needs"] == "prepare-package"
+    assert publish["needs"] == "verify-and-seal"
     assert gitea["permissions"] == {"contents": "read", "packages": "none"}
+
+
+def test_gitea_package_workflow_has_no_alternate_credential_path() -> None:
     gitea_text = (GITEA_WORKFLOWS / "publish-package.yml").read_text(encoding="utf-8")
     secret_names = set(re.findall(r"secrets\.([A-Z0-9_]+)", gitea_text))
-    assert secret_names == set()
+    assert secret_names == {"PACKAGE_WRITE_TOKEN"}
     for forbidden in (
-        "release-publisher",
         "TWINE_USERNAME",
         "TWINE_PASSWORD",
         "GITEA_PACKAGE_TOKEN",
@@ -171,15 +182,21 @@ def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
         "twine upload",
     ):
         assert forbidden not in gitea_text
+    assert "actions/setup-python@" not in gitea_text
+    assert "jq --arg" not in gitea_text
+    assert "actions/upload-artifact@c6a3b2bd78b3985e4b2f15397fec357f0fd808de" in gitea_text
+
+
+def test_gitea_package_metadata_is_identity_bound() -> None:
+    gitea = _gitea("publish-package.yml")
+    prepare = gitea["jobs"]["prepare-package"]
+    gitea_text = (GITEA_WORKFLOWS / "publish-package.yml").read_text(encoding="utf-8")
     assert "Prerelease publication is restricted to rc versions" in gitea_text
     assert "local or development segments" in gitea_text
     assert "github.server_url" in gitea_text
     assert "https://git.nmulti.cloud" in gitea_text
-    assert "actions/setup-python@" not in gitea_text
     assert 'python-version: "3.13.14"' in gitea_text
     assert "uv run --locked python - <<'PY'" in gitea_text
-    assert "jq --arg" not in gitea_text
-    assert "actions/upload-artifact@c6a3b2bd78b3985e4b2f15397fec357f0fd808de" in gitea_text
     meta = next(
         step for step in prepare["steps"] if step.get("name") == "Validate tag and package metadata"
     )
@@ -187,6 +204,11 @@ def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
     assert meta["env"]["RELEASE_RUN_ATTEMPT"] == "${{ github.run_attempt }}"
     assert 're.fullmatch(r"[1-9][0-9]*", run_id)' in meta["run"]
     assert 're.fullmatch(r"[1-9][0-9]*", run_attempt)' in meta["run"]
+
+
+def test_gitea_package_attestation_is_identity_bound() -> None:
+    prepare = _gitea("publish-package.yml")["jobs"]["prepare-package"]
+    gitea_text = (GITEA_WORKFLOWS / "publish-package.yml").read_text(encoding="utf-8")
     upload = next(
         step for step in prepare["steps"] if step.get("name") == "Upload attested package candidate"
     )
@@ -195,16 +217,46 @@ def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
     assert "PROXMOX_SDK_CANDIDATE_SHA256=" in gitea_text
     assert 'workflow_path=".gitea/workflows/publish-package.yml"' in gitea_text
     assert "workflow_sha256=sha256" in gitea_text
+
+
+def test_gitea_package_manifest_and_provenance_remain_separate() -> None:
+    gitea_text = (GITEA_WORKFLOWS / "publish-package.yml").read_text(encoding="utf-8")
     assert 'provenance_path = pathlib.Path("release-artifacts/gitea-provenance.json")' in gitea_text
     assert "distribution_manifest_sha256=distribution_manifest_sha256" in gitea_text
     assert "manifest.update(\n              source_sha=" in gitea_text
 
+
+def test_gitea_seal_digest_is_exported_and_checked_before_publication() -> None:
+    jobs = _gitea("publish-package.yml")["jobs"]
+    verify = jobs["verify-and-seal"]
+    publish = jobs["publish-candidate"]
+    assert verify["outputs"]["seal_sha256"] == "${{ steps.seal.outputs.seal_sha256 }}"
+    assert verify["outputs"]["source_date_epoch"] == (
+        "${{ needs.prepare-package.outputs.source_date_epoch }}"
+    )
+    assert "verify-actions" in str(verify["steps"])
+    assert "harden-actions-seal" in str(publish["steps"])
+    assert "publish-actions" in str(publish["steps"])
+    assert str(publish["steps"]).count("--seal-sha256") == 2
+    assert '--server-url "https://git.nmulti.cloud"' in str(publish["steps"])
+    assert "PACKAGE_WRITE_TOKEN is required for Gitea package publication" in str(publish["steps"])
+    evidence = publish["steps"][-1]
+    assert evidence["name"] == "Upload source-bound publication evidence"
+    assert evidence["with"]["retention-days"] == "90"
+    assert (
+        "${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}"
+        in evidence["with"]["name"]
+    )
+
+
+def test_gitea_host_compatibility_units_keep_credentials_separate() -> None:
     verifier_unit = (ROOT / "tools" / "proxmox-sdk-gitea-verify@.service").read_text(
         encoding="utf-8"
     )
     publisher_unit = (ROOT / "tools" / "proxmox-sdk-gitea-publisher@.service").read_text(
         encoding="utf-8"
     )
+
     assert "registry.json" not in verifier_unit
     assert "gitea-read.json" not in publisher_unit
     assert "policy.json" not in publisher_unit
@@ -219,10 +271,190 @@ def test_gitea_package_of_record_and_rc_gates_are_repository_visible() -> None:
         assert "pip " not in unit
         assert "twine" not in unit.lower()
 
+
+def test_gitea_record_remains_an_rc_gate_for_public_release() -> None:
     release_text = (GITHUB_WORKFLOWS / "publish-testpypi.yml").read_text(encoding="utf-8")
     assert 'tags: ["v*rc*"]' in release_text
     assert "The tag trigger is restricted to PEP 440 rc versions" in release_text
     assert "needs.prepare-release.outputs.is_final == 'true'" in release_text
+
+
+def _replace_last(text: str, old: str, new: str) -> str:
+    before, separator, after = text.rpartition(old)
+    assert separator
+    return before + new + after
+
+
+def _move_named_step_after(text: str, moving_name: str, target_name: str) -> str:
+    workflow = yaml.load(text, Loader=yaml.BaseLoader)
+    steps = workflow["jobs"]["publish-candidate"]["steps"]
+    moving = next(step for step in steps if step.get("name") == moving_name)
+    steps.remove(moving)
+    target_index = next(
+        index for index, step in enumerate(steps) if step.get("name") == target_name
+    )
+    steps.insert(target_index + 1, moving)
+    return yaml.safe_dump(workflow, sort_keys=False)
+
+
+def _named_step(job: dict[str, Any], name: str) -> dict[str, Any]:
+    matches = [step for step in job["steps"] if step.get("name") == name]
+    assert len(matches) == 1
+    return matches[0]
+
+
+def _assert_gitea_release_runner_contract(jobs: dict[str, Any]) -> None:
+    verify = jobs["verify-and-seal"]
+    publish = jobs["publish-candidate"]
+    assert verify["runs-on"] == "release-builder"
+    assert publish["runs-on"] == "release-publisher"
+    assert not str(verify["runs-on"]).startswith("ci-untrusted-")
+    assert not str(publish["runs-on"]).startswith("ci-untrusted-")
+
+
+def _assert_gitea_publish_source_fetch_contract(publish: dict[str, Any]) -> None:
+    assert not any(action.startswith("actions/checkout@") for action in _uses(publish))
+    source_fetch = _named_step(
+        publish, "Fetch exact tag source anonymously for independent rebuild"
+    )
+    assert source_fetch["env"] == {
+        "EVENT_SOURCE_SHA": "${{ github.sha }}",
+        "EVENT_TAG": "${{ github.ref_name }}",
+        "TOOL_ROOT": (
+            "${{ runner.temp }}/proxmox-sdk-publisher-source-"
+            "${{ github.run_id }}-${{ github.run_attempt }}"
+        ),
+    }
+    run = source_fetch["run"]
+    assert 'git init "$TOOL_ROOT"' in run
+    assert (
+        'git -C "$TOOL_ROOT" remote add origin \\\n'
+        "  https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git" in run
+    )
+    assert run.count("https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git") == 1
+    assert 'git -C "$TOOL_ROOT" fetch --force --no-tags --depth 1 origin' in run
+    assert '"+refs/tags/${EVENT_TAG}:refs/tags/${EVENT_TAG}"' in run
+    assert 'git -C "$TOOL_ROOT" checkout --detach "$EVENT_SOURCE_SHA"' in run
+    assert 'test "$(git -C "$TOOL_ROOT" rev-parse HEAD)" = "$EVENT_SOURCE_SHA"' in run
+    assert (
+        'test "$(git -C "$TOOL_ROOT" rev-parse '
+        '"refs/tags/${EVENT_TAG}^{commit}")" = "$EVENT_SOURCE_SHA"' in run
+    )
+    for forbidden in (
+        "github.server_url",
+        "github.token",
+        "GITHUB_TOKEN",
+        "GIT_ASKPASS",
+        "secrets.",
+    ):
+        assert forbidden not in str(source_fetch)
+
+
+def _assert_gitea_rebuild_contract(
+    publish: dict[str, Any], credentialed_step: dict[str, Any]
+) -> None:
+    source_fetch = _named_step(
+        publish, "Fetch exact tag source anonymously for independent rebuild"
+    )
+    locked_tools = _named_step(publish, "Prepare isolated locked publisher tool")
+    rebuild = _named_step(publish, "Independently rebuild and compare exact tag distributions")
+    _assert_gitea_publish_source_fetch_contract(publish)
+    assert publish["steps"].index(source_fetch) < publish["steps"].index(rebuild)
+    assert publish["steps"].index(locked_tools) < publish["steps"].index(rebuild)
+    assert publish["steps"].index(rebuild) < publish["steps"].index(credentialed_step)
+    assert 'uv lock --directory "$TOOL_ROOT" --check' in locked_tools["run"]
+    assert '--directory "$TOOL_ROOT" --locked --extra test --group dev' in locked_tools["run"]
+    assert "build_reproducible_distributions.py" in rebuild["run"]
+    assert "filecmp.cmp" in rebuild["run"]
+    assert "show -s --format=%ct HEAD)" in rebuild["run"]
+    assert rebuild["env"]["SOURCE_DATE_EPOCH"] == (
+        "${{ needs.verify-and-seal.outputs.source_date_epoch }}"
+    )
+    assert "secrets.PACKAGE_WRITE_TOKEN" not in str(rebuild)
+
+
+def test_gitea_publish_source_fetch_rejects_token_bearing_checkout_mutation() -> None:
+    publish = _gitea("publish-package.yml")["jobs"]["publish-candidate"]
+    _assert_gitea_publish_source_fetch_contract(publish)
+    publish["steps"].insert(
+        0,
+        {
+            "name": "Mutated token-bearing checkout",
+            "uses": "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+            "with": {
+                "ref": "${{ github.sha }}",
+                "token": "${{ secrets.PACKAGE_WRITE_TOKEN }}",
+            },
+        },
+    )
+
+    with pytest.raises(AssertionError):
+        _assert_gitea_publish_source_fetch_contract(publish)
+
+
+def _assert_gitea_publisher_security_contract(text: str) -> None:
+    workflow = yaml.load(text, Loader=yaml.BaseLoader)
+    assert isinstance(workflow, dict)
+    jobs = workflow["jobs"]
+    publish = jobs["publish-candidate"]
+    _assert_gitea_release_runner_contract(jobs)
+    secret_steps = [step for step in publish["steps"] if "secrets.PACKAGE_WRITE_TOKEN" in str(step)]
+    assert len(secret_steps) == 1
+    assert secret_steps[0]["name"] == "Publish sealed package and verify served bytes"
+    _assert_gitea_rebuild_contract(publish, secret_steps[0])
+    publish_run = secret_steps[0]["run"]
+    assert '--server-url "https://git.nmulti.cloud"' in publish_run
+    assert "github.server_url" not in publish_run
+    assert str(publish["steps"]).count("--seal-sha256") == 2
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda text: text.replace("runs-on: release-builder", "runs-on: ci-untrusted-python312"),
+        lambda text: text.replace("runs-on: release-publisher", "runs-on: ci-untrusted-python312"),
+        lambda text: _move_named_step_after(
+            text,
+            "Independently rebuild and compare exact tag distributions",
+            "Publish sealed package and verify served bytes",
+        ),
+        lambda text: text.replace("filecmp.cmp", "files_are_equal", 1),
+        lambda text: _replace_last(
+            text,
+            '--server-url "https://git.nmulti.cloud"',
+            '--server-url "${{ github.server_url }}"',
+        ),
+        lambda text: text.replace(
+            "          EVENT_SOURCE_SHA: ${{ github.sha }}",
+            "          EVENT_SOURCE_SHA: ${{ github.sha }}\n"
+            "          EARLY_TOKEN: ${{ secrets.PACKAGE_WRITE_TOKEN }}",
+            1,
+        ),
+        lambda text: text.replace('            --seal-sha256 "$EXPECTED_SEAL_SHA256" \\\n', "", 1),
+    ],
+)
+def test_gitea_publisher_security_mutations_are_detected(
+    mutate: Any,
+) -> None:
+    text = (GITEA_WORKFLOWS / "publish-package.yml").read_text(encoding="utf-8")
+
+    with pytest.raises(AssertionError):
+        _assert_gitea_publisher_security_contract(mutate(text))
+
+
+def _assert_reconciler_revalidates_seal(text: str) -> None:
+    start = text.index("def reconcile_actions_publication(")
+    end = text.index("\ndef publish_verified_candidate(", start)
+    assert text[start:end].count("revalidate_seal()") == 2
+
+
+def test_removed_reconciler_revalidation_mutation_is_detected() -> None:
+    text = (ROOT / "tools" / "gitea_package_publisher.py").read_text(encoding="utf-8")
+    start = text.index("def reconcile_actions_publication(")
+    mutated = text[:start] + text[start:].replace("    revalidate_seal()\n", "", 1)
+
+    with pytest.raises(AssertionError):
+        _assert_reconciler_revalidates_seal(mutated)
 
 
 def test_gitea_candidate_uses_canonical_public_server_provenance() -> None:
@@ -242,9 +474,29 @@ def test_gitea_candidate_uses_canonical_public_server_provenance() -> None:
     assert "${{ github.server_url }}" not in str(prepare["steps"])
 
 
-def test_no_gitea_workflow_or_runner_receives_package_credentials() -> None:
+def test_gitea_package_secret_is_scoped_only_to_the_publish_step() -> None:
+    workflow = _gitea("publish-package.yml")
+    publish_steps = workflow["jobs"]["publish-candidate"]["steps"]
+    credentialed = [step for step in publish_steps if "secrets.PACKAGE_WRITE_TOKEN" in str(step)]
+    assert len(credentialed) == 1
+    publish = credentialed[0]
+    assert publish["name"] == "Publish sealed package and verify served bytes"
+    assert publish["timeout-minutes"] == "5"
+    assert publish["env"]["PACKAGE_WRITE_TOKEN"] == "${{ secrets.PACKAGE_WRITE_TOKEN }}"
+    later = publish_steps[publish_steps.index(publish) + 1 :]
+    assert all("PACKAGE_WRITE_TOKEN" not in str(step.get("env", {})) for step in later)
+
+    for job_name, job in workflow["jobs"].items():
+        for step in job["steps"]:
+            references = re.findall(r"secrets\.([A-Z0-9_]+)", str(step))
+            if job_name == "publish-candidate" and step is publish:
+                assert references == ["PACKAGE_WRITE_TOKEN"]
+            else:
+                assert references == []
+
+
+def test_no_other_gitea_workflow_or_runner_receives_package_credentials() -> None:
     forbidden = (
-        "release-publisher",
         "TWINE_PASSWORD",
         "TWINE_USERNAME",
         "GITEA_PACKAGE_TOKEN",
@@ -256,6 +508,9 @@ def test_no_gitea_workflow_or_runner_receives_package_credentials() -> None:
         text = path.read_text(encoding="utf-8")
         for value in forbidden:
             assert value not in text, f"{value!r} must not appear in {path.name}"
+        if path.name != "publish-package.yml":
+            assert "release-publisher" not in text
+            assert "secrets.PACKAGE_WRITE_TOKEN" not in text
 
 
 def test_current_python_base_and_direct_apk_inputs_are_pinned() -> None:

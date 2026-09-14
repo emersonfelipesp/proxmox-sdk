@@ -15,41 +15,59 @@ eligible for public PyPI and Docker Hub promotion.
    SHA256 values, runs the full test suite, writes the canonical cross-system
    distribution manifest, a separate source/run/workflow-bound Gitea
    provenance document, and `SHA256SUMS`, then uploads one deterministic tar.
-   The sole job runs on `ci-untrusted-python312` with read-only contents and
-   explicit `packages: none`. No Gitea Actions job, runner, environment, user,
-   organization, or repository secret may hold a package credential.
+   The `prepare-package` job runs on `ci-untrusted-python312` with read-only
+   contents and explicit `packages: none` and receives no package credential.
    Candidate provenance records the canonical public server identity
    `https://git.nmulti.cloud`; it does not consume the runner-facing
    `github.server_url`, which can legitimately contain the server's internal
-   configured origin. The external verifier independently proves the canonical
-   origin through its fixed Gitea reader and the repository clone URL.
-3. Wait for that exact workflow run and its sole builder job to finish
-   successfully. Download the source-SHA/run-ID/attempt-scoped Actions ZIP from
-   that run into `/var/lib/proxmox-sdk-publisher/inbox/<run-id>.zip`. The
-   deployed Gitea-compatible v3 artifact protocol has no authoritative unique
-   artifact ID in the REST artifact API, so the separately stored job log is
-   the server-side binding: it records the artifact name and SHA256 of the
-   candidate tar that the host publisher must reproduce.
-4. Start `proxmox-sdk-gitea-verify@<run-id>.service`. The credential-free
-   verifier requires the exact owner/repository, workflow path,
-   successful run and job identities, untrusted runner label, annotated tag,
-   pinned `v*` protection identity and allowlists created before the run, main
-   ancestry, tag/commit/version agreement,
-   tagged workflow digest/policy, log-bound candidate digest, closed tar member
-   set, both evidence documents, `SHA256SUMS`, distribution hashes, and
-   wheel/sdist metadata. It downloads the exact tagged source, rebuilds twice
-   in the immutable host build environment, and requires byte equality with the
-   untrusted Actions candidate. Its root finalizer rehashes and seals the closed
-   handoff. Only then start `proxmox-sdk-gitea-publisher@<run-id>.service`; that
-   separate process receives only the encrypted registry credential, rehashes
-   the root-sealed handoff, performs an idempotent same-origin upload, downloads
-   served bytes, requires the exact two-file set, and writes
-   `/var/lib/proxmox-sdk-publisher/evidence/<run-id>.json`.
-   A partial prior upload is repaired only when every existing byte matches;
-   extra or mismatched files fail closed.
-5. Verify the package listing through `nms git packages` and archive the host
-   evidence. Do not promote a tag whose package record is absent or whose served
-   bytes differ from the build manifest.
+   configured origin.
+3. The dependent `verify-and-seal` job anonymously fetches canonical `main` and
+   the exact annotated tag from `https://git.nmulti.cloud`, proves that the tag
+   peels to the immutable event SHA and remains in canonical `main`, validates
+   the workflow digest and every candidate attestation field, and rebuilds the
+   source in two independent Git worktrees. It requires byte equality between
+   both rebuilds and the candidate, writes a canonical seal manifest that binds
+   every sealed file to the source SHA, run ID, run attempt, tag, and version,
+   and exports the manifest SHA256 as a job output before uploading the bounded
+   seal. This credential-free job runs only on the dedicated `release-builder`
+   lane and never on a `ci-untrusted-*` runner.
+4. The `publish-candidate` job anonymously fetches the exact tag from the
+   canonical `https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git` origin
+   into an isolated source tree, checks that the tag peels to `${{ github.sha }}`
+   and that the checked-out SHA matches the verifier output, downloads only the
+   sealed set, recomputes and compares the verifier-exported seal manifest
+   SHA256, and restores private read-only modes. It then uses the locked release
+   tools and the same reproducible-build procedure as `prepare-package` to build
+   the exact tag source twice on the `release-publisher` runner. Both rebuilt
+   distributions must match the sealed wheel and sdist byte for byte before the
+   package token is exposed. This job must run only on the dedicated
+   `release-publisher` lane and never on a `ci-untrusted-*` runner. Only its
+   five-minute `Publish sealed package and verify served bytes` step receives
+   the repository secret `PACKAGE_WRITE_TOKEN`. The helper validates the token
+   as bounded printable ASCII before constructing a registry client, uses the
+   pinned `https://git.nmulti.cloud` origin, and uploads each missing artifact
+   through one no-redirect multipart request with bounded connect/read timeouts,
+   response size, and a shared global deadline. An exact remote subset is
+   resumable only when every present artifact's metadata, served bytes, and
+   repository association match the seal; every upload is followed by a fresh
+   inspection. Redirected, oversized, timed-out, extra, mismatched, or wrongly
+   associated states fail closed. An ambiguous upload or link response is
+   accepted only when an independent bounded GET proves exact progress. A final
+   credential-free step retains `publication.json` under a source/run/attempt-
+   qualified artifact name. That evidence records the verified seal digest,
+   canonical server, owner, and repository, observed repository association,
+   result, and the final filename, size, and SHA256 inventory.
+5. Verify the package record and both served file identities with:
+
+   ```bash
+   nms git packages latest --type pypi --name proxmox-sdk --owner emersonfelipesp
+   nms git packages detail --type pypi --name proxmox-sdk --version <version> --owner emersonfelipesp
+   nms git packages files --type pypi --name proxmox-sdk --version <version> --owner emersonfelipesp
+   ```
+
+   Archive these responses with the candidate provenance and distribution
+   manifest. Do not promote a tag whose package record, repository association,
+   filenames, sizes, or SHA256 values differ from the sealed evidence.
 6. Promote the RC tag to GitHub. The `v*rc*` trigger publishes the same pair to
    TestPyPI and validates the bytes served by TestPyPI across Python 3.11, 3.12,
    and 3.13 and all supported schema fixtures. Iterate with `rcN` until clean.
@@ -57,10 +75,10 @@ eligible for public PyPI and Docker Hub promotion.
    to pass the same byte-level verification.
 8. Copy `.github/RELEASE_EVIDENCE_TEMPLATE.md` into the public GitHub Release
    body, set the exact version, copy `distribution_manifest_sha256` from the
-   external host publisher evidence, complete every evidence item, and remove all
-   private tracker references. The public workflow rebuilds the manifest and
-   rejects a digest mismatch, missing/unchecked evidence, a version mismatch,
-   or internal evidence.
+   Gitea provenance in the verified seal, complete every evidence item, and
+   remove all private tracker references. The public workflow rebuilds the
+   manifest and rejects a digest mismatch, missing/unchecked evidence, a
+   version mismatch, or internal evidence.
 9. Publish the non-prerelease GitHub Release. PyPI publication runs in a
    protected, artifact-only job. A later job downloads the project wheel back
    from PyPI, hashes the served bytes, and makes that exact wheel the only
@@ -95,35 +113,32 @@ must configure all of the following before enabling publication:
 | `dockerhub-candidate` | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` | Protected `main`/`testing` and protected release tags only |
 | `dockerhub-development` | Docker Hub credentials | Protected `main`/`testing` only |
 | `dockerhub-release` | Docker Hub credentials | Required reviewer; protected final/post release tags only |
-| Gitea package registry | systemd encrypted `registry.json` credential on the external publisher host | Exact protected annotated `v*` tags only; never available to Gitea Actions |
+| Gitea package registry | Repository secret `PACKAGE_WRITE_TOKEN` | Repository-scoped `write:package`; exact protected annotated `v*` tag workflow only |
 
 Remove the corresponding GitHub repository-scoped publisher secrets after the
-GitHub environment secrets are configured. Never store the Gitea package PAT as
-a Gitea Actions user, owner, repository, environment, or runner secret: any
-same-repository workflow can target an eligible runner, and Gitea environments
-do not form a sufficient credential boundary. There is no `release-publisher`
-runner. The only Gitea release job uses the same untrusted label as review CI.
+GitHub environment secrets are configured. Provision the dedicated runner
+`ci-deploy-emersonfelipesp-246` with the labels `mirror-host`,
+`release-builder`, and `release-publisher`, and confirm that both release lanes
+select only that runner and that the runner executes no pull-request workloads.
+Do not configure `PACKAGE_WRITE_TOKEN` until the `release-builder` and
+`release-publisher` assignments and the absence of pull-request workloads have
+been confirmed. Then provision it as the only Gitea package-publisher secret. It
+must be a dedicated,
+repository-scoped `write:package` credential, must not grant repository-content
+write or administrative access, and must not be copied into a runner profile,
+command argument, log, artifact, or committed configuration. The built-in job
+token remains package-read-only. The `prepare-package` job remains on disposable
+`ci-untrusted-python312` workers; `verify-and-seal` is isolated on
+`release-builder`, and `publish-candidate` is isolated on `release-publisher`.
+If the secret is absent, the credentialed step exits non-zero with an explicit
+message.
 
-Install `tools/gitea_package_publisher.py`, its Python runtime, the reviewed
-`nms` binary at `/opt/proxmox-sdk-publisher/bin/nms`, and both systemd units into
-root-owned read-only paths before tag creation. The immutable Python 3.13.14
-interpreter must contain exactly `build==1.5.0`, `packaging==26.0`,
-`pyproject-hooks==1.2.0`, `setuptools==83.0.0`, and `wheel==0.47.0`;
-it is never resolved or installed during a release. Record all installed-file SHA256
-identities in the private release evidence; never run tools from a tag checkout.
-Provision a read-only Gitea credential at
-`/etc/proxmox-sdk-publisher/gitea-read.json` for `nms git` evidence reads and an
-encrypted systemd credential named `registry.json` containing only `username`
-and `token`. Copy `tools/publisher-policy.example.json` to root-owned
-`/etc/proxmox-sdk-publisher/policy.json`, replace the invalid zero with the exact
-server-assigned `v*` protection ID, and pin the approved user/team allowlists.
-The rule's server `created_at` and `updated_at` must predate the workflow run;
-no release may proceed until that external rule exists. Credential
-values must never appear in an environment variable,
-command argument, log, repository secret, or committed configuration. Protect
-tag creation, require annotated tags and the exact `v*` protection, restrict
-publisher-host administrators, and require the public-release reviewer to
-confirm the Gitea package record and host evidence.
+The systemd verifier and publisher units remain available as a compatibility
+path for already provisioned hosts, but they are no longer required for the
+normal release sequence. Their credential-file and root-seal controls remain
+unchanged. Protect tag creation, require annotated tags and the exact `v*`
+protection, restrict repository-secret administration, and require the public
+release reviewer to confirm the Gitea package record and retained evidence.
 
 ## Reproducibility and digest terminology
 

@@ -271,20 +271,34 @@ workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
 2. Merge through Gitea review and push the protected matching tag. The Gitea
    workflow builds the wheel/sdist twice under the commit `SOURCE_DATE_EPOCH`,
    runs all gates, and uploads an attested source/run/attempt-bound candidate on
-   `ci-untrusted-python312` with `packages: none`. No Actions job or runner may
-   hold package credentials. Candidate provenance records the canonical public
-   Gitea URL instead of the runner-facing `github.server_url`. The separately
-   installed verifier independently validates the canonical origin and the
-   exact workflow/job and preexisting pinned tag protection, rebuilds the tag
-   twice in an immutable host environment, byte-compares the candidate, and
-   root-seals a handoff. A separate publisher process receives only the package
-   credential, rehashes that handoff, and verifies the served bytes.
-3. Verify the record with `nms git packages`, promote the RC tag, and require the
-   GitHub `v*rc*` TestPyPI matrix to pass. RCs cannot reach public PyPI or stable
-   Docker tags.
+   `ci-untrusted-python312` with `packages: none`. A second credential-free job
+   runs only on `release-builder`, anonymously fetches the exact tag and
+   canonical `main`, validates the attestation, rebuilds twice in independent
+   Git worktrees, byte-compares the candidate, writes a canonical
+   source/run/attempt/tag/version-bound seal manifest, and exports its SHA256
+   with the bounded exact seal. A third job runs only on the dedicated
+   `release-publisher` lane, checks out the immutable event SHA, downloads only
+   that seal, compares the external manifest digest, and independently rebuilds
+   the exact tag twice with locked tools. Both rebuilt distributions must equal
+   the sealed wheel and sdist byte for byte before package credentials are
+   exposed. Only its five-minute publish step receives the repository secret
+   `PACKAGE_WRITE_TOKEN`; the
+   helper rehashes the seal, uses the pinned public
+   `https://git.nmulti.cloud` origin, resumes only exact remote subsets, uploads
+   each missing artifact through the bounded client, and verifies the exact
+   wheel, sdist, hashes, and repository association. Extra, mismatched,
+   redirected, oversized, timed-out, and wrongly associated states fail closed.
+   A later credential-free step retains source/run/attempt-bound publication
+   evidence with the seal digest, canonical registry identity, repository
+   association, result, and final remote file inventory.
+3. Verify the record with `nms git packages latest`,
+   `nms git packages detail`, and `nms git packages files`; promote the RC tag
+   only after all three agree with the sealed evidence. Require the GitHub
+   `v*rc*` TestPyPI matrix to pass. RCs cannot reach public PyPI or stable Docker
+   tags.
 4. After a clean RC, create and verify the final Gitea package of record. Fill
    `.github/RELEASE_EVIDENCE_TEMPLATE.md` with public product evidence and the
-   external host evidence's `distribution_manifest_sha256`, then publish the
+   verified Gitea provenance's `distribution_manifest_sha256`, then publish the
    matching non-prerelease GitHub Release. GitHub rebuilds that manifest and
    rejects a mismatch.
 5. The public workflow publishes from artifacts in protected environments,
@@ -300,10 +314,19 @@ workspace `deploy-workflow`; never publish directly from an ad-hoc shell.
 
 Configure the GitHub `testpypi`, `pypi`, `dockerhub-candidate`,
 `dockerhub-development`, and `dockerhub-release` environments exactly as
-documented. Configure the external Gitea publisher host, systemd credentials,
-exact annotated `v*` protection, and untrusted Actions runner separately. The
-package PAT must never exist in Gitea Actions secrets, runner environments,
-command arguments, logs, or committed configuration.
+documented. Configure the exact annotated `v*` protection and disposable
+untrusted Actions runner separately. Confirm that the dedicated runner
+`ci-deploy-emersonfelipesp-246`, labeled `mirror-host`, `release-builder`, and
+`release-publisher`, is the only runner selected by both release lanes and runs
+no pull-request workloads. Do not configure `PACKAGE_WRITE_TOKEN` until the
+`release-builder` and `release-publisher` assignments and the absence of
+pull-request workloads are confirmed. The secret must be a dedicated
+repository-scoped `write:package`
+PAT without source or administrative write authority. It may exist only in the
+credentialed publish step's environment and must never appear in a command
+argument, log, artifact, runner profile, or committed configuration. The
+retained external systemd mode is optional compatibility infrastructure, not
+the normal release path.
 
 An OCI digest is the immutable image identity. A `sha-<commit>` alias is a
 commit traceability tag, not an immutable object. Docker Hub has no multi-image

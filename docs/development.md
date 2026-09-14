@@ -202,7 +202,7 @@ proxmox-sdk/
 │               └── models/             # Lazy route-group Pydantic shards
 │
 ├── tests/                        # Test suite
-├── tools/                        # Root-installed, external release publisher boundary
+├── tools/                        # Gitea Actions and compatible host release publisher
 ├── docs/                         # MkDocs documentation
 ├── pyproject.toml                # Project config and dependencies
 ├── mkdocs.yml                    # Documentation config
@@ -504,12 +504,12 @@ checks pinned workflow inputs, Ruff, ty, Pyright, compile/import contracts, all
 three shipped Proxmox schemas (`latest`, `9.2`, and `9.1.11`), strict MkDocs,
 distribution metadata, and the installed-wheel schema/PDM contract.
 
-All jobs use the isolated `ci-untrusted-python312` label and read-only contents
-permission. The workflow has no package-registry, DockerHub, deployment, live
-Proxmox, or repository-write authority. Do not add secrets to make an
-untrusted job convenient. The Gitea package candidate workflow uses this same
-credential-free boundary; publication occurs only in the separately installed
-host publisher documented below.
+All review jobs use the isolated `ci-untrusted-python312` label and read-only
+contents permission. The review workflow has no package-registry, DockerHub,
+deployment, live Proxmox, or repository-write authority. Do not add secrets to
+make an untrusted job convenient. The tag-only Gitea package workflow uses the
+same disposable label, but only its final bounded publication step receives the
+dedicated `PACKAGE_WRITE_TOKEN` described below.
 
 The repository file cannot provision its own runner or branch protection.
 Before treating these contexts as a merge gate, an operator must register an
@@ -534,28 +534,34 @@ a pass.
    clean. `.gitea/workflows/publish-package.yml` builds twice under the tag
    commit's `SOURCE_DATE_EPOCH`, verifies byte-identical output, attests the
    exact source/workflow/run/artifact identities, and uploads one candidate tar
-   on `ci-untrusted-python312`. It has `packages: none`, contains no publisher
-   job, and receives no package credential through any Gitea secret or runner.
-   Download the successful run's exact artifact as
-   `/var/lib/proxmox-sdk-publisher/inbox/<run-id>.zip`, then start
-   `proxmox-sdk-gitea-verify@<run-id>.service`. The preinstalled verifier checks
-   repository, workflow, job, pinned preexisting tag protection, main ancestry,
-   tagged metadata, payload/evidence hashes, and independently rebuilds twice
-   from the exact tagged source before root-sealing a byte-identical handoff.
-   Then start `proxmox-sdk-gitea-publisher@<run-id>.service`; only this separate
-   process receives the registry credential. It rehashes the handoff,
-   idempotently repairs only a matching partial upload, and requires exact
-   served bytes. Install and operate both units
-   exactly as described in [Release evidence and package promotion](release-evidence.md).
-4. **Verify the package record** with `nms git packages`. Promote an RC tag to
+   on `ci-untrusted-python312` without credentials. A second credential-free job
+   anonymously fetches the exact tag and canonical `main`, validates the
+   attestation, rebuilds twice in independent Git worktrees, requires byte
+   equality, and emits a bounded exact seal. A third job binds the helper to the
+   immutable event SHA and downloads only that seal. Only its final five-minute
+   step receives `PACKAGE_WRITE_TOKEN`; it rehashes the seal, permits only an
+   absent or exact two-file registry state with the correct repository
+   association, publishes with Twine, and verifies both served files through
+   bounded registry API reads. Partial, extra, mismatched, redirected,
+   oversized, timed-out, or wrongly associated states fail closed. The retained
+   systemd units are an optional compatibility path, not a release prerequisite.
+4. **Verify the package record** with all three read paths:
+
+   ```bash
+   nms git packages latest --type pypi --name proxmox-sdk --owner emersonfelipesp
+   nms git packages detail --type pypi --name proxmox-sdk --version <version> --owner emersonfelipesp
+   nms git packages files --type pypi --name proxmox-sdk --version <version> --owner emersonfelipesp
+   ```
+
+   Promote an RC tag to
    GitHub only after that record is complete; the `v*rc*` GitHub trigger uses
    TestPyPI and never reaches public PyPI or stable Docker tags. Iterate through
    `rcN` until validation is clean.
 5. **Create the final package of record**, then copy
    `.github/RELEASE_EVIDENCE_TEMPLATE.md` into the GitHub Release body, set the
-   exact version, copy `distribution_manifest_sha256` from the external host
-   publisher evidence, complete every checkbox with product-facing evidence, and
-   remove all private tracker references. GitHub rebuilds that manifest and
+   exact version, copy `distribution_manifest_sha256` from the verified Gitea
+   provenance, complete every checkbox with product-facing evidence, and remove
+   all private tracker references. GitHub rebuilds that manifest and
    rejects a digest mismatch before public promotion.
 6. **Publish the final GitHub Release** through the deploy workflow:
    ```bash
@@ -592,8 +598,11 @@ The repository cannot create environment reviewers, environment secrets,
 deployment-branch rules, protected tags, or isolated Gitea runners. Configure
 those prerequisites exactly as listed in
 [Release evidence and package promotion](release-evidence.md) before enabling a
-publisher. `sha-<commit>` is a commit traceability tag, while the resolved OCI
-manifest digest is the immutable deployment identity.
+publisher. Configure the repository secret `PACKAGE_WRITE_TOKEN` as a dedicated
+repository-scoped `write:package` credential; it must not grant source or
+administrative write authority. A missing secret is a hard publication failure.
+`sha-<commit>` is a commit traceability tag, while the resolved OCI manifest
+digest is the immutable deployment identity.
 
 ## Getting Help
 

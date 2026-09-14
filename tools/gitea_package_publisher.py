@@ -1,12 +1,12 @@
-"""Verify, seal, and publish a proxmox-sdk candidate outside Gitea Actions.
+"""Verify, seal, and publish a proxmox-sdk Gitea package candidate.
 
-This program intentionally uses only the Python standard library.  It obtains
-read-only Gitea evidence through an immutable ``nms git`` installation.  The
-verifier independently rebuilds the exact tag and seals a byte-for-byte match.
-A separate process can then open the package credential and publish only that
-root-sealed handoff; the credential is never present in the verifier process.
-Install this file and its interpreter in a root-owned, read-only location; do
-not execute it from the release tag checkout.
+The host mode obtains read-only Gitea evidence through an immutable ``nms git``
+installation.  The Actions mode validates an anonymously fetched exact tag.
+Both modes independently rebuild twice and seal a byte-for-byte match before a
+separate process receives package credentials.  The Actions publisher lane also
+rebuilds and compares the exact source before its credentialed step.  The
+Actions token is read only from an environment variable by the final
+publication command and is never printed or passed as a command argument.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ import fnmatch
 import gzip
 import hashlib
 import html.parser
+import http.client
 import io
 import json
 import os
@@ -29,12 +30,13 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import tomllib
 import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from email.message import Message
@@ -64,9 +66,12 @@ EXPECTED_BUILD_TOOLS = {
 }
 EXPECTED_PYTHON_VERSION = "3.13.14"
 PAYLOAD_NAME = "proxmox-sdk-gitea-candidate.tar"
+SEAL_MANIFEST_NAME = "seal-manifest.json"
 MAX_CONTROL_BYTES = 4 * 1024 * 1024
+MAX_HANDOFF_BYTES = 64 * 1024
 MAX_DISTRIBUTION_BYTES = 512 * 1024 * 1024
 MAX_PAYLOAD_BYTES = 1024 * 1024 * 1024
+MAX_TOKEN_BYTES = 4096
 HEX40 = re.compile(r"[0-9a-f]{40}")
 HEX64 = re.compile(r"[0-9a-f]{64}")
 SAFE_VERSION = re.compile(
@@ -157,6 +162,27 @@ class VerifiedCandidate:
     gitea_provenance: Path
 
 
+@dataclass(frozen=True)
+class RegistryArtifact:
+    """An exact registry artifact identity."""
+
+    name: str
+    size: int
+    sha256: str
+
+
+@dataclass(frozen=True)
+class RegistryState:
+    """The bounded package-version state returned by Gitea."""
+
+    version_exists: bool
+    repository: str | None
+    artifacts: tuple[RegistryArtifact, ...]
+
+    def artifact_map(self) -> dict[str, RegistryArtifact]:
+        return {artifact.name: artifact for artifact in self.artifacts}
+
+
 def _object(value: Any, description: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise PublisherError(f"{description} is not a JSON object")
@@ -180,6 +206,14 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _validate_package_token(token: str) -> str:
+    if not isinstance(token, str) or not token or len(token) > MAX_TOKEN_BYTES:
+        raise PublisherError("PACKAGE_WRITE_TOKEN has an invalid length")
+    if any(not 0x21 <= ord(character) <= 0x7E for character in token):
+        raise PublisherError("PACKAGE_WRITE_TOKEN must contain printable ASCII without spaces")
+    return token
 
 
 def _canonical_name(value: str) -> str:
@@ -244,6 +278,92 @@ def _server_time(value: Any, description: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def _workflow_job_block(text: str, job_name: str) -> str:
+    marker = f"  {job_name}:"
+    lines = text.splitlines(keepends=True)
+    starts = [index for index, line in enumerate(lines) if line.rstrip() == marker]
+    if len(starts) != 1:
+        raise PublisherError(f"Workflow does not contain exactly one {job_name} job")
+    start = starts[0]
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        if re.fullmatch(r"  [A-Za-z0-9_-]+:\s*", lines[index]):
+            end = index
+            break
+    return "".join(lines[start:end])
+
+
+def _validate_workflow_secret_scope(text: str) -> None:
+    prepare = _workflow_job_block(text, "prepare-package")
+    verify = _workflow_job_block(text, "verify-and-seal")
+    publish = _workflow_job_block(text, "publish-candidate")
+    secret_names = re.findall(r"secrets\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)", text)
+    if re.search(r"secrets\s*\[", text) or secret_names != ["PACKAGE_WRITE_TOKEN"]:
+        raise PublisherError("Workflow package secret set or cardinality is invalid")
+    publish_marker = "      - name: Publish sealed package and verify served bytes"
+    if publish.count(publish_marker) != 1:
+        raise PublisherError("Workflow does not contain one credentialed publish step")
+    before_publish, publish_and_later = publish.split(publish_marker, 1)
+    publish_step = publish_and_later.split("\n      - name:", 1)[0]
+    secret_reference = "${{ secrets.PACKAGE_WRITE_TOKEN }}"
+    if (
+        secret_reference in prepare
+        or secret_reference in verify
+        or secret_reference in before_publish
+    ):
+        raise PublisherError("Workflow exposes the package secret before the publish step")
+    if publish_step.count(secret_reference) != 1:
+        raise PublisherError("Publish step does not contain the exact package secret")
+
+
+def _validate_workflow_publisher_rebuild(publish: str) -> None:
+    source_marker = "      - name: Fetch exact tag source anonymously for independent rebuild"
+    rebuild_marker = "      - name: Independently rebuild and compare exact tag distributions"
+    publish_marker = "      - name: Publish sealed package and verify served bytes"
+    required = (
+        "EVENT_SOURCE_SHA: ${{ github.sha }}",
+        "EVENT_TAG: ${{ github.ref_name }}",
+        'git init "$TOOL_ROOT"',
+        "fetch --force --no-tags --depth 1 origin",
+        '"+refs/tags/${EVENT_TAG}:refs/tags/${EVENT_TAG}"',
+        'checkout --detach "$EVENT_SOURCE_SHA"',
+        'rev-parse HEAD)" = "$EVENT_SOURCE_SHA"',
+        'rev-parse "refs/tags/${EVENT_TAG}^{commit}"',
+        "tests/build_reproducible_distributions.py",
+        "filecmp.cmp",
+    )
+    if "actions/checkout@" in publish or any(item not in publish for item in required):
+        raise PublisherError("Publisher workflow is missing its independent rebuild control")
+    if publish.count(source_marker) != 1:
+        raise PublisherError("Publisher workflow does not contain one anonymous source fetch")
+    source_and_later = publish.split(source_marker, 1)[1]
+    source_step = source_and_later.split("\n      - name:", 1)[0]
+    canonical_remote = (
+        'git -C "$TOOL_ROOT" remote add origin \\\n'
+        "            https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git"
+    )
+    if (
+        canonical_remote not in source_step
+        or source_step.count("https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git") != 1
+    ):
+        raise PublisherError("Publisher source fetch does not use the canonical public origin")
+    forbidden_source_credentials = (
+        "github.server_url",
+        "github.token",
+        "GITHUB_TOKEN",
+        "GIT_ASKPASS",
+        "secrets.",
+    )
+    if any(item in source_step for item in forbidden_source_credentials):
+        raise PublisherError("Publisher source fetch must not receive credentials")
+    if (
+        publish.count(rebuild_marker) != 1
+        or publish.index(source_marker) > publish.index(rebuild_marker)
+        or publish.index(rebuild_marker) > publish.index(publish_marker)
+    ):
+        raise PublisherError("Publisher rebuild must precede the credentialed step")
+
+
 def _validate_workflow_source(source: bytes, expected_sha256: str) -> None:
     if hashlib.sha256(source).hexdigest() != expected_sha256:
         raise PublisherError("Workflow source digest does not match the attestation")
@@ -251,17 +371,26 @@ def _validate_workflow_source(source: bytes, expected_sha256: str) -> None:
         text = source.decode("utf-8")
     except UnicodeDecodeError as exc:
         raise PublisherError("Workflow source is not UTF-8") from exc
+    prepare = _workflow_job_block(text, "prepare-package")
+    verify = _workflow_job_block(text, "verify-and-seal")
+    publish = _workflow_job_block(text, "publish-candidate")
     required = (
         f"name: {EXPECTED_WORKFLOW_NAME}",
-        "runs-on: ci-untrusted-python312",
         "packages: none",
         "actions/upload-artifact@c6a3b2bd78b3985e4b2f15397fec357f0fd808de",
+        "actions/download-artifact@ad191675b41f6a5b46da9a048cb6893812da158b",
+        "verify-and-seal:",
+        "publish-candidate:",
     )
     if any(item not in text for item in required):
         raise PublisherError("Workflow source is missing a required credential-free control")
+    if "runs-on: ci-untrusted-python312" not in prepare:
+        raise PublisherError("Candidate workflow job requires the untrusted runner")
+    if "runs-on: release-builder" not in verify or "runs-on: ci-untrusted-" in verify:
+        raise PublisherError("Verifier workflow job requires the release builder runner")
+    if "runs-on: release-publisher" not in publish or "runs-on: ci-untrusted-" in publish:
+        raise PublisherError("Credentialed workflow job requires the release publisher runner")
     forbidden = (
-        "secrets.",
-        "release-publisher",
         "TWINE_PASSWORD",
         "TWINE_USERNAME",
         "GITEA_PACKAGE_TOKEN",
@@ -269,6 +398,8 @@ def _validate_workflow_source(source: bytes, expected_sha256: str) -> None:
     )
     if any(item in text for item in forbidden):
         raise PublisherError("Workflow source contains a forbidden publisher credential path")
+    _validate_workflow_publisher_rebuild(publish)
+    _validate_workflow_secret_scope(text)
 
 
 def _validate_repository_and_run(client: GiteaReader, run_id: int) -> dict[str, Any]:
@@ -790,6 +921,207 @@ class TrustedSourceRebuilder:
         return {name: outputs[0] / name for name in hashes[0]}
 
 
+def _git_output(source_root: Path, *arguments: str) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(source_root), *arguments],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise PublisherError("Anonymous source checkout could not be inspected") from exc
+    if completed.returncode != 0:
+        raise PublisherError("Anonymous source checkout failed a Git identity check")
+    return completed.stdout.strip()
+
+
+def _git_bytes(source_root: Path, *arguments: str) -> bytes:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(source_root), *arguments],
+            check=False,
+            capture_output=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise PublisherError("Anonymous source content could not be inspected") from exc
+    if completed.returncode != 0:
+        raise PublisherError("Anonymous source content failed a Git identity check")
+    return completed.stdout
+
+
+def _git_is_ancestor(source_root: Path, ancestor: str, descendant: str) -> None:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(source_root), "merge-base", "--is-ancestor", ancestor, descendant],
+            check=False,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise PublisherError("Canonical main ancestry could not be checked") from exc
+    if completed.returncode != 0:
+        raise PublisherError("Tagged commit is not an ancestor of canonical main")
+
+
+def validate_actions_source(
+    *, source_root: Path, source_sha: str, tag: str
+) -> tuple[str, int, bytes]:
+    """Validate an anonymously fetched exact tag and return its release identity."""
+
+    if HEX40.fullmatch(source_sha) is None:
+        raise PublisherError("Actions source SHA is not a full lowercase commit digest")
+    version = tag.removeprefix("v")
+    if tag != f"v{version}" or _canonical_version(version) != version:
+        raise PublisherError("Actions tag version is not canonical or safe")
+    if source_root.is_symlink() or not source_root.is_dir():
+        raise PublisherError("Anonymous source checkout is unavailable or unsafe")
+    expected_origin = f"{EXPECTED_SERVER}/{EXPECTED_FULL_NAME}.git"
+    _require_equal(
+        _git_output(source_root, "remote", "get-url", "origin"), expected_origin, "origin"
+    )
+    _require_equal(_git_output(source_root, "rev-parse", "HEAD"), source_sha, "checkout SHA")
+    _require_equal(_git_output(source_root, "cat-file", "-t", tag), "tag", "tag object type")
+    _require_equal(
+        _git_output(source_root, "rev-parse", f"{tag}^{{commit}}"),
+        source_sha,
+        "tag commit SHA",
+    )
+    _git_is_ancestor(source_root, source_sha, "refs/remotes/origin/main")
+    pyproject_bytes = _git_bytes(source_root, "show", f"{source_sha}:pyproject.toml")
+    try:
+        project = tomllib.loads(pyproject_bytes.decode("utf-8"))["project"]
+    except (KeyError, UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
+        raise PublisherError("Tagged pyproject.toml has invalid project metadata") from exc
+    _require_equal(project.get("name"), EXPECTED_PACKAGE, "tagged package name")
+    _require_equal(project.get("version"), version, "tagged package version")
+    timestamp = _git_output(source_root, "show", "-s", "--format=%ct", source_sha)
+    if not timestamp.isascii() or not timestamp.isdigit():
+        raise PublisherError("Source commit timestamp is invalid")
+    source_date_epoch = int(timestamp)
+    if not 315532800 <= source_date_epoch <= 4294967295:
+        raise PublisherError("Source commit timestamp is outside the reproducible-build range")
+    workflow = _git_bytes(source_root, "show", f"{source_sha}:{EXPECTED_WORKFLOW_PATH}")
+    return version, source_date_epoch, workflow
+
+
+class ActionsSourceRebuilder(TrustedSourceRebuilder):
+    """Rebuild an anonymous checkout twice from independent Git worktrees."""
+
+    def __init__(self, source_root: Path, interpreter: Path) -> None:
+        super().__init__(interpreter)
+        self._source_root = source_root
+
+    def _add_worktree(self, destination: Path, source_sha: str) -> None:
+        try:
+            completed = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(self._source_root),
+                    "worktree",
+                    "add",
+                    "--detach",
+                    str(destination),
+                    source_sha,
+                ],
+                check=False,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=120,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise PublisherError("Independent source worktree could not be created") from exc
+        if completed.returncode != 0:
+            raise PublisherError("Independent source worktree could not be created")
+
+    def _build_worktree(
+        self,
+        source: Path,
+        output: Path,
+        environment: Mapping[str, str],
+        source_date_epoch: int,
+    ) -> dict[str, str]:
+        _set_tree_mtime(source, source_date_epoch)
+        output.mkdir(mode=0o700)
+        try:
+            completed = subprocess.run(
+                [
+                    str(self._interpreter),
+                    "-I",
+                    "-m",
+                    "build",
+                    "--no-isolation",
+                    "--outdir",
+                    str(output),
+                ],
+                cwd=source,
+                env=dict(environment),
+                check=False,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=600,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise PublisherError("Independent Actions source rebuild failed") from exc
+        if completed.returncode != 0:
+            raise PublisherError("Independent Actions source rebuild failed")
+        sdists = list(output.glob("*.tar.gz"))
+        if len(sdists) != 1:
+            raise PublisherError("Independent Actions rebuild produced an invalid sdist set")
+        _normalize_sdist(sdists[0], source_date_epoch)
+        hashes = {
+            path.name: _sha256(path)
+            for path in output.iterdir()
+            if path.is_file() and path.name.endswith(DIST_SUFFIXES)
+        }
+        if len(hashes) != 2:
+            raise PublisherError("Independent Actions rebuild produced an invalid distribution set")
+        return hashes
+
+    def _remove_worktree(self, source: Path) -> None:
+        subprocess.run(
+            ["git", "-C", str(self._source_root), "worktree", "remove", "--force", str(source)],
+            check=False,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=60,
+        )
+
+    def rebuild(
+        self,
+        client: GiteaReader,
+        *,
+        source_sha: str,
+        source_date_epoch: int,
+        work: Path,
+    ) -> Mapping[str, Path]:
+        del client
+        environment = self._environment(source_date_epoch)
+        self._check_environment(environment)
+        hashes: list[dict[str, str]] = []
+        outputs: list[Path] = []
+        for index in (1, 2):
+            source = work / f"actions-source-{index}"
+            output = work / f"actions-dist-{index}"
+            self._add_worktree(source, source_sha)
+            try:
+                hashes.append(self._build_worktree(source, output, environment, source_date_epoch))
+                outputs.append(output)
+            finally:
+                self._remove_worktree(source)
+        if hashes[0] != hashes[1]:
+            raise PublisherError("Independent Actions worktree builds are not byte reproducible")
+        return {name: outputs[0] / name for name in hashes[0]}
+
+
 def verify_candidate(
     client: GiteaReader,
     *,
@@ -941,9 +1273,227 @@ def verify_candidate(
     )
 
 
-def load_registry_credential(path: Path) -> RegistryCredential:
-    """Open the host-only package credential after provenance verification."""
+def _load_candidate_document(path: Path, description: str) -> dict[str, Any]:
+    try:
+        return _object(json.loads(path.read_text(encoding="utf-8")), description)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise PublisherError(f"{description} is malformed") from exc
 
+
+def _validate_actions_attestation(
+    *,
+    extracted: Mapping[str, Path],
+    artifact_name: str,
+    run_id: int,
+    run_attempt: int,
+    source_sha: str,
+    source_date_epoch: int,
+    version: str,
+    workflow_source: bytes,
+) -> tuple[dict[str, Any], Path, Path]:
+    manifest_path = extracted["release-artifacts/distribution-manifest.json"]
+    manifest = _load_candidate_document(manifest_path, "distribution manifest")
+    expected_manifest = {
+        "algorithm": "sha256",
+        "source_date_epoch": source_date_epoch,
+        "source_sha": source_sha,
+        "version": version,
+    }
+    if set(manifest) != {*expected_manifest, "artifacts"}:
+        raise PublisherError("Canonical distribution manifest field set is invalid")
+    for key, expected in expected_manifest.items():
+        _require_equal(manifest.get(key), expected, f"manifest {key}")
+
+    provenance_path = extracted["release-artifacts/gitea-provenance.json"]
+    provenance = _load_candidate_document(provenance_path, "Gitea provenance")
+    expected_provenance = {
+        "schema_version": 1,
+        "artifact_name": artifact_name,
+        "distribution_manifest_sha256": _sha256(manifest_path),
+        "event": "push",
+        "ref": f"refs/tags/v{version}",
+        "repository": EXPECTED_FULL_NAME,
+        "run_attempt": run_attempt,
+        "run_id": run_id,
+        "server_url": EXPECTED_SERVER,
+        "source_sha": source_sha,
+        "tag": f"v{version}",
+        "version": version,
+        "workflow_name": EXPECTED_WORKFLOW_NAME,
+        "workflow_path": EXPECTED_WORKFLOW_PATH,
+    }
+    if set(provenance) != {*expected_provenance, "workflow_sha256"}:
+        raise PublisherError("Gitea provenance field set is invalid")
+    for key, expected in expected_provenance.items():
+        _require_equal(provenance.get(key), expected, f"provenance {key}")
+    workflow_sha256 = provenance.get("workflow_sha256")
+    if not isinstance(workflow_sha256, str) or HEX64.fullmatch(workflow_sha256) is None:
+        raise PublisherError("Manifest workflow SHA256 is invalid")
+    _validate_workflow_source(workflow_source, workflow_sha256)
+    return manifest, manifest_path, provenance_path
+
+
+def _validate_candidate_distributions(
+    *, extracted: Mapping[str, Path], manifest: Mapping[str, Any], version: str
+) -> dict[str, Path]:
+    artifacts = manifest.get("artifacts")
+    if not isinstance(artifacts, dict) or len(artifacts) != 2:
+        raise PublisherError("Distribution manifest must name exactly two artifacts")
+    distributions = {
+        PurePosixPath(name).name: path
+        for name, path in extracted.items()
+        if name.startswith("dist/")
+    }
+    if set(artifacts) != set(distributions):
+        raise PublisherError("Distribution manifest artifact set does not match the payload")
+    if sum(name.endswith(".whl") for name in distributions) != 1:
+        raise PublisherError("Candidate must contain exactly one wheel")
+    if sum(name.endswith(".tar.gz") for name in distributions) != 1:
+        raise PublisherError("Candidate must contain exactly one sdist")
+    for name, path in distributions.items():
+        _validate_distribution_digest(name, path, artifacts.get(name), version)
+    _validate_candidate_checksums(extracted, artifacts)
+    return distributions
+
+
+def _validate_distribution_digest(name: str, path: Path, digest: Any, version: str) -> None:
+    if not isinstance(digest, str) or HEX64.fullmatch(digest) is None:
+        raise PublisherError(f"Manifest SHA256 is invalid for {name}")
+    if _sha256(path) != digest:
+        raise PublisherError(f"Distribution SHA256 mismatch for {name}")
+    if not _belongs_to_release(name, EXPECTED_PACKAGE, version):
+        raise PublisherError(f"Distribution filename is not bound to this release: {name}")
+
+
+def _validate_candidate_checksums(
+    extracted: Mapping[str, Path], artifacts: Mapping[str, Any]
+) -> None:
+    expected_checksums = "".join(f"{artifacts[name]}  dist/{name}\n" for name in sorted(artifacts))
+    try:
+        checksums = extracted["release-artifacts/SHA256SUMS"].read_text(encoding="ascii")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise PublisherError("SHA256SUMS is not valid ASCII") from exc
+    _require_equal(checksums, expected_checksums, "SHA256SUMS content")
+
+
+def _validate_rebuilt_distributions(
+    distributions: Mapping[str, Path], rebuilt: Mapping[str, Path]
+) -> None:
+    if set(rebuilt) != set(distributions):
+        raise PublisherError("Independent rebuild distribution set differs from candidate")
+    for name, path in rebuilt.items():
+        if _sha256(path) != _sha256(distributions[name]):
+            raise PublisherError(
+                f"Candidate bytes differ from independent trusted source rebuild: {name}"
+            )
+
+
+def _validated_distribution_metadata(
+    distributions: Mapping[str, Path], version: str
+) -> dict[str, dict[str, str]]:
+    metadata = {name: _distribution_metadata(path) for name, path in distributions.items()}
+    for name, values in metadata.items():
+        if _canonical_name(values["name"]) != _canonical_name(EXPECTED_PACKAGE):
+            raise PublisherError(f"Distribution metadata name mismatch for {name}")
+        _require_equal(values["version"], version, f"distribution metadata version for {name}")
+        if not values["metadata_version"]:
+            raise PublisherError(f"Distribution metadata version is missing for {name}")
+    return metadata
+
+
+def _validate_candidate_tar(path: Path, expected_sha256: str) -> str:
+    try:
+        details = path.lstat()
+    except OSError as exc:
+        raise PublisherError("Actions candidate payload is unavailable") from exc
+    if path.is_symlink() or not stat.S_ISREG(details.st_mode):
+        raise PublisherError("Actions candidate payload must be a regular non-symlink file")
+    if not 0 < details.st_size <= MAX_PAYLOAD_BYTES:
+        raise PublisherError("Actions candidate payload has an invalid size")
+    actual = _sha256(path)
+    if HEX64.fullmatch(expected_sha256) is None or actual != expected_sha256:
+        raise PublisherError("Actions candidate payload digest does not match the builder output")
+    return actual
+
+
+class _UnusedGiteaReader:
+    def get_json(self, path: str) -> Any:
+        raise PublisherError(f"Unexpected Actions Gitea JSON read: {path}")
+
+    def get_bytes(self, path: str) -> bytes:
+        raise PublisherError(f"Unexpected Actions Gitea byte read: {path}")
+
+
+def verify_actions_candidate(
+    *,
+    source_root: Path,
+    interpreter: Path,
+    candidate_tar: Path,
+    expected_candidate_sha256: str,
+    run_id: int,
+    run_attempt: int,
+    source_sha: str,
+    tag: str,
+    repository: str,
+    server_url: str,
+    work: Path,
+) -> VerifiedCandidate:
+    """Verify Actions event evidence and rebuild twice without package credentials."""
+
+    if run_id < 1 or run_attempt < 1:
+        raise PublisherError("Actions run identity must contain positive integers")
+    _require_equal(repository, EXPECTED_FULL_NAME, "Actions repository identity")
+    _require_equal(server_url, EXPECTED_SERVER, "Actions canonical server URL")
+    version, source_date_epoch, workflow_source = validate_actions_source(
+        source_root=source_root,
+        source_sha=source_sha,
+        tag=tag,
+    )
+    artifact_name = f"gitea-dist-{source_sha}-{run_id}-{run_attempt}"
+    candidate_sha256 = _validate_candidate_tar(candidate_tar, expected_candidate_sha256)
+    work.mkdir(mode=0o700, parents=True, exist_ok=False)
+    extracted = _extract_candidate(candidate_tar, work)
+    manifest, manifest_path, provenance_path = _validate_actions_attestation(
+        extracted=extracted,
+        artifact_name=artifact_name,
+        run_id=run_id,
+        run_attempt=run_attempt,
+        source_sha=source_sha,
+        source_date_epoch=source_date_epoch,
+        version=version,
+        workflow_source=workflow_source,
+    )
+    distributions = _validate_candidate_distributions(
+        extracted=extracted,
+        manifest=manifest,
+        version=version,
+    )
+    rebuilt = ActionsSourceRebuilder(source_root, interpreter).rebuild(
+        _UnusedGiteaReader(),
+        source_sha=source_sha,
+        source_date_epoch=source_date_epoch,
+        work=work,
+    )
+    _validate_rebuilt_distributions(distributions, rebuilt)
+    metadata = _validated_distribution_metadata(distributions, version)
+    return VerifiedCandidate(
+        artifact_name=artifact_name,
+        candidate_sha256=candidate_sha256,
+        distributions=distributions,
+        metadata=metadata,
+        run_attempt=run_attempt,
+        run_id=run_id,
+        source_sha=source_sha,
+        tag=tag,
+        version=version,
+        distribution_manifest_sha256=_sha256(manifest_path),
+        gitea_provenance_sha256=_sha256(provenance_path),
+        distribution_manifest=manifest_path,
+        gitea_provenance=provenance_path,
+    )
+
+
+def _load_registry_credential_payload(path: Path) -> dict[str, Any]:
     try:
         details = path.lstat()
     except OSError as exc:
@@ -960,15 +1510,22 @@ def load_registry_credential(path: Path) -> RegistryCredential:
         raise PublisherError("Package credential file is malformed") from exc
     if not isinstance(payload, dict) or set(payload) != {"username", "token"}:
         raise PublisherError("Package credential must contain only username and token")
+    return payload
+
+
+def load_registry_credential(path: Path) -> RegistryCredential:
+    """Open the host-only package credential after provenance verification."""
+
+    payload = _load_registry_credential_payload(path)
     username = payload["username"]
     token = payload["token"]
     if not isinstance(username, str) or not isinstance(token, str):
         raise PublisherError("Package credential values must be strings")
-    if not username or len(username) > 255 or not token or len(token) > 4096:
+    if not username or len(username) > 255:
         raise PublisherError("Package credential values have invalid lengths")
-    if any(ord(character) < 0x20 or ord(character) == 0x7F for character in username + token):
+    if any(ord(character) < 0x20 or ord(character) == 0x7F for character in username):
         raise PublisherError("Package credential values contain control characters")
-    return RegistryCredential(username=username, token=token)
+    return RegistryCredential(username=username, token=_validate_package_token(token))
 
 
 def load_publisher_policy(path: Path) -> PublisherPolicy:
@@ -1196,7 +1753,533 @@ class GiteaPackageRegistry:
             raise PublisherError("Package registry upload failed") from exc
 
 
-def publish_verified_candidate(candidate: VerifiedCandidate, registry: PackageRegistry) -> None:
+class RegistryHttpConnection(Protocol):
+    sock: Any
+
+    def request(
+        self, method: str, url: str, body: bytes | None, headers: Mapping[str, str]
+    ) -> None: ...
+
+    def getresponse(self) -> Any: ...
+
+    def putrequest(self, method: str, url: str) -> None: ...
+
+    def putheader(self, header: str, *values: str) -> None: ...
+
+    def endheaders(self) -> None: ...
+
+    def send(self, data: bytes) -> None: ...
+
+    def close(self) -> None: ...
+
+
+def _multipart_prefix(boundary: str, fields: Mapping[str, str], artifact_name: str) -> bytes:
+    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", artifact_name) is None:
+        raise PublisherError("Upload artifact filename is unsafe")
+    chunks: list[bytes] = []
+    for key, value in fields.items():
+        if re.fullmatch(r"[:A-Za-z_][A-Za-z0-9_:.-]*", key) is None:
+            raise PublisherError("Upload metadata field name is unsafe")
+        chunks.extend(
+            (
+                f"--{boundary}\r\n".encode(),
+                f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode(),
+                value.encode("utf-8"),
+                b"\r\n",
+            )
+        )
+    chunks.extend(
+        (
+            f"--{boundary}\r\n".encode(),
+            (
+                f'Content-Disposition: form-data; name="content"; filename="{artifact_name}"\r\n'
+            ).encode(),
+            b"Content-Type: application/octet-stream\r\n\r\n",
+        )
+    )
+    prefix = b"".join(chunks)
+    if len(prefix) > MAX_CONTROL_BYTES:
+        raise PublisherError("Upload metadata exceeds its size limit")
+    return prefix
+
+
+class BoundedRegistryClient:
+    """A no-redirect registry client with request, body, and wall-clock bounds."""
+
+    def __init__(
+        self,
+        *,
+        server_url: str,
+        token: str,
+        deadline_seconds: float = 180.0,
+        request_timeout: float = 15.0,
+        connection_factory: Callable[[str, float], RegistryHttpConnection] | None = None,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        _validate_package_token(token)
+        parsed = urllib.parse.urlsplit(server_url)
+        if (
+            parsed.scheme != "https"
+            or not parsed.netloc
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.query
+            or parsed.fragment
+            or parsed.path not in {"", "/"}
+        ):
+            raise PublisherError("Registry server URL must be a credential-free HTTPS origin")
+        if not 0 < deadline_seconds <= 600 or not 0 < request_timeout <= 60:
+            raise PublisherError("Registry timeout bounds are invalid")
+        self.origin = f"{parsed.scheme}://{parsed.netloc}"
+        self._host = parsed.netloc
+        self._token = token
+        self._clock = clock
+        self._deadline = clock() + deadline_seconds
+        self._request_timeout = request_timeout
+        self._connection_factory = connection_factory or (
+            lambda host, timeout: http.client.HTTPSConnection(host, timeout=timeout)
+        )
+
+    def remaining(self) -> float:
+        remaining = self._deadline - self._clock()
+        if remaining <= 0:
+            raise PublisherError("Registry operation exceeded its deadline")
+        return remaining
+
+    @staticmethod
+    def _response_socket(response: Any, connection: RegistryHttpConnection) -> Any:
+        if connection.sock is not None:
+            return connection.sock
+        stream = getattr(response, "fp", None)
+        raw_stream = getattr(stream, "raw", None)
+        response_socket = getattr(raw_stream, "_sock", None)
+        if response_socket is None:
+            raise PublisherError("Registry response did not expose a bounded socket")
+        return response_socket
+
+    def _read_bounded(
+        self, response: Any, connection: RegistryHttpConnection, maximum: int
+    ) -> bytes:
+        length_value = response.getheader("Content-Length")
+        if length_value is not None:
+            try:
+                content_length = int(length_value)
+            except ValueError as exc:
+                raise PublisherError("Registry returned an invalid Content-Length") from exc
+            if content_length < 0 or content_length > maximum:
+                raise PublisherError("Registry response exceeds the allowed size")
+        result = bytearray()
+        response_socket = self._response_socket(response, connection)
+        while True:
+            remaining = self.remaining()
+            response_socket.settimeout(min(self._request_timeout, remaining))
+            chunk = response.read(min(64 * 1024, maximum + 1 - len(result)))
+            if not chunk:
+                break
+            result.extend(chunk)
+            if len(result) > maximum:
+                raise PublisherError("Registry response exceeds the allowed size")
+        self.remaining()
+        return bytes(result)
+
+    def request_bytes(
+        self,
+        *,
+        method: str,
+        path: str,
+        maximum: int,
+        allow_not_found: bool = False,
+    ) -> bytes | None:
+        if not path.startswith("/") or any(character in path for character in "\r\n"):
+            raise PublisherError("Registry request path is invalid")
+        connection = self._connection_factory(
+            self._host,
+            min(self._request_timeout, self.remaining()),
+        )
+        try:
+            connection.request(
+                method,
+                path,
+                b"" if method == "POST" else None,
+                {
+                    "Authorization": f"token {self._token}",
+                    "Accept": "application/json",
+                    "User-Agent": "proxmox-sdk-actions-publisher/1",
+                },
+            )
+            response = connection.getresponse()
+            status = int(response.status)
+            if status == 404 and allow_not_found:
+                return None
+            if 300 <= status < 400:
+                raise PublisherError("Registry redirect was refused")
+            if not 200 <= status < 300:
+                raise PublisherError(f"Registry request failed with HTTP {status}")
+            return self._read_bounded(response, connection, maximum)
+        except PublisherError:
+            raise
+        except ValueError:
+            raise PublisherError("Registry request headers are invalid") from None
+        except (TimeoutError, http.client.HTTPException, OSError) as exc:
+            raise PublisherError("Registry request failed or timed out") from exc
+        finally:
+            connection.close()
+
+    def request_json(self, *, path: str, allow_not_found: bool = False) -> Any | None:
+        payload = self.request_bytes(
+            method="GET",
+            path=path,
+            maximum=MAX_CONTROL_BYTES,
+            allow_not_found=allow_not_found,
+        )
+        if payload is None:
+            return None
+        try:
+            return json.loads(payload)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise PublisherError("Registry response is not valid bounded JSON") from exc
+
+    def post_empty(self, *, path: str) -> None:
+        self.request_bytes(method="POST", path=path, maximum=MAX_CONTROL_BYTES)
+
+    def _send_bounded(self, connection: RegistryHttpConnection, payload: bytes) -> None:
+        if connection.sock is None:
+            raise PublisherError("Registry connection did not expose a bounded socket")
+        connection.sock.settimeout(min(self._request_timeout, self.remaining()))
+        connection.send(payload)
+        self.remaining()
+
+    def upload_distribution(
+        self,
+        *,
+        path: str,
+        username: str,
+        artifact: Path,
+        fields: Mapping[str, str],
+    ) -> None:
+        if not path.startswith("/") or any(character in path for character in "\r\n"):
+            raise PublisherError("Registry upload path is invalid")
+        details = artifact.lstat()
+        if artifact.is_symlink() or not stat.S_ISREG(details.st_mode):
+            raise PublisherError("Upload artifact must be a regular file")
+        if not 0 < details.st_size <= MAX_DISTRIBUTION_BYTES:
+            raise PublisherError("Upload artifact size is outside policy")
+        boundary = f"proxmox-sdk-{os.urandom(24).hex()}"
+        prefix = _multipart_prefix(boundary, fields, artifact.name)
+        suffix = f"\r\n--{boundary}--\r\n".encode()
+        authorization = base64.b64encode(f"{username}:{self._token}".encode("ascii")).decode(
+            "ascii"
+        )
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Basic {authorization}",
+            "Content-Length": str(len(prefix) + details.st_size + len(suffix)),
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "User-Agent": "proxmox-sdk-actions-publisher/1",
+        }
+        connection = self._connection_factory(
+            self._host,
+            min(self._request_timeout, self.remaining()),
+        )
+        try:
+            connection.putrequest("POST", path)
+            for key, value in headers.items():
+                connection.putheader(key, value)
+            connection.endheaders()
+            self._send_bounded(connection, prefix)
+            with artifact.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(64 * 1024), b""):
+                    self._send_bounded(connection, chunk)
+            self._send_bounded(connection, suffix)
+            response = connection.getresponse()
+            status = int(response.status)
+            if 300 <= status < 400:
+                raise PublisherError("Registry redirect was refused")
+            if not 200 <= status < 300:
+                raise PublisherError(f"Registry upload failed with HTTP {status}")
+            self._read_bounded(response, connection, MAX_CONTROL_BYTES)
+        except PublisherError:
+            raise
+        except ValueError:
+            raise PublisherError("Registry request headers are invalid") from None
+        except (TimeoutError, http.client.HTTPException, OSError) as exc:
+            raise PublisherError("Registry upload failed or timed out") from exc
+        finally:
+            connection.close()
+
+
+def _registry_quote(value: str) -> str:
+    if not value or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", value) is None:
+        raise PublisherError("Registry identity contains unsupported characters")
+    return urllib.parse.quote(value, safe="")
+
+
+def _repository_identity(payload: Any) -> str | None:
+    package = _object(payload, "registry package metadata")
+    repository = package.get("repository")
+    if repository is None:
+        return None
+    value = _object(repository, "registry repository association").get("full_name")
+    if not isinstance(value, str) or value.count("/") != 1:
+        raise PublisherError("Registry repository association is incomplete")
+    return value
+
+
+def _candidate_registry_artifacts(candidate: VerifiedCandidate) -> tuple[RegistryArtifact, ...]:
+    records: list[RegistryArtifact] = []
+    for name, path in sorted(candidate.distributions.items()):
+        try:
+            details = path.lstat()
+        except OSError as exc:
+            raise PublisherError("Sealed distribution is unavailable") from exc
+        if path.is_symlink() or not stat.S_ISREG(details.st_mode):
+            raise PublisherError("Sealed distribution is not a regular file")
+        if not 0 < details.st_size <= MAX_DISTRIBUTION_BYTES:
+            raise PublisherError("Sealed distribution size is outside policy")
+        records.append(RegistryArtifact(name, details.st_size, _sha256(path)))
+    if len(records) != 2:
+        raise PublisherError("Sealed candidate must contain exactly two distributions")
+    return tuple(records)
+
+
+def _distribution_upload_fields(artifact: Path, metadata: Mapping[str, str]) -> dict[str, str]:
+    return {
+        ":action": "file_upload",
+        "protocol_version": "1",
+        "name": metadata["name"],
+        "version": metadata["version"],
+        "metadata_version": metadata["metadata_version"],
+        "summary": metadata["summary"],
+        "requires_python": metadata["requires_python"],
+        "license": metadata["license"],
+        "author": metadata["author"],
+        "home_page": metadata["home_page"],
+        "filetype": metadata["filetype"],
+        "pyversion": metadata["pyversion"],
+        "sha256_digest": _sha256(artifact),
+    }
+
+
+class ActionsGiteaRegistry:
+    """An exact-state view of Gitea package metadata and served files."""
+
+    def __init__(
+        self, client: BoundedRegistryClient, owner: str, repository: str, username: str
+    ) -> None:
+        self.client = client
+        self.owner = _registry_quote(owner)
+        self.repository = _registry_quote(repository)
+        self.username = _registry_quote(username)
+
+    @property
+    def expected_repository(self) -> str:
+        return f"{urllib.parse.unquote(self.owner)}/{urllib.parse.unquote(self.repository)}"
+
+    def _package_path(self, candidate: VerifiedCandidate) -> str:
+        return (
+            f"/api/v1/packages/{self.owner}/pypi/"
+            f"{_registry_quote(EXPECTED_PACKAGE)}/{_registry_quote(candidate.version)}"
+        )
+
+    def _download_exact(self, candidate: VerifiedCandidate, expected: RegistryArtifact) -> None:
+        path = (
+            f"/api/packages/{self.owner}/pypi/files/{_registry_quote(EXPECTED_PACKAGE)}/"
+            f"{_registry_quote(candidate.version)}/{_registry_quote(expected.name)}"
+        )
+        content = self.client.request_bytes(method="GET", path=path, maximum=expected.size)
+        if content is None:
+            raise PublisherError("Registry artifact download unexpectedly disappeared")
+        actual = RegistryArtifact(expected.name, len(content), hashlib.sha256(content).hexdigest())
+        if actual != expected:
+            raise PublisherError("Registry artifact bytes do not match their API provenance")
+
+    def _version_repository(
+        self, candidate: VerifiedCandidate, package_payload: Any | None
+    ) -> str | None:
+        if package_payload is None:
+            latest = (
+                f"/api/v1/packages/{self.owner}/pypi/{_registry_quote(EXPECTED_PACKAGE)}/-/latest"
+            )
+            latest_payload = self.client.request_json(path=latest, allow_not_found=True)
+            return _repository_identity(latest_payload) if latest_payload is not None else None
+        package = _object(package_payload, "registry package metadata")
+        identity = (
+            str(package.get("type", "")),
+            _canonical_name(str(package.get("name", ""))),
+            str(package.get("version", "")),
+        )
+        if identity != ("pypi", _canonical_name(EXPECTED_PACKAGE), candidate.version):
+            raise PublisherError("Registry package metadata identity mismatch")
+        return _repository_identity(package)
+
+    def _file_record(
+        self,
+        row: Any,
+        expected: Mapping[str, RegistryArtifact],
+        seen: set[str],
+        candidate: VerifiedCandidate,
+    ) -> RegistryArtifact:
+        item = _object(row, "registry file inventory entry")
+        name, size, digest = item.get("name"), item.get("size"), item.get("sha256")
+        if (
+            not isinstance(name, str)
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._+-]*", name) is None
+            or name in seen
+            or isinstance(size, bool)
+            or not isinstance(size, int)
+            or not 0 <= size <= MAX_DISTRIBUTION_BYTES
+            or not isinstance(digest, str)
+            or HEX64.fullmatch(digest.lower()) is None
+        ):
+            raise PublisherError("Registry file inventory identity is invalid")
+        seen.add(name)
+        record = RegistryArtifact(name, size, digest.lower())
+        if expected.get(name) == record:
+            self._download_exact(candidate, record)
+        return record
+
+    def inspect(self, candidate: VerifiedCandidate) -> RegistryState:
+        package_path = self._package_path(candidate)
+        package_payload = self.client.request_json(path=package_path, allow_not_found=True)
+        version_exists = package_payload is not None
+        repository = self._version_repository(candidate, package_payload)
+        files_payload = self.client.request_json(path=f"{package_path}/files", allow_not_found=True)
+        if files_payload is None:
+            if version_exists:
+                raise PublisherError("Registry package version exists without a file inventory")
+            return RegistryState(False, repository, ())
+        if not version_exists or not isinstance(files_payload, list):
+            raise PublisherError("Registry file inventory is inconsistent")
+        expected = {record.name: record for record in _candidate_registry_artifacts(candidate)}
+        records: list[RegistryArtifact] = []
+        seen: set[str] = set()
+        for row in files_payload:
+            records.append(self._file_record(row, expected, seen, candidate))
+        return RegistryState(True, repository, tuple(sorted(records, key=lambda item: item.name)))
+
+    def link(self) -> None:
+        path = (
+            f"/api/v1/packages/{self.owner}/pypi/{_registry_quote(EXPECTED_PACKAGE)}"
+            f"/-/link/{self.repository}"
+        )
+        self.client.post_empty(path=path)
+
+    def upload(self, candidate: VerifiedCandidate, artifact: Path) -> None:
+        expected = candidate.distributions.get(artifact.name)
+        if expected is None or expected.resolve() != artifact.resolve():
+            raise PublisherError("Upload artifact is not part of the sealed candidate")
+        path = f"/api/packages/{self.owner}/pypi/"
+        fields = _distribution_upload_fields(artifact, candidate.metadata[artifact.name])
+        self.client.upload_distribution(
+            path=path,
+            username=urllib.parse.unquote(self.username),
+            artifact=artifact,
+            fields=fields,
+        )
+
+
+def classify_registry_state(state: RegistryState, candidate: VerifiedCandidate) -> str:
+    """Accept absent, exact, or byte-exact resumable subset states."""
+
+    local = {record.name: record for record in _candidate_registry_artifacts(candidate)}
+    remote = state.artifact_map()
+    if not state.version_exists:
+        if remote:
+            raise PublisherError("Registry version state is inconsistent")
+        return "absent"
+    if set(remote) - set(local):
+        raise PublisherError("Registry version contains unexpected extra artifacts")
+    if any(remote[name] != local[name] for name in remote):
+        raise PublisherError("Registry artifact size or digest mismatch")
+    return "exact" if set(remote) == set(local) else "partial"
+
+
+def _require_repository_association(state: RegistryState, expected: str) -> None:
+    if state.repository is not None and state.repository != expected:
+        raise PublisherError("Package is associated with a different repository")
+
+
+def _inspect_actions_registry(
+    candidate: VerifiedCandidate, registry: ActionsGiteaRegistry
+) -> tuple[RegistryState, str]:
+    state = registry.inspect(candidate)
+    _require_repository_association(state, registry.expected_repository)
+    return state, classify_registry_state(state, candidate)
+
+
+def _ensure_actions_repository(
+    candidate: VerifiedCandidate,
+    registry: ActionsGiteaRegistry,
+    state: RegistryState,
+) -> RegistryState:
+    if state.repository == registry.expected_repository or not state.version_exists:
+        return state
+    try:
+        registry.link()
+    except Exception:
+        pass
+    recovered, _ = _inspect_actions_registry(candidate, registry)
+    if recovered.repository != registry.expected_repository:
+        raise PublisherError("Repository association did not reach an exact state")
+    return recovered
+
+
+def _upload_actions_artifact(
+    *,
+    candidate: VerifiedCandidate,
+    registry: ActionsGiteaRegistry,
+    artifact: Path,
+    revalidate_seal: Callable[[], None],
+) -> RegistryState:
+    revalidate_seal()
+    try:
+        registry.upload(candidate, artifact)
+    except Exception:
+        revalidate_seal()
+        recovered, _ = _inspect_actions_registry(candidate, registry)
+        if artifact.name not in recovered.artifact_map():
+            raise PublisherError("Registry upload made no exact recoverable progress") from None
+        return _ensure_actions_repository(candidate, registry, recovered)
+    revalidate_seal()
+    state, _ = _inspect_actions_registry(candidate, registry)
+    if state.artifact_map().get(artifact.name) not in _candidate_registry_artifacts(candidate):
+        raise PublisherError("Registry upload did not preserve the uploaded artifact")
+    return _ensure_actions_repository(candidate, registry, state)
+
+
+def reconcile_actions_publication(
+    *,
+    candidate: VerifiedCandidate,
+    registry: ActionsGiteaRegistry,
+    revalidate_seal: Callable[[], None],
+) -> tuple[str, RegistryState]:
+    """Resume exact subsets one file at a time and require an exact final GET."""
+
+    revalidate_seal()
+    state, initial = _inspect_actions_registry(candidate, registry)
+    state = _ensure_actions_repository(candidate, registry, state)
+    for record in _candidate_registry_artifacts(candidate):
+        if record.name in state.artifact_map():
+            continue
+        state = _upload_actions_artifact(
+            candidate=candidate,
+            registry=registry,
+            artifact=candidate.distributions[record.name],
+            revalidate_seal=revalidate_seal,
+        )
+    revalidate_seal()
+    final_state, classification = _inspect_actions_registry(candidate, registry)
+    if final_state.repository != registry.expected_repository:
+        raise PublisherError("Package repository association is missing")
+    if classification != "exact":
+        raise PublisherError("Final registry state is not exact")
+    result = "already exact" if initial == "exact" else "published exact"
+    return result, final_state
+
+
+def publish_verified_candidate(
+    candidate: VerifiedCandidate, registry: PackageRegistry
+) -> tuple[str, RegistryState]:
     """Idempotently upload missing files and require exact served bytes."""
 
     expected = {name: _sha256(path) for name, path in candidate.distributions.items()}
@@ -1210,10 +2293,41 @@ def publish_verified_candidate(candidate: VerifiedCandidate, registry: PackageRe
     served = registry.inspect(EXPECTED_PACKAGE, candidate.version)
     if served != expected:
         raise PublisherError("Served package bytes do not exactly match the verified candidate")
+    artifacts = tuple(
+        RegistryArtifact(name, candidate.distributions[name].stat().st_size, digest)
+        for name, digest in sorted(served.items())
+    )
+    result = "already exact" if remote == expected else "published exact"
+    return result, RegistryState(True, None, artifacts)
 
 
-def write_verified_staging(candidate: VerifiedCandidate, staging: Path) -> None:
-    """Write a closed handoff while the verifier has no package credential."""
+def _canonical_json_bytes(value: Mapping[str, Any]) -> bytes:
+    return (json.dumps(value, separators=(",", ":"), sort_keys=True) + "\n").encode("utf-8")
+
+
+def _write_seal_manifest(candidate: VerifiedCandidate, staging: Path) -> str:
+    files = {
+        path.relative_to(staging).as_posix(): _sha256(path)
+        for path in staging.rglob("*")
+        if path.is_file()
+    }
+    manifest = {
+        "schema_version": 1,
+        "files": dict(sorted(files.items())),
+        "run_attempt": candidate.run_attempt,
+        "run_id": candidate.run_id,
+        "source_sha": candidate.source_sha,
+        "tag": candidate.tag,
+        "version": candidate.version,
+    }
+    path = staging / SEAL_MANIFEST_NAME
+    path.write_bytes(_canonical_json_bytes(manifest))
+    path.chmod(0o600)
+    return _sha256(path)
+
+
+def write_verified_staging(candidate: VerifiedCandidate, staging: Path) -> str:
+    """Write a closed handoff and return its canonical seal-manifest digest."""
 
     staging.mkdir(mode=0o700, parents=False)
     dist = staging / "dist"
@@ -1250,11 +2364,18 @@ def write_verified_staging(candidate: VerifiedCandidate, staging: Path) -> None:
     handoff_path = staging / "handoff.json"
     handoff_path.write_text(json.dumps(handoff, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     handoff_path.chmod(0o600)
+    return _write_seal_manifest(candidate, staging)
 
 
 def _load_handoff_json(directory: Path) -> dict[str, Any]:
     try:
-        value = json.loads((directory / "handoff.json").read_text(encoding="utf-8"))
+        path = directory / "handoff.json"
+        details = path.lstat()
+        if path.is_symlink() or not stat.S_ISREG(details.st_mode):
+            raise PublisherError("Verified handoff is not a regular file")
+        if not 0 < details.st_size <= MAX_HANDOFF_BYTES:
+            raise PublisherError("Verified handoff exceeds its size limit")
+        value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise PublisherError("Verified handoff is unavailable or malformed") from exc
     handoff = _object(value, "verified handoff")
@@ -1277,6 +2398,14 @@ def _load_handoff_json(directory: Path) -> dict[str, Any]:
     return handoff
 
 
+def _validate_actions_seal_directories(sealed: Path) -> None:
+    directories = {
+        path.relative_to(sealed).as_posix() for path in sealed.rglob("*") if path.is_dir()
+    }
+    if directories != {"dist"}:
+        raise PublisherError("Actions seal does not contain its exact directory set")
+
+
 def _validate_handoff_files(directory: Path, handoff: Mapping[str, Any]) -> dict[str, Path]:
     hashes = handoff.get("file_sha256")
     if not isinstance(hashes, dict):
@@ -1284,17 +2413,9 @@ def _validate_handoff_files(directory: Path, handoff: Mapping[str, Any]) -> dict
     relative_files = {
         path.relative_to(directory).as_posix() for path in directory.rglob("*") if path.is_file()
     }
-    if relative_files != {*hashes, "handoff.json"}:
+    if relative_files != {*hashes, "handoff.json", SEAL_MANIFEST_NAME}:
         raise PublisherError("Verified handoff does not contain its exact closed file set")
-    result: dict[str, Path] = {}
-    for name, digest in hashes.items():
-        path = PurePosixPath(str(name))
-        if path.is_absolute() or ".." in path.parts or not isinstance(digest, str):
-            raise PublisherError("Verified handoff contains an unsafe file identity")
-        target = directory.joinpath(*path.parts)
-        if HEX64.fullmatch(digest) is None or _sha256(target) != digest:
-            raise PublisherError("Verified handoff file digest mismatch")
-        result[str(name)] = target
+    result = _rehash_handoff_files(directory, hashes)
     distribution_names = {
         name for name in result if name.startswith("dist/") and len(PurePosixPath(name).parts) == 2
     }
@@ -1305,6 +2426,86 @@ def _validate_handoff_files(directory: Path, handoff: Mapping[str, Any]) -> dict
     }:
         raise PublisherError("Verified handoff has an invalid distribution/control set")
     return result
+
+
+def _rehash_handoff_files(directory: Path, hashes: Mapping[Any, Any]) -> dict[str, Path]:
+    result: dict[str, Path] = {}
+    for name, digest in hashes.items():
+        path = PurePosixPath(str(name))
+        if path.is_absolute() or ".." in path.parts or not isinstance(digest, str):
+            raise PublisherError("Verified handoff contains an unsafe file identity")
+        target = directory.joinpath(*path.parts)
+        if HEX64.fullmatch(digest) is None or _sha256(target) != digest:
+            raise PublisherError("Verified handoff file digest mismatch")
+        result[str(name)] = target
+    return result
+
+
+def _load_seal_manifest(sealed: Path) -> tuple[dict[str, Any], bytes]:
+    path = sealed / SEAL_MANIFEST_NAME
+    try:
+        details = path.lstat()
+        if path.is_symlink() or not stat.S_ISREG(details.st_mode):
+            raise PublisherError("Actions seal manifest is not a regular file")
+        if not 0 < details.st_size <= MAX_HANDOFF_BYTES:
+            raise PublisherError("Actions seal manifest exceeds its size limit")
+        raw = path.read_bytes()
+        manifest = _object(json.loads(raw), "Actions seal manifest")
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise PublisherError("Actions seal manifest is unavailable or malformed") from exc
+    if raw != _canonical_json_bytes(manifest):
+        raise PublisherError("Actions seal manifest is not canonical JSON")
+    return manifest, raw
+
+
+def _validate_seal_manifest_files(sealed: Path, manifest: Mapping[str, Any]) -> None:
+    hashes = manifest.get("files")
+    if not isinstance(hashes, dict):
+        raise PublisherError("Actions seal manifest file map is invalid")
+    relative_files = {
+        path.relative_to(sealed).as_posix() for path in sealed.rglob("*") if path.is_file()
+    }
+    if relative_files != {*hashes, SEAL_MANIFEST_NAME}:
+        raise PublisherError("Actions seal manifest does not cover the exact file set")
+    for name, digest in hashes.items():
+        relative = PurePosixPath(str(name))
+        if relative.is_absolute() or ".." in relative.parts or not isinstance(digest, str):
+            raise PublisherError("Actions seal manifest contains an unsafe file identity")
+        target = sealed.joinpath(*relative.parts)
+        if HEX64.fullmatch(digest) is None or _sha256(target) != digest:
+            raise PublisherError("Actions seal manifest file digest mismatch")
+
+
+def verify_actions_seal_manifest(
+    sealed: Path,
+    *,
+    expected_sha256: str,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    tag: str,
+    version: str,
+) -> str:
+    """Verify the externally carried digest and all canonical seal identities."""
+
+    manifest, raw = _load_seal_manifest(sealed)
+    actual_sha256 = hashlib.sha256(raw).hexdigest()
+    if HEX64.fullmatch(expected_sha256) is None or actual_sha256 != expected_sha256:
+        raise PublisherError("Actions seal manifest digest does not match verifier output")
+    expected = {
+        "schema_version": 1,
+        "run_attempt": run_attempt,
+        "run_id": run_id,
+        "source_sha": source_sha,
+        "tag": tag,
+        "version": version,
+    }
+    if set(manifest) != {*expected, "files"}:
+        raise PublisherError("Actions seal manifest field set is invalid")
+    for key, value in expected.items():
+        _require_equal(manifest.get(key), value, f"seal manifest {key}")
+    _validate_seal_manifest_files(sealed, manifest)
+    return actual_sha256
 
 
 def seal_verified_staging(staging: Path, sealed: Path) -> None:
@@ -1340,16 +2541,7 @@ def seal_verified_staging(staging: Path, sealed: Path) -> None:
         shutil.rmtree(temporary, ignore_errors=True)
 
 
-def load_sealed_candidate(sealed: Path) -> VerifiedCandidate:
-    """Rehash and load a root-owned handoff without any Gitea subprocess."""
-
-    details = sealed.lstat()
-    if not stat.S_ISDIR(details.st_mode) or details.st_uid != 0 or details.st_mode & 0o022:
-        raise PublisherError("Verified handoff directory is not root-sealed")
-    for path in sealed.rglob("*"):
-        details = path.lstat()
-        if stat.S_ISLNK(details.st_mode) or details.st_uid != 0 or details.st_mode & 0o022:
-            raise PublisherError("Verified handoff member is not root-sealed")
+def _candidate_from_handoff(sealed: Path) -> VerifiedCandidate:
     handoff = _load_handoff_json(sealed)
     files = _validate_handoff_files(sealed, handoff)
     metadata = handoff.get("metadata")
@@ -1401,22 +2593,187 @@ def load_sealed_candidate(sealed: Path) -> VerifiedCandidate:
     )
 
 
-def write_publication_evidence(candidate: VerifiedCandidate, evidence_path: Path) -> None:
+def load_sealed_candidate(sealed: Path) -> VerifiedCandidate:
+    """Rehash and load a root-owned handoff without any Gitea subprocess."""
+
+    details = sealed.lstat()
+    if not stat.S_ISDIR(details.st_mode) or details.st_uid != 0 or details.st_mode & 0o022:
+        raise PublisherError("Verified handoff directory is not root-sealed")
+    for path in sealed.rglob("*"):
+        details = path.lstat()
+        if stat.S_ISLNK(details.st_mode) or details.st_uid != 0 or details.st_mode & 0o022:
+            raise PublisherError("Verified handoff member is not root-sealed")
+    return _candidate_from_handoff(sealed)
+
+
+def _require_actions_candidate_identity(
+    candidate: VerifiedCandidate,
+    *,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    tag: str,
+    version: str,
+) -> None:
+    expected = (source_sha, run_id, run_attempt, tag, version)
+    actual = (
+        candidate.source_sha,
+        candidate.run_id,
+        candidate.run_attempt,
+        candidate.tag,
+        candidate.version,
+    )
+    _require_equal(actual, expected, "Actions sealed candidate identity")
+
+
+def harden_actions_seal(
+    sealed: Path,
+    *,
+    expected_sha256: str,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    tag: str,
+    version: str,
+) -> VerifiedCandidate:
+    """Restore private modes after artifact transport and rehash the closed seal."""
+
+    try:
+        details = sealed.lstat()
+        members = sorted(sealed.rglob("*"), key=lambda path: len(path.parts), reverse=True)
+    except OSError as exc:
+        raise PublisherError("Downloaded Actions seal is unavailable") from exc
+    if sealed.is_symlink() or not stat.S_ISDIR(details.st_mode):
+        raise PublisherError("Downloaded Actions seal is not a real directory")
+    for path in members:
+        details = path.lstat()
+        if stat.S_ISLNK(details.st_mode) or not (path.is_file() or path.is_dir()):
+            raise PublisherError("Downloaded Actions seal contains an unsafe member")
+    _validate_actions_seal_directories(sealed)
+    verify_actions_seal_manifest(
+        sealed,
+        expected_sha256=expected_sha256,
+        source_sha=source_sha,
+        run_id=run_id,
+        run_attempt=run_attempt,
+        tag=tag,
+        version=version,
+    )
+    candidate = _candidate_from_handoff(sealed)
+    _require_actions_candidate_identity(
+        candidate,
+        source_sha=source_sha,
+        run_id=run_id,
+        run_attempt=run_attempt,
+        tag=tag,
+        version=version,
+    )
+    for path in members:
+        path.chmod(0o500 if path.is_dir() else 0o400)
+    sealed.chmod(0o500)
+    return candidate
+
+
+def load_actions_sealed_candidate(
+    sealed: Path,
+    *,
+    expected_sha256: str,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    tag: str,
+    version: str,
+) -> VerifiedCandidate:
+    """Load a read-only Actions seal and require its exact hashes and file set."""
+
+    try:
+        details = sealed.lstat()
+        members = list(sealed.rglob("*"))
+    except OSError as exc:
+        raise PublisherError("Downloaded Actions seal is unavailable") from exc
+    if sealed.is_symlink() or not stat.S_ISDIR(details.st_mode) or details.st_mode & 0o222:
+        raise PublisherError("Downloaded Actions seal is not hardened read-only")
+    for path in members:
+        details = path.lstat()
+        if stat.S_ISLNK(details.st_mode) or details.st_mode & 0o222:
+            raise PublisherError("Downloaded Actions seal member is not hardened read-only")
+    _validate_actions_seal_directories(sealed)
+    verify_actions_seal_manifest(
+        sealed,
+        expected_sha256=expected_sha256,
+        source_sha=source_sha,
+        run_id=run_id,
+        run_attempt=run_attempt,
+        tag=tag,
+        version=version,
+    )
+    candidate = _candidate_from_handoff(sealed)
+    _require_actions_candidate_identity(
+        candidate,
+        source_sha=source_sha,
+        run_id=run_id,
+        run_attempt=run_attempt,
+        tag=tag,
+        version=version,
+    )
+    return candidate
+
+
+def write_publication_evidence(
+    candidate: VerifiedCandidate,
+    evidence_path: Path,
+    *,
+    seal_sha256: str,
+    server_url: str,
+    owner: str,
+    repository: str,
+    result: str,
+    registry_state: RegistryState,
+) -> None:
     """Write non-secret evidence only after exact served bytes are confirmed."""
 
+    if HEX64.fullmatch(seal_sha256) is None:
+        raise PublisherError("Publication evidence seal digest is invalid")
+    _require_equal(
+        (server_url, owner, repository),
+        (EXPECTED_SERVER, EXPECTED_OWNER, EXPECTED_REPOSITORY),
+        "publication registry identity",
+    )
+    if classify_registry_state(registry_state, candidate) != "exact":
+        raise PublisherError("Publication evidence requires an exact registry state")
+    if registry_state.repository not in {None, EXPECTED_FULL_NAME}:
+        raise PublisherError("Publication evidence repository association is invalid")
+    if result not in {"already exact", "published exact"}:
+        raise PublisherError("Publication evidence result is invalid")
     evidence_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     evidence_path.write_text(
         json.dumps(
             {
+                "schema_version": 1,
                 "artifact_name": candidate.artifact_name,
                 "candidate_sha256": candidate.candidate_sha256,
                 "distribution_sha256": {
                     name: _sha256(path) for name, path in sorted(candidate.distributions.items())
                 },
                 "distribution_manifest_sha256": candidate.distribution_manifest_sha256,
+                "final_registry_inventory": [
+                    {
+                        "filename": artifact.name,
+                        "sha256": artifact.sha256,
+                        "size": artifact.size,
+                    }
+                    for artifact in sorted(registry_state.artifacts, key=lambda item: item.name)
+                ],
                 "gitea_provenance_sha256": candidate.gitea_provenance_sha256,
+                "owner": owner,
+                "repository": repository,
+                "repository_association": registry_state.repository,
+                "registry_version_exists": registry_state.version_exists,
+                "result": result,
                 "run_attempt": candidate.run_attempt,
                 "run_id": candidate.run_id,
+                "seal_sha256": seal_sha256,
+                "server_url": server_url,
                 "source_sha": candidate.source_sha,
                 "tag": candidate.tag,
                 "version": candidate.version,
@@ -1437,6 +2794,117 @@ def _credential_directory() -> Path:
     return Path(value)
 
 
+def _actions_directory(value: Path | None, environment_name: str, leaf: str) -> Path:
+    if value is not None:
+        return value.resolve()
+    configured = os.environ.get(environment_name)
+    if configured:
+        return Path(configured).resolve()
+    workspace = Path(os.environ.get("GITHUB_WORKSPACE", Path.cwd()))
+    return (workspace / ".tmp" / "gitea-package" / leaf).resolve()
+
+
+def _run_actions_verify(args: argparse.Namespace) -> None:
+    inbox = _actions_directory(args.inbox_dir, "PROXMOX_SDK_PUBLISHER_INBOX", "inbox")
+    evidence = _actions_directory(args.evidence_dir, "PROXMOX_SDK_PUBLISHER_EVIDENCE", "evidence")
+    candidate_tar = (args.candidate_tar or inbox / PAYLOAD_NAME).resolve()
+    sealed = (args.sealed_dir or evidence / "sealed").resolve()
+    work = (args.work_dir or evidence / "verify-work").resolve()
+    if args.event_name != "push":
+        raise PublisherError("Actions package verification requires a tag push event")
+    candidate = verify_actions_candidate(
+        source_root=args.source_root.resolve(),
+        interpreter=args.python.resolve(),
+        candidate_tar=candidate_tar,
+        expected_candidate_sha256=args.candidate_sha256,
+        run_id=args.run_id,
+        run_attempt=args.run_attempt,
+        source_sha=args.source_sha,
+        tag=args.tag,
+        repository=args.repository,
+        server_url=args.server_url,
+        work=work,
+    )
+    sealed.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    seal_sha256 = write_verified_staging(candidate, sealed)
+    try:
+        with args.github_output.open("a", encoding="utf-8") as output:
+            output.write(f"seal_sha256={seal_sha256}\n")
+    except OSError as exc:
+        raise PublisherError("Actions output file is unavailable") from exc
+    print(f"Verified and sealed {EXPECTED_PACKAGE}=={candidate.version} without credentials")
+
+
+def _run_actions_harden(args: argparse.Namespace) -> None:
+    evidence = _actions_directory(args.evidence_dir, "PROXMOX_SDK_PUBLISHER_EVIDENCE", "evidence")
+    sealed = (args.sealed_dir or evidence / "sealed").resolve()
+    candidate = harden_actions_seal(
+        sealed,
+        expected_sha256=args.seal_sha256,
+        source_sha=args.source_sha,
+        run_id=args.run_id,
+        run_attempt=args.run_attempt,
+        tag=args.tag,
+        version=args.version,
+    )
+    print(f"Hardened exact Actions seal for {EXPECTED_PACKAGE}=={candidate.version}")
+
+
+def _run_actions_publish(args: argparse.Namespace) -> None:
+    evidence = _actions_directory(args.evidence_dir, "PROXMOX_SDK_PUBLISHER_EVIDENCE", "evidence")
+    sealed = (args.sealed_dir or evidence / "sealed").resolve()
+    evidence_path = (args.publication_evidence or evidence / "publication.json").resolve()
+    token = _validate_package_token(os.environ.get(args.token_env, ""))
+    _require_equal(args.server_url, EXPECTED_SERVER, "registry server URL")
+    _require_equal(args.owner, EXPECTED_OWNER, "registry owner")
+    _require_equal(args.repository, EXPECTED_REPOSITORY, "registry repository")
+    _require_equal(args.username, EXPECTED_OWNER, "registry username")
+    candidate = load_actions_sealed_candidate(
+        sealed,
+        expected_sha256=args.seal_sha256,
+        source_sha=args.source_sha,
+        run_id=args.run_id,
+        run_attempt=args.run_attempt,
+        tag=args.tag,
+        version=args.version,
+    )
+    client = BoundedRegistryClient(
+        server_url=args.server_url,
+        token=token,
+        deadline_seconds=args.deadline_seconds,
+        request_timeout=args.request_timeout,
+    )
+    registry = ActionsGiteaRegistry(client, args.owner, args.repository, args.username)
+
+    def revalidate() -> None:
+        load_actions_sealed_candidate(
+            sealed,
+            expected_sha256=args.seal_sha256,
+            source_sha=args.source_sha,
+            run_id=args.run_id,
+            run_attempt=args.run_attempt,
+            tag=args.tag,
+            version=args.version,
+        )
+
+    result, final_state = reconcile_actions_publication(
+        candidate=candidate,
+        registry=registry,
+        revalidate_seal=revalidate,
+    )
+    write_publication_evidence(
+        candidate,
+        evidence_path,
+        seal_sha256=args.seal_sha256,
+        server_url=args.server_url,
+        owner=args.owner,
+        repository=args.repository,
+        result=result,
+        registry_state=final_state,
+    )
+    print(f"Published and verified {EXPECTED_PACKAGE}=={candidate.version}: {result}")
+
+
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -1450,6 +2918,49 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     publish = commands.add_parser("publish")
     publish.add_argument("--handoff", type=Path, required=True)
     publish.add_argument("--evidence", type=Path, required=True)
+    actions_verify = commands.add_parser("verify-actions")
+    actions_verify.add_argument("--source-root", type=Path, required=True)
+    actions_verify.add_argument("--python", type=Path, required=True)
+    actions_verify.add_argument("--candidate-tar", type=Path)
+    actions_verify.add_argument("--candidate-sha256", required=True)
+    actions_verify.add_argument("--inbox-dir", type=Path)
+    actions_verify.add_argument("--evidence-dir", type=Path)
+    actions_verify.add_argument("--sealed-dir", type=Path)
+    actions_verify.add_argument("--work-dir", type=Path)
+    actions_verify.add_argument("--event-name", required=True)
+    actions_verify.add_argument("--run-id", type=int, required=True)
+    actions_verify.add_argument("--run-attempt", type=int, required=True)
+    actions_verify.add_argument("--source-sha", required=True)
+    actions_verify.add_argument("--tag", required=True)
+    actions_verify.add_argument("--repository", required=True)
+    actions_verify.add_argument("--server-url", required=True)
+    actions_verify.add_argument("--github-output", type=Path, required=True)
+    actions_harden = commands.add_parser("harden-actions-seal")
+    actions_harden.add_argument("--evidence-dir", type=Path)
+    actions_harden.add_argument("--sealed-dir", type=Path)
+    actions_harden.add_argument("--source-sha", required=True)
+    actions_harden.add_argument("--run-id", type=int, required=True)
+    actions_harden.add_argument("--run-attempt", type=int, required=True)
+    actions_harden.add_argument("--tag", required=True)
+    actions_harden.add_argument("--version", required=True)
+    actions_harden.add_argument("--seal-sha256", required=True)
+    actions_publish = commands.add_parser("publish-actions")
+    actions_publish.add_argument("--evidence-dir", type=Path)
+    actions_publish.add_argument("--sealed-dir", type=Path)
+    actions_publish.add_argument("--publication-evidence", type=Path)
+    actions_publish.add_argument("--source-sha", required=True)
+    actions_publish.add_argument("--run-id", type=int, required=True)
+    actions_publish.add_argument("--run-attempt", type=int, required=True)
+    actions_publish.add_argument("--tag", required=True)
+    actions_publish.add_argument("--version", required=True)
+    actions_publish.add_argument("--seal-sha256", required=True)
+    actions_publish.add_argument("--server-url", required=True)
+    actions_publish.add_argument("--owner", required=True)
+    actions_publish.add_argument("--repository", required=True)
+    actions_publish.add_argument("--username", required=True)
+    actions_publish.add_argument("--token-env", default="PACKAGE_WRITE_TOKEN")
+    actions_publish.add_argument("--deadline-seconds", type=float, default=180.0)
+    actions_publish.add_argument("--request-timeout", type=float, default=15.0)
     return parser.parse_args(argv)
 
 
@@ -1473,17 +2984,32 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "seal":
         seal_verified_staging(args.staging.resolve(), args.handoff.resolve())
         print("Root-sealed verified package handoff")
-    else:
+    elif args.command == "publish":
         credentials = _credential_directory()
         candidate = load_sealed_candidate(args.handoff.resolve())
         registry = GiteaPackageRegistry(load_registry_credential(credentials / "registry.json"))
-        publish_verified_candidate(candidate, registry)
-        write_publication_evidence(candidate, args.evidence.resolve())
+        result, final_state = publish_verified_candidate(candidate, registry)
+        write_publication_evidence(
+            candidate,
+            args.evidence.resolve(),
+            seal_sha256=_sha256(args.handoff.resolve() / SEAL_MANIFEST_NAME),
+            server_url=EXPECTED_SERVER,
+            owner=EXPECTED_OWNER,
+            repository=EXPECTED_REPOSITORY,
+            result=result,
+            registry_state=final_state,
+        )
         print(
             "Published root-sealed "
             f"{EXPECTED_PACKAGE}=={candidate.version} from run {candidate.run_id} "
             f"at source {candidate.source_sha}"
         )
+    elif args.command == "verify-actions":
+        _run_actions_verify(args)
+    elif args.command == "harden-actions-seal":
+        _run_actions_harden(args)
+    else:
+        _run_actions_publish(args)
     return 0
 
 

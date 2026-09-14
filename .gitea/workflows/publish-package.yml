@@ -4,9 +4,10 @@ on:
   push:
     tags: ["v*"]
 
-# This workflow is an untrusted producer. It must never receive package,
-# deployment, or repository-write credentials; publication is performed by the
-# separately installed host publisher after independent provenance checks.
+# Candidate production and verification never receive package, deployment, or
+# repository-write credentials. Verification runs on the dedicated release builder,
+# and the publisher independently rebuilds before its credentialed step receives the
+# repository-scoped package token.
 # Do not derive canonical provenance from github.server_url: Gitea can expose a
 # valid internal runner-facing origin there.
 permissions:
@@ -22,6 +23,12 @@ jobs:
     name: build and attest package candidate
     runs-on: ci-untrusted-python312
     timeout-minutes: 60
+    outputs:
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+      candidate_sha256: ${{ steps.attestation.outputs.candidate_sha256 }}
+      source_date_epoch: ${{ steps.meta.outputs.source_date_epoch }}
+      source_sha: ${{ github.sha }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
       - name: Checkout exact tag source
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -130,6 +137,7 @@ jobs:
           uv run --locked python tests/verify_wheel_contract.py dist/*.whl
 
       - name: Bind attestation to the workflow run and candidate bytes
+        id: attestation
         env:
           ARTIFACT_NAME: ${{ steps.meta.outputs.artifact_name }}
           EVENT_REF: ${{ github.ref }}
@@ -219,6 +227,8 @@ jobs:
                       archive.addfile(info, handle)
 
           digest = sha256(payload)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"candidate_sha256={digest}\n")
           print(f"PROXMOX_SDK_ARTIFACT_NAME={os.environ['ARTIFACT_NAME']}")
           print(f"PROXMOX_SDK_CANDIDATE_SHA256={digest}")
           PY
@@ -228,5 +238,282 @@ jobs:
         with:
           name: ${{ steps.meta.outputs.artifact_name }}
           path: release-artifacts/proxmox-sdk-gitea-candidate.tar
+          if-no-files-found: error
+          retention-days: 90
+
+  verify-and-seal:
+    name: verify source and seal without package credentials
+    needs: prepare-package
+    runs-on: release-builder
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: none
+    outputs:
+      seal_sha256: ${{ steps.seal.outputs.seal_sha256 }}
+      source_date_epoch: ${{ needs.prepare-package.outputs.source_date_epoch }}
+      source_sha: ${{ needs.prepare-package.outputs.source_sha }}
+      version: ${{ needs.prepare-package.outputs.version }}
+    steps:
+      - name: Fetch exact tag source anonymously
+        env:
+          EVENT_SHA: ${{ needs.prepare-package.outputs.source_sha }}
+          EVENT_TAG: v${{ needs.prepare-package.outputs.version }}
+          SOURCE_ROOT: ${{ runner.temp }}/proxmox-sdk-source-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          test ! -e "$SOURCE_ROOT"
+          git init "$SOURCE_ROOT"
+          git -C "$SOURCE_ROOT" remote add origin \
+            https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git
+          git -C "$SOURCE_ROOT" fetch --force --no-tags origin \
+            "+refs/heads/main:refs/remotes/origin/main" \
+            "+refs/tags/${EVENT_TAG}:refs/tags/${EVENT_TAG}"
+          git -C "$SOURCE_ROOT" checkout --detach "$EVENT_SHA"
+          test "$(git -C "$SOURCE_ROOT" rev-parse HEAD)" = "$EVENT_SHA"
+
+      - name: Set up uv and Python 3.13.14
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          python-version: "3.13.14"
+          enable-cache: true
+
+      - name: Prepare isolated locked verifier tools
+        env:
+          PUBLISH_ROOT: ${{ runner.temp }}/proxmox-sdk-verify-${{ github.run_id }}-${{ github.run_attempt }}
+          SOURCE_ROOT: ${{ runner.temp }}/proxmox-sdk-source-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test ! -e "$PUBLISH_ROOT"
+          mkdir -p "$PUBLISH_ROOT"
+          uv lock --directory "$SOURCE_ROOT" --check
+          UV_PROJECT_ENVIRONMENT="$PUBLISH_ROOT/venv" uv sync \
+            --directory "$SOURCE_ROOT" --locked --extra test --group dev
+          test "$("$PUBLISH_ROOT/venv/bin/python" -c \
+            'import platform; print(platform.python_version())')" = "3.13.14"
+
+      - name: Download the exact candidate artifact
+        uses: actions/download-artifact@ad191675b41f6a5b46da9a048cb6893812da158b # v3.1.0; deployed Gitea-compatible artifact protocol
+        with:
+          name: ${{ needs.prepare-package.outputs.artifact_name }}
+          path: ${{ runner.temp }}/proxmox-sdk-verify-${{ github.run_id }}-${{ github.run_attempt }}/inbox
+
+      - name: Verify attestation, rebuild twice, and create the seal
+        id: seal
+        env:
+          CANDIDATE_SHA256: ${{ needs.prepare-package.outputs.candidate_sha256 }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SHA: ${{ needs.prepare-package.outputs.source_sha }}
+          EVENT_TAG: v${{ needs.prepare-package.outputs.version }}
+          PUBLISH_ROOT: ${{ runner.temp }}/proxmox-sdk-verify-${{ github.run_id }}-${{ github.run_attempt }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RELEASE_RUN_ATTEMPT: ${{ github.run_attempt }}
+          RELEASE_RUN_ID: ${{ github.run_id }}
+          SOURCE_ROOT: ${{ runner.temp }}/proxmox-sdk-source-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          "$PUBLISH_ROOT/venv/bin/python" \
+            "$SOURCE_ROOT/tools/gitea_package_publisher.py" verify-actions \
+            --source-root "$SOURCE_ROOT" \
+            --python "$PUBLISH_ROOT/venv/bin/python" \
+            --candidate-tar "$PUBLISH_ROOT/inbox/proxmox-sdk-gitea-candidate.tar" \
+            --candidate-sha256 "$CANDIDATE_SHA256" \
+            --sealed-dir "$PUBLISH_ROOT/sealed" \
+            --work-dir "$PUBLISH_ROOT/verify-work" \
+            --event-name "$EVENT_NAME" \
+            --run-id "$RELEASE_RUN_ID" \
+            --run-attempt "$RELEASE_RUN_ATTEMPT" \
+            --source-sha "$EVENT_SHA" \
+            --tag "$EVENT_TAG" \
+            --repository "$RELEASE_REPOSITORY" \
+            --server-url "https://git.nmulti.cloud" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Upload only the bounded verified seal
+        uses: actions/upload-artifact@c6a3b2bd78b3985e4b2f15397fec357f0fd808de # v3.2.2; deployed Gitea-compatible artifact protocol
+        with:
+          name: proxmox-sdk-gitea-seal-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/proxmox-sdk-verify-${{ github.run_id }}-${{ github.run_attempt }}/sealed
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-candidate:
+    name: publish only the verified sealed candidate
+    needs: verify-and-seal
+    runs-on: release-publisher
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Fetch exact tag source anonymously for independent rebuild
+        env:
+          EVENT_SOURCE_SHA: ${{ github.sha }}
+          EVENT_TAG: ${{ github.ref_name }}
+          TOOL_ROOT: ${{ runner.temp }}/proxmox-sdk-publisher-source-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          test ! -e "$TOOL_ROOT"
+          git init "$TOOL_ROOT"
+          git -C "$TOOL_ROOT" remote add origin \
+            https://git.nmulti.cloud/emersonfelipesp/proxmox-sdk.git
+          git -C "$TOOL_ROOT" fetch --force --no-tags --depth 1 origin \
+            "+refs/tags/${EVENT_TAG}:refs/tags/${EVENT_TAG}"
+          git -C "$TOOL_ROOT" checkout --detach "$EVENT_SOURCE_SHA"
+          test "$(git -C "$TOOL_ROOT" rev-parse HEAD)" = "$EVENT_SOURCE_SHA"
+          test "$(git -C "$TOOL_ROOT" rev-parse "refs/tags/${EVENT_TAG}^{commit}")" = "$EVENT_SOURCE_SHA"
+
+      - name: Bind publisher authority to the verified event source
+        env:
+          EVENT_SOURCE_SHA: ${{ github.sha }}
+          EXPECTED_SEAL_SHA256: ${{ needs.verify-and-seal.outputs.seal_sha256 }}
+          TOOL_ROOT: ${{ runner.temp }}/proxmox-sdk-publisher-source-${{ github.run_id }}-${{ github.run_attempt }}
+          VERIFIED_SOURCE_SHA: ${{ needs.verify-and-seal.outputs.source_sha }}
+        run: |
+          set -euo pipefail
+          test "$VERIFIED_SOURCE_SHA" = "$EVENT_SOURCE_SHA"
+          test -n "$EXPECTED_SEAL_SHA256"
+          test "$(git -C "$TOOL_ROOT" rev-parse HEAD)" = "$EVENT_SOURCE_SHA"
+
+      - name: Set up uv and Python 3.13.14
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: "0.11.28"
+          python-version: "3.13.14"
+          enable-cache: true
+
+      - name: Prepare isolated locked publisher tool
+        env:
+          PUBLISH_ROOT: ${{ runner.temp }}/proxmox-sdk-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          TOOL_ROOT: ${{ runner.temp }}/proxmox-sdk-publisher-source-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test ! -e "$PUBLISH_ROOT"
+          mkdir -p "$PUBLISH_ROOT"
+          uv lock --directory "$TOOL_ROOT" --check
+          UV_PROJECT_ENVIRONMENT="$PUBLISH_ROOT/venv" uv sync \
+            --directory "$TOOL_ROOT" --locked --extra test --group dev
+          test "$("$PUBLISH_ROOT/venv/bin/python" -c \
+            'import platform; print(platform.python_version())')" = "3.13.14"
+
+      - name: Download only the verified sealed set
+        uses: actions/download-artifact@ad191675b41f6a5b46da9a048cb6893812da158b # v3.1.0; deployed Gitea-compatible artifact protocol
+        with:
+          name: proxmox-sdk-gitea-seal-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/proxmox-sdk-publish-${{ github.run_id }}-${{ github.run_attempt }}/sealed
+
+      - name: Restore private seal permissions and bind the source SHA
+        env:
+          EVENT_SOURCE_SHA: ${{ github.sha }}
+          EVENT_TAG: v${{ needs.verify-and-seal.outputs.version }}
+          EXPECTED_SEAL_SHA256: ${{ needs.verify-and-seal.outputs.seal_sha256 }}
+          PUBLISH_ROOT: ${{ runner.temp }}/proxmox-sdk-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          RELEASE_RUN_ATTEMPT: ${{ github.run_attempt }}
+          RELEASE_RUN_ID: ${{ github.run_id }}
+          TOOL_ROOT: ${{ runner.temp }}/proxmox-sdk-publisher-source-${{ github.run_id }}-${{ github.run_attempt }}
+          VERSION: ${{ needs.verify-and-seal.outputs.version }}
+        run: |
+          set -euo pipefail
+          "$PUBLISH_ROOT/venv/bin/python" \
+            "$TOOL_ROOT/tools/gitea_package_publisher.py" harden-actions-seal \
+            --sealed-dir "$PUBLISH_ROOT/sealed" \
+            --source-sha "$EVENT_SOURCE_SHA" \
+            --run-id "$RELEASE_RUN_ID" \
+            --run-attempt "$RELEASE_RUN_ATTEMPT" \
+            --tag "$EVENT_TAG" \
+            --version "$VERSION" \
+            --seal-sha256 "$EXPECTED_SEAL_SHA256"
+
+      - name: Independently rebuild and compare exact tag distributions
+        env:
+          EVENT_SOURCE_SHA: ${{ github.sha }}
+          PUBLISH_ROOT: ${{ runner.temp }}/proxmox-sdk-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          SOURCE_DATE_EPOCH: ${{ needs.verify-and-seal.outputs.source_date_epoch }}
+          TOOL_ROOT: ${{ runner.temp }}/proxmox-sdk-publisher-source-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          test "$(git -C "$TOOL_ROOT" rev-parse HEAD)" = "$EVENT_SOURCE_SHA"
+          test "$(git -C "$TOOL_ROOT" show -s --format=%ct HEAD)" = "$SOURCE_DATE_EPOCH"
+          "$PUBLISH_ROOT/venv/bin/python" \
+            "$TOOL_ROOT/tests/build_reproducible_distributions.py" \
+            --source-date-epoch "$SOURCE_DATE_EPOCH" \
+            --output-dir "$PUBLISH_ROOT/publisher-rebuild" \
+            --manifest "$PUBLISH_ROOT/publisher-rebuild-manifest.json"
+          "$PUBLISH_ROOT/venv/bin/python" -m twine check \
+            "$PUBLISH_ROOT"/publisher-rebuild/*
+          "$PUBLISH_ROOT/venv/bin/python" \
+            "$TOOL_ROOT/tests/verify_wheel_contract.py" \
+            "$PUBLISH_ROOT"/publisher-rebuild/*.whl
+          "$PUBLISH_ROOT/venv/bin/python" - \
+            "$PUBLISH_ROOT/sealed/dist" "$PUBLISH_ROOT/publisher-rebuild" <<'PY'
+          import filecmp
+          import pathlib
+          import sys
+
+          sealed_dir = pathlib.Path(sys.argv[1])
+          rebuilt_dir = pathlib.Path(sys.argv[2])
+          suffixes = (".whl", ".tar.gz")
+          sealed = {
+              path.name: path
+              for path in sealed_dir.iterdir()
+              if path.is_file() and path.name.endswith(suffixes)
+          }
+          rebuilt = {
+              path.name: path
+              for path in rebuilt_dir.iterdir()
+              if path.is_file() and path.name.endswith(suffixes)
+          }
+          if len(sealed) != 2 or set(sealed) != set(rebuilt):
+              raise SystemExit("Publisher rebuild distribution set does not match the seal")
+          for name in sorted(sealed):
+              if not filecmp.cmp(sealed[name], rebuilt[name], shallow=False):
+                  raise SystemExit(f"Publisher rebuild differs from sealed distribution: {name}")
+          print("Publisher rebuild exactly matches both sealed distributions")
+          PY
+
+      - name: Publish sealed package and verify served bytes
+        timeout-minutes: 5
+        env:
+          EVENT_SOURCE_SHA: ${{ github.sha }}
+          EVENT_TAG: v${{ needs.verify-and-seal.outputs.version }}
+          EXPECTED_SEAL_SHA256: ${{ needs.verify-and-seal.outputs.seal_sha256 }}
+          PACKAGE_WRITE_TOKEN: ${{ secrets.PACKAGE_WRITE_TOKEN }}
+          PUBLISH_ROOT: ${{ runner.temp }}/proxmox-sdk-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          RELEASE_RUN_ATTEMPT: ${{ github.run_attempt }}
+          RELEASE_RUN_ID: ${{ github.run_id }}
+          TOOL_ROOT: ${{ runner.temp }}/proxmox-sdk-publisher-source-${{ github.run_id }}-${{ github.run_attempt }}
+          VERSION: ${{ needs.verify-and-seal.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "$PACKAGE_WRITE_TOKEN" ]; then
+            printf '%s\n' 'PACKAGE_WRITE_TOKEN is required for Gitea package publication' >&2
+            exit 1
+          fi
+          "$PUBLISH_ROOT/venv/bin/python" \
+            "$TOOL_ROOT/tools/gitea_package_publisher.py" publish-actions \
+            --sealed-dir "$PUBLISH_ROOT/sealed" \
+            --publication-evidence "$PUBLISH_ROOT/publication.json" \
+            --source-sha "$EVENT_SOURCE_SHA" \
+            --run-id "$RELEASE_RUN_ID" \
+            --run-attempt "$RELEASE_RUN_ATTEMPT" \
+            --tag "$EVENT_TAG" \
+            --version "$VERSION" \
+            --seal-sha256 "$EXPECTED_SEAL_SHA256" \
+            --server-url "https://git.nmulti.cloud" \
+            --owner emersonfelipesp \
+            --repository proxmox-sdk \
+            --username emersonfelipesp \
+            --token-env PACKAGE_WRITE_TOKEN \
+            --deadline-seconds 180 \
+            --request-timeout 15
+
+      - name: Upload source-bound publication evidence
+        uses: actions/upload-artifact@c6a3b2bd78b3985e4b2f15397fec357f0fd808de # v3.2.2; deployed Gitea-compatible artifact protocol
+        with:
+          name: proxmox-sdk-gitea-publication-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/proxmox-sdk-publish-${{ github.run_id }}-${{ github.run_attempt }}/publication.json
           if-no-files-found: error
           retention-days: 90
