@@ -4,7 +4,8 @@ requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14'",
     "python_full_version == '3.13.*'",
-    "python_full_version < '3.13'",
+    "python_full_version == '3.12.*' and sys_platform == 'emscripten'",
+    "(python_full_version < '3.13' and sys_platform != 'emscripten') or (python_full_version < '3.12' and sys_platform == 'emscripten')",
 ]
 
 [manifest]
@@ -1195,15 +1196,15 @@ wheels = [
 
 [[package]]
 name = "httpcore2"
-version = "2.8.0"
+version = "2.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "h11" },
     { name = "truststore" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ce/50/a33260c2a959a7f12d3cf6b96bb35c7028c5d1904fa7b2f5850fa175af01/httpcore2-2.8.0.tar.gz", hash = "sha256:44be3730e7cd4fd206478488c00f57c0960b5e00ee9f7099ef18bb2b0c5cdb79", size = 66779, upload-time = "2026-07-23T11:54:40.443Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/ad/f4f0e57345f1870f3e8cb624e058d7eca6e5a27d33bcc3311d9b618734cd/httpcore2-2.12.0.tar.gz", hash = "sha256:9293522bba0aa7c4c8e9e3f040c16575bd8868e155a77fa30c7a9085a5eae648", size = 67548, upload-time = "2026-08-18T13:22:08.211Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/b7/76d6baa8c087cf5170f36dbeb92471e77c5c48f8f7ca8e5ba4ad613ea492/httpcore2-2.8.0-py3-none-any.whl", hash = "sha256:60ee2f9963ca942955ffd44553fc1111f00286283f9cc047d74e19888e061ace", size = 82638, upload-time = "2026-07-23T11:54:37.976Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/74/d370e55600d9bcfa0d9794b0166126d49291a3d2b20c268fc98c453a4948/httpcore2-2.12.0-py3-none-any.whl", hash = "sha256:7e04258ce01013d7d615e5b910a3b27fac937d7a95038227e79652b4ba3b4ceb", size = 83074, upload-time = "2026-08-18T13:22:05.854Z" },
 ]
 
 [[package]]
@@ -1259,18 +1260,28 @@ wheels = [
 
 [[package]]
 name = "httpx2"
-version = "2.8.0"
+version = "2.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "anyio" },
-    { name = "httpcore2" },
+    { name = "anyio", marker = "sys_platform != 'emscripten'" },
+    { name = "httpcore2", marker = "sys_platform != 'emscripten'" },
+    { name = "httpx2-jsfetch", marker = "python_full_version >= '3.12' and sys_platform == 'emscripten'" },
     { name = "idna" },
-    { name = "truststore" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
     { name = "typing-extensions", marker = "python_full_version < '3.13'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/31/ca/928387a80e8e6ebbfa7ed020f1412e99038092657d63d801fe935f56677c/httpx2-2.8.0.tar.gz", hash = "sha256:7137d9278553773c672856112c36062ae691146212ab748a6a8362479b19bdee", size = 94485, upload-time = "2026-07-23T11:54:41.363Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7f/f8/579a8b51e42e38ee32647df9f08aa25643ae788e275cc625b199829c4671/httpx2-2.12.0.tar.gz", hash = "sha256:7631fe9887a8a2275f4a2540e053aa670fcc50742864a9ae7c66e609fdcf12cf", size = 100040, upload-time = "2026-08-18T13:22:09.086Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e6/a7/aea061b450d51cf448c1ccc8e1fc6f04c0d8fdc97c17524c7f835018bb92/httpx2-2.8.0-py3-none-any.whl", hash = "sha256:9617a6af8354667c94dc06a1b7b88a32db618ffb1f0649f8be31c0639dc58227", size = 90232, upload-time = "2026-07-23T11:54:39.222Z" },
+    { url = "https://files.pythonhosted.org/packages/c8/95/411ba65569158e862368917aaf56597f3e5fa3b91b0502919638465a08f3/httpx2-2.12.0-py3-none-any.whl", hash = "sha256:cc8b6eecb8661c146b8f89a60e97456ee086e91a784ed31ac450c3a9e613dd36", size = 95427, upload-time = "2026-08-18T13:22:06.834Z" },
+]
+
+[[package]]
+name = "httpx2-jsfetch"
+version = "1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/c4/0e5636363151a2a1795e0a77617168b9ca438e1748ec05fc9b5687f93d64/httpx2_jsfetch-1.0.tar.gz", hash = "sha256:70a0e3eabfef7cce5ad9c629f7d01ca05e418f586646f4ddf14782e4c1454c60", size = 6872, upload-time = "2026-08-07T00:13:07.492Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9b/43/832f631d32e4f1211caa2ba368317739fe71f0b8530e4c9d15dc454bac2a/httpx2_jsfetch-1.0-py3-none-any.whl", hash = "sha256:cb916b707601e69a07721aabc8f3f6659be3a6893bc1ff5c6f9e02241df2da32", size = 6382, upload-time = "2026-08-07T00:13:06.567Z" },
 ]
 
 [[package]]
@@ -1616,7 +1627,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-material"
-version = "9.7.6"
+version = "9.7.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
@@ -1631,9 +1642,9 @@ dependencies = [
     { name = "pymdown-extensions" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/45/29/6d2bcf41ae40802c4beda2432396fff97b8456fb496371d1bc7aad6512ec/mkdocs_material-9.7.6.tar.gz", hash = "sha256:00bdde50574f776d328b1862fe65daeaf581ec309bd150f7bff345a098c64a69", size = 4097959, upload-time = "2026-03-19T15:41:58.161Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f1/cd/c05d3a530ba7934f144fb45f7203cd236adc25c7bdcc34673d202f4b0278/mkdocs_material-9.7.7.tar.gz", hash = "sha256:c0649c065b1b0512d60aad8c10f947f8e455284475239b364b610f2deb4d0855", size = 4097923, upload-time = "2026-07-17T16:21:33.156Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2c/01/bc663630c510822c95c47a66af9fa7a443c295b47d5f041e5e6ae62ef659/mkdocs_material-9.7.6-py3-none-any.whl", hash = "sha256:71b84353921b8ea1ba84fe11c50912cc512da8fe0881038fcc9a0761c0e635ba", size = 9305470, upload-time = "2026-03-19T15:41:55.217Z" },
+    { url = "https://files.pythonhosted.org/packages/ad/21/17c1bc9e6f47c972ad66fb2ac2568f99f90f1207eeb6fc3b34d094dba7b5/mkdocs_material-9.7.7-py3-none-any.whl", hash = "sha256:8ea9bb1737a5b524a5f9dcf2e1b4ebda8274ae3008aa7845720a97083bef708f", size = 9305438, upload-time = "2026-07-17T16:21:30.017Z" },
 ]
 
 [[package]]
@@ -2262,10 +2273,10 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.135.2" },
     { name = "granian", marker = "extra == 'granian'", specifier = "==2.7.4" },
     { name = "httpx", marker = "extra == 'test'", specifier = ">=0.28.1" },
-    { name = "httpx2", marker = "extra == 'dev'", specifier = "==2.8.0" },
-    { name = "httpx2", marker = "extra == 'test'", specifier = "==2.8.0" },
+    { name = "httpx2", marker = "extra == 'dev'", specifier = "==2.12.0" },
+    { name = "httpx2", marker = "extra == 'test'", specifier = "==2.12.0" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6.1" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.7.6" },
+    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.7.7" },
     { name = "openssh-wrapper", marker = "extra == 'all'", specifier = ">=0.4" },
     { name = "openssh-wrapper", marker = "extra == 'ssh'", specifier = ">=0.4" },
     { name = "opentelemetry-api", marker = "extra == 'all'" },
