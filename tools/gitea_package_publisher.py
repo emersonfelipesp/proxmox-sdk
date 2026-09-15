@@ -685,6 +685,12 @@ def _extract_candidate(payload: Path, work: Path) -> dict[str, Path]:
         raise PublisherError("Candidate payload is not a valid uncompressed tar archive") from exc
 
 
+def _is_root_pkg_info(member_name: str) -> bool:
+    """Return True for ``<root>/PKG-INFO``, the sdist distribution metadata."""
+    parts = PurePosixPath(member_name).parts
+    return len(parts) == 2 and parts[1] == "PKG-INFO"
+
+
 def _distribution_metadata(path: Path) -> dict[str, str]:
     try:
         if path.name.endswith(".whl"):
@@ -702,10 +708,14 @@ def _distribution_metadata(path: Path) -> dict[str, str]:
             pyversion = "py3"
         else:
             with tarfile.open(path, mode="r:gz") as archive:
+                # A setuptools sdist carries the PEP 517 metadata at
+                # ``<root>/PKG-INFO`` and a second copy under
+                # ``<root>/<package>.egg-info/PKG-INFO``; only the root-level
+                # file is the distribution metadata.
                 members = [
                     member
                     for member in archive.getmembers()
-                    if member.isfile() and PurePosixPath(member.name).name == "PKG-INFO"
+                    if member.isfile() and _is_root_pkg_info(member.name)
                 ]
                 if len(members) != 1 or members[0].size > MAX_CONTROL_BYTES:
                     raise PublisherError(f"Sdist has no bounded, unique PKG-INFO: {path.name}")

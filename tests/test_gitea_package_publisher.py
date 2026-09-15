@@ -64,7 +64,8 @@ def _wheel() -> bytes:
     return result.getvalue()
 
 
-def _sdist() -> bytes:
+def _sdist(*, roots: tuple[str, ...] = (f"proxmox_sdk-{VERSION}",)) -> bytes:
+    """Build a setuptools-shaped sdist: root PKG-INFO plus the egg-info copy."""
     result = io.BytesIO()
     metadata = (
         "Metadata-Version: 2.4\n"
@@ -75,10 +76,12 @@ def _sdist() -> bytes:
     ).encode()
     with gzip.GzipFile(fileobj=result, mode="wb", mtime=0) as compressed:
         with tarfile.open(fileobj=compressed, mode="w") as archive:
-            info = tarfile.TarInfo(f"proxmox_sdk-{VERSION}/PKG-INFO")
-            info.size = len(metadata)
-            info.mtime = 0
-            archive.addfile(info, io.BytesIO(metadata))
+            for root in roots:
+                for name in (f"{root}/PKG-INFO", f"{root}/proxmox_sdk.egg-info/PKG-INFO"):
+                    info = tarfile.TarInfo(name)
+                    info.size = len(metadata)
+                    info.mtime = 0
+                    archive.addfile(info, io.BytesIO(metadata))
     return result.getvalue()
 
 
@@ -1517,3 +1520,24 @@ def test_run_actions_verify_keeps_venv_interpreter_symlink(
     assert captured["interpreter"] == launcher.absolute()
     assert captured["interpreter"].is_absolute()
     assert captured["interpreter"] != launcher.resolve()
+
+
+def test_distribution_metadata_reads_root_pkg_info_of_setuptools_sdist(tmp_path: Path) -> None:
+    """The egg-info copy of PKG-INFO must not make the sdist ambiguous."""
+    sdist = tmp_path / f"proxmox_sdk-{VERSION}.tar.gz"
+    sdist.write_bytes(_sdist())
+    with tarfile.open(sdist, mode="r:gz") as archive:
+        names = [m.name for m in archive.getmembers() if m.name.endswith("PKG-INFO")]
+    assert len(names) == 2, names
+
+    metadata = publisher._distribution_metadata(sdist)
+
+    assert metadata["version"] == VERSION
+
+
+def test_distribution_metadata_refuses_multi_root_sdist(tmp_path: Path) -> None:
+    sdist = tmp_path / f"proxmox_sdk-{VERSION}.tar.gz"
+    sdist.write_bytes(_sdist(roots=(f"proxmox_sdk-{VERSION}", "other-root")))
+
+    with pytest.raises(publisher.PublisherError, match="unique PKG-INFO"):
+        publisher._distribution_metadata(sdist)
