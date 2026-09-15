@@ -133,7 +133,7 @@ jobs:
             nginx|granian) probe='https://127.0.0.1:8000' ;;
             *) probe='http://127.0.0.1:8000' ;;
           esac
-          for attempt in $(seq 1 45); do
+          for _ in $(seq 1 45); do
             if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
               --no-check-certificate --spider "${probe}/health" >/dev/null 2>&1; then
               version_payload="$(docker exec "$container" wget -qO- \

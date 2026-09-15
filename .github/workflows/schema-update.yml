@@ -64,8 +64,8 @@ jobs:
           echo "Upstream operation count: $UPSTREAM_METHODS"
 
           # Find highest local version (exclude 'latest')
-          LOCAL=$(ls proxmox_sdk/generated/proxmox/ \
-            | grep -v '^latest$' | sort -V | tail -1)
+          LOCAL=$(find proxmox_sdk/generated/proxmox -mindepth 1 -maxdepth 1 -type d \
+            ! -name latest -printf '%f\n' | sort -V | tail -1)
           LOCAL_METHODS=$(python3 - <<PY
           import json, pathlib
           p = pathlib.Path("proxmox_sdk/generated/proxmox/$LOCAL/openapi.json")

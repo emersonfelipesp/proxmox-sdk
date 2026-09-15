@@ -570,7 +570,7 @@ jobs:
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
           docker run -d --platform "$platform" --name "$container" "$image"
           ready=false
-          for attempt in $(seq 1 45); do
+          for _ in $(seq 1 45); do
             if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
               --spider http://127.0.0.1:8000/health >/dev/null 2>&1; then
               ready=true
@@ -792,7 +792,7 @@ jobs:
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
           docker pull --platform "$platform" "$image"
           docker run -d --platform "$platform" --name "$container" "$image"
-          for attempt in $(seq 1 45); do
+          for _ in $(seq 1 45); do
             if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
               --spider http://127.0.0.1:8000/health >/dev/null 2>&1; then
               root_payload="$(docker exec "$container" wget -qO- http://127.0.0.1:8000/)"

@@ -262,7 +262,7 @@ jobs:
             *) echo "Unsupported variant: $VARIANT" >&2; exit 1 ;;
           esac
           ready=false
-          for attempt in $(seq 1 45); do
+          for _ in $(seq 1 45); do
             if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
               --no-check-certificate --spider "${probe}/health" >/dev/null 2>&1; then
               ready=true
@@ -468,7 +468,7 @@ jobs:
           trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
           docker pull --platform "$platform" "$image"
           docker run -d --platform "$platform" --name "$container" "$image"
-          for attempt in $(seq 1 45); do
+          for _ in $(seq 1 45); do
             if docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
               --no-check-certificate --spider "${probe}/health" >/dev/null 2>&1; then
               docker exec "$container" wget --no-verbose --tries=1 --timeout=5 \
