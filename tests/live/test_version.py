@@ -22,6 +22,8 @@ from urllib.parse import urlsplit
 
 import pytest
 
+from tests.conftest import live_credentials
+
 pytestmark = pytest.mark.live
 
 
@@ -31,10 +33,11 @@ pytestmark = pytest.mark.live
 
 
 @pytest.fixture
-async def sdk():
-    url = os.getenv("PROXMOX_API_URL")
-    token_id = os.getenv("PROXMOX_API_TOKEN_ID")
-    token_secret = os.getenv("PROXMOX_API_TOKEN_SECRET")
+async def sdk(request: pytest.FixtureRequest):
+    creds = live_credentials(request.config)
+    url = creds.get("PROXMOX_API_URL")
+    token_id = creds.get("PROXMOX_API_TOKEN_ID")
+    token_secret = creds.get("PROXMOX_API_TOKEN_SECRET")
     if not (url and token_id and token_secret):
         pytest.skip(
             "PROXMOX_API_URL / PROXMOX_API_TOKEN_ID / PROXMOX_API_TOKEN_SECRET not set",

@@ -10,14 +10,22 @@ explicitly opted in.
 export PROXMOX_API_URL=https://10.0.30.95:8006
 export PROXMOX_API_TOKEN_ID='root@pam!proxbox'
 export PROXMOX_API_TOKEN_SECRET=...   # from .hosts-env or your own credentials
-uv run pytest -m live -v
+uv run pytest tests/live -m live -v
 ```
 
 To also run write tests (creates and auto-deletes a temporary API token):
 
 ```bash
-PROXMOX_LIVE_WRITE_TESTS=1 uv run pytest -m live -v
+PROXMOX_LIVE_WRITE_TESTS=1 uv run pytest tests/live -m live -v
 ```
+
+Importing `proxmox_sdk.main` masks `PROXMOX_API_TOKEN_SECRET` in `os.environ`
+with `"********"`. The root `tests/conftest.py` captures credentials only when
+the live suite is selected (`-m live` or a `tests/live` path), clears them at
+session end, and recovers only `PROXMOX_API_TOKEN_SECRET` from that snapshot (a
+deliberately-set sentinel for the secret is indistinguishable from in-process
+masking and is accepted for this harness), so `uv run pytest -m live` from the
+whole tree still passes the real secret to the live fixtures.
 
 ## CLI smoke tests
 

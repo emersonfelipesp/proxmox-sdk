@@ -206,6 +206,13 @@ uv run python -c "from proxmox_sdk.proxmox_cli.cli import cli"
 
 # Run tests
 pytest
+
+# Live certification against a real Proxmox VE node (excluded from CI; needs
+# PROXMOX_API_URL, PROXMOX_API_TOKEN_ID, PROXMOX_API_TOKEN_SECRET). Credentials
+# are snapshotted before collection only when the live suite is selected,
+# because importing proxmox_sdk.main masks the secret in os.environ. See
+# tests/live/README.md.
+uv run pytest tests/live -m live -v
 ```
 
 ## Continuous Integration
