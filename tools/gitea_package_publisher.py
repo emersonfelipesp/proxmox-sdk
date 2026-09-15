@@ -2812,9 +2812,13 @@ def _run_actions_verify(args: argparse.Namespace) -> None:
     work = (args.work_dir or evidence / "verify-work").resolve()
     if args.event_name != "push":
         raise PublisherError("Actions package verification requires a tag push event")
+    # The interpreter is the locked verifier venv launcher. It must not be
+    # resolved: ``venv/bin/python`` is a symlink to the uv-managed base
+    # interpreter, and following it would run the rebuild outside the venv,
+    # without the locked build tools.
     candidate = verify_actions_candidate(
         source_root=args.source_root.resolve(),
-        interpreter=args.python.resolve(),
+        interpreter=args.python.absolute(),
         candidate_tar=candidate_tar,
         expected_candidate_sha256=args.candidate_sha256,
         run_id=args.run_id,

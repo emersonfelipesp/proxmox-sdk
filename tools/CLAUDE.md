@@ -20,7 +20,11 @@ the downloaded canonical seal-manifest digest with the verifier job output,
 rebuilds the exact tag source twice with locked tools and the release
 reproducibility procedure, and requires both rebuilt distributions to match the
 seal byte for byte. The helper reads the token from the environment, validates
-it before client construction, and never prints it. Publication evidence is
+it before client construction, and never prints it. The `--python` argument
+of `verify-actions` is the locked verifier venv launcher (`venv/bin/python`);
+the helper keeps it unresolved, because that launcher is a symlink to the
+uv-managed base interpreter and following it would rebuild outside the venv
+without the locked build tools. Publication evidence is
 uploaded afterward without the package credential and includes the seal digest,
 canonical registry identity, repository association, result, and final remote
 file inventory.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import base64
 import contextlib
 import email.policy
@@ -12,6 +13,7 @@ import http.server
 import io
 import json
 import os
+import sys
 import tarfile
 import threading
 import traceback
@@ -1467,3 +1469,51 @@ def test_actions_command_rejects_token_before_registry_client_construction(
 def test_actions_registry_requires_package_write_token() -> None:
     with pytest.raises(publisher.PublisherError, match="invalid length"):
         publisher.BoundedRegistryClient(server_url=publisher.EXPECTED_SERVER, token="")
+
+
+def test_run_actions_verify_keeps_venv_interpreter_symlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The Actions verifier must hand the venv launcher to the rebuilder unresolved.
+
+    ``venv/bin/python`` is a symlink to the uv-managed base interpreter; resolving
+    it escapes the venv and the locked build tools disappear.
+    """
+    venv_bin = tmp_path / "venv" / "bin"
+    venv_bin.mkdir(parents=True)
+    launcher = venv_bin / "python"
+    launcher.symlink_to(Path(sys.executable))
+    assert launcher.resolve() != launcher
+
+    captured: dict[str, Path] = {}
+
+    def _capture(**kwargs: object) -> object:
+        captured["interpreter"] = Path(str(kwargs["interpreter"]))
+        raise publisher.PublisherError("stop after capture")
+
+    monkeypatch.setattr(publisher, "verify_actions_candidate", _capture)
+    args = argparse.Namespace(
+        inbox_dir=tmp_path / "inbox",
+        evidence_dir=tmp_path / "evidence",
+        candidate_tar=None,
+        sealed_dir=None,
+        work_dir=None,
+        event_name="push",
+        source_root=tmp_path,
+        python=launcher,
+        candidate_sha256="0" * 64,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        source_sha=SOURCE_SHA,
+        tag=f"v{VERSION}",
+        repository=publisher.EXPECTED_FULL_NAME,
+        server_url=publisher.EXPECTED_SERVER,
+        github_output=tmp_path / "output",
+    )
+
+    with pytest.raises(publisher.PublisherError, match="stop after capture"):
+        publisher._run_actions_verify(args)
+
+    assert captured["interpreter"] == launcher.absolute()
+    assert captured["interpreter"].is_absolute()
+    assert captured["interpreter"] != launcher.resolve()
