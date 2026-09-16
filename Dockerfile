@@ -17,7 +17,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 # exact-versioned against the reviewed Alpine 3.24 repositories.
 RUN apk add --no-cache \
     build-base=0.5-r4 \
-    curl=8.21.0-r0
+    curl=8.22.0-r0
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.28@sha256:0f36cb9361a3346885ca3677e3767016687b5a170c1a6b88465ec14aefec90aa /uv /usr/local/bin/uv
 
@@ -127,7 +127,7 @@ USER root
 RUN apk add --no-cache \
     ca-certificates=20260611-r0 \
     nss-tools=3.124-r0 \
-    openssl=3.5.7-r0
+    openssl=3.5.8-r0
 
 COPY --from=builder /usr/local/bin/mkcert /usr/local/bin/mkcert
 COPY docker/entrypoint-granian.sh /usr/local/bin/docker-entrypoint-granian.sh
