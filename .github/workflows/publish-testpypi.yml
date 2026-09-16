@@ -498,6 +498,9 @@ jobs:
     with:
       source_ref: ${{ needs.prepare-release.outputs.source_sha }}
       mode: stage
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
   build-service-images:
     name: build + smoke service ${{ matrix.service }} / ${{ matrix.arch }}
