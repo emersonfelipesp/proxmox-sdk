@@ -150,7 +150,7 @@ proxmox-sdk/
 │   │   ├── backends/             # Transport backends
 │   │   │   ├── base.py           # AbstractBackend protocol
 │   │   │   ├── https.py          # aiohttp HTTPS backend (default)
-│   │   │   ├── mock.py           # In-memory mock backend
+│   │   │   ├── mock.py           # Local mock backend using the configured store
 │   │   │   ├── local.py          # Local pvesh CLI backend
 │   │   │   ├── ssh_paramiko.py   # SSH via Paramiko
 │   │   │   └── openssh.py        # SSH via openssh-wrapper

@@ -319,10 +319,11 @@ The mock backend supports the same attribute-chain and path-string navigation st
 
 !!! tip "Mock state persistence"
     Default mock state is tempdir-scoped SQLite/WAL state, not production
-    persistence. For test isolation, reset state between tests using
-    `POST /mock/reset` on the FastAPI server, set a unique
-    `PROXMOX_MOCK_STATE_NAMESPACE`, or create a new `ProxmoxSDK.mock()` instance
-    per test.
+    persistence. For SDK test isolation, call `reset_shared_mock_state()` or
+    set a unique `PROXMOX_MOCK_STATE_NAMESPACE`. FastAPI mock-server tests may
+    instead use `POST /mock/reset`. Creating a new SDK instance alone does not
+    isolate state because instances with the same owner, namespace, and path
+    share the cached store.
 
 ### `from_config(config)` — construct from ProxmoxConfig
 
@@ -337,7 +338,7 @@ This is the recommended construction path when using the FastAPI server's config
 
 ### `sync_mock(**kwargs)` — synchronous mock instance
 
-`ProxmoxSDK.sync_mock()` returns a `SyncProxmoxSDK` backed by the in-memory mock, without requiring a real Proxmox host. Useful for scripting and tests in non-async contexts:
+`ProxmoxSDK.sync_mock()` returns a `SyncProxmoxSDK` backed by the configured local mock store, without requiring a real Proxmox host. SQLite/WAL is the default; shared-memory and dict remain explicit alternatives. Useful for scripting and tests in non-async contexts:
 
 ```python title="proxmox_sdk/sdk/api.py"
 with ProxmoxSDK.sync_mock() as proxmox:

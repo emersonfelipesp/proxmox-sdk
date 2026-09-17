@@ -9,7 +9,7 @@ CLI/TUI built on the same backend layer.
 ## Features
 
 ### 🔄 Auto-Generated OpenAPI Schema
-Crawl the official [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/) and automatically generate complete OpenAPI 3.0 schemas with **675 operations** across **444 endpoints**.
+Crawl the official [Proxmox API Viewer](https://pve.proxmox.com/pve-docs/api-viewer/) and automatically generate complete OpenAPI 3.0 schemas with **675 operations** across **444 paths**.
 
 ### Multi-Service SDK Facades
 Use one backend layer across Proxmox VE (`PVE`), Proxmox Mail Gateway (`PMG`),
@@ -25,8 +25,8 @@ command groups, and production/mock TUIs.
 ### 🎭 Mock API Mode (Default)
 Perfect for development and testing:
 
-- **In-memory CRUD operations** - Create, read, update, and delete mock Proxmox resources
-- **Pre-generated 675 operations / 444 endpoints** - Full Proxmox API surface ready to use
+- **SQLite/WAL-backed CRUD operations** - Create, read, update, and delete mock Proxmox resources; shared-memory and dict stores are explicit alternatives
+- **Pre-generated 675 operations / 444 paths** - Full generated Proxmox API surface ready to use
 - **Custom mock data loading** - Inject your own test data via JSON/YAML files
 - **State persistence** - Mock data persists across requests during runtime
 - **No Proxmox server required** - Test your code without a real Proxmox cluster
@@ -65,7 +65,7 @@ proxmox-sdk-mock
 uvicorn proxmox_sdk.mock_main:app
 ```
 
-Visit `http://localhost:8000/docs` to see **675 operations / 444 Proxmox API endpoints** ready to use!
+Visit `http://localhost:8000/docs` to see **675 operations / 444 Proxmox API paths** ready to use!
 
 ### Connect to Real Proxmox
 
@@ -111,7 +111,7 @@ All requests now route to your real Proxmox server with full validation!
 ```mermaid
 graph LR
     A[Client] --> B{Proxmox OpenAPI}
-    B -->|Mock Mode| C[In-Memory CRUD]
+    B -->|Mock Mode| C[SQLite-Default CRUD]
     B -->|Real Mode| D[ProxmoxClient]
     D --> E[Real Proxmox Server]
     C --> F[Generated Mock Data]
@@ -121,7 +121,7 @@ graph LR
     H --> A
 ```
 
-**Mock Mode**: Requests → Generated Endpoints → In-Memory State → Mock Response
+**Mock Mode**: Requests → Generated Endpoints → SQLite/WAL State by Default → Mock Response
 
 **Real Mode**: Requests → Validation → aiohttp Client → Proxmox API → Validation → Response
 

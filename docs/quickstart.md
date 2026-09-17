@@ -103,7 +103,7 @@ response = httpx.post(
 )
 
 print(response.json())
-# Mock data created and stored in memory!
+# Mock data is stored in the default tempdir-scoped SQLite/WAL state store.
 ```
 
 ### Read the Resource (GET)
@@ -234,7 +234,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 ## Understanding Mock Mode
 
 !!! info "Mock Mode Behavior"
-    - **In-memory state**: All data stored in RAM during runtime
+    - **Local state**: SQLite/WAL by default, with shared-memory and dict alternatives
     - **Automatic seeding**: First GET request creates sample data
     - **State persistence**: Changes persist across requests (until restart)
     - **No real Proxmox needed**: Perfect for development and testing

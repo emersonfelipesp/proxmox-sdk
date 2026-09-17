@@ -1,7 +1,7 @@
 # proxmox-sdk
 
 Schema-driven FastAPI package, Python SDK, and CLI/TUI for Proxmox APIs:
-OpenAPI generation, mock data, in-memory CRUD operations, typed service
+OpenAPI generation, mock data, SQLite/WAL-backed CRUD operations, typed service
 facades, and real API connections.
 
 **📚 [Full Documentation](https://emersonfelipesp.github.io/proxmox-sdk/)**
@@ -9,9 +9,9 @@ facades, and real API connections.
 ## Features
 
 - **Dual Mode**: Mock mode (default) for development, Real mode for production Proxmox integration
-- **675 Operations / 444 Endpoints**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
+- **675 Operations / 444 Paths**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
 - **318 Operations / 246 Endpoints**: Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
-- **Mock Data**: Automatically generate mock data for all endpoints with in-memory CRUD
+- **Mock Data**: Automatically generate mock data for all endpoints with SQLite/WAL state by default; shared-memory and process-local dict stores are opt-in alternatives
 - **Real API Proxy**: Validated proxy to real Proxmox VE API with request/response validation
 - **Typed Facades**: PBS, PDM, and Ceph clients for higher-level workflows
 - **CLI/TUI**: Generic path commands, configuration profiles, Ceph/PBS/PDM command groups, and Textual TUIs

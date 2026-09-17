@@ -24,7 +24,7 @@ flowchart TD
     API -->|"dependency injection"| SESSION
     SESSION -->|"wraps"| SDK
     SDK -->|"delegates to"| BACK
-    BACK -->|"aiohttp HTTPS\nor in-memory"| PVE
+    BACK -->|"aiohttp HTTPS\nor local mock state"| PVE
 ```
 
 ---
@@ -460,7 +460,7 @@ async def __aexit__(self, *args) -> None:
     await self._sdk.close()
 ```
 
-Tests that use this context manager get an in-memory mock SDK that behaves identically to the production SDK, so the full service layer can be tested without a real Proxmox server.
+Tests that use this context manager get a local mock SDK with the same resource-navigation contract as the production SDK, so the full service layer can be tested without a real Proxmox server. SQLite/WAL is the default mock store; this does not imply identical Proxmox side effects or authorization behavior.
 
 ---
 

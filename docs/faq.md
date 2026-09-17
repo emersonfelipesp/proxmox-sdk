@@ -8,7 +8,7 @@ Frequently Asked Questions about the Proxmox OpenAPI server.
 
 Proxmox OpenAPI is a FastAPI-based server that provides two modes:
 
-1. **Mock Mode** - In-memory Proxmox VE API simulator with 675 operations / 444 endpoints for development and testing
+1. **Mock Mode** - SQLite/WAL-backed Proxmox VE API simulator with 675 operations / 444 paths for development and testing; shared-memory and dict stores are optional
 2. **Real Mode** - Validated proxy to a real Proxmox VE API with full request/response validation
 
 It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.
@@ -26,9 +26,11 @@ If you want to connect to a real Proxmox server, switch to real mode by setting 
 
 ### What Proxmox VE version is supported?
 
-The current schema is captured from **Proxmox VE 9.2**. Both the
-`9.2/` and `latest/` schema directories ship the same content (9.1.11 retained for backward compatibility), and CI
-exercises both tags in parallel.
+The current schema is captured from **Proxmox VE 9.2**. The `9.2/` and
+`latest/` schema directories expose the same 444 paths and 675 operations, but
+their metadata identifies the explicit version and stable alias respectively.
+The 9.1.11 schema is retained for backward compatibility, and CI exercises all
+three tags.
 
 | Version | Status | Schema directory |
 |---|---|---|
@@ -51,7 +53,7 @@ The project uses publicly available Proxmox VE API documentation and generates O
 
 **Yes**, but with considerations:
 
-- **Mock mode:** Only for development/testing (data is in-memory and not persistent)
+- **Mock mode:** Only for development/testing. SQLite/WAL is the default state store; its default database is tempdir-scoped, while `PROXMOX_MOCK_STATE_PATH` selects an explicit debugging path.
 - **Real mode:** Yes, but it adds a validation layer between clients and Proxmox. Consider:
   - Additional latency (~20-100ms)
   - Single point of failure (if the proxy goes down)

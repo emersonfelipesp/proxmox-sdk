@@ -14,7 +14,7 @@ flowchart TD
     SERVER["proxmox_sdk/main.py\nDual-mode FastAPI server\n(mock OR real API proxy)"]
     CODEGEN["proxmox_codegen/\nPlaywright crawler → OpenAPI + Pydantic\n(schema generation pipeline)"]
     SDK["sdk/\nStandalone async Python SDK\n(production integrations)"]
-    MOCK["mock/\nIn-memory CRUD state store\n(test infrastructure)"]
+    MOCK["mock/\nSQLite-default CRUD state store\n(test infrastructure)"]
     GEN["generated/proxmox/\nPre-built OpenAPI schemas\n+ Pydantic models"]
 
     CLI -->|uses| SDK
@@ -122,7 +122,7 @@ flowchart TD
     LEAF["ProxmoxResource\npath=/api2/json/nodes/pve1/qemu/100/config"]
     BACKEND["AbstractBackend\nsdk/backends/base.py"]
     HTTPS["HttpsBackend\naiohttp + auth"]
-    MOCK_B["MockBackend\nin-memory"]
+    MOCK_B["MockBackend\nSQLite by default"]
     SSH["SshParamikoBackend\nor OpenSshBackend"]
     LOCAL["LocalBackend\npvesh subprocess"]
     PROXMOX["Proxmox VE"]
@@ -137,7 +137,7 @@ flowchart TD
     BACKEND -->|"ssh_paramiko / openssh"| SSH
     BACKEND -->|"local"| LOCAL
     HTTPS -->|"aiohttp HTTPS"| PROXMOX
-    MOCK_B -->|"in-memory"| PROXMOX
+    MOCK_B -->|"local mock state"| PROXMOX
     SSH -->|"pvesh via SSH"| PROXMOX
     LOCAL -->|"pvesh subprocess"| PROXMOX
 ```

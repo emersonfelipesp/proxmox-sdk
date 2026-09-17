@@ -47,7 +47,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 ## Features
 
 ✅ **Zero Setup** — No real Proxmox server needed
-✅ **In-Memory CRUD** — Create, read, update, delete mock resources
+✅ **Local Mock CRUD** — Create, read, update, and delete mock resources through SQLite/WAL by default
 ✅ **Deterministic Data** — Same seed produces same data (testable)
 ✅ **Schema-Driven** — Mock data respects Proxmox OpenAPI schema
 ✅ **Multi-Service Support** — PVE, PMG, PBS
@@ -66,7 +66,7 @@ async with ProxmoxSDK.mock() as proxmox:
     # proxmox is the root ProxmoxResource
     nodes = await proxmox.nodes.get()
 
-    # Automatic cleanup when exiting context
+    # The SDK context closes; shared mock state is not reset.
 ```
 
 ### Async Manual Lifecycle
@@ -92,7 +92,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
     nodes = proxmox.nodes.get()
     print(nodes)
 
-    # Automatic cleanup when exiting context
+    # The SDK context closes; shared mock state is not reset.
 ```
 
 ### Sync Manual Lifecycle
@@ -326,24 +326,34 @@ def test_vm_lifecycle_sync():
 
 ## State Persistence
 
-Mock state persists in memory during a single session but **resets on restart**:
+The default `SQLiteMockStore` keeps CRUD state in a WAL-enabled SQLite file.
+Without configuration, that file is scoped by the process owner and mock
+namespace under the system temporary directory. SDK instances using the same
+owner, namespace, and path reuse the cached store within the process; leaving
+one `ProxmoxSDK.sync_mock()` context does not reset it. Use
+`reset_shared_mock_state()` or a new namespace when a test needs a deterministic
+seed. Set `PROXMOX_MOCK_STATE_PATH` when you need an explicit debugging path.
 
 ```python
+from proxmox_sdk import ProxmoxSDK
+from proxmox_sdk.mock.state import reset_shared_mock_state
+
 with ProxmoxSDK.sync_mock() as proxmox:
-    # Session 1: Create data
     vm = proxmox.nodes("pve").qemu.post(vmid=300, name="test")
     retrieved = proxmox.nodes("pve").qemu(300).get()
     print(retrieved)  # ✅ Works
 
-# Context exits, state is lost
-
 with ProxmoxSDK.sync_mock() as proxmox:
-    # Session 2: Data is gone
-    try:
-        vm = proxmox.nodes("pve").qemu(300).get()
-    except Exception:
-        print("VM not found (state was reset)")  # ✅ Expected
+    # The same owner/namespace/path reuses the SQLite-backed state.
+    retrieved = proxmox.nodes("pve").qemu(300).get()
+    print(retrieved)
+
+reset_shared_mock_state()
 ```
+
+Set `PROXMOX_MOCK_STORE=shared-memory` or `PROXMOX_MOCK_STORE=dict` only when
+you explicitly need those legacy in-process alternatives. They do not provide
+the SQLite backend's file-backed debugging behavior.
 
 For persistent mock data across sessions, see [Custom Mock Data (FastAPI Mode)](mock-api.md#custom-mock-data).
 
@@ -380,7 +390,7 @@ with ProxmoxSDK.sync_mock() as proxmox:
 - ⚠️ No permission validation (all operations allowed)
 - ⚠️ No task tracking (UPIDs not returned)
 - ⚠️ Limited data validation (basic schema compliance)
-- ⚠️ State resets on server restart (in-memory only)
+- ⚠️ Default tempdir-scoped SQLite state is development data, not a durable production database; use `PROXMOX_MOCK_STATE_PATH` for an explicit debugging path
 
 ---
 

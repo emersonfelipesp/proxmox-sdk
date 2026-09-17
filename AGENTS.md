@@ -21,14 +21,21 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 
 ## Overview
 
+Package version: `0.0.15`. Python requirement: `>=3.11`.
+
+Generated inventories are authoritative: PVE `9.2` and `latest` each contain
+444 paths / 675 operations; retained PVE `9.1.11` contains 431 paths / 649
+operations; PDM `latest` contains 246 paths / 318 operations. Preserve older
+release statements as historical records when these current inventories move.
+
 `proxmox-sdk` is a schema-driven FastAPI package for Proxmox API that provides:
 
-1. **Dual-mode operation** - Mock mode (default, in-memory CRUD) or Real mode (proxy to actual Proxmox)
+1. **Dual-mode operation** - Mock mode (default, SQLite/WAL CRUD) or Real mode (proxy to actual Proxmox)
 2. **Standalone Python SDK** - Production-ready SDK without FastAPI server (async + sync)
 3. **CLI + TUI** - Typer CLI and Textual terminal UI for interactive use
 4. **Codegen pipeline** - Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
-5. **675 operations / 444 endpoints** - Pre-generated Proxmox VE 9.2 API with full OpenAPI schema (9.1.11 retained for backward compatibility)
-6. **318 operations / 246 endpoints** - Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
+5. **675 operations / 444 paths** - Pre-generated Proxmox VE 9.2 API with full OpenAPI schema (`latest` exposes the same API surface; 9.1.11 retains 649 operations / 431 paths)
+6. **318 operations / 246 paths** - Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
 7. **Rate limiting** - Built-in protection via SlowAPI
 
 ## Package Structure
@@ -140,7 +147,7 @@ proxmox_sdk/
 │   │   ├── base.py           # AbstractBackend protocol
 │   │   ├── _cli_base.py      # Shared base for pvesh/openssh CLI backends
 │   │   ├── https.py          # aiohttp HTTPS backend (default)
-│   │   ├── mock.py           # In-memory mock backend
+│   │   ├── mock.py           # Local mock backend using the configured store
 │   │   ├── local.py          # Local pvesh CLI backend
 │   │   ├── ssh_paramiko.py   # SSH via Paramiko
 │   │   └── openssh.py        # SSH via openssh-wrapper
@@ -154,7 +161,7 @@ proxmox_sdk/
 └── mock/                     # Mock API implementation
     ├── app.py                # Mock FastAPI app
     ├── routes.py             # Dynamic route registration with CRUD
-    ├── state.py              # SharedMemoryMockStore (in-memory persistence)
+    ├── state.py              # SQLite default plus shared-memory/dict mock stores
     ├── schema_helpers.py     # Mock value generation
     └── loader.py             # Mock data loading from JSON/YAML
 ```
