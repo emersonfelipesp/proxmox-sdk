@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2362,7 +2362,7 @@
     API --&gt;|"dependency injection"| SESSION
     SESSION --&gt;|"wraps"| SDK
     SDK --&gt;|"delegates to"| BACK
-    BACK --&gt;|"aiohttp HTTPS\nor in-memory"| PVE</code></pre>
+    BACK --&gt;|"aiohttp HTTPS\nor local mock state"| PVE</code></pre>
 <hr />
 <h2 id="session-factory-proxmoxapi">Session Factory: <code>ProxmoxAPI()</code><a class="headerlink" href="#session-factory-proxmoxapi" title="Permanent link">&para;</a></h2>
 <p><code>proxbox-api</code> does not call <code>ProxmoxSDK()</code> directly. Instead it goes through a compatibility wrapper that auto-detects whether to use mock mode:</p>
@@ -2768,7 +2768,7 @@
 </span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sdk</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </span></code></pre></div>
-<p>Tests that use this context manager get an in-memory mock SDK that behaves identically to the production SDK, so the full service layer can be tested without a real Proxmox server.</p>
+<p>Tests that use this context manager get a local mock SDK with the same resource-navigation contract as the production SDK, so the full service layer can be tested without a real Proxmox server. SQLite/WAL is the default mock store; this does not imply identical Proxmox side effects or authorization behavior.</p>
 <hr />
 <h2 id="sync-stage-sdk-call-mapping">Sync Stage → SDK Call Mapping<a class="headerlink" href="#sync-stage-sdk-call-mapping" title="Permanent link">&para;</a></h2>
 <p>Each of the 12 synchronization stages in <code>proxbox-api</code> calls specific SDK endpoints:</p>
@@ -2919,7 +2919,7 @@
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

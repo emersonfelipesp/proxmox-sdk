@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -3042,7 +3042,7 @@
 <h3 id="what-is-proxmox-openapi">What is Proxmox OpenAPI?<a class="headerlink" href="#what-is-proxmox-openapi" title="Permanent link">&para;</a></h3>
 <p>Proxmox OpenAPI is a FastAPI-based server that provides two modes:</p>
 <ol>
-<li><strong>Mock Mode</strong> - In-memory Proxmox VE API simulator with 675 operations / 444 endpoints for development and testing</li>
+<li><strong>Mock Mode</strong> - SQLite/WAL-backed Proxmox VE API simulator with 675 operations / 444 paths for development and testing; shared-memory and dict stores are optional</li>
 <li><strong>Real Mode</strong> - Validated proxy to a real Proxmox VE API with full request/response validation</li>
 </ol>
 <p>It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.</p>
@@ -3056,9 +3056,11 @@
 </ul>
 <p>If you want to connect to a real Proxmox server, switch to real mode by setting <code>PROXMOX_API_MODE=real</code>.</p>
 <h3 id="what-proxmox-ve-version-is-supported">What Proxmox VE version is supported?<a class="headerlink" href="#what-proxmox-ve-version-is-supported" title="Permanent link">&para;</a></h3>
-<p>The current schema is captured from <strong>Proxmox VE 9.2</strong>. Both the
-<code>9.2/</code> and <code>latest/</code> schema directories ship the same content (9.1.11 retained for backward compatibility), and CI
-exercises both tags in parallel.</p>
+<p>The current schema is captured from <strong>Proxmox VE 9.2</strong>. The <code>9.2/</code> and
+<code>latest/</code> schema directories expose the same 444 paths and 675 operations, but
+their metadata identifies the explicit version and stable alias respectively.
+The 9.1.11 schema is retained for backward compatibility, and CI exercises all
+three tags.</p>
 <table>
 <thead>
 <tr>
@@ -3095,7 +3097,7 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 <h3 id="can-i-use-this-in-production">Can I use this in production?<a class="headerlink" href="#can-i-use-this-in-production" title="Permanent link">&para;</a></h3>
 <p><strong>Yes</strong>, but with considerations:</p>
 <ul>
-<li><strong>Mock mode:</strong> Only for development/testing (data is in-memory and not persistent)</li>
+<li><strong>Mock mode:</strong> Only for development/testing. SQLite/WAL is the default state store; its default database is tempdir-scoped, while <code>PROXMOX_MOCK_STATE_PATH</code> selects an explicit debugging path.</li>
 <li><strong>Real mode:</strong> Yes, but it adds a validation layer between clients and Proxmox. Consider:</li>
 <li>Additional latency (~20-100ms)</li>
 <li>Single point of failure (if the proxy goes down)</li>
@@ -3493,7 +3495,7 @@ the configured mock backend and namespace.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

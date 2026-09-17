@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -2568,7 +2568,7 @@
 <hr />
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <p>✅ <strong>Zero Setup</strong> — No real Proxmox server needed
-✅ <strong>In-Memory CRUD</strong> — Create, read, update, delete mock resources
+✅ <strong>Local Mock CRUD</strong> — Create, read, update, and delete mock resources through SQLite/WAL by default
 ✅ <strong>Deterministic Data</strong> — Same seed produces same data (testable)
 ✅ <strong>Schema-Driven</strong> — Mock data respects Proxmox OpenAPI schema
 ✅ <strong>Multi-Service Support</strong> — PVE, PMG, PBS
@@ -2582,7 +2582,7 @@
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="c1"># proxmox is the root ProxmoxResource</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="k">await</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="c1"># Automatic cleanup when exiting context</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="c1"># The SDK context closes; shared mock state is not reset.</span>
 </span></code></pre></div>
 <h3 id="async-manual-lifecycle">Async Manual Lifecycle<a class="headerlink" href="#async-manual-lifecycle" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
@@ -2602,7 +2602,7 @@
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">nodes</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
 </span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="c1"># Automatic cleanup when exiting context</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="c1"># The SDK context closes; shared mock state is not reset.</span>
 </span></code></pre></div>
 <h3 id="sync-manual-lifecycle">Sync Manual Lifecycle<a class="headerlink" href="#sync-manual-lifecycle" title="Permanent link">&para;</a></h3>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
@@ -2795,22 +2795,31 @@ schema is produced.</p>
 </span></code></pre></div>
 <hr />
 <h2 id="state-persistence">State Persistence<a class="headerlink" href="#state-persistence" title="Permanent link">&para;</a></h2>
-<p>Mock state persists in memory during a single session but <strong>resets on restart</strong>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync_mock</span><span class="p">()</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="c1"># Session 1: Create data</span>
-</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="n">vm</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">vmid</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
-</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">retrieved</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">retrieved</span><span class="p">)</span>  <span class="c1"># ✅ Works</span>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># Context exits, state is lost</span>
+<p>The default <code>SQLiteMockStore</code> keeps CRUD state in a WAL-enabled SQLite file.
+Without configuration, that file is scoped by the process owner and mock
+namespace under the system temporary directory. SDK instances using the same
+owner, namespace, and path reuse the cached store within the process; leaving
+one <code>ProxmoxSDK.sync_mock()</code> context does not reset it. Use
+<code>reset_shared_mock_state()</code> or a new namespace when a test needs a deterministic
+seed. Set <code>PROXMOX_MOCK_STATE_PATH</code> when you need an explicit debugging path.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProxmoxSDK</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">proxmox_sdk.mock.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">reset_shared_mock_state</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync_mock</span><span class="p">()</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="n">vm</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">vmid</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="n">retrieved</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">retrieved</span><span class="p">)</span>  <span class="c1"># ✅ Works</span>
 </span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
 </span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="k">with</span> <span class="n">ProxmoxSDK</span><span class="o">.</span><span class="n">sync_mock</span><span class="p">()</span> <span class="k">as</span> <span class="n">proxmox</span><span class="p">:</span>
-</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>    <span class="c1"># Session 2: Data is gone</span>
-</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>        <span class="n">vm</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;VM not found (state was reset)&quot;</span><span class="p">)</span>  <span class="c1"># ✅ Expected</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>    <span class="c1"># The same owner/namespace/path reuses the SQLite-backed state.</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="n">retrieved</span> <span class="o">=</span> <span class="n">proxmox</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="s2">&quot;pve&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">qemu</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">retrieved</span><span class="p">)</span>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>
+</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="n">reset_shared_mock_state</span><span class="p">()</span>
 </span></code></pre></div>
+<p>Set <code>PROXMOX_MOCK_STORE=shared-memory</code> or <code>PROXMOX_MOCK_STORE=dict</code> only when
+you explicitly need those legacy in-process alternatives. They do not provide
+the SQLite backend's file-backed debugging behavior.</p>
 <p>For persistent mock data across sessions, see <a href="../mock-api/#custom-mock-data">Custom Mock Data (FastAPI Mode)</a>.</p>
 <hr />
 <h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
@@ -2840,7 +2849,7 @@ schema is produced.</p>
 <li>⚠️ No permission validation (all operations allowed)</li>
 <li>⚠️ No task tracking (UPIDs not returned)</li>
 <li>⚠️ Limited data validation (basic schema compliance)</li>
-<li>⚠️ State resets on server restart (in-memory only)</li>
+<li>⚠️ Default tempdir-scoped SQLite state is development data, not a durable production database; use <code>PROXMOX_MOCK_STATE_PATH</code> for an explicit debugging path</li>
 </ul>
 <hr />
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
@@ -2940,7 +2949,7 @@ schema is produced.</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>
