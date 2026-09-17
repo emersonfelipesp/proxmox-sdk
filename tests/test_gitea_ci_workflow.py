@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = ROOT / ".gitea" / "workflows" / "ci.yml"
 FULL_SHA_ACTION = re.compile(r"^[^\s@]+@[0-9a-f]{40}$")
 GITEA_UPLOAD_ARTIFACT = "actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32"
+GITEA_SETUP_UV = "astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990"
 
 
 def _workflow() -> dict[str, Any]:
@@ -60,6 +61,20 @@ def test_third_party_actions_are_pinned_to_reviewed_commits() -> None:
             action = step.get("uses")
             if action is not None:
                 assert FULL_SHA_ACTION.fullmatch(action), f"{job_name}: {action}"
+
+
+def test_setup_uv_uses_gitea_compatible_boolean_inputs() -> None:
+    setup_steps = [
+        step
+        for job in _workflow()["jobs"].values()
+        for step in job["steps"]
+        if str(step.get("uses", "")).startswith("astral-sh/setup-uv@")
+    ]
+
+    assert len(setup_steps) == 4
+    for step in setup_steps:
+        assert step["uses"] == GITEA_SETUP_UV
+        assert step["with"]["no-project"] == "false"
 
 
 def test_static_and_syntax_jobs_preserve_github_ci_policy() -> None:
