@@ -5,6 +5,50 @@ every final or post release is built reproducibly from a protected tag, recorded
 in the Gitea Package Registry, validated through TestPyPI, and only then
 eligible for public PyPI and Docker Hub promotion.
 
+## Public source promotion hold
+
+Automatic public mirroring is held. The mirror workflow has no push trigger,
+and its manual job is unconditionally disabled. It contains no credentials,
+installation, or push operations. Manual dispatch cannot override the hold;
+there is no input, variable, or secret that enables promotion.
+
+The literal disabled condition is intentional. Actionlint normally rejects
+constant conditions, so its configuration permits only the exact
+constant-false diagnostic in this mirror workflow. It does not suppress
+constant-true diagnostics, conditions in other workflows, or other syntax and
+policy findings. The release contracts enforce both the disabled workflow and
+the exact file/message scope of this exception.
+
+The release operator must first verify the successful source-bound Gitea
+package publication run, canonical repository association, exact wheel and
+sdist filenames, sizes, and SHA256 values against the retained sealed
+publication evidence. Use the sanctioned `nms git` run/package surfaces for
+these reads. Select the full source commit SHA recorded by that evidence,
+prove that its package version matches the selected source, and confirm that
+it remains an ancestor of canonical Gitea `main`. Do not select whichever
+commit happens to be latest when promotion runs.
+
+Only after these checks may the release operator promote that exact verified
+commit through the approved Git surfaces to the canonical GitHub `main`.
+Inspect the exact owner/repository and the current destination commit before
+writing, require an approved ancestry/lease transition, and re-read the
+promoted destination SHA afterward. A source promotion does not publish a
+release, deploy a consumer, or authorize a tag operation. GitHub main CI may
+publish development images; stable package/image publication remains subject
+to the release gates below.
+
+Promote selected release tags separately only after verifying their exact
+objects and peeled source commit. Never mirror all tags or replay historical
+RC tags: those events can dispatch immutable candidate publications. Keep
+tracker references and private operational evidence out of public commit
+messages and release text.
+
+Credential-hardening changes to the mirror workflow must preserve this hold.
+They must not restore automatic main promotion or add a manual bypass without
+a separately reviewed, exact-source verified-package gate. A future automated
+guard is a separate change; the present workflow does not claim to verify
+packages on a runner.
+
 ## Required sequence
 
 1. Record requirements, design impact, verification scope, coverage, known

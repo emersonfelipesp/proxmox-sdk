@@ -1,0 +1,5 @@
+# This file-specific exception preserves the intentional, unconditional hold.
+paths:
+  .gitea/workflows/mirror-github.yml:
+    ignore:
+      - '^constant expression "false" in condition\. remove the if: section$'

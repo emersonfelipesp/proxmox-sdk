@@ -80,12 +80,34 @@ def test_credentialed_jobs_are_protected_and_artifact_only() -> None:
     assert "secrets: inherit" not in release_text
     assert "secrets: inherit" not in (GITHUB_WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
 
+
+def test_public_source_mirroring_is_unconditionally_held() -> None:
     mirror = _gitea("mirror-github.yml")
+    assert set(mirror["on"]) == {"workflow_dispatch"}
+    assert not mirror["on"]["workflow_dispatch"]
     mirror_job = mirror["jobs"]["mirror"]
+    assert mirror_job["if"] == "${{ false }}"
     assert "env" not in mirror_job
-    install_step, mirror_step = mirror_job["steps"]
-    assert "env" not in install_step
-    assert "GH_MIRROR_TOKEN" in str(mirror_step["env"])
+    assert mirror_job["steps"] == [
+        {
+            "name": "Follow the verified package-first operator procedure",
+            "run": 'echo "Public promotion is held. Follow docs/release-evidence.md."',
+        }
+    ]
+    mirror_text = (GITEA_WORKFLOWS / "mirror-github.yml").read_text(encoding="utf-8")
+    assert "secrets." not in mirror_text
+    assert "git push" not in mirror_text
+
+
+def test_actionlint_exception_is_limited_to_the_intentional_mirror_hold() -> None:
+    config = _workflow(ROOT / ".github" / "actionlint.yaml")
+    assert config == {
+        "paths": {
+            ".gitea/workflows/mirror-github.yml": {
+                "ignore": [r'^constant expression "false" in condition\. remove the if: section$']
+            }
+        }
+    }
 
 
 def test_distribution_build_is_reproducible_and_serialized() -> None:
