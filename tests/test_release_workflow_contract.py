@@ -694,9 +694,7 @@ def test_permissions_are_read_only_and_tag_terminology_is_truthful() -> None:
     checked_paths = [
         ROOT / "README.md",
         ROOT / "docs" / "development.md",
-        ROOT / "CLAUDE.md",
         ROOT / "AGENTS.md",
-        ROOT / ".github" / "CLAUDE.md",
         ROOT / ".github" / "AGENTS.md",
     ]
     text = "\n".join(path.read_text(encoding="utf-8") for path in checked_paths)

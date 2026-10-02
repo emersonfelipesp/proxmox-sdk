@@ -1,13 +1,3 @@
-# .github/ Directory Guide — AGENTS.md Mirror
-
-This file mirrors the sibling `CLAUDE.md` guidance for agents that read `AGENTS.md`. Treat `CLAUDE.md` as the source material; the content below preserves the current guide.
-
-## Source
-
-@CLAUDE.md
-
----
-
 # .github/ Directory Guide
 
 ## Workspace Context
@@ -39,11 +29,12 @@ read the systemd package credential.
 
 | File | Trigger | What it does |
 |------|---------|--------------|
-| `ci.yml` | Push / PR to any branch | Lint (ruff), compile, import smoke checks, run `tests/` with coverage |
+| `ci.yml` | Push / PR to any branch | Lint (ruff), compile, import smoke checks, run `tests/` with coverage across all schema versions |
 | `ci.yml` docker-images | Push to main/testing | Builds/tests without credentials, stages digest-addressed candidates, then promotes `dev` and commit-traceability tags |
 | `docs.yml` | Push to `main` | Builds MkDocs site and deploys to GitHub Pages |
 | `docker-hub-publish.yml` | Called by CI / release / manual | Builds and smokes raw/nginx/granian on amd64+arm64 without secrets, emits SBOMs, stages candidates in a protected job, and returns manifest digests |
 | `publish-testpypi.yml` | `v*rc*`, GitHub Release, or manual | Reproducible build, protected TestPyPI/PyPI publication, served-byte verification, hash-bound service images, and one all-image stable promotion fan-in |
+| `schema-update.yml` | Manual (`workflow_dispatch`) or weekly cron (Monday 03:00 UTC) | Detects upstream Proxmox API drift, runs codegen for a new version tag, verifies SHA integrity, opens a PR with a generated schema update |
 | `release-docker-verify.yml` | Successful release workflow | Confirms alias digests and smokes core + all/pve/pbs/pdm images on amd64 and arm64 |
 | `.gitea/workflows/ci.yml` | Push / PR to `main` or `testing` | Read-only Ruff/type/syntax, three-schema regression, strict docs, and installed-wheel gates on an isolated untrusted runner |
 | `.gitea/workflows/publish-package.yml` | Protected `v*` tag | Builds, attests, and uploads a credential-free package candidate for external rebuild/verification and publication |
