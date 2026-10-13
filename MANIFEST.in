@@ -1,0 +1,3 @@
+include tests/native_telemetry_probe.py
+include tests/native_provider_controls_probe.py
+include tests/native_empty_caller_probe.py

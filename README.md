@@ -158,19 +158,46 @@ See the [Quick Start Guide](https://emersonfelipesp.github.io/proxmox-sdk/quicks
 - `HOST` - Host to bind to (default: "0.0.0.0")
 - `PORT` - Port to bind to (default: "8000")
 
-### OpenTelemetry Tracing
-- `PROXMOX_OTEL_ENABLED` - Enable outbound SDK CLIENT spans and inbound FastAPI SERVER spans (default: false)
-- `OTEL_EXPORTER_OTLP_ENDPOINT` - OTLP HTTP collector endpoint (default base endpoint: "http://localhost:4318")
-- `OTEL_EXPORTER_OTLP_PROTOCOL` - Must be "http/protobuf" for the bundled HTTP exporter
-- `OTEL_EXPORTER_OTLP_HEADERS` - Optional OTLP headers
-- `OTEL_SERVICE_NAME` - Service name resource attribute (default: "proxmox-sdk")
-- `OTEL_RESOURCE_ATTRIBUTES` - Additional OpenTelemetry resource attributes
-- `OTEL_SDK_DISABLED` - Standard OpenTelemetry kill switch; truthy values disable tracing
-- `OTEL_TRACES_SAMPLER` - Standard OpenTelemetry trace sampler
-- `OTEL_TRACES_EXPORTER` - Set to "otlp" or leave unset for OTLP export; set "none" to disable export
+### OpenTelemetry
 
-Tracing never records request params, request bodies, auth headers, cookies,
-passwords, tickets, CSRF tokens, or API token values as span data.
+FastAPI 0.143.0 owns native HTTP traces, duration metrics, validation/error logs,
+and WebSocket traces and logs in the main, PVE, PBS, and PDM applications. Server
+export is opt-in through `FASTAPI_OTEL_AUTO_CONFIGURE=true` together with
+`OTEL_EXPORTER_OTLP_ENDPOINT` or signal-specific endpoints. Explicit factory
+`telemetry` dictionaries take precedence over the automatic-configuration flag.
+There is no application collector default. Explicit empty endpoints are preserved.
+`PROXMOX_OTEL_ENABLED` controls only outbound SDK CLIENT tracing (default: false);
+standalone client tracing retains the HTTP exporter's localhost default when enabled.
+Install the `otel` extra for standalone client tracing. Client imports remain lazy
+and work when OpenTelemetry is unavailable.
+
+- `OTEL_EXPORTER_OTLP_PROTOCOL` and signal-specific protocol settings select the transport; native automatic setup supports `http/protobuf`.
+- `OTEL_EXPORTER_OTLP_HEADERS` and signal-specific headers configure collector authentication.
+- `OTEL_SERVICE_NAME` and `OTEL_RESOURCE_ATTRIBUTES` configure provider resources.
+- `OTEL_SDK_DISABLED` disables native server signals and outbound SDK tracing.
+- `OTEL_TRACES_SAMPLER` configures sampling.
+- `OTEL_TRACES_EXPORTER`, `OTEL_METRICS_EXPORTER`, and `OTEL_LOGS_EXPORTER` honor `none` to disable individual exports.
+
+Library-owned client and server tracer providers are separate, preventing duplicate
+exporters in either initialization order while preserving cross-provider trace
+context. Existing global providers and providers passed through the factories'
+`telemetry` argument remain caller-owned. Native lifespan flushes its own exporter
+components and never shuts down caller providers or the standalone client provider.
+When callers already configure exporters, pass `telemetry={"auto_configure": False,
+"tracer_provider": provider, ...}` and own their flushing and shutdown.
+
+Native server privacy processors redact concrete URL path/query values and remove
+exception message/stacktrace attributes, preserving route templates, exception types,
+and static log bodies. They affect only the `fastapi` instrumentation scope. Caller
+log exporters must be installed after `native_server_configuration()` so the privacy
+processor precedes exporter snapshots; already-installed caller exporters remain
+untouched and require caller-owned sanitization. Outbound tracing never records
+request params, bodies, auth headers, cookies, passwords, tickets, CSRF tokens, or
+API token values.
+
+`instrument_fastapi_app()` is a deprecated compatibility no-op. It does not instrument
+externally constructed applications; use FastAPI's native `telemetry` configuration
+or the shipping factories.
 
 ### PDM Mock Server
 - `PROXMOX_PDM_MOCK_HOST` - Host to bind to (default: "0.0.0.0")
@@ -320,3 +347,12 @@ docker run --rm emersonfelipesp/proxmox-sdk:latest-nginx sh
 ## License
 
 MIT
+
+Implicit native server providers are allocated only when their native signal is
+enabled, automatic configuration is enabled, and the standard environment selects
+an exporter and endpoint. Empty signal endpoints fall back to the generic endpoint
+as FastAPI specifies. An ineligible implicit SDK client provider uses a no-op server
+provider to preserve client/server export isolation. Explicit caller providers retain
+manual telemetry with `auto_configure=False`; selected real caller providers receive
+scoped privacy processors even without an environment endpoint. Privacy callbacks
+are inert while `OTEL_SDK_DISABLED` is true, including after provider construction.

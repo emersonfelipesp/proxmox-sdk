@@ -23,7 +23,7 @@ description = "pvesh-like CLI for Proxmox API with multi-backend support, perfor
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi[standard]>=0.135.2",
+    "fastapi[standard]==0.143.0",
     "pydantic>=2.13.3,<2.14.0",
     "pyyaml>=6.0",
     "aiohttp>=3.14.0",
@@ -47,7 +47,6 @@ otel = [
     "opentelemetry-api",
     "opentelemetry-sdk",
     "opentelemetry-exporter-otlp-proto-http",
-    "opentelemetry-instrumentation-fastapi",
 ]
 all = [
     "paramiko>=5.0.0",
@@ -59,7 +58,6 @@ all = [
     "opentelemetry-api",
     "opentelemetry-sdk",
     "opentelemetry-exporter-otlp-proto-http",
-    "opentelemetry-instrumentation-fastapi",
 ]
 test = [
     "httpx>=0.28.1",

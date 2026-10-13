@@ -6,6 +6,7 @@ import os
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.telemetry import TelemetryConfig
 
 from proxmox_sdk import __version__
 from proxmox_sdk.mock.loader import load_mock_data
@@ -15,13 +16,7 @@ from proxmox_sdk.schema import DEFAULT_PROXMOX_OPENAPI_TAG, load_proxmox_generat
 _STUB_SERVICES = frozenset({"pbs", "pdm"})
 
 
-def _instrument_app(app: FastAPI) -> FastAPI:
-    from proxmox_sdk import telemetry
-
-    return telemetry.instrument_fastapi_app(app)
-
-
-def create_mock_app() -> FastAPI:
+def create_mock_app(*, telemetry: TelemetryConfig | None = None) -> FastAPI:
     """Build the standalone Proxmox mock API app.
 
     Reads PROXMOX_MOCK_SERVICE (default: "all") to select which Proxmox service
@@ -32,12 +27,15 @@ def create_mock_app() -> FastAPI:
     service = os.environ.get("PROXMOX_MOCK_SERVICE", "all").lower().strip()
 
     if service in _STUB_SERVICES:
-        return _create_stub_app(service)
+        return _create_stub_app(service, telemetry=telemetry)
 
     version_tag = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", DEFAULT_PROXMOX_OPENAPI_TAG)
     openapi_doc = load_proxmox_generated_openapi(version_tag=version_tag)
 
+    from proxmox_sdk.server_telemetry import native_server_configuration
+
     app = FastAPI(
+        telemetry=native_server_configuration(telemetry),
         title=f"Proxmox Mock API ({service.upper()})",
         description="Schema-driven in-memory FastAPI mock for the generated Proxmox API.",
         version=__version__,
@@ -76,10 +74,10 @@ def create_mock_app() -> FastAPI:
                 custom_mock_data=custom_mock_data,
                 namespace=namespace,
             )
-            return _instrument_app(app)
+            return app
 
         _register_static_mock_routes(app, custom_mock_data)
-        return _instrument_app(app)
+        return app
 
     if openapi_doc:
         from proxmox_sdk.mock.routes import register_generated_proxmox_mock_routes
@@ -87,7 +85,7 @@ def create_mock_app() -> FastAPI:
         register_generated_proxmox_mock_routes(
             app, version_tag=version_tag, openapi_document=openapi_doc, namespace=namespace
         )
-        return _instrument_app(app)
+        return app
 
     @app.get("/api2/json")
     async def no_schema() -> dict[str, str]:
@@ -96,13 +94,16 @@ def create_mock_app() -> FastAPI:
             "message": f"Run /codegen/generate to generate version '{version_tag}' or use the full API server.",
         }
 
-    return _instrument_app(app)
+    return app
 
 
-def _create_stub_app(service: str) -> FastAPI:
+def _create_stub_app(service: str, *, telemetry: TelemetryConfig | None = None) -> FastAPI:
     """Return a healthy FastAPI stub for services without a generated schema yet."""
     service_upper = service.upper()
+    from proxmox_sdk.server_telemetry import native_server_configuration
+
     app = FastAPI(
+        telemetry=native_server_configuration(telemetry),
         title=f"Proxmox {service_upper} Mock API (stub)",
         description=(
             f"Stub mock for Proxmox {service_upper}. "
@@ -130,7 +131,7 @@ def _create_stub_app(service: str) -> FastAPI:
     async def version() -> dict[str, str]:
         return {"version": __version__}
 
-    return _instrument_app(app)
+    return app
 
 
 def _register_static_mock_routes(app: FastAPI, mock_data: dict[str, Any]) -> None:

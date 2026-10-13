@@ -7,6 +7,7 @@ from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi import __version__ as fastapi_version
+from fastapi.telemetry import TelemetryConfig
 
 from proxmox_sdk import __version__
 from proxmox_sdk.proxmox.config import ProxmoxConfig
@@ -136,7 +137,7 @@ def _register_mode_routes(
     route_info.update(registrar(app, config, version_tag=version_tag, openapi_document=openapi_doc))
 
 
-def create_app() -> FastAPI:
+def create_app(*, telemetry: TelemetryConfig | None = None) -> FastAPI:
     """Build the Proxmox OpenAPI FastAPI application.
 
     Modes:
@@ -156,7 +157,10 @@ def create_app() -> FastAPI:
     config = ProxmoxConfig.from_env()
     api_mode = config.api_mode
 
+    from proxmox_sdk.server_telemetry import native_server_configuration
+
     app = FastAPI(
+        telemetry=native_server_configuration(telemetry),
         title="Proxmox OpenAPI",
         description=(
             f"Schema-driven FastAPI package for Proxmox API (mode: {api_mode}). "
@@ -171,9 +175,6 @@ def create_app() -> FastAPI:
     route_info: dict[str, Any] = {"mode": api_mode}
 
     _configure_middleware(app, config)
-    from proxmox_sdk import telemetry
-
-    telemetry.instrument_fastapi_app(app, config)
     _register_utility_routes(app, config, route_info)
 
     app.include_router(codegen_router, prefix="/codegen", tags=["codegen"])

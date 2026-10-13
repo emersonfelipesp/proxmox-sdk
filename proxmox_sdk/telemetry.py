@@ -15,6 +15,7 @@ from proxmox_sdk.sdk.exceptions import BackendNotAvailableError
 
 _TRUE_VALUES = frozenset({"1", "true", "yes", "on"})
 _TRACER: Any | None = None
+_CLIENT_PROVIDER: Any | None = None
 _OTEL_IMPORT_FAILED = False
 _BOOTSTRAP_LOCK = threading.Lock()
 
@@ -108,7 +109,7 @@ def _ensure_tracer(config: Any | None = None) -> Any | None:
     if not is_enabled(config):
         return None
 
-    global _TRACER
+    global _TRACER, _CLIENT_PROVIDER
     if _TRACER is not None:
         return _TRACER
 
@@ -131,6 +132,7 @@ def _ensure_tracer(config: Any | None = None) -> Any | None:
                     exporter = otel["OTLPSpanExporter"]()
                     provider.add_span_processor(otel["BatchSpanProcessor"](exporter))
                 trace.set_tracer_provider(provider)
+                _CLIENT_PROVIDER = provider
             except Exception:
                 return None
 
@@ -140,17 +142,6 @@ def _ensure_tracer(config: Any | None = None) -> Any | None:
             return None
 
         return _TRACER
-
-
-def _load_fastapi_instrumentor() -> Any | None:
-    if _load_otel() is None:
-        return None
-
-    try:
-        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-    except ImportError:
-        return None
-    return FastAPIInstrumentor
 
 
 def _safe_error(exc: BaseException) -> Exception:
@@ -275,26 +266,12 @@ class _TicketCapableTracingBackend(TracingBackend):
 
 
 def instrument_fastapi_app(app: Any, config: Any | None = None) -> Any:
-    """Instrument a FastAPI app when proxmox-sdk telemetry is enabled."""
-    if not is_enabled(config):
-        return app
+    """Deprecated compatibility no-op: FastAPI owns native server instrumentation.
 
-    _ensure_tracer(config)
-    instrumentor = _load_fastapi_instrumentor()
-    if instrumentor is None:
-        return app
-
-    app_state = getattr(app, "state", None)
-    if app_state is not None and getattr(app_state, "_proxmox_otel_instrumented", False):
-        return app
-
-    try:
-        instrumentor().instrument_app(app)
-    except Exception:
-        return app
-
-    if app_state is not None:
-        app_state._proxmox_otel_instrumented = True
+    This helper does not instrument externally constructed apps. Configure telemetry
+    when constructing FastAPI, using native_server_configuration.
+    Outbound SDK tracing remains independently controlled by is_enabled.
+    """
     return app
 
 

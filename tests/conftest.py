@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import os
+
+# Ordinary regressions never export to operator/estate collectors. Native probes opt in.
+os.environ["OTEL_SDK_DISABLED"] = "true"
 import re
 from collections.abc import Mapping, Sequence
 

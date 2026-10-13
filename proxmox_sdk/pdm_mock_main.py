@@ -20,6 +20,7 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.telemetry import TelemetryConfig
 
 from proxmox_sdk import __version__
 from proxmox_sdk.pdm.mock.routes import (
@@ -29,16 +30,11 @@ from proxmox_sdk.pdm.mock.routes import (
 )
 
 
-def _instrument_app(app: FastAPI) -> FastAPI:
-    from proxmox_sdk import telemetry
-
-    return telemetry.instrument_fastapi_app(app)
-
-
 def create_pdm_mock_app(
     *,
     state: PDMMockState | None = None,
     seed: dict[str, Any] | None = None,
+    telemetry: TelemetryConfig | None = None,
 ) -> FastAPI:
     """Build the standalone PDM mock API app.
 
@@ -54,7 +50,10 @@ def create_pdm_mock_app(
         if seed_file:
             seed = load_seed_from_file(seed_file)
 
+    from proxmox_sdk.server_telemetry import native_server_configuration
+
     app = FastAPI(
+        telemetry=native_server_configuration(telemetry),
         title="Proxmox Datacenter Manager (PDM) Mock API",
         description=(
             "In-memory FastAPI mock for the PDM REST API. Mirrors every PDM SDK "
@@ -80,7 +79,7 @@ def create_pdm_mock_app(
     # Expose the state on the app so test fixtures can inspect / mutate it
     # without going through HTTP.
     app.state.pdm_mock_state = mock_state
-    return _instrument_app(app)
+    return app
 
 
 app = create_pdm_mock_app()
