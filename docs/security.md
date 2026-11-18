@@ -38,6 +38,43 @@ To allow other domains (e.g. a self-hosted API viewer), pass `allow_any_domain=T
 
 Plain HTTP is blocked by default. Pass `allow_http=True` to `validate_source_url()` in trusted internal tooling only.
 
+### Browser transport policy
+
+Browser crawling validates every ordinary HTTP request against the source
+origin. Allowed routes are fetched with zero redirects and zero retries; a
+redirect is rejected before any followed-hop network I/O or browser fulfillment.
+Ordinary same-origin resources remain available.
+
+All WebSockets are refused without connecting upstream, including same-origin
+sockets. Their route callbacks queue refusals for the owning synchronous caller
+to close after navigation, selector processing, and during cleanup. Each drain
+processes only the queue snapshot present on entry, so reentrant callbacks cannot
+keep a drain running indefinitely. Browser closure disposes final unconnected
+routes and clears remaining handles. Both synchronous and asynchronous crawler
+entry points preserve this policy.
+
+The original Chromium security regressions retain their assertions and deadlines.
+Public browser CI runs every complete schema row on Ubuntu 24.04 and installs the
+exact locked Chromium revision with the official ephemeral-host dependency
+installer before testing. An empty browser cache must not substitute skips for
+these regressions.
+
+### CI qualification and publication
+
+Read-only CI validates lint, syntax/imports, distributions and installed wheels,
+every complete browser-enabled schema row, documentation generation, and strict
+documentation build. Its always-run summary rejects failed, cancelled, missing,
+or unexpectedly skipped quality jobs and unexpected Docker dispositions.
+
+The optional non-secret repository variable `CI_QUALIFICATION_ONLY`, set to the
+canonical literal `true`, suppresses only CI Docker publication and the legacy
+documentation writer while preserving all read-only quality. An absent value
+preserves ordinary future publication. A normal feature pull request must pass
+complete CI before protected main integration. A controlled protected squash
+may then use the temporary variable for its main event; both writers must be
+terminal and skipped before restoring the previous absent setting. A later
+rerun requires a fresh guarded qualification window.
+
 ### Version tag validation
 
 Version tags used in codegen URLs and file paths are validated by `validate_version_tag()`:

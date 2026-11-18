@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import importlib.util
 import logging
+from collections import deque
 from dataclasses import dataclass
 from typing import Any, Literal
 from urllib.parse import urlsplit
@@ -90,10 +91,67 @@ def _should_reject_web_socket(_url: str) -> bool:
     return True
 
 
-def _guard_web_socket(web_socket: Any) -> None:
-    """Refuse a routed browser WebSocket without connecting to its server."""
+def _guard_web_socket(web_socket: Any, pending: deque[Any]) -> None:
+    """Queue a refusal without entering sync Playwright from its dispatcher."""
     if _should_reject_web_socket(web_socket.url):
-        web_socket.close(code=1008, reason="WebSockets are refused")
+        pending.append(web_socket)
+
+
+def _drain_web_socket_refusals(pending: deque[Any]) -> None:
+    """Close every unconnected socket on the owning synchronous caller stack."""
+    first_error = None
+    for _ in range(len(pending)):
+        web_socket = pending.popleft()
+        try:
+            web_socket.close(code=1008, reason="WebSockets are refused")
+        except Exception as error:
+            if first_error is None:
+                first_error = error
+    if first_error is not None:
+        raise first_error
+
+
+def _fulfill_without_redirect(route: Any, redirect_errors: list[ProxmoxRedirectError]) -> None:
+    """Inspect the first response before the browser can follow any redirect."""
+    response = route.fetch(max_redirects=0, max_retries=0, timeout=30000)
+    try:
+        if 300 <= response.status < 400:
+            location = response.headers.get("location") or response.headers.get("Location")
+            redirect_errors.append(ProxmoxRedirectError(response.status, location))
+            route.abort("blockedbyclient")
+            return
+        route.fulfill(response=response)
+    finally:
+        response.dispose()
+
+
+def _guard_request(
+    route: Any,
+    request: Any,
+    source_origin: _Origin,
+    redirect_errors: list[ProxmoxRedirectError],
+) -> None:
+    """Reject forbidden request origins before making any network fetch."""
+    decision = _should_abort(request, source_origin)
+    if not decision.abort:
+        _fulfill_without_redirect(route, redirect_errors)
+        return
+    if decision.reason == "redirect":
+        redirect_errors.append(ProxmoxRedirectError(decision.status or 300, decision.location))
+    route.abort("blockedbyclient")
+
+
+def _close_browser(browser: Any, pending: deque[Any]) -> None:
+    """Drain refusals before cleanup and retain no handles after browser closure."""
+    try:
+        _drain_web_socket_refusals(pending)
+    finally:
+        try:
+            browser.close()
+        finally:
+            # Routes arriving while the browser closes are never connected and
+            # are disposed with that browser, rather than retained across crawls.
+            pending.clear()
 
 
 def _raise_redirect_error(
@@ -169,15 +227,13 @@ def _run_playwright_crawler(
     failed_endpoints: list[str] = []
     discovered_navigation_items = 0
     redirect_errors: list[ProxmoxRedirectError] = []
+    pending_web_sockets: deque[Any] = deque()
 
     def guard_request(route: Any, request: Any) -> None:
-        decision = _should_abort(request, source_origin)
-        if not decision.abort:
-            route.continue_()
-            return
-        if decision.reason == "redirect":
-            redirect_errors.append(ProxmoxRedirectError(decision.status or 300, decision.location))
-        route.abort("blockedbyclient")
+        _guard_request(route, request, source_origin, redirect_errors)
+
+    def guard_web_socket(web_socket: Any) -> None:
+        _guard_web_socket(web_socket, pending_web_sockets)
 
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
@@ -187,7 +243,7 @@ def _run_playwright_crawler(
                 service_workers="block",
             )
             context.route("**/*", guard_request)
-            context.route_web_socket("**/*", _guard_web_socket)
+            context.route_web_socket("**/*", guard_web_socket)
             page = context.new_page()
             try:
                 page.goto(url, wait_until="networkidle", timeout=30000)
@@ -200,6 +256,8 @@ def _run_playwright_crawler(
                     goto_error,
                 )
                 return _empty_capture()
+            finally:
+                _drain_web_socket_refusals(pending_web_sockets)
             if redirect_errors:
                 raise redirect_errors[0]
             try:
@@ -214,6 +272,8 @@ def _run_playwright_crawler(
                     selector_error,
                 )
                 return _empty_capture()
+            finally:
+                _drain_web_socket_refusals(pending_web_sockets)
             if redirect_errors:
                 raise redirect_errors[0]
 
@@ -224,7 +284,7 @@ def _run_playwright_crawler(
                 redirect_errors,
             )
         finally:
-            browser.close()
+            _close_browser(browser, pending_web_sockets)
 
     _raise_redirect_error(redirect_errors)
     return {

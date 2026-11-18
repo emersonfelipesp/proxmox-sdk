@@ -125,3 +125,23 @@ ci.yml
   required environment reviewers, deployment rules, protected tags, and Gitea
   runner labels are documented in `docs/release-evidence.md` and must be
   provisioned outside the repository.
+
+## Browser-enabled quality and controlled integration
+
+The public browser-test matrix uses Ubuntu 24.04 and installs the locked
+Chromium revision with the official dependency installer on the disposable
+hosted runner. Preserve every complete schema command, original security
+assertion, and deadline. The separate read-only documentation job reuses the
+original docgen and strict-build commands without publishing documentation.
+The always-run complete summary requires every quality job and the expected
+Docker disposition, including failure, cancellation, and skipped results.
+
+The optional non-secret repository variable `CI_QUALIFICATION_ONLY` guards only
+CI Docker publication and the legacy documentation writer. GitHub compares its
+`true` value case-insensitively; the controlled transaction uses the canonical
+literal `true`. An absent value preserves ordinary future publication. Complete
+PR quality must pass before protected main integration. A controlled protected
+squash may use the temporary variable for its main event only after the exact
+source and policy are reviewed. Preserve terminal skipped-writer evidence before
+restoring the previous absent setting. Do not change secrets, publisher inputs,
+release workflows, Pages mode, browser assertions, or deadlines to qualify CI.

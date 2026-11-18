@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   deploy:
+    if: vars.CI_QUALIFICATION_ONLY != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
