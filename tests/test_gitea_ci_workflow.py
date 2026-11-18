@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = ROOT / ".gitea" / "workflows" / "ci.yml"
 FULL_SHA_ACTION = re.compile(r"^[^\s@]+@[0-9a-f]{40}$")
 GITEA_UPLOAD_ARTIFACT = "actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32"
-GITEA_SETUP_UV = "astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990"
+GITEA_SETUP_UV = "./.tmp/setup-uv"
 
 
 def _workflow() -> dict[str, Any]:
@@ -40,7 +40,7 @@ def test_gitea_ci_has_bounded_read_only_review_triggers() -> None:
     assert "workflow_dispatch" in workflow["on"]
     assert workflow["concurrency"] == {
         "group": "gitea-ci-${{ github.ref }}",
-        "cancel-in-progress": "true",
+        "cancel-in-progress": "${{ github.event_name == 'pull_request' }}",
     }
 
 
@@ -59,7 +59,7 @@ def test_third_party_actions_are_pinned_to_reviewed_commits() -> None:
     for job_name, job in _workflow()["jobs"].items():
         for step in job["steps"]:
             action = step.get("uses")
-            if action is not None:
+            if action is not None and action != GITEA_SETUP_UV:
                 assert FULL_SHA_ACTION.fullmatch(action), f"{job_name}: {action}"
 
 
@@ -68,7 +68,7 @@ def test_setup_uv_uses_gitea_compatible_boolean_inputs() -> None:
         step
         for job in _workflow()["jobs"].values()
         for step in job["steps"]
-        if str(step.get("uses", "")).startswith("astral-sh/setup-uv@")
+        if step.get("name") == "Set up locked Python tooling"
     ]
 
     assert len(setup_steps) == 4
@@ -148,6 +148,63 @@ def test_docs_and_package_job_validates_the_installed_artifact() -> None:
         "tests/verify_wheel_contract.py dist/*.whl",
     ):
         assert command in commands
+
+
+def _browser_steps() -> tuple[list[dict[str, Any]], int, int]:
+    steps = _workflow()["jobs"]["schema-tests"]["steps"]
+    preparation = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("name") == "Prepare job-private Chromium and authenticated Debian libraries"
+    )
+    regression = next(
+        index
+        for index, step in enumerate(steps)
+        if step.get("name") == "Run complete schema-driven regression suite"
+    )
+    return steps, preparation, regression
+
+
+def test_schema_browser_preparation_is_mandatory_before_unchanged_regression() -> None:
+    steps, preparation, regression = _browser_steps()
+    assert preparation < regression
+    assert "if" not in steps[preparation]
+    assert "continue-on-error" not in steps[preparation]
+    assert steps[regression]["run"] == (
+        "uv run --locked pytest -n 4 --cov=proxmox_sdk --cov-branch "
+        "--cov-report=term-missing --cov-report=xml tests"
+    )
+    artifact = next(step for step in steps if step.get("name") == "Retain schema coverage evidence")
+    assert artifact["with"]["path"].splitlines() == [
+        "coverage.xml",
+        "${{ env.PROXMOX_CHROMIUM_RUNTIME }}/archive-inventory.json",
+    ]
+
+
+def test_schema_browser_preparation_uses_private_paths_and_exact_browser() -> None:
+    steps, preparation, _regression = _browser_steps()
+    command = steps[preparation]["run"]
+    assert 'mktemp -d "${RUNNER_TEMP:?}/proxmox-chromium.XXXXXX"' in command
+    assert 'tools/prepare_ci_chromium.py "$runtime/runtime"' in command
+    assert "playwright install chromium\n" in command
+    assert (
+        "chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell"
+        in command
+    )
+    assert '>> "$GITHUB_ENV"' in command
+    assert "--with-deps" not in command
+    assert "sudo" not in command
+    assert "--no-sandbox" not in command
+
+
+def test_private_fontconfig_state_is_confined_to_the_original_regression_step() -> None:
+    steps, preparation, regression = _browser_steps()
+    assert steps[regression]["env"] == {
+        "FONTCONFIG_FILE": "${{ env.PROXMOX_CHROMIUM_RUNTIME }}/fontconfig/fonts.conf",
+        "FONTCONFIG_PATH": "${{ env.PROXMOX_CHROMIUM_RUNTIME }}/fontconfig",
+    }
+    assert "FONTCONFIG_" not in steps[preparation]["run"]
+    assert "FONTCONFIG_FILE" not in _workflow()["jobs"]["schema-tests"]["env"]
 
 
 def test_pull_request_workflow_contains_no_publish_or_deploy_authority() -> None:

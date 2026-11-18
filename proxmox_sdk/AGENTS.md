@@ -56,6 +56,13 @@ endpoint, protocol, header, resource, sampler, and exporter controls.
 - `proxmox-sdk-mock` — standalone PVE mock server.
 - `proxmox-sdk-pdm-mock` — standalone Proxmox Datacenter Manager mock server (default port 8443).
 
+The Playwright crawler permits ordinary HTTP resources only from the validated
+source origin and fetches them with zero redirects before browser fulfillment.
+All WebSockets stay unconnected; refusal callbacks queue synchronous closes for
+the owning crawler stack, including error and cleanup paths. Preserve the real
+Chromium network-zero assertions and original deadlines. See
+`docs/security.md` for the route and private CI runtime contracts.
+
 Generated response models retain Proxmox composite string fields, while also
 accepting the native integer or boolean scalar documented by a format's single
 `default_key`. This compatibility applies to responses only; request fields and

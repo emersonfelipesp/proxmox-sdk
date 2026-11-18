@@ -38,6 +38,58 @@ To allow other domains (e.g. a self-hosted API viewer), pass `allow_any_domain=T
 
 Plain HTTP is blocked by default. Pass `allow_http=True` to `validate_source_url()` in trusted internal tooling only.
 
+### Browser request boundaries
+
+The Playwright crawler routes requests before it creates a page. Ordinary HTTP
+resources must have the same scheme, host, and effective port as the validated
+source. Each allowed request uses `route.fetch(max_redirects=0, max_retries=0,
+timeout=30000)`. The crawler rejects a redirect response before fulfilling the
+browser route, so the followed target receives no request. Nonredirect responses
+are fulfilled unchanged, and the fetched response is disposed on every path.
+Redirect errors remain visible through navigation and extraction failures.
+
+All browser WebSockets are refused, including same-origin sockets. The routed
+socket is never connected to its server. Playwright 1.58 calls WebSocket handlers
+from its dispatcher context, so the handler queues the refusal without making a
+synchronous API call. The owning crawler stack closes queued sockets after
+navigation and selector calls and before browser cleanup. Each drain processes
+only the snapshot present on entry, so a close callback cannot reopen sockets
+forever inside that drain. Error paths use the same bounded drain; browser
+closure disposes any final unconnected routes and no
+handles survive into another crawl. Both public sync and async crawler entry
+points retain this policy.
+
+The original Chromium regressions verify HTTPS-to-HTTP redirect refusal, no
+cross-origin WebSocket upgrade, and delayed script-redirect propagation. The
+Gitea schema matrix installs locked Chromium into a private browser directory
+with authenticated, download-only Debian 12 libraries. It must execute these
+tests rather than obtain skips from an empty browser cache. No test assertion or
+deadline is relaxed to prepare the runtime.
+The headless runtime also acquires the single locked `fonts-liberation` tools
+entry through the same signed APT transaction. Its private Fontconfig file
+references only the extracted font directory and a private cache, with its
+environment confined to the regression step. This preserves real DOM visibility
+in a minimal runner without changing host font configuration or test assertions.
+Public browser CI instead uses supported Ubuntu 24.04 and the official locked
+Playwright dependency installer on the disposable hosted runner. That provider
+setup does not change the unprivileged Debian helper's host restrictions.
+
+### CI qualification and publication
+
+Read-only public CI validates lint, syntax/imports, distributions and installed
+wheels, every complete browser-enabled schema row, and documentation generation
+and strict build. An always-run summary fails if a required quality job fails,
+is cancelled, or is unexpectedly skipped. It also checks the Docker publication
+disposition appropriate to the event.
+
+The optional non-secret repository variable `CI_QUALIFICATION_ONLY`, set to
+the canonical literal `true`, suppresses only CI Docker publication and the legacy Pages
+writer. It keeps quality checks active. Its absent default preserves ordinary
+future publication and the original release workflows. A controlled main
+qualification must verify both writers are terminal and skipped before
+restoring the previous absent setting. A later rerun requires a new guarded
+qualification window; restoration is not permission to publish an old run.
+
 ### Version tag validation
 
 Version tags used in codegen URLs and file paths are validated by `validate_version_tag()`:

@@ -29,7 +29,7 @@ read the systemd package credential.
 
 | File | Trigger | What it does |
 |------|---------|--------------|
-| `ci.yml` | Push / PR to any branch | Lint (ruff), compile, import smoke checks, run `tests/` with coverage across all schema versions |
+| `ci.yml` | Push / PR to the existing branch filters | Lint, compile/import, wheel contracts, complete browser-enabled schema tests, read-only docs, and an always-run complete summary |
 | `ci.yml` docker-images | Push to main/testing | Builds/tests without credentials, stages digest-addressed candidates, then promotes `dev` and commit-traceability tags |
 | `docs.yml` | Push to `main` | Builds MkDocs site and deploys to GitHub Pages |
 | `docker-hub-publish.yml` | Called by CI / release / manual | Builds and smokes raw/nginx/granian on amd64+arm64 without secrets, emits SBOMs, stages candidates in a protected job, and returns manifest digests |
@@ -40,6 +40,52 @@ read the systemd package credential.
 | `.gitea/workflows/publish-package.yml` | Protected `v*` tag | Builds, attests, and uploads a credential-free package candidate for external rebuild/verification and publication |
 
 ## CI Job Dependencies
+
+Public browser tests use `ubuntu-24.04` and install the exact locked Chromium
+with the official `--with-deps` route on the disposable hosted runner. Keep
+every full schema command and original browser assertion and deadline. The
+separate read-only docs job reuses docgen and strict-build checks without a
+deployment command. The always-run summary requires every quality job and the
+expected Docker disposition, including failures, cancellations, and skips.
+
+The optional non-secret repository variable `CI_QUALIFICATION_ONLY` suppresses
+only CI Docker publication and the legacy documentation writer when its value
+compares equal to `true` under GitHub's case-insensitive string comparison.
+The controlled qualification uses the literal `true`. An absent value preserves
+normal future publication. It does not disable read-only quality. A controlled
+main qualification must retain
+explicit terminal skipped-writer evidence before restoring the variable to its
+previous absent state. Do not change secrets, Pages mode, release workflows, or
+writer inputs to obtain qualification.
+
+The Gitea schema matrix prepares Chromium in a fresh job-private directory.
+`tools/prepare_ci_chromium.py` accepts only an unprivileged Debian 12 amd64
+job and locked Playwright 1.58.0. It uses the preinstalled root-controlled
+Debian archive keyring, isolated APT configuration/state/status/cache, signed
+metadata, download-only dependency resolution, and `dpkg-deb --extract`.
+It copies the public host dpkg status into private state and reinstalls only
+the fixed top-level library packages into the download cache. It refuses core
+libc/loader archives before any extraction, preserving the running host ABI.
+Every downloaded archive retains Package, Version, Architecture, and SHA-256
+in the job log and an inventory artifact. It never installs packages or runs
+package scripts. The workflow installs the
+locked Chromium revision 1208 into a private browser path and supplies private
+library paths to the unchanged full schema suite. An unsupported host, missing
+keyring, failed acquisition, or missing browser fails the job; an empty browser
+cache must never substitute for the three real browser security tests.
+The separately validated `fonts-liberation` entry from locked `nativeDeps.tools`
+is acquired in the same signed transaction. A fixed private Fontconfig file
+points only at its extracted fonts and a private cache. Fontconfig environment
+variables exist only on the original regression step. Do not use host font
+configuration, add font selectors, or weaken the navigation visibility check.
+
+The `schema-update.yml` regeneration job uses `ubuntu-24.04` because locked
+Playwright 1.58.0 supports that OS and rejects Ubuntu 26.04. Keep its browser,
+dependency lock, and command bodies unchanged when maintaining this runner pin.
+Detection and PR creation retain their existing runner labels. The workflow's
+final job can push a schema branch and open a PR; a full dispatch requires the
+applicable source-promotion and write authorization. This OS pin does not prove
+hosted recovery or resolve the separate required-browser security lane.
 
 ```
 ci.yml
@@ -56,6 +102,22 @@ ci.yml
 ├── schema-tests (latest + 9.2 + 9.1.11)
 └── docs-package (strict MkDocs + wheel/sdist + installed-wheel verifier)
 ```
+
+## Native source acquisition
+
+Native CI acquires this public repository anonymously with fixed-argument Git
+inside the existing per-job workspace. It validates the event SHA and ref,
+fetches the exact ref with complete reachable history, checks the fetched tip,
+and checks out that exact SHA detached. A moved or unavailable ref fails closed.
+The workflow supplies no credential, changes no global Git or HOME state, and
+does not clean or reconfigure the runner's shared remote-action cache. Preserve
+every original quality command. The exact setup-uv commit is acquired into the
+existing ignored `.tmp/setup-uv` directory separately for each job and invoked
+as a supported local action. Preserve its complete action metadata, Node24 main
+and post hooks, original inputs, uv version, Python version, and cache behavior.
+An unavailable pin or pre-existing action directory fails closed. These fixed
+acquisitions avoid the two observed shared-worktree paths for these jobs; they
+do not claim that all other remote actions or runner caches are isolated.
 
 ## Docker Image Tags
 
