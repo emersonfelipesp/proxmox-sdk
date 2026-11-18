@@ -11,12 +11,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 from typing import Any
+from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from proxmox_sdk.proxmox_codegen.crawler import (
     _extract_navigation,
-    _guard_web_socket,
     _run_playwright_crawler,
     _should_abort,
     _should_reject_web_socket,
@@ -130,72 +130,47 @@ def test_late_redirect_error_is_not_hidden_by_locator_failure() -> None:
     assert endpoints == {}
 
 
+def _assert_empty_browser_api_contract(page: Mock, browser: Mock, manager: MagicMock) -> None:
+    manager.__enter__.return_value.chromium.launch.assert_called_once_with(headless=True)
+    browser.new_context.assert_called_once_with(ignore_https_errors=False, service_workers="block")
+    page.goto.assert_called_once_with(
+        "https://source.example/api-viewer/", wait_until="networkidle", timeout=30000
+    )
+    page.wait_for_selector.assert_called_once_with("nav", timeout=10000)
+    page.locator.assert_called_once_with("nav")
+    page.locator.return_value.locator.assert_called_once_with("a")
+    browser.close.assert_called_once_with()
+
+
 def test_browser_guards_are_wired_before_page_creation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     events: list[str] = []
     handlers: dict[str, Any] = {}
 
-    class EmptyLocator:
-        def locator(self, selector: str) -> EmptyLocator:
-            assert selector == "a"
-            return self
+    page = Mock()
+    page.locator.return_value.locator.return_value.all.return_value = []
 
-        def all(self) -> list[object]:
-            return []
+    def route(pattern: str, handler: Any) -> None:
+        events.append("route")
+        handlers["request"] = handler
+        assert pattern == "**/*"
 
-    class FakePage:
-        def goto(self, url: str, **kwargs: object) -> None:
-            assert url == "https://source.example/api-viewer/"
+    def route_web_socket(pattern: str, handler: Any) -> None:
+        events.append("route_web_socket")
+        handlers["web_socket"] = handler
+        assert pattern == "**/*"
 
-        def wait_for_selector(self, selector: str, **kwargs: object) -> None:
-            assert selector == "nav"
+    def new_page() -> Mock:
+        events.append("new_page")
+        return page
 
-        def locator(self, selector: str) -> EmptyLocator:
-            assert selector == "nav"
-            return EmptyLocator()
-
-    class FakeContext:
-        def route(self, pattern: str, handler: Any) -> None:
-            events.append("route")
-            handlers["request"] = handler
-            assert pattern == "**/*"
-
-        def route_web_socket(self, pattern: str, handler: Any) -> None:
-            events.append("route_web_socket")
-            handlers["web_socket"] = handler
-            assert pattern == "**/*"
-
-        def new_page(self) -> FakePage:
-            events.append("new_page")
-            return FakePage()
-
-    class FakeBrowser:
-        def new_context(self, **kwargs: object) -> FakeContext:
-            return FakeContext()
-
-        def close(self) -> None:
-            pass
-
-    class FakeChromium:
-        def launch(self, *, headless: bool) -> FakeBrowser:
-            assert headless is True
-            return FakeBrowser()
-
-    class FakePlaywright:
-        chromium = FakeChromium()
-
-    class FakePlaywrightManager:
-        def __enter__(self) -> FakePlaywright:
-            return FakePlaywright()
-
-        def __exit__(self, *args: object) -> None:
-            pass
-
-    monkeypatch.setattr(
-        "playwright.sync_api.sync_playwright",
-        lambda: FakePlaywrightManager(),
-    )
+    context = Mock(route=route, route_web_socket=route_web_socket, new_page=new_page)
+    browser = Mock()
+    browser.new_context.return_value = context
+    manager = MagicMock()
+    manager.__enter__.return_value.chromium.launch.return_value = browser
+    monkeypatch.setattr("playwright.sync_api.sync_playwright", lambda: manager)
 
     capture = _run_playwright_crawler(
         "https://source.example/api-viewer/",
@@ -204,8 +179,9 @@ def test_browser_guards_are_wired_before_page_creation(
 
     assert events == ["route", "route_web_socket", "new_page"]
     assert handlers["request"].__name__ == "guard_request"
-    assert handlers["web_socket"] is _guard_web_socket
+    assert handlers["web_socket"].__name__ == "guard_web_socket"
     assert capture["discovered_navigation_items"] == 0
+    _assert_empty_browser_api_contract(page, browser, manager)
 
 
 @contextmanager

@@ -98,7 +98,7 @@ jobs:
     name: Regenerate schema (${{ needs.detect-version.outputs.version_tag }})
     needs: detect-version
     if: needs.detect-version.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     steps:
