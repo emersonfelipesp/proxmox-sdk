@@ -1610,6 +1610,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#public-source-promotion-hold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public source promotion hold
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#required-sequence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1924,6 +1935,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#public-source-promotion-hold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public source promotion hold
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#required-sequence" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1992,6 +2014,43 @@
 every final or post release is built reproducibly from a protected tag, recorded
 in the Gitea Package Registry, validated through TestPyPI, and only then
 eligible for public PyPI and Docker Hub promotion.</p>
+<h2 id="public-source-promotion-hold">Public source promotion hold<a class="headerlink" href="#public-source-promotion-hold" title="Permanent link">&para;</a></h2>
+<p>Automatic public mirroring is held. The mirror workflow has no push trigger,
+and its manual job is unconditionally disabled. It contains no credentials,
+installation, or push operations. Manual dispatch cannot override the hold;
+there is no input, variable, or secret that enables promotion.</p>
+<p>The literal disabled condition is intentional. Actionlint normally rejects
+constant conditions, so its configuration permits only the exact
+constant-false diagnostic in this mirror workflow. It does not suppress
+constant-true diagnostics, conditions in other workflows, or other syntax and
+policy findings. The release contracts enforce both the disabled workflow and
+the exact file/message scope of this exception.</p>
+<p>The release operator must first verify the successful source-bound Gitea
+package publication run, canonical repository association, exact wheel and
+sdist filenames, sizes, and SHA256 values against the retained sealed
+publication evidence. Use the sanctioned <code>nms git</code> run/package surfaces for
+these reads. Select the full source commit SHA recorded by that evidence,
+prove that its package version matches the selected source, and confirm that
+it remains an ancestor of canonical Gitea <code>main</code>. Do not select whichever
+commit happens to be latest when promotion runs.</p>
+<p>Only after these checks may the release operator promote that exact verified
+commit through the approved Git surfaces to the canonical GitHub <code>main</code>.
+Inspect the exact owner/repository and the current destination commit before
+writing, require an approved ancestry/lease transition, and re-read the
+promoted destination SHA afterward. A source promotion does not publish a
+release, deploy a consumer, or authorize a tag operation. GitHub main CI may
+publish development images; stable package/image publication remains subject
+to the release gates below.</p>
+<p>Promote selected release tags separately only after verifying their exact
+objects and peeled source commit. Never mirror all tags or replay historical
+RC tags: those events can dispatch immutable candidate publications. Keep
+tracker references and private operational evidence out of public commit
+messages and release text.</p>
+<p>Credential-hardening changes to the mirror workflow must preserve this hold.
+They must not restore automatic main promotion or add a manual bypass without
+a separately reviewed, exact-source verified-package gate. A future automated
+guard is a separate change; the present workflow does not claim to verify
+packages on a runner.</p>
 <h2 id="required-sequence">Required sequence<a class="headerlink" href="#required-sequence" title="Permanent link">&para;</a></h2>
 <ol>
 <li>Record requirements, design impact, verification scope, coverage, known
@@ -2007,7 +2066,7 @@ eligible for public PyPI and Docker Hub promotion.</p>
    Candidate provenance records the canonical public server identity
    <code>https://git.nmulti.cloud</code>; it does not consume the runner-facing
    <code>github.server_url</code>, which can legitimately contain the server's internal
-   configured origin.</li>
+   configured origin. The candidate build job prepares the same job-private Chromium runtime as pull-request CI before the regression suite, and clears its library path before the reproducible builds.</li>
 <li>The dependent <code>verify-and-seal</code> job anonymously fetches canonical <code>main</code> and
    the exact annotated tag from <code>https://git.nmulti.cloud</code>, proves that the tag
    peels to the immutable event SHA and remains in canonical <code>main</code>, validates

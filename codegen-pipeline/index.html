@@ -1361,6 +1361,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Stage 3: Normalization (normalize.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variant-parameter-schemas-proxmox-ve-93" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variant parameter schemas (Proxmox VE 9.3+)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2142,6 +2159,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Stage 3: Normalization (normalize.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#variant-parameter-schemas-proxmox-ve-93" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variant parameter schemas (Proxmox VE 9.3+)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2352,10 +2386,10 @@ metadata, and lazy model shards. The generated artifacts are checked into
     PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
 
     CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n675 operations / 444 paths\npaths + methods + parameters"]
+    RAW["raw_capture.json\n716 operations / 481 paths\npaths + methods + parameters"]
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 444 paths"]
+    OPENAPI["openapi.json\nOpenAPI 3.1\n716 operations · 481 paths"]
     PYDANTIC_GEN["PydanticBuilder\nGenerate aggregate + shards\nAdd validators"]
     PYDANTIC["pydantic_models.py\nCompatibility aggregate"]
     SHARDS["models/&lt;group&gt;.py\nLazy route-group shards"]
@@ -2403,10 +2437,10 @@ metadata, and lazy model shards. The generated artifacts are checked into
         CW-&gt;&gt;PW: click tree item
         PW-&gt;&gt;CW: endpoint metadata
     end
-    CW-&gt;&gt;CLI: raw_capture.json (675 items)</code></pre>
+    CW-&gt;&gt;CLI: raw_capture.json (716 items)</code></pre>
 <div class="admonition warning">
 <p class="admonition-title">Crawler requires a real Proxmox host</p>
-<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.2. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
+<p>The crawler must connect to a real Proxmox VE instance to render the API Viewer. The current pre-generated schema shipped with this package was produced from Proxmox VE 9.3. Re-running the crawler requires <code>PROXMOX_URL</code>, valid credentials, and network access.</p>
 </div>
 <hr />
 <h2 id="stage-2-parser-apidoc_parserpy">Stage 2: Parser (<code>apidoc_parser.py</code>)<a class="headerlink" href="#stage-2-parser-apidoc_parserpy" title="Permanent link">&para;</a></h2>
@@ -2427,6 +2461,23 @@ metadata, and lazy model shards. The generated artifacts are checked into
 <li><strong>Operation ID generation</strong>: Creates unique <code>operationId</code> values for each operation</li>
 </ul>
 <hr />
+<h3 id="variant-parameter-schemas-proxmox-ve-93">Variant parameter schemas (Proxmox VE 9.3+)<a class="headerlink" href="#variant-parameter-schemas-proxmox-ve-93" title="Permanent link">&para;</a></h3>
+<p>Proxmox VE 9.3 publishes some request parameters as a common part plus
+type-dependent variants (<code>allOf</code> with a <code>oneOf</code> group whose members carry an
+<code>instance-type</code>, and a <code>type-property</code> discriminator). <code>POST</code>/<code>PUT /storage</code>,
+<code>POST</code>/<code>PUT /cluster/ha/rules</code>, and <code>POST /cluster/ha/resources/{sid}/migrate</code>
+use this form. <code>proxmox_codegen/parameter_variants.py</code> folds these schemas into
+one flat <code>properties</code> object before normalization, because the request-body and
+query-parameter builders read only flat properties:</p>
+<ul>
+<li>every property of every variant is kept;</li>
+<li>a property is required only when every variant requires it;</li>
+<li>the discriminator (for example <code>type</code>) is added as an optional enum property,
+  and Proxmox remains the authority that rejects a missing or wrong value;</li>
+<li>properties that only some variants accept carry <code>x-proxmox-instance-types</code>.</li>
+</ul>
+<p>Flat schemas from earlier releases pass through unchanged, so regenerating an
+older version produces the same parameters as before.</p>
 <h2 id="stage-4-openapi-builder-openapi_generatorpy">Stage 4: OpenAPI Builder (<code>openapi_generator.py</code>)<a class="headerlink" href="#stage-4-openapi-builder-openapi_generatorpy" title="Permanent link">&para;</a></h2>
 <p><code>proxmox_codegen/openapi_generator.py</code> produces an <strong>OpenAPI 3.1</strong> JSON document:</p>
 <table>
@@ -2439,11 +2490,11 @@ metadata, and lazy model shards. The generated artifacts are checked into
 <tbody>
 <tr>
 <td>Operations</td>
-<td>675</td>
+<td>716</td>
 </tr>
 <tr>
 <td>Paths</td>
-<td>444</td>
+<td>481</td>
 </tr>
 <tr>
 <td>File size</td>
@@ -2643,7 +2694,7 @@ trusting a cached number if the schema is regenerated).</p>
 <div class="tabbed-block">
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Run full pipeline against the official Proxmox API viewer</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>proxmox-sdk-codegen<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>--version-tag<span class="w"> </span><span class="m">9</span>.2<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>--version-tag<span class="w"> </span><span class="m">9</span>.3<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>--output-dir<span class="w"> </span>proxmox_sdk/generated/proxmox<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>--workers<span class="w"> </span><span class="m">4</span>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
@@ -2722,18 +2773,19 @@ unchanged through both the synchronous and asynchronous crawler entry points.</p
 </span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        │   ├── model_index.json
 </span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        │   ├── pydantic_models.py
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>        │   └── models/
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        ├── 9.2/
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        │   ├── openapi.json
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        │   ├── route_metadata.json
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>        │   ├── model_index.json
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        │   ├── pydantic_models.py
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>        │   └── models/
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        └── 9.1.11/       ← retained for backward compatibility
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>            ├── openapi.json
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>            ├── route_metadata.json
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>            ├── model_index.json
-</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>            ├── pydantic_models.py
-</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>            └── models/
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        ├── 9.3/
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        ├── 9.2/
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        │   ├── openapi.json
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>        │   ├── route_metadata.json
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        │   ├── model_index.json
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>        │   ├── pydantic_models.py
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        │   └── models/
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>        └── 9.1.11/       ← retained for backward compatibility
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>            ├── openapi.json
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>            ├── route_metadata.json
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>            ├── model_index.json
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>            ├── pydantic_models.py
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>            └── models/
 </span></code></pre></div>
 <p>The SDK reads the version to use from <code>PROXMOX_MOCK_SCHEMA_VERSION</code> (default: <code>"latest"</code>). Multiple versions can coexist; <code>GET /versions/</code> lists all available versions.</p>
 <hr />

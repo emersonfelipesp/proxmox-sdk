@@ -2671,7 +2671,7 @@ without addressing the largest bottlenecks that were measured.</p>
 <li>The <code>app</code> and <code>mock_app</code> attributes are only materialised when accessed (e.g. by uvicorn).</li>
 </ul>
 <h3 id="generated-route-metadata">Generated route metadata<a class="headerlink" href="#generated-route-metadata" title="Permanent link">&para;</a></h3>
-<p>675 operations across 444 Proxmox VE 9.2 paths are registered at startup.
+<p>716 operations across 481 Proxmox VE 9.3 paths are registered at startup.
 Runtime registration now prefers pre-generated <code>route_metadata.json</code> artifacts,
 so it does not rebuild topology, parameter maps, mounted paths, model names, and
 child collection relationships from OpenAPI on every app import.</p>
@@ -2970,8 +2970,8 @@ included through <code>pyproject.toml</code> package data:</p>
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="s2">&quot;generated/proxmox/**/*.py&quot;</span><span class="p">,</span>
 </span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="p">]</span>
 </span></code></pre></div>
-<p>The integrity tests check all supported schema tags (<code>latest</code>, <code>9.2</code>, and
-<code>9.1.11</code>):</p>
+<p>The integrity tests check all supported schema tags (<code>latest</code>, <code>9.3</code>, <code>9.2</code>,
+and <code>9.1.11</code>):</p>
 <ul>
 <li><code>openapi.json</code> SHA matches the generated model metadata</li>
 <li><code>route_metadata.json</code> source SHA matches <code>openapi.json</code></li>
@@ -2985,8 +2985,9 @@ included through <code>pyproject.toml</code> package data:</p>
 <p>The GitHub CI, the secret-free Gitea feature workflow, and release validation
 run the full test suite across:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span>latest
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.2
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.1.11
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.3
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.2
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nv">PROXMOX_MOCK_SCHEMA_VERSION</span><span class="o">=</span><span class="m">9</span>.1.11
 </span></code></pre></div>
 <p>The scheduled/manual schema update workflow also runs <code>proxmox-sdk-codegen</code>.
 That command writes <code>route_metadata.json</code>, <code>model_index.json</code>, and

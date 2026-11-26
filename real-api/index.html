@@ -2861,7 +2861,7 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>Real mode transforms proxmox-sdk into a <strong>validated proxy</strong> for your Proxmox API:</p>
 <ul>
-<li>✅ <strong>675 operations / 444 generated paths</strong> route to the real Proxmox server</li>
+<li>✅ <strong>716 operations / 481 generated paths</strong> route to the real Proxmox server</li>
 <li>✅ <strong>Request validation</strong> - Pydantic models ensure correct request format</li>
 <li>✅ <strong>Response validation</strong> - Guarantees response data integrity</li>
 <li>✅ <strong>Multiple auth methods</strong> - API tokens or username/password</li>
@@ -2872,7 +2872,7 @@
 <h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Running Proxmox VE server (9.2 primary or 9.1.11 retained CI schema); older
+<li>Running Proxmox VE server (9.3 primary, with 9.2 and 9.1.11 retained CI schemas); older
   7.x and 8.x releases are best-effort only</li>
 <li>API credentials (token or username/password)</li>
 <li>Network access to Proxmox server</li>
@@ -2888,6 +2888,15 @@
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>uvicorn<span class="w"> </span>proxmox_sdk.main:app
 </span></code></pre></div>
 <p>Now all requests to <code>http://localhost:8000/api2/json/*</code> are proxied to your real Proxmox server!</p>
+<p>Proxmox VE 9.3 adds unique guest identities. VMs and containers can expose a
+stable <code>uid</code> matching <code>[a-z2-7]{20}</code> in cluster resources and current status;
+clones receive a new identity, and existing guests receive one when a 9.3 node
+first writes their configuration. Cluster status adds <code>cluster-id</code> (on the
+cluster entry, or the local node entry when standalone), cluster resources add
+<code>rtime</code>, and restore adds <code>allow-identity-mismatch</code> while <code>unique</code> means not
+adopting the backup's <code>uid</code>. New APIs cover SAN, multipath, access logs, APT
+history, storage plugins, and QEMU guest-agent statistics. Generated typed
+models expose optional <code>uid</code> and <code>cluster_id</code> (alias <code>cluster-id</code>) fields.</p>
 <hr />
 <h2 id="authentication-methods">Authentication Methods<a class="headerlink" href="#authentication-methods" title="Permanent link">&para;</a></h2>
 <h3 id="method-1-api-tokens-recommended">Method 1: API Tokens (Recommended)<a class="headerlink" href="#method-1-api-tokens-recommended" title="Permanent link">&para;</a></h3>
@@ -3344,9 +3353,9 @@
 <div class="language-json highlight"><pre><span></span><code><span id="__span-23-1"><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
 </span><span id="__span-23-2"><a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;real&quot;</span><span class="p">,</span>
 </span><span id="__span-23-3"><a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span><span class="nt">&quot;schema_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
-</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span><span class="nt">&quot;proxmox_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">675</span><span class="p">,</span>
-</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">  </span><span class="nt">&quot;proxmox_paths&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">444</span><span class="p">,</span>
-</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">  </span><span class="nt">&quot;proxmox_methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">675</span><span class="p">,</span>
+</span><span id="__span-23-4"><a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span><span class="nt">&quot;proxmox_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">716</span><span class="p">,</span>
+</span><span id="__span-23-5"><a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">  </span><span class="nt">&quot;proxmox_paths&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">481</span><span class="p">,</span>
+</span><span id="__span-23-6"><a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">  </span><span class="nt">&quot;proxmox_methods&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">716</span><span class="p">,</span>
 </span><span id="__span-23-7"><a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">  </span><span class="nt">&quot;proxmox_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://pve.example.com:8006&quot;</span><span class="p">,</span>
 </span><span id="__span-23-8"><a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">  </span><span class="nt">&quot;auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;token&quot;</span><span class="p">,</span>
 </span><span id="__span-23-9"><a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">  </span><span class="nt">&quot;ssl_verify&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>

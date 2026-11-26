@@ -2387,7 +2387,7 @@ is the default. No real Proxmox server required.</p>
 <ol>
 <li>Load <code>generated/proxmox/latest/openapi.json</code></li>
 <li>Load <code>generated/proxmox/latest/route_metadata.json</code></li>
-<li><code>register_generated_proxmox_mock_routes()</code> iterates 675 metadata operations across 444 paths</li>
+<li><code>register_generated_proxmox_mock_routes()</code> iterates 716 metadata operations across 481 paths</li>
 <li>For each operation, create a lightweight FastAPI dispatcher with precomputed path, parameter, and mock-topology metadata</li>
 <li>Load request/response model classes lazily from <code>models/&lt;group&gt;.py</code> through <code>model_index.json</code></li>
 <li>Routes perform CRUD on <code>SQLiteMockStore</code> by default, with shared-memory and dict backends available by env var</li>
@@ -2460,7 +2460,7 @@ is the default. No real Proxmox server required.</p>
     CRAWL["ProxmoxCrawler\nPlaywright"]
     PARSE["apidoc_parser.py"]
     NORM["normalize.py"]
-    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 675 ops"]
+    OA["OpenAPIBuilder\n→ openapi.json\n716 operations"]
     PYD["PydanticBuilder\n→ pydantic_models.py\n+ model shards"]
     META["RouteMetadataBuilder\n→ route_metadata.json\n+ model_index.json"]
     USE1["proxmox-sdk\nMock routes"]
@@ -2517,7 +2517,7 @@ is the default. No real Proxmox server required.</p>
 </tbody>
 </table>
 <h3 id="2-metadata-driven-route-registration">2. Metadata-Driven Route Registration<a class="headerlink" href="#2-metadata-driven-route-registration" title="Permanent link">&para;</a></h3>
-<p>Rather than hardcoding 675 routes or rebuilding all route topology at runtime,
+<p>Rather than hardcoding 716 routes or rebuilding all route topology at runtime,
 the codegen pipeline emits <code>route_metadata.json</code>, <code>model_index.json</code>, and
 route-group model shards under each <code>generated/proxmox/&lt;version&gt;/</code> directory.
 The server registers lightweight FastAPI dispatchers from this metadata and
@@ -2529,9 +2529,9 @@ at startup.</p>
 <p>The OpenAPI schema, aggregate Pydantic models, lazy model shards, model index,
 and route metadata are committed to the repository so mock mode works
 completely offline without a Proxmox server. Each version is stored
-independently under <code>generated/proxmox/</code>; CI ships <code>9.2/</code>, <code>9.1.11/</code>, and
-<code>latest/</code> (alias for 9.2), exercising all three in parallel via
-<code>PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]</code>.</p>
+independently under <code>generated/proxmox/</code>; CI ships <code>9.3/</code>, <code>9.2/</code>, <code>9.1.11/</code>,
+and <code>latest/</code> (alias for 9.3), exercising all four in parallel via
+<code>PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.3, 9.2, 9.1.11]</code>.</p>
 <h3 id="4-full-requestresponse-validation">4. Full Request/Response Validation<a class="headerlink" href="#4-full-requestresponse-validation" title="Permanent link">&para;</a></h3>
 <p>Every request body and response passes through Pydantic v2 validation against the OpenAPI-derived models. This enforces type correctness, produces accurate Swagger UI documentation, and catches schema drift between the SDK and Proxmox API.</p>
 <h3 id="5-sqlite-mock-state">5. SQLite Mock State<a class="headerlink" href="#5-sqlite-mock-state" title="Permanent link">&para;</a></h3>

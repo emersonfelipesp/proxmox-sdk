@@ -1683,6 +1683,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#browser-request-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser request boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-qualification-and-publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI qualification and publication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#version-tag-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2224,6 +2246,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#browser-request-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Browser request boundaries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-qualification-and-publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI qualification and publication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#version-tag-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2560,6 +2604,51 @@
 <p>To allow other domains (e.g. a self-hosted API viewer), pass <code>allow_any_domain=True</code> explicitly in code. The API endpoint does <strong>not</strong> expose this flag to callers.</p>
 <h3 id="http-opt-in">HTTP opt-in<a class="headerlink" href="#http-opt-in" title="Permanent link">&para;</a></h3>
 <p>Plain HTTP is blocked by default. Pass <code>allow_http=True</code> to <code>validate_source_url()</code> in trusted internal tooling only.</p>
+<h3 id="browser-request-boundaries">Browser request boundaries<a class="headerlink" href="#browser-request-boundaries" title="Permanent link">&para;</a></h3>
+<p>The Playwright crawler routes requests before it creates a page. Ordinary HTTP
+resources must have the same scheme, host, and effective port as the validated
+source. Each allowed request uses <code>route.fetch(max_redirects=0, max_retries=0,
+timeout=30000)</code>. The crawler rejects a redirect response before fulfilling the
+browser route, so the followed target receives no request. Nonredirect responses
+are fulfilled unchanged, and the fetched response is disposed on every path.
+Redirect errors remain visible through navigation and extraction failures.</p>
+<p>All browser WebSockets are refused, including same-origin sockets. The routed
+socket is never connected to its server. Playwright 1.58 calls WebSocket handlers
+from its dispatcher context, so the handler queues the refusal without making a
+synchronous API call. The owning crawler stack closes queued sockets after
+navigation and selector calls and before browser cleanup. Each drain processes
+only the snapshot present on entry, so a close callback cannot reopen sockets
+forever inside that drain. Error paths use the same bounded drain; browser
+closure disposes any final unconnected routes and no
+handles survive into another crawl. Both public sync and async crawler entry
+points retain this policy.</p>
+<p>The original Chromium regressions verify HTTPS-to-HTTP redirect refusal, no
+cross-origin WebSocket upgrade, and delayed script-redirect propagation. The
+Gitea schema matrix installs locked Chromium into a private browser directory
+with authenticated, download-only Debian 12 libraries. It must execute these
+tests rather than obtain skips from an empty browser cache. No test assertion or
+deadline is relaxed to prepare the runtime.
+The headless runtime also acquires the single locked <code>fonts-liberation</code> tools
+entry through the same signed APT transaction. Its private Fontconfig file
+references only the extracted font directory and a private cache, with its
+environment confined to the regression step. This preserves real DOM visibility
+in a minimal runner without changing host font configuration or test assertions.
+Public browser CI instead uses supported Ubuntu 24.04 and the official locked
+Playwright dependency installer on the disposable hosted runner. That provider
+setup does not change the unprivileged Debian helper's host restrictions.</p>
+<h3 id="ci-qualification-and-publication">CI qualification and publication<a class="headerlink" href="#ci-qualification-and-publication" title="Permanent link">&para;</a></h3>
+<p>Read-only public CI validates lint, syntax/imports, distributions and installed
+wheels, every complete browser-enabled schema row, and documentation generation
+and strict build. An always-run summary fails if a required quality job fails,
+is cancelled, or is unexpectedly skipped. It also checks the Docker publication
+disposition appropriate to the event.</p>
+<p>The optional non-secret repository variable <code>CI_QUALIFICATION_ONLY</code>, set to
+the canonical literal <code>true</code>, suppresses only CI Docker publication and the legacy Pages
+writer. It keeps quality checks active. Its absent default preserves ordinary
+future publication and the original release workflows. A controlled main
+qualification must verify both writers are terminal and skipped before
+restoring the previous absent setting. A later rerun requires a new guarded
+qualification window; restoration is not permission to publish an old run.</p>
 <h3 id="version-tag-validation">Version tag validation<a class="headerlink" href="#version-tag-validation" title="Permanent link">&para;</a></h3>
 <p>Version tags used in codegen URLs and file paths are validated by <code>validate_version_tag()</code>:</p>
 <ul>

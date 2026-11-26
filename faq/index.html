@@ -3042,7 +3042,7 @@
 <h3 id="what-is-proxmox-openapi">What is Proxmox OpenAPI?<a class="headerlink" href="#what-is-proxmox-openapi" title="Permanent link">&para;</a></h3>
 <p>Proxmox OpenAPI is a FastAPI-based server that provides two modes:</p>
 <ol>
-<li><strong>Mock Mode</strong> - SQLite/WAL-backed Proxmox VE API simulator with 675 operations / 444 paths for development and testing; shared-memory and dict stores are optional</li>
+<li><strong>Mock Mode</strong> - SQLite/WAL-backed Proxmox VE API simulator with 716 operations / 481 paths for development and testing; shared-memory and dict stores are optional</li>
 <li><strong>Real Mode</strong> - Validated proxy to a real Proxmox VE API with full request/response validation</li>
 </ol>
 <p>It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.</p>
@@ -3056,11 +3056,11 @@
 </ul>
 <p>If you want to connect to a real Proxmox server, switch to real mode by setting <code>PROXMOX_API_MODE=real</code>.</p>
 <h3 id="what-proxmox-ve-version-is-supported">What Proxmox VE version is supported?<a class="headerlink" href="#what-proxmox-ve-version-is-supported" title="Permanent link">&para;</a></h3>
-<p>The current schema is captured from <strong>Proxmox VE 9.2</strong>. The <code>9.2/</code> and
-<code>latest/</code> schema directories expose the same 444 paths and 675 operations, but
+<p>The current schema is captured from <strong>Proxmox VE 9.3</strong>. The <code>9.3/</code> and
+<code>latest/</code> schema directories expose the same 481 paths and 716 operations, but
 their metadata identifies the explicit version and stable alias respectively.
-The 9.1.11 schema is retained for backward compatibility, and CI exercises all
-three tags.</p>
+The 9.2 and 9.1.11 schemas are retained for backward compatibility, and CI
+exercises all four tags.</p>
 <table>
 <thead>
 <tr>
@@ -3071,18 +3071,23 @@ three tags.</p>
 </thead>
 <tbody>
 <tr>
-<td>9.2</td>
+<td>9.3</td>
 <td>Primary (CI-tested)</td>
-<td><code>proxmox_sdk/generated/proxmox/9.2/</code></td>
+<td><code>proxmox_sdk/generated/proxmox/9.3/</code></td>
 </tr>
 <tr>
 <td>latest</td>
-<td>Alias for 9.2 (CI-tested)</td>
+<td>Alias for 9.3 (CI-tested)</td>
 <td><code>proxmox_sdk/generated/proxmox/latest/</code></td>
 </tr>
 <tr>
+<td>9.2</td>
+<td>Previous release (CI-tested)</td>
+<td><code>proxmox_sdk/generated/proxmox/9.2/</code></td>
+</tr>
+<tr>
 <td>9.1.11</td>
-<td>Retained (backward compat)</td>
+<td>Older release (CI-tested)</td>
 <td><code>proxmox_sdk/generated/proxmox/9.1.11/</code></td>
 </tr>
 </tbody>
@@ -3141,7 +3146,7 @@ run <code>proxmox-sdk-codegen</code> against your node and pass
 <h3 id="what-is-mock-mode">What is mock mode?<a class="headerlink" href="#what-is-mock-mode" title="Permanent link">&para;</a></h3>
 <p>Mock mode provides a schema-driven simulation of the Proxmox VE API. It:</p>
 <ul>
-<li>Loads 675 operations / 444 paths from pre-generated route metadata</li>
+<li>Loads 716 operations / 481 paths from pre-generated route metadata</li>
 <li>Lazy-loads Pydantic route-group model shards on demand</li>
 <li>Provides full CRUD operations (Create, Read, Update, Delete)</li>
 <li>Stores data in SQLite/WAL by default, with shared-memory and dict backends available</li>
@@ -3267,13 +3272,13 @@ durable application data.</p>
 </span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
 </span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="n">bundle</span> <span class="o">=</span> <span class="n">generate_proxmox_codegen_bundle</span><span class="p">(</span>
 </span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;./output&quot;</span><span class="p">,</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.2&quot;</span><span class="p">,</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">version_tag</span><span class="o">=</span><span class="s2">&quot;9.3&quot;</span><span class="p">,</span>
 </span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">worker_count</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
 </span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>Or from the command line:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>proxmox-sdk-codegen<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>--version-tag<span class="w"> </span><span class="m">9</span>.2<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span>--version-tag<span class="w"> </span><span class="m">9</span>.3<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>--output-dir<span class="w"> </span>proxmox_sdk/generated/proxmox<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>--workers<span class="w"> </span><span class="m">4</span>
 </span></code></pre></div>
