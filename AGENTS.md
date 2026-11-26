@@ -11,7 +11,7 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 
 ## Overview
 
-Package version: `0.0.15`. Python requirement: `>=3.11`.
+Package version: `0.0.16`. Python requirement: `>=3.11`.
 
 Generated inventories are authoritative: PVE `9.3` and `latest` each contain
 481 paths / 716 operations; retained PVE `9.2` contains 444 paths / 675
