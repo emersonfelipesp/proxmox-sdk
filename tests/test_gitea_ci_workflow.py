@@ -119,6 +119,7 @@ def test_schema_matrix_runs_the_complete_covered_suite() -> None:
     assert job["strategy"]["fail-fast"] == "false"
     assert job["strategy"]["matrix"]["proxmox_schema"] == [
         "latest",
+        "9.3",
         "9.2",
         "9.1.11",
     ]

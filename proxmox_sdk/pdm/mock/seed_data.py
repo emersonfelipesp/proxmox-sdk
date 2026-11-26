@@ -11,9 +11,9 @@ import os
 from typing import Any
 
 # Derive the remote PVE cluster version from the mock schema env var so that
-# CI matrix jobs (schema=latest, 9.2, 9.1.11) each produce consistent seed data.
+# CI matrix jobs (schema=latest, 9.3, 9.2, 9.1.11) each produce consistent seed data.
 _SCHEMA_VERSION = os.environ.get("PROXMOX_MOCK_SCHEMA_VERSION", "9.1.11")
-_PVE_VERSION = "9.2" if _SCHEMA_VERSION in ("latest", "9.2") else _SCHEMA_VERSION
+_PVE_VERSION = "9.3" if _SCHEMA_VERSION in ("latest", "9.3") else _SCHEMA_VERSION
 
 # The seed mirrors the structure the PDM mock state expects. See
 # :class:`proxmox_sdk.pdm.mock.routes.PDMMockState` for the schema.

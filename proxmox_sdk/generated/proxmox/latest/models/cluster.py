@@ -10,8 +10,8 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr
 
 GENERATED_FOR_PROXMOX_VERSION = "latest"
-GENERATED_SOURCE_SHA256 = "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b"
-GENERATED_AT = "2026-08-06T18:55:01.885818+00:00"
+GENERATED_SOURCE_SHA256 = "83d00ff237bdfac0cb144eb603209f20654125dc40350c35447707fd330a0179"
+GENERATED_AT = "2026-11-26T14:19:39.255287+00:00"
 
 
 class ProxmoxBaseModel(BaseModel):
@@ -178,8 +178,8 @@ class GetClusterBackupResponseItem(ProxmoxBaseModel):
     mode: StrictStr | None = Field(None, description='Backup mode.')
     next_run: int | None = Field(None, alias="next-run", description='UNIX timestamp when this backup job will be executed next')
     node: StrictStr | None = Field(None, description='Only run if executed on this node.')
-    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, {{uid}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to 'none', no notification will be sent.")
     pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: dict[str, object] | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
@@ -222,8 +222,8 @@ class PostClusterBackupRequest(ProxmoxBaseModel):
     mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     mode: StrictStr | None = Field(None, description='Backup mode.')
     node: StrictStr | None = Field(None, description='Only run if executed on this node.')
-    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, {{uid}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to 'none', no notification will be sent.")
     pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: StrictStr | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
@@ -289,8 +289,8 @@ class GetClusterBackupIdResponse(ProxmoxBaseModel):
     mode: StrictStr | None = Field(None, description='Backup mode.')
     next_run: int | None = Field(None, alias="next-run", description='UNIX timestamp when this backup job will be executed next')
     node: StrictStr | None = Field(None, description='Only run if executed on this node.')
-    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, {{uid}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to 'none', no notification will be sent.")
     pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: dict[str, object] | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
@@ -329,8 +329,8 @@ class PutClusterBackupIdRequest(ProxmoxBaseModel):
     mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     mode: StrictStr | None = Field(None, description='Backup mode.')
     node: StrictStr | None = Field(None, description='Only run if executed on this node.')
-    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, {{uid}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to 'none', no notification will be sent.")
     pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: StrictStr | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
@@ -431,6 +431,7 @@ class GetClusterCephFlagsResponse(RootModel[list[GetClusterCephFlagsResponseItem
 
 class PutClusterCephFlagsRequest(ProxmoxBaseModel):
     """Model for set_flags. Set/Unset multiple Ceph flags at once. Each flag is a top-level optional boolean: passing true sets the flag, false unsets it, omitting it leaves the current state untouched. Runs as a worker task; returns a UPID to follow. request."""
+    noautoscale: bool | None = Field(None, description='The PG autoscaler does not change the number of PGs of any pool.')
     nobackfill: bool | None = Field(None, description='Backfilling of PGs is suspended.')
     nodeep_scrub: bool | None = Field(None, alias="nodeep-scrub", description='Deep Scrubbing is disabled.')
     nodown: bool | None = Field(None, description='OSD failure reports are being ignored, such that the monitors will not mark OSDs down.')
@@ -459,6 +460,27 @@ class PutClusterCephFlagsFlagResponse(RootModel[None]):
     """Model for update_flag. Set or clear (unset) a specific Ceph flag. Runs synchronously (unlike the bulk PUT /cluster/ceph/flags endpoint, which forks a worker task). response."""
     root: None = Field(...)
 
+class GetClusterCephHealthMuteResponseItem(ProxmoxBaseModel):
+    """Model for health_mute_index. Get the currently muted Ceph health checks. response."""
+    code: StrictStr | None = Field(None, description='The muted health check.')
+    sticky: bool | None = Field(None, description='Whether the mute survives the check getting worse.')
+    summary: StrictStr | None = Field(None, description='What the check reports.')
+    ttl: StrictStr | None = Field(None, description='When the mute expires. Absent if it does not.')
+
+class GetClusterCephHealthMuteResponse(RootModel[list[GetClusterCephHealthMuteResponseItem]]):
+    """List of items. health_mute_index. Get the currently muted Ceph health checks. response."""
+    root: list[GetClusterCephHealthMuteResponseItem] = Field(...)
+
+class PutClusterCephHealthMuteCodeRequest(ProxmoxBaseModel):
+    """Model for health_mute. Mute or unmute a Ceph health check. A muted check no longer counts towards the cluster status, but stays visible and keeps being evaluated. request."""
+    sticky: bool | None = Field(None, description='Keep the mute even when the check gets worse. Without this a mute clears itself as soon as the number of affected items grows, which brings the check back to attention. Only used when muting.')
+    ttl: StrictStr | None = Field(None, description="How long the mute lasts, for example '2h', '3d' or '1w'. Without it the mute has no expiry. Only used when muting.")
+    value: bool = Field(..., description='Whether to mute (true) or unmute (false) the check.')
+
+class PutClusterCephHealthMuteCodeResponse(RootModel[None]):
+    """Model for health_mute. Mute or unmute a Ceph health check. A muted check no longer counts towards the cluster status, but stays visible and keeps being evaluated. response."""
+    root: None = Field(...)
+
 class GetClusterCephMetadataResponse(ProxmoxBaseModel):
     """Model for metadata. Get ceph metadata. response."""
     mds: dict[str, object] = Field(..., description="Metadata servers configured in the cluster and their properties, keyed by '<name>@<host>'.")
@@ -466,6 +488,18 @@ class GetClusterCephMetadataResponse(ProxmoxBaseModel):
     mon: dict[str, object] = Field(..., description="Monitors configured in the cluster and their properties, keyed by '<name>@<host>'.")
     node: dict[str, object] = Field(..., description='Ceph version installed on the nodes, keyed by node name.')
     osd: list[dict[str, object]] = Field(..., description='OSDs configured in the cluster and their properties.')
+
+class PostClusterCephRestartBulkRequest(ProxmoxBaseModel):
+    """Model for restart_bulk. Cluster-wide rolling restart of all Ceph daemons of the given type. For MON/MGR/MDS each daemon is restarted only after Ceph reports the previous one is back up and the next one is safe to stop. For OSDs the cluster path orchestrates the per-node endpoint at /nodes/{node}/ceph/restart-bulk on each node in turn, inheriting that endpoint's per-OSD 'noout' handling and resume support. The 'noout' flag itself is not exposed by this endpoint as it is OSD-specific (and for OSDs handled by the per-node sub-tasks). request."""
+    dry_run: bool | None = Field(None, alias="dry-run", description='Log the plan (which daemons would be restarted, in what order) without actually doing anything.')
+    force: bool | None = Field(None, description='Proceed past a HEALTH_WARN with non-benign checks like PG_DEGRADED, SLOW_OPS, or MON_DOWN. A blocking HEALTH_ERR is fatal regardless of this flag. Checks that ceph reports as muted, and checks known to be harmless for a rolling restart, never block and are named in the task log. The cluster-wide OSD map flags are only ever evaluated for an OSD restart, since they govern nothing a mon, mgr or mds restart touches. Likewise, a missing active manager (MGR_DOWN) only blocks an OSD restart, as only the OSD safety check needs a manager. The operator is responsible for confirming the cluster is stable enough to absorb a rolling restart.')
+    only_outdated: bool | None = Field(None, alias="only-outdated", description='OSDs only: restart only OSDs whose running version differs from the locally-installed ceph-osd binary on their host. Forwarded to each per-node sub-task so the per-host installed version is used (a partial upgrade where one host is on a newer build is handled correctly).')
+    service_type: StrictStr = Field(..., alias="service-type", description='Ceph daemon type to restart cluster-wide.')
+    timeout: int | None = Field(None, description='Per-daemon timeout (in seconds) for the up-wait phase. Note: for daemons on remote nodes the same timeout also bounds the remote restart task, so the per-daemon budget can be up to 2x this value. Default sized for slow MDS journal replay or MON paxos settle on busy clusters; bump higher if the cluster routinely takes longer to stabilize after a daemon restart.')
+
+class PostClusterCephRestartBulkResponse(RootModel[StrictStr]):
+    """Model for restart_bulk. Cluster-wide rolling restart of all Ceph daemons of the given type. For MON/MGR/MDS each daemon is restarted only after Ceph reports the previous one is back up and the next one is safe to stop. For OSDs the cluster path orchestrates the per-node endpoint at /nodes/{node}/ceph/restart-bulk on each node in turn, inheriting that endpoint's per-OSD 'noout' handling and resume support. The 'noout' flag itself is not exposed by this endpoint as it is OSD-specific (and for OSDs handled by the per-node sub-tasks). response."""
+    root: StrictStr = Field(...)
 
 class GetClusterCephStatusResponse(RootModel[dict[str, object]]):
     """Model for status. Get ceph status. response."""
@@ -496,6 +530,7 @@ class GetClusterConfigJoinResponse(ProxmoxBaseModel):
     config_digest: StrictStr = Field(...)
     nodelist: list[dict[str, object]] = Field(...)
     preferred_node: StrictStr = Field(..., description='The cluster node name.')
+    pve_version: StrictStr | None = Field(None, alias="pve-version", description='The highest Proxmox VE manager version of all cluster nodes.')
     totem: dict[str, object] = Field(...)
 
 class PostClusterConfigJoinRequest(ProxmoxBaseModel):
@@ -586,7 +621,7 @@ class GetClusterFirewallAliasesNameResponse(RootModel[dict[str, object]]):
 
 class PutClusterFirewallAliasesNameRequest(ProxmoxBaseModel):
     """Model for update_alias. Update IP or Network alias. request."""
-    cidr: StrictStr = Field(..., description='Network/IP specification in CIDR format.')
+    cidr: StrictStr | None = Field(None, description='Network/IP specification in CIDR format.')
     comment: StrictStr | None = Field(None)
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     rename: StrictStr | None = Field(None, description='Rename an existing alias.')
@@ -597,7 +632,7 @@ class PutClusterFirewallAliasesNameResponse(RootModel[None]):
 
 class GetClusterFirewallGroupsResponseItem(ProxmoxBaseModel):
     """Model for list_security_groups. List security groups. response."""
-    comment: StrictStr | None = Field(None)
+    comment: StrictStr | None = Field(None, description='Optional comment or description.')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     group: StrictStr | None = Field(None, description='Security Group name.')
 
@@ -798,7 +833,7 @@ class GetClusterFirewallOptionsResponse(ProxmoxBaseModel):
     """Model for get_options. Get Firewall options. response."""
     ebtables: bool | None = Field(None, description='Enable ebtables rules cluster wide.')
     enable: int | None = Field(None, description='Enable or disable the firewall cluster wide.')
-    log_ratelimit: StrictBool | Annotated[StrictInt, Field(ge=0, le=1)] | StrictStr | None = Field(None, description='Log ratelimiting settings')
+    log_ratelimit: StrictStr | None = Field(None, description='Log ratelimiting settings')
     policy_forward: StrictStr | None = Field(None, description='Forward policy.')
     policy_in: StrictStr | None = Field(None, description='Input policy.')
     policy_out: StrictStr | None = Field(None, description='Output policy.')
@@ -820,11 +855,11 @@ class PutClusterFirewallOptionsResponse(RootModel[None]):
 
 class GetClusterFirewallRefsResponseItem(ProxmoxBaseModel):
     """Model for refs. Lists possible IPSet/Alias reference which are allowed in source/dest properties. response."""
-    comment: StrictStr | None = Field(None)
-    name: StrictStr | None = Field(None)
-    ref: StrictStr | None = Field(None)
-    scope: StrictStr | None = Field(None)
-    type: StrictStr | None = Field(None)
+    comment: StrictStr | None = Field(None, description='Optional comment or description.')
+    name: StrictStr | None = Field(None, description='The name of the alias or ipset.')
+    ref: StrictStr | None = Field(None, description='The reference string used in firewall rules.')
+    scope: StrictStr | None = Field(None, description='The scope of the reference (e.g., SDN).')
+    type: StrictStr | None = Field(None, description='The type of reference (alias or ipset).')
 
 class GetClusterFirewallRefsResponse(RootModel[list[GetClusterFirewallRefsResponseItem]]):
     """List of items. refs. Lists possible IPSet/Alias reference which are allowed in source/dest properties. response."""
@@ -1037,6 +1072,9 @@ class PutClusterHaResourcesSidResponse(RootModel[None]):
 class PostClusterHaResourcesSidMigrateRequest(ProxmoxBaseModel):
     """Model for migrate. Request resource migration (online) to another node. request."""
     node: StrictStr = Field(..., description='Target node.')
+    resource_type: StrictStr | None = Field(None, alias="resource-type", description='The resource type. Automatically determined from the service ID.')
+    skip_config_check: bool | None = Field(None, alias="skip-config-check", description='For intra-cluster migration. Skip checking if the configuration can be parsed successfully by the target. Using this flag can lead to dropped or ignored configuration options if the target is too old to parse them.')
+    with_conntrack_state: bool | None = Field(None, alias="with-conntrack-state", description='Whether to migrate conntrack entries for running VMs.')
 
 class PostClusterHaResourcesSidMigrateResponse(ProxmoxBaseModel):
     """Model for migrate. Request resource migration (online) to another node. response."""
@@ -1066,14 +1104,14 @@ class GetClusterHaRulesResponse(RootModel[list[GetClusterHaRulesResponseItem]]):
 
 class PostClusterHaRulesRequest(ProxmoxBaseModel):
     """Model for create_rule. Create HA rule. request."""
-    affinity: StrictStr | None = Field(None, description="Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').")
+    affinity: StrictStr | None = Field(None, description="Describes whether the HA resources are supposed to be placed on the given nodes ('positive'), or are supposed to be placed on any but the given nodes ('negative').")
     comment: StrictStr | None = Field(None, description='HA rule description.')
     disable: bool | None = Field(None, description='Whether the HA rule is disabled.')
     nodes: StrictStr | None = Field(None, description='List of cluster node names with optional priority.')
     resources: StrictStr = Field(..., description='List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).')
     rule: StrictStr = Field(..., description='HA rule identifier.')
     strict: bool | None = Field(None, description='Describes whether the node affinity rule is strict or non-strict.')
-    type: StrictStr = Field(..., description='HA rule type.')
+    type: StrictStr | None = Field(None, description='HA rule type.')
 
 class PostClusterHaRulesResponse(RootModel[None]):
     """Model for create_rule. Create HA rule. response."""
@@ -1090,7 +1128,7 @@ class GetClusterHaRulesRuleResponse(ProxmoxBaseModel):
 
 class PutClusterHaRulesRuleRequest(ProxmoxBaseModel):
     """Model for update_rule. Update HA rule. request."""
-    affinity: StrictStr | None = Field(None, description="Describes whether the HA resources are supposed to be kept on the same node ('positive'), or are supposed to be kept on separate nodes ('negative').")
+    affinity: StrictStr | None = Field(None, description="Describes whether the HA resources are supposed to be placed on the given nodes ('positive'), or are supposed to be placed on any but the given nodes ('negative').")
     comment: StrictStr | None = Field(None, description='HA rule description.')
     delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
@@ -1098,7 +1136,7 @@ class PutClusterHaRulesRuleRequest(ProxmoxBaseModel):
     nodes: StrictStr | None = Field(None, description='List of cluster node names with optional priority.')
     resources: StrictStr | None = Field(None, description='List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).')
     strict: bool | None = Field(None, description='Describes whether the node affinity rule is strict or non-strict.')
-    type: StrictStr = Field(..., description='HA rule type.')
+    type: StrictStr | None = Field(None, description='HA rule type.')
 
 class PutClusterHaRulesRuleResponse(RootModel[None]):
     """Model for update_rule. Update HA rule. response."""
@@ -1119,6 +1157,8 @@ class GetClusterHaStatusCurrentResponseItem(ProxmoxBaseModel):
     crm_state: StrictStr | None = Field(None, description="For type 'service'. Service state as seen by the CRM.")
     failback: bool | None = Field(None, description='The HA resource is automatically migrated to the node with the highest priority according to their node affinity rule, if a node with a higher priority than the current node comes online.')
     id: StrictStr | None = Field(None, description='Status entry ID (quorum, master, lrm:<node>, service:<sid>).')
+    maintenance_request_queued: bool | None = Field(None, alias="maintenance-request-queued", description="For type 'lrm'. Whether a request to enable or disable maintenance mode for the node is queued and not yet processed by the CRM.")
+    maintenance_requested: bool | None = Field(None, alias="maintenance-requested", description="For type 'lrm'. Whether maintenance mode was manually requested for the node.")
     max_relocate: int | None = Field(None, description="For type 'service'.")
     max_restart: int | None = Field(None, description="For type 'service'.")
     node: StrictStr | None = Field(None, description='Node associated to status entry.')
@@ -1437,6 +1477,83 @@ class PutClusterMetricsServerIdResponse(RootModel[None]):
     """Model for update. Update metric server configuration. response."""
     root: None = Field(...)
 
+class GetClusterMultipathResponseItem(ProxmoxBaseModel):
+    """Model for index. Directory index. response."""
+    name: StrictStr | None = Field(None)
+
+class GetClusterMultipathResponse(RootModel[list[GetClusterMultipathResponseItem]]):
+    """List of items. index. Directory index. response."""
+    root: list[GetClusterMultipathResponseItem] = Field(...)
+
+class GetClusterMultipathOverridesResponse(ProxmoxBaseModel):
+    """Model for read_overrides. Read the verbatim multipath.conf override sections. response."""
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    overrides: StrictStr | None = Field(None, description='Verbatim override sections.')
+
+class PutClusterMultipathOverridesRequest(ProxmoxBaseModel):
+    """Model for set_overrides. Set the verbatim multipath.conf sections for hardware-specific settings: 'devices', 'overrides', 'defaults', 'blacklist' and 'blacklist_exceptions' blocks, for example a 'devices' section with 'device' subsections. request."""
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    overrides: StrictStr | None = Field(None, description='Verbatim override sections. Omit to clear them.')
+
+class PutClusterMultipathOverridesResponse(RootModel[None]):
+    """Model for set_overrides. Set the verbatim multipath.conf sections for hardware-specific settings: 'devices', 'overrides', 'defaults', 'blacklist' and 'blacklist_exceptions' blocks, for example a 'devices' section with 'device' subsections. response."""
+    root: None = Field(...)
+
+class GetClusterMultipathWwidResponseItem(ProxmoxBaseModel):
+    """Model for wwid_index. List the explicit multipath entries with their alias and per-LUN settings. response."""
+    alias: StrictStr | None = Field(None, description='The name of the multipath map.')
+    no_path_retry: StrictStr | None = Field(None, alias="no-path-retry", description='The action or number of retries when all paths are down.')
+    nodes: StrictStr | None = Field(None, description='The nodes that should assemble the map, or all nodes when unset.')
+    paths_expected: int | None = Field(None, alias="paths-expected", description='The number of paths each node should have to the LUN. A node with fewer paths reports the LUN as degraded.')
+    wwid: StrictStr | None = Field(None, description='The LUN WWID.')
+
+class GetClusterMultipathWwidResponse(RootModel[list[GetClusterMultipathWwidResponseItem]]):
+    """List of items. wwid_index. List the explicit multipath entries with their alias and per-LUN settings. response."""
+    root: list[GetClusterMultipathWwidResponseItem] = Field(...)
+
+class PostClusterMultipathWwidRequest(ProxmoxBaseModel):
+    """Model for add_wwid. Add an explicit multipath entry for a LUN, with an optional alias, node restriction, and per-LUN settings. For a LUN of an iSCSI storage with multipath enabled, an entry is only needed to set an alias or per-LUN settings. The entry keeps the LUN managed even if the storage's 'managed-multipath' option is disabled. request."""
+    alias: StrictStr | None = Field(None, description='The name of the multipath map.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    no_path_retry: StrictStr | None = Field(None, alias="no-path-retry", description='The action or number of retries when all paths are down.')
+    nodes: StrictStr | None = Field(None, description='The nodes that should assemble the map, or all nodes when unset.')
+    paths_expected: int | None = Field(None, alias="paths-expected", description='The number of paths each node should have to the LUN. A node with fewer paths reports the LUN as degraded.')
+    wwid: StrictStr = Field(..., description='The WWID of the LUN to manage via multipath.')
+
+class PostClusterMultipathWwidResponse(RootModel[None]):
+    """Model for add_wwid. Add an explicit multipath entry for a LUN, with an optional alias, node restriction, and per-LUN settings. For a LUN of an iSCSI storage with multipath enabled, an entry is only needed to set an alias or per-LUN settings. The entry keeps the LUN managed even if the storage's 'managed-multipath' option is disabled. response."""
+    root: None = Field(...)
+
+class DeleteClusterMultipathWwidWwidRequest(ProxmoxBaseModel):
+    """Model for remove_wwid. Remove an explicit multipath entry without changing node allow-lists. request."""
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+
+class DeleteClusterMultipathWwidWwidResponse(RootModel[None]):
+    """Model for remove_wwid. Remove an explicit multipath entry without changing node allow-lists. response."""
+    root: None = Field(...)
+
+class GetClusterMultipathWwidWwidResponse(ProxmoxBaseModel):
+    """Model for read_wwid. Read the explicit multipath entry of a WWID, with the digest of the configuration it was read from. response."""
+    alias: StrictStr | None = Field(None, description='The name of the multipath map.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    no_path_retry: StrictStr | None = Field(None, alias="no-path-retry", description='The action or number of retries when all paths are down.')
+    nodes: StrictStr | None = Field(None, description='The nodes that should assemble the map, or all nodes when unset.')
+    paths_expected: int | None = Field(None, alias="paths-expected", description='The number of paths each node should have to the LUN. A node with fewer paths reports the LUN as degraded.')
+    wwid: StrictStr = Field(..., description='The LUN WWID.')
+
+class PutClusterMultipathWwidWwidRequest(ProxmoxBaseModel):
+    """Model for update_wwid. Update the alias, node restriction, and per-LUN settings of an explicit multipath entry. request."""
+    alias: StrictStr | None = Field(None, description='The name of the multipath map.')
+    delete: StrictStr | None = Field(None, description='Comma-separated list of settings to unset.')
+    digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
+    no_path_retry: StrictStr | None = Field(None, alias="no-path-retry", description='The action or number of retries when all paths are down.')
+    nodes: StrictStr | None = Field(None, description='The nodes that should assemble the map, or all nodes when unset.')
+    paths_expected: int | None = Field(None, alias="paths-expected", description='The number of paths each node should have to the LUN. A node with fewer paths reports the LUN as degraded.')
+
+class PutClusterMultipathWwidWwidResponse(RootModel[None]):
+    """Model for update_wwid. Update the alias, node restriction, and per-LUN settings of an explicit multipath entry. response."""
+    root: None = Field(...)
+
 class GetClusterNextidResponse(RootModel[int]):
     """Model for nextid. Get next free VMID. Pass a VMID to assert that its free (at time of check). response."""
     root: int = Field(..., description='The next free VMID.')
@@ -1719,6 +1836,7 @@ class GetClusterNotificationsMatchersResponseItem(ProxmoxBaseModel):
     """Model for get_matchers. Returns a list of all matchers response."""
     comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this matcher')
+    expression: StrictStr | None = Field(None, description='Match expression as inline JSON. This option is mutually exclusive with the following options: match-field, match-calendar, match-severity, invert-match and mode. All of these can be represented as (sub)-expressions of this expression')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
     match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
     match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
@@ -1736,6 +1854,7 @@ class PostClusterNotificationsMatchersRequest(ProxmoxBaseModel):
     """Model for create_matcher. Create a new matcher request."""
     comment: StrictStr | None = Field(None, description='Comment')
     disable: bool | None = Field(None, description='Disable this matcher')
+    expression: StrictStr | None = Field(None, description='Match expression as inline JSON. This option is mutually exclusive with the following options: match-field, match-calendar, match-severity, invert-match and mode. All of these can be represented as (sub)-expressions of this expression')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
     match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
     match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
@@ -1757,6 +1876,7 @@ class GetClusterNotificationsMatchersNameResponse(ProxmoxBaseModel):
     comment: StrictStr | None = Field(None, description='Comment')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this matcher')
+    expression: StrictStr | None = Field(None, description='Match expression as inline JSON. This option is mutually exclusive with the following options: match-field, match-calendar, match-severity, invert-match and mode. All of these can be represented as (sub)-expressions of this expression')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
     match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
     match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
@@ -1771,6 +1891,7 @@ class PutClusterNotificationsMatchersNameRequest(ProxmoxBaseModel):
     delete: list[StrictStr] | None = Field(None, description='A list of settings you want to delete.')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     disable: bool | None = Field(None, description='Disable this matcher')
+    expression: StrictStr | None = Field(None, description='Match expression as inline JSON. This option is mutually exclusive with the following options: match-field, match-calendar, match-severity, invert-match and mode. All of these can be represented as (sub)-expressions of this expression')
     invert_match: bool | None = Field(None, alias="invert-match", description='Invert match of the whole matcher')
     match_calendar: list[StrictStr] | None = Field(None, alias="match-calendar", description='Match notification timestamp')
     match_field: list[StrictStr] | None = Field(None, alias="match-field", description='Metadata fields to match (regex or exact match). Must be in the form (regex|exact):<field>=<value>')
@@ -1798,14 +1919,39 @@ class PostClusterNotificationsTargetsNameTestResponse(RootModel[None]):
     """Model for test_target. Send a test notification to a provided target. response."""
     root: None = Field(...)
 
-class GetClusterOptionsResponse(RootModel[dict[str, object]]):
+class GetClusterOptionsResponse(ProxmoxBaseModel):
     """Model for get_options. Get datacenter options. Without 'Sys.Audit' on '/' not all options are returned. response."""
-    root: dict[str, object] = Field(...)
+    allowed_tags: list[StrictStr] = Field(..., alias="allowed-tags", description='The tags the current user is allowed to set and see.')
+    bwlimit: StrictStr | None = Field(None, description='Set I/O bandwidth limit for various operations (in KiB/s).')
+    consent_text: StrictStr | None = Field(None, alias="consent-text", description='Consent text that is displayed before logging in. Needs to be base64 encoded.')
+    console: StrictStr | None = Field(None, description='Select the default Console viewer. You can either use the builtin java applet (VNC; deprecated and maps to html5), an external virt-viewer comtatible application (SPICE), an HTML5 based vnc viewer (noVNC), or an HTML5 based console client (xtermjs). If the selected viewer is not available (e.g. SPICE not activated for the VM), the fallback is noVNC.')
+    crs: StrictStr | None = Field(None, description='Cluster resource scheduling settings.')
+    description: StrictStr | None = Field(None, description='Datacenter description. Shown in the web-interface datacenter notes panel. This is saved as comment inside the configuration file.')
+    email_from: StrictStr | None = Field(None, description='Specify email address to send notification from (default is root@$hostname)')
+    fencing: StrictStr | None = Field(None, description="Set the fencing mode of the HA cluster. Hardware mode needs a valid configuration of fence devices in /etc/pve/ha/fence.cfg. With both all two modes are used.\n\nWARNING: 'hardware' and 'both' are EXPERIMENTAL & WIP")
+    ha: StrictStr | None = Field(None, description='Cluster wide HA settings.')
+    http_proxy: StrictStr | None = Field(None, description="Specify external http proxy which is used for downloads (example: 'http://username:password@host:port/')")
+    keyboard: StrictStr | None = Field(None, description='Default keybord layout for vnc server.')
+    language: StrictStr | None = Field(None, description='Default GUI language.')
+    location: StrictStr | None = Field(None, description='The location of the cluster.')
+    mac_prefix: StrictStr | None = Field(None, description="Prefix for the auto-generated MAC addresses of virtual guests. The default 'BC:24:11' is the OUI assigned by the IEEE to Proxmox Server Solutions GmbH for a 24-bit large MAC block. You're allowed to use this in local networks, i.e., those not directly reachable by the public (e.g., in a LAN or behind NAT).")
+    max_workers: int | None = Field(None, description="Defines how many workers (per node) are maximal started  on actions like 'stopall VMs' or task from the ha-manager.")
+    migration: StrictStr | None = Field(None, description='For cluster wide migration settings.')
+    migration_unsecure: bool | None = Field(None, description="Migration is secure using SSH tunnel by default. For secure private networks you can disable it to speed up migration. Deprecated, use the 'migration' property instead!")
+    next_id: StrictStr | None = Field(None, alias="next-id", description='Control the range for the free VMID auto-selection pool.')
+    notify: StrictStr | None = Field(None, description='Cluster-wide notification settings.')
+    registered_tags: StrictStr | None = Field(None, alias="registered-tags", description="A list of tags that require a `Sys.Modify` on '/' to set and delete. Tags set here that are also in 'user-tag-access' also require `Sys.Modify`.")
+    replication: StrictStr | None = Field(None, description='For cluster wide replication settings.')
+    tag_style: StrictStr | None = Field(None, alias="tag-style", description='Tag style options.')
+    token_policy: StrictStr | None = Field(None, alias="token-policy", description='Cluster-wide policy for creating and updating API tokens, for example to enforce an expiration date or privilege separation.')
+    u2f: StrictStr | None = Field(None, description='u2f')
+    user_tag_access: StrictStr | None = Field(None, alias="user-tag-access", description='Privilege options for user-settable tags')
+    webauthn: StrictStr | None = Field(None, description='webauthn configuration')
 
 class PutClusterOptionsRequest(ProxmoxBaseModel):
     """Model for set_options. Set datacenter options. request."""
     bwlimit: StrictStr | None = Field(None, description='Set I/O bandwidth limit for various operations (in KiB/s).')
-    consent_text: StrictStr | None = Field(None, alias="consent-text", description='Consent text that is displayed before logging in.')
+    consent_text: StrictStr | None = Field(None, alias="consent-text", description='Consent text that is displayed before logging in. Needs to be base64 encoded.')
     console: StrictStr | None = Field(None, description='Select the default Console viewer. You can either use the builtin java applet (VNC; deprecated and maps to html5), an external virt-viewer comtatible application (SPICE), an HTML5 based vnc viewer (noVNC), or an HTML5 based console client (xtermjs). If the selected viewer is not available (e.g. SPICE not activated for the VM), the fallback is noVNC.')
     crs: StrictStr | None = Field(None, description='Cluster resource scheduling settings.')
     delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
@@ -1826,6 +1972,7 @@ class PutClusterOptionsRequest(ProxmoxBaseModel):
     registered_tags: StrictStr | None = Field(None, alias="registered-tags", description="A list of tags that require a `Sys.Modify` on '/' to set and delete. Tags set here that are also in 'user-tag-access' also require `Sys.Modify`.")
     replication: StrictStr | None = Field(None, description='For cluster wide replication settings.')
     tag_style: StrictStr | None = Field(None, alias="tag-style", description='Tag style options.')
+    token_policy: StrictStr | None = Field(None, alias="token-policy", description='Cluster-wide policy for creating and updating API tokens, for example to enforce an expiration date or privilege separation.')
     u2f: StrictStr | None = Field(None, description='u2f')
     user_tag_access: StrictStr | None = Field(None, alias="user-tag-access", description='Privilege options for user-settable tags')
     webauthn: StrictStr | None = Field(None, description='webauthn configuration')
@@ -1921,6 +2068,7 @@ class GetClusterReplicationResponseItem(ProxmoxBaseModel):
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
     remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
     schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    skip_freeze_fs: bool | None = Field(None, alias="skip-freeze-fs", description="Whether to skip freezing and thawing the guest's filesystems for consistency during replication.")
     source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
     target: StrictStr | None = Field(None, description='Target node.')
     type: StrictStr | None = Field(None, description='Section type.')
@@ -1937,6 +2085,7 @@ class PostClusterReplicationRequest(ProxmoxBaseModel):
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
     remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
     schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    skip_freeze_fs: bool | None = Field(None, alias="skip-freeze-fs", description="Whether to skip freezing and thawing the guest's filesystems for consistency during replication.")
     source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
     target: StrictStr = Field(..., description='Target node.')
     type: StrictStr = Field(..., description='Section type.')
@@ -1965,6 +2114,7 @@ class GetClusterReplicationIdResponse(ProxmoxBaseModel):
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
     remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
     schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    skip_freeze_fs: bool | None = Field(None, alias="skip-freeze-fs", description="Whether to skip freezing and thawing the guest's filesystems for consistency during replication.")
     source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
     target: StrictStr = Field(..., description='Target node.')
     type: StrictStr = Field(..., description='Section type.')
@@ -1978,6 +2128,7 @@ class PutClusterReplicationIdRequest(ProxmoxBaseModel):
     rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
     remove_job: StrictStr | None = Field(None, description="Mark the replication job for removal. The job will remove all local replication snapshots. When set to 'full', it also tries to remove replicated volumes on the target. The job then removes itself from the configuration file.")
     schedule: StrictStr | None = Field(None, description='Storage replication schedule. The format is a subset of `systemd` calendar events.')
+    skip_freeze_fs: bool | None = Field(None, alias="skip-freeze-fs", description="Whether to skip freezing and thawing the guest's filesystems for consistency during replication.")
     source: StrictStr | None = Field(None, description='For internal use, to detect if the guest was stolen.')
 
 class PutClusterReplicationIdResponse(RootModel[None]):
@@ -2011,6 +2162,7 @@ class GetClusterResourcesResponseItem(ProxmoxBaseModel):
     plugintype: StrictStr | None = Field(None, description='More specific type, if available.')
     pool: StrictStr | None = Field(None, description="The pool name (for types 'pool', 'qemu' and 'lxc').")
     protocol: StrictStr | None = Field(None, description="The protocol of a fabric (for type 'network', network-type 'fabric').")
+    rtime: int | None = Field(None, description="Time the guest was registered in this cluster, for example by creation, a restore to a free VMID, or a migration from another cluster, in milliseconds since the UNIX epoch (for types 'qemu' and 'lxc').")
     sdn: StrictStr | None = Field(None, description="The name of an SDN entity (for type 'sdn')")
     shared: bool | None = Field(None, description='Determines whether the storage is shared')
     status: StrictStr | None = Field(None, description='Resource type dependent status.')
@@ -2018,6 +2170,7 @@ class GetClusterResourcesResponseItem(ProxmoxBaseModel):
     tags: StrictStr | None = Field(None, description="The guest's tags (for types 'qemu' and 'lxc')")
     template: bool | None = Field(None, description="Determines if the guest is a template. (for types 'qemu' and 'lxc')")
     type: StrictStr | None = Field(None, description='Resource type.')
+    uid: StrictStr | None = Field(None, description="Random identifier of the guest, kept across restores and migrations and independent of the VMID (for types 'qemu' and 'lxc').")
     uptime: int | None = Field(None, description="Uptime of node or virtual guest in seconds (for types 'node', 'qemu' and 'lxc').")
     vmid: int | None = Field(None, description="The numerical vmid (for types 'qemu' and 'lxc').")
     zone_type: StrictStr | None = Field(None, alias="zone-type", description="The type of an SDN zone (for type 'sdn').")
@@ -2025,6 +2178,19 @@ class GetClusterResourcesResponseItem(ProxmoxBaseModel):
 class GetClusterResourcesResponse(RootModel[list[GetClusterResourcesResponseItem]]):
     """List of items. resources. Resources index (cluster wide). response."""
     root: list[GetClusterResourcesResponseItem] = Field(...)
+
+class GetClusterSanResponseItem(ProxmoxBaseModel):
+    """Model for index. Directory index. response."""
+    name: StrictStr | None = Field(None)
+
+class GetClusterSanResponse(RootModel[list[GetClusterSanResponseItem]]):
+    """List of items. index. Directory index. response."""
+    root: list[GetClusterSanResponseItem] = Field(...)
+
+class GetClusterSanStatusResponse(ProxmoxBaseModel):
+    """Model for status. Report the SAN status of the nodes, with their initiator names, and the multipath health of each LUN on each node, with as summary the worst known state among the nodes that should see or report the LUN. Nodes whose state is unknown are not counted. response."""
+    luns: list[dict[str, object]] = Field(..., description='One entry per LUN or NVMe namespace, identified by its WWID, with its path health on each node and the overall cluster state.')
+    nodes: dict[str, object] = Field(..., description='The SAN status of each cluster node, keyed by node name.')
 
 class GetClusterSdnResponseItem(ProxmoxBaseModel):
     """Model for index. Directory index. response."""
@@ -2228,11 +2394,13 @@ class GetClusterSdnFabricsFabricResponseItem(ProxmoxBaseModel):
     id: StrictStr | None = Field(None, description='Identifier for SDN fabrics')
     ip6_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
     ip_prefix: StrictStr | None = Field(None, description='The IP prefix for Node IPs')
-    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
+    pending: dict[str, object] | None = Field(None, description="Changes that are not applied yet, 'deleted' for removed values. A new entry has all its values here.")
     persistent_keepalive: float | None = Field(None, description='A seconds interval, between 1 and 65535 inclusive, of how often to send an authenticated empty packet to the peer for the purpose of keeping a stateful firewall or NAT mapping valid persistently. For example, if the interface very rarely sends traffic, but it might at anytime receive traffic from another node, and it is behind NAT, the interface might benefit from having a persistent keepalive interval of 25 seconds. If unset or set to 0, it is turned off')
     protocol: StrictStr | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
     redistribute: list[StrictStr] | None = Field(None)
     route_filter: StrictStr | None = Field(None, description='A prefix list that should be used for filtering routes that are to be installed into the kernel routing table')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
+    zone: StrictStr | None = Field(None, description='Simple zone whose VRF contains this fabric.')
 
 class GetClusterSdnFabricsFabricResponse(RootModel[list[GetClusterSdnFabricsFabricResponseItem]]):
     """List of items. index. SDN Fabrics Index response."""
@@ -2252,6 +2420,7 @@ class PostClusterSdnFabricsFabricRequest(ProxmoxBaseModel):
     protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
     redistribute: list[StrictStr] = Field(...)
     route_filter: StrictStr | None = Field(None, description='A prefix list that should be used for filtering routes that are to be installed into the kernel routing table')
+    zone: StrictStr | None = Field(None, description='Simple zone whose VRF contains this fabric.')
 
 class PostClusterSdnFabricsFabricResponse(RootModel[None]):
     """Model for add_fabric. Add a fabric response."""
@@ -2275,6 +2444,7 @@ class GetClusterSdnFabricsFabricIdResponse(ProxmoxBaseModel):
     protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
     redistribute: list[StrictStr] = Field(...)
     route_filter: StrictStr | None = Field(None, description='A prefix list that should be used for filtering routes that are to be installed into the kernel routing table')
+    zone: StrictStr | None = Field(None, description='Simple zone whose VRF contains this fabric.')
 
 class PutClusterSdnFabricsFabricIdRequest(ProxmoxBaseModel):
     """Model for update_fabric. Update a fabric request."""
@@ -2290,6 +2460,7 @@ class PutClusterSdnFabricsFabricIdRequest(ProxmoxBaseModel):
     protocol: StrictStr = Field(..., description='Type of configuration entry in an SDN Fabric section config')
     redistribute: list[StrictStr] = Field(...)
     route_filter: StrictStr | None = Field(None, description='A prefix list that should be used for filtering routes that are to be installed into the kernel routing table')
+    zone: StrictStr | None = Field(None, description='Simple zone whose VRF contains this fabric.')
 
 class PutClusterSdnFabricsFabricIdResponse(RootModel[None]):
     """Model for update_fabric. Update a fabric response."""
@@ -2304,12 +2475,13 @@ class GetClusterSdnFabricsNodeResponseItem(ProxmoxBaseModel):
     interfaces: list[StrictStr] | None = Field(None)
     ip: StrictStr | None = Field(None, description='IPv4 address for this node')
     ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
-    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     node_id: StrictStr | None = Field(None, description='Identifier for nodes in an SDN fabric')
     peers: list[StrictStr] | None = Field(None)
+    pending: dict[str, object] | None = Field(None, description="Changes that are not applied yet, 'deleted' for removed values. A new entry has all its values here.")
     protocol: StrictStr | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
     public_key: StrictStr | None = Field(None, description='The public key for the external node.')
     role: StrictStr | None = Field(None, description='The role of this node in the WireGuard fabric.')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
 
 class GetClusterSdnFabricsNodeResponse(RootModel[list[GetClusterSdnFabricsNodeResponseItem]]):
     """List of items. list_nodes. SDN Fabrics Index response."""
@@ -2324,12 +2496,13 @@ class GetClusterSdnFabricsNodeFabricIdResponseItem(ProxmoxBaseModel):
     interfaces: list[StrictStr] | None = Field(None)
     ip: StrictStr | None = Field(None, description='IPv4 address for this node')
     ip6: StrictStr | None = Field(None, description='IPv6 address for this node')
-    lock_token: StrictStr | None = Field(None, alias="lock-token", description='the token for unlocking the global SDN configuration')
     node_id: StrictStr | None = Field(None, description='Identifier for nodes in an SDN fabric')
     peers: list[StrictStr] | None = Field(None)
+    pending: dict[str, object] | None = Field(None, description="Changes that are not applied yet, 'deleted' for removed values. A new entry has all its values here.")
     protocol: StrictStr | None = Field(None, description='Type of configuration entry in an SDN Fabric section config')
     public_key: StrictStr | None = Field(None, description='The public key for the external node.')
     role: StrictStr | None = Field(None, description='The role of this node in the WireGuard fabric.')
+    state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
 
 class GetClusterSdnFabricsNodeFabricIdResponse(RootModel[list[GetClusterSdnFabricsNodeFabricIdResponseItem]]):
     """List of items. list_nodes_fabric. SDN Fabrics Index response."""
@@ -2829,7 +3002,7 @@ class DeleteClusterSdnVnetsVnetIpsRequest(ProxmoxBaseModel):
     """Model for ipdelete. Delete IP Mappings in a VNet request."""
     ip: StrictStr = Field(..., description='The IP address to delete')
     mac: StrictStr | None = Field(None, description='Unicast MAC address.')
-    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
+    zone: StrictStr | None = Field(None, description='DEPRECATED: value is ignored and parameter will be removed with PVE 10')
 
 class DeleteClusterSdnVnetsVnetIpsResponse(RootModel[None]):
     """Model for ipdelete. Delete IP Mappings in a VNet response."""
@@ -2839,7 +3012,7 @@ class PostClusterSdnVnetsVnetIpsRequest(ProxmoxBaseModel):
     """Model for ipcreate. Create IP Mapping in a VNet request."""
     ip: StrictStr = Field(..., description='The IP address to associate with the given MAC address')
     mac: StrictStr | None = Field(None, description='Unicast MAC address.')
-    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
+    zone: StrictStr | None = Field(None, description='DEPRECATED: value is ignored and parameter will be removed with PVE 10')
 
 class PostClusterSdnVnetsVnetIpsResponse(RootModel[None]):
     """Model for ipcreate. Create IP Mapping in a VNet response."""
@@ -2850,7 +3023,7 @@ class PutClusterSdnVnetsVnetIpsRequest(ProxmoxBaseModel):
     ip: StrictStr = Field(..., description='The IP address to associate with the given MAC address')
     mac: StrictStr | None = Field(None, description='Unicast MAC address.')
     vmid: int | None = Field(None, description='The (unique) ID of the VM.')
-    zone: StrictStr = Field(..., description='The SDN zone object identifier.')
+    zone: StrictStr | None = Field(None, description='DEPRECATED: value is ignored and parameter will be removed with PVE 10')
 
 class PutClusterSdnVnetsVnetIpsResponse(RootModel[None]):
     """Model for ipupdate. Update IP Mapping in a VNet response."""
@@ -2862,7 +3035,7 @@ class GetClusterSdnVnetsVnetSubnetsResponse(RootModel[list[dict[str, object]]]):
 
 class PostClusterSdnVnetsVnetSubnetsRequest(ProxmoxBaseModel):
     """Model for create. Create a new sdn subnet object. request."""
-    dhcp_dns_server: StrictStr | None = Field(None, alias="dhcp-dns-server", description='IP address for the DNS server')
+    dhcp_dns_server: StrictStr | None = Field(None, alias="dhcp-dns-server", description='DNS server IP address. Must use the same address family as the subnet.')
     dhcp_range: list[StrictStr] | None = Field(None, alias="dhcp-range", description='A list of DHCP ranges for this subnet')
     dnszoneprefix: StrictStr | None = Field(None, description="dns domain zone prefix  ex: 'adm' -> <hostname>.adm.mydomain.com")
     gateway: StrictStr | None = Field(None, description='Subnet Gateway: Will be assign on vnet for layer3 zones')
@@ -2890,7 +3063,7 @@ class GetClusterSdnVnetsVnetSubnetsSubnetResponse(RootModel[dict[str, object]]):
 class PutClusterSdnVnetsVnetSubnetsSubnetRequest(ProxmoxBaseModel):
     """Model for update. Update sdn subnet object configuration. request."""
     delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
-    dhcp_dns_server: StrictStr | None = Field(None, alias="dhcp-dns-server", description='IP address for the DNS server')
+    dhcp_dns_server: StrictStr | None = Field(None, alias="dhcp-dns-server", description='DNS server IP address. Must use the same address family as the subnet.')
     dhcp_range: list[StrictStr] | None = Field(None, alias="dhcp-range", description='A list of DHCP ranges for this subnet')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     dnszoneprefix: StrictStr | None = Field(None, description="dns domain zone prefix  ex: 'adm' -> <hostname>.adm.mydomain.com")
@@ -2908,6 +3081,8 @@ class GetClusterSdnZonesResponseItem(ProxmoxBaseModel):
     bridge: StrictStr | None = Field(None, description='the bridge for which VLANs should be managed. VLAN & QinQ zone only.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning. VLAN zone only.')
     controller: StrictStr | None = Field(None, description='ID of the controller for this zone. EVPN zone only.')
+    ct_zone: int | None = Field(None, alias="ct-zone", description='Conntrack zone of the dedicated VRF, assigned automatically.')
+    dedicated_vrf: bool | None = Field(None, alias="dedicated-vrf", description='Create a dedicated VRF for a simple zone.')
     dhcp: StrictStr | None = Field(None, description='Name of DHCP server backend for this zone.')
     digest: StrictStr | None = Field(None, description='Digest of the controller section.')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages. EVPN zone only.')
@@ -2923,6 +3098,7 @@ class GetClusterSdnZonesResponseItem(ProxmoxBaseModel):
     peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes. VXLAN zone only.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
     reversedns: StrictStr | None = Field(None, description='ID of the reverse DNS server for this zone.')
+    route: list[StrictStr] | None = Field(None, description='Static routes of a simple zone, installed in its dedicated VRF, which they require.')
     rt_import: StrictStr | None = Field(None, alias="rt-import", description='Route-Targets that should be imported into the VRF of this zone via BGP. EVPN zone only.')
     secondary_controllers: list[StrictStr] | None = Field(None, alias="secondary-controllers", description='Additional controllers.')
     state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
@@ -2943,6 +3119,8 @@ class PostClusterSdnZonesRequest(ProxmoxBaseModel):
     bridge: StrictStr | None = Field(None, description='The bridge for which VLANs should be managed.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning.')
     controller: StrictStr | None = Field(None, description='Controller for this zone.')
+    ct_zone: int | None = Field(None, alias="ct-zone", description='Conntrack zone of the dedicated VRF, assigned automatically.')
+    dedicated_vrf: bool | None = Field(None, alias="dedicated-vrf", description='Create a dedicated VRF for the zone.')
     dhcp: StrictStr | None = Field(None, description='Type of the DHCP backend for this zone')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages.')
     dns: StrictStr | None = Field(None, description='dns api server')
@@ -2959,6 +3137,7 @@ class PostClusterSdnZonesRequest(ProxmoxBaseModel):
     nodes: StrictStr | None = Field(None, description='List of cluster node names.')
     peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes.')
     reversedns: StrictStr | None = Field(None, description='reverse dns api server')
+    route: list[StrictStr] | None = Field(None, description='Static routes of a simple zone, installed in its dedicated VRF, which they require.')
     rt_import: StrictStr | None = Field(None, alias="rt-import", description='List of Route Targets that should be imported into the VRF of the zone.')
     secondary_controllers: list[StrictStr] | None = Field(None, alias="secondary-controllers", description='Additional controllers.')
     tag: int | None = Field(None, description='Service-VLAN Tag (outer VLAN)')
@@ -2986,6 +3165,8 @@ class GetClusterSdnZonesZoneResponse(ProxmoxBaseModel):
     bridge: StrictStr | None = Field(None, description='the bridge for which VLANs should be managed. VLAN & QinQ zone only.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning. VLAN zone only.')
     controller: StrictStr | None = Field(None, description='ID of the controller for this zone. EVPN zone only.')
+    ct_zone: int | None = Field(None, alias="ct-zone", description='Conntrack zone of the dedicated VRF, assigned automatically.')
+    dedicated_vrf: bool | None = Field(None, alias="dedicated-vrf", description='Create a dedicated VRF for a simple zone.')
     dhcp: StrictStr | None = Field(None, description='Name of DHCP server backend for this zone.')
     digest: StrictStr | None = Field(None, description='Digest of the controller section.')
     disable_arp_nd_suppression: bool | None = Field(None, alias="disable-arp-nd-suppression", description='Suppress IPv4 ARP && IPv6 Neighbour Discovery messages. EVPN zone only.')
@@ -3001,6 +3182,7 @@ class GetClusterSdnZonesZoneResponse(ProxmoxBaseModel):
     peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes. VXLAN zone only.')
     pending: dict[str, object] | None = Field(None, description='Changes that have not yet been applied to the running configuration.')
     reversedns: StrictStr | None = Field(None, description='ID of the reverse DNS server for this zone.')
+    route: list[StrictStr] | None = Field(None, description='Static routes of a simple zone, installed in its dedicated VRF, which they require.')
     rt_import: StrictStr | None = Field(None, alias="rt-import", description='Route-Targets that should be imported into the VRF of this zone via BGP. EVPN zone only.')
     secondary_controllers: list[StrictStr] | None = Field(None, alias="secondary-controllers", description='Additional controllers.')
     state: StrictStr | None = Field(None, description='State of the SDN configuration object.')
@@ -3017,6 +3199,8 @@ class PutClusterSdnZonesZoneRequest(ProxmoxBaseModel):
     bridge: StrictStr | None = Field(None, description='The bridge for which VLANs should be managed.')
     bridge_disable_mac_learning: bool | None = Field(None, alias="bridge-disable-mac-learning", description='Disable auto mac learning.')
     controller: StrictStr | None = Field(None, description='Controller for this zone.')
+    ct_zone: int | None = Field(None, alias="ct-zone", description='Conntrack zone of the dedicated VRF, assigned automatically.')
+    dedicated_vrf: bool | None = Field(None, alias="dedicated-vrf", description='Create a dedicated VRF for the zone.')
     delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
     dhcp: StrictStr | None = Field(None, description='Type of the DHCP backend for this zone')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
@@ -3035,6 +3219,7 @@ class PutClusterSdnZonesZoneRequest(ProxmoxBaseModel):
     nodes: StrictStr | None = Field(None, description='List of cluster node names.')
     peers: StrictStr | None = Field(None, description='Comma-separated list of peers, that are part of the VXLAN zone. Usually the IPs of the nodes.')
     reversedns: StrictStr | None = Field(None, description='reverse dns api server')
+    route: list[StrictStr] | None = Field(None, description='Static routes of a simple zone, installed in its dedicated VRF, which they require.')
     rt_import: StrictStr | None = Field(None, alias="rt-import", description='List of Route Targets that should be imported into the VRF of the zone.')
     secondary_controllers: list[StrictStr] | None = Field(None, alias="secondary-controllers", description='Additional controllers.')
     tag: int | None = Field(None, description='Service-VLAN Tag (outer VLAN)')
@@ -3048,6 +3233,7 @@ class PutClusterSdnZonesZoneResponse(RootModel[None]):
 
 class GetClusterStatusResponseItem(ProxmoxBaseModel):
     """Model for get_status. Get cluster status information. response."""
+    cluster_id: StrictStr | None = Field(None, alias="cluster-id", description='[cluster] Random identifier of the cluster. A standalone node reports its own identifier on its node entry.')
     id: StrictStr | None = Field(None)
     ip: StrictStr | None = Field(None, description='[node] IP of the resolved nodename.')
     level: StrictStr | None = Field(None, description='[node] Proxmox VE Subscription level, indicates if eligible for enterprise support as well as access to the stable Proxmox VE Enterprise Repository.')

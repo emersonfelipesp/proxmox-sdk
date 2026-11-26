@@ -9,7 +9,7 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 
 ---
 
-Schema-driven Proxmox API toolkit Python package. Pre-generated 675-operation / 444-endpoint Proxmox VE 9.2 surface (`latest` mirrors 9.2; 9.1.11 retained), plus a 318-operation / 246-endpoint Proxmox Datacenter Manager (PDM) surface (`proxmox_sdk/generated/pdm/latest/`). Dual-mode: mock (in-memory CRUD, `reset_state()`) or real (proxy to a Proxmox node via HTTPS / local `pvesh` / SSH).
+Schema-driven Proxmox API toolkit Python package. Pre-generated 716-operation / 481-endpoint Proxmox VE 9.3 surface (`latest` mirrors 9.3; 9.2 and 9.1.11 retained), plus a 318-operation / 246-endpoint Proxmox Datacenter Manager (PDM) surface (`proxmox_sdk/generated/pdm/latest/`). Dual-mode: mock (in-memory CRUD, `reset_state()`) or real (proxy to a Proxmox node via HTTPS / local `pvesh` / SSH).
 
 ## Standalone SDK Entry Point
 

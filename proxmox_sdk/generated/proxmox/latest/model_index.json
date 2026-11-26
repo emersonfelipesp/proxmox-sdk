@@ -1,9 +1,10 @@
 {
-  "generated_at": "2026-08-06T18:55:01.885818+00:00",
+  "generated_at": "2026-11-26T14:19:39.255287+00:00",
   "groups": [
     "access",
     "cluster",
     "nodes",
+    "plugins",
     "pools",
     "storage",
     "version"
@@ -128,6 +129,11 @@
       "group": "cluster",
       "request_model": null,
       "response_model": "DeleteClusterMetricsServerIdResponse"
+    },
+    "delete_cluster_multipath_wwid_wwid": {
+      "group": "cluster",
+      "request_model": "DeleteClusterMultipathWwidWwidRequest",
+      "response_model": "DeleteClusterMultipathWwidWwidResponse"
     },
     "delete_cluster_notifications_endpoints_gotify_name": {
       "group": "cluster",
@@ -369,6 +375,11 @@
       "request_model": "DeleteNodesNodeQemuVmidSnapshotSnapnameRequest",
       "response_model": "DeleteNodesNodeQemuVmidSnapshotSnapnameResponse"
     },
+    "delete_nodes_node_san_nvmeof_controller_controller": {
+      "group": "nodes",
+      "request_model": "DeleteNodesNodeSanNvmeofControllerControllerRequest",
+      "response_model": "DeleteNodesNodeSanNvmeofControllerControllerResponse"
+    },
     "delete_nodes_node_storage_storage_content_volume": {
       "group": "nodes",
       "request_model": "DeleteNodesNodeStorageStorageContentVolumeRequest",
@@ -401,7 +412,7 @@
     },
     "delete_storage_storage": {
       "group": "storage",
-      "request_model": null,
+      "request_model": "DeleteStorageStorageRequest",
       "response_model": "DeleteStorageStorageResponse"
     },
     "get_access": {
@@ -598,6 +609,11 @@
       "group": "cluster",
       "request_model": null,
       "response_model": "GetClusterCephFlagsFlagResponse"
+    },
+    "get_cluster_ceph_health_mute": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterCephHealthMuteResponse"
     },
     "get_cluster_ceph_metadata": {
       "group": "cluster",
@@ -839,6 +855,26 @@
       "request_model": null,
       "response_model": "GetClusterMetricsServerIdResponse"
     },
+    "get_cluster_multipath": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMultipathResponse"
+    },
+    "get_cluster_multipath_overrides": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMultipathOverridesResponse"
+    },
+    "get_cluster_multipath_wwid": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMultipathWwidResponse"
+    },
+    "get_cluster_multipath_wwid_wwid": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterMultipathWwidWwidResponse"
+    },
     "get_cluster_nextid": {
       "group": "cluster",
       "request_model": null,
@@ -958,6 +994,16 @@
       "group": "cluster",
       "request_model": null,
       "response_model": "GetClusterResourcesResponse"
+    },
+    "get_cluster_san": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSanResponse"
+    },
+    "get_cluster_san_status": {
+      "group": "cluster",
+      "request_model": null,
+      "response_model": "GetClusterSanStatusResponse"
     },
     "get_cluster_sdn": {
       "group": "cluster",
@@ -1149,6 +1195,16 @@
       "request_model": null,
       "response_model": "GetNodesNodeResponse"
     },
+    "get_nodes_node_access_log": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAccessLogResponse"
+    },
+    "get_nodes_node_access_log_stats": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAccessLogStatsResponse"
+    },
     "get_nodes_node_aplinfo": {
       "group": "nodes",
       "request_model": null,
@@ -1164,15 +1220,40 @@
       "request_model": null,
       "response_model": "GetNodesNodeAptChangelogResponse"
     },
+    "get_nodes_node_apt_history": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptHistoryResponse"
+    },
+    "get_nodes_node_apt_installed_changelog": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptInstalledChangelogResponse"
+    },
     "get_nodes_node_apt_repositories": {
       "group": "nodes",
       "request_model": null,
       "response_model": "GetNodesNodeAptRepositoriesResponse"
     },
+    "get_nodes_node_apt_termlog": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptTermlogResponse"
+    },
+    "get_nodes_node_apt_transaction_changelogs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptTransactionChangelogsResponse"
+    },
     "get_nodes_node_apt_update": {
       "group": "nodes",
       "request_model": null,
       "response_model": "GetNodesNodeAptUpdateResponse"
+    },
+    "get_nodes_node_apt_update_changelogs": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeAptUpdateChangelogsResponse"
     },
     "get_nodes_node_apt_versions": {
       "group": "nodes",
@@ -1303,6 +1384,11 @@
       "group": "nodes",
       "request_model": null,
       "response_model": "GetNodesNodeCephPoolNameStatusResponse"
+    },
+    "get_nodes_node_ceph_releases": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeCephReleasesResponse"
     },
     "get_nodes_node_ceph_rules": {
       "group": "nodes",
@@ -1614,6 +1700,21 @@
       "request_model": null,
       "response_model": "GetNodesNodeQemuVmidAgentFileReadResponse"
     },
+    "get_nodes_node_qemu_vmid_agent_get_cpustats": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetCpustatsResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_disks": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetDisksResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_diskstats": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetDiskstatsResponse"
+    },
     "get_nodes_node_qemu_vmid_agent_get_fsinfo": {
       "group": "nodes",
       "request_model": null,
@@ -1623,6 +1724,11 @@
       "group": "nodes",
       "request_model": null,
       "response_model": "GetNodesNodeQemuVmidAgentGetHostNameResponse"
+    },
+    "get_nodes_node_qemu_vmid_agent_get_load": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeQemuVmidAgentGetLoadResponse"
     },
     "get_nodes_node_qemu_vmid_agent_get_memory_block_info": {
       "group": "nodes",
@@ -1844,6 +1950,46 @@
       "request_model": null,
       "response_model": "GetNodesNodeRrddataResponse"
     },
+    "get_nodes_node_san": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanResponse"
+    },
+    "get_nodes_node_san_iscsi": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanIscsiResponse"
+    },
+    "get_nodes_node_san_iscsi_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanIscsiStatusResponse"
+    },
+    "get_nodes_node_san_iscsi_target": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanIscsiTargetResponse"
+    },
+    "get_nodes_node_san_luns": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanLunsResponse"
+    },
+    "get_nodes_node_san_nvmeof": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanNvmeofResponse"
+    },
+    "get_nodes_node_san_nvmeof_controller": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanNvmeofControllerResponse"
+    },
+    "get_nodes_node_san_nvmeof_status": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeSanNvmeofStatusResponse"
+    },
     "get_nodes_node_scan": {
       "group": "nodes",
       "request_model": null,
@@ -1873,6 +2019,11 @@
       "group": "nodes",
       "request_model": null,
       "response_model": "GetNodesNodeScanNfsResponse"
+    },
+    "get_nodes_node_scan_nvmeof": {
+      "group": "nodes",
+      "request_model": null,
+      "response_model": "GetNodesNodeScanNvmeofResponse"
     },
     "get_nodes_node_scan_pbs": {
       "group": "nodes",
@@ -2079,6 +2230,26 @@
       "request_model": null,
       "response_model": "GetNodesNodeVzdumpExtractconfigResponse"
     },
+    "get_plugins": {
+      "group": "plugins",
+      "request_model": null,
+      "response_model": "GetPluginsResponse"
+    },
+    "get_plugins_storage": {
+      "group": "plugins",
+      "request_model": null,
+      "response_model": "GetPluginsStorageResponse"
+    },
+    "get_plugins_storage_plugin": {
+      "group": "plugins",
+      "request_model": null,
+      "response_model": "GetPluginsStoragePluginResponse"
+    },
+    "get_plugins_storage_plugin_type": {
+      "group": "plugins",
+      "request_model": null,
+      "response_model": "GetPluginsStoragePluginTypeResponse"
+    },
     "get_pools": {
       "group": "pools",
       "request_model": null,
@@ -2194,6 +2365,11 @@
       "request_model": "PostClusterBulkActionGuestSuspendRequest",
       "response_model": "PostClusterBulkActionGuestSuspendResponse"
     },
+    "post_cluster_ceph_restart_bulk": {
+      "group": "cluster",
+      "request_model": "PostClusterCephRestartBulkRequest",
+      "response_model": "PostClusterCephRestartBulkResponse"
+    },
     "post_cluster_config": {
       "group": "cluster",
       "request_model": "PostClusterConfigRequest",
@@ -2298,6 +2474,11 @@
       "group": "cluster",
       "request_model": "PostClusterMetricsServerIdRequest",
       "response_model": "PostClusterMetricsServerIdResponse"
+    },
+    "post_cluster_multipath_wwid": {
+      "group": "cluster",
+      "request_model": "PostClusterMultipathWwidRequest",
+      "response_model": "PostClusterMultipathWwidResponse"
     },
     "post_cluster_notifications_endpoints_gotify": {
       "group": "cluster",
@@ -2483,6 +2664,11 @@
       "group": "nodes",
       "request_model": "PostNodesNodeCephRestartRequest",
       "response_model": "PostNodesNodeCephRestartResponse"
+    },
+    "post_nodes_node_ceph_restart_bulk": {
+      "group": "nodes",
+      "request_model": "PostNodesNodeCephRestartBulkRequest",
+      "response_model": "PostNodesNodeCephRestartBulkResponse"
     },
     "post_nodes_node_ceph_start": {
       "group": "nodes",
@@ -3039,6 +3225,11 @@
       "request_model": "PutClusterCephFlagsFlagRequest",
       "response_model": "PutClusterCephFlagsFlagResponse"
     },
+    "put_cluster_ceph_health_mute_code": {
+      "group": "cluster",
+      "request_model": "PutClusterCephHealthMuteCodeRequest",
+      "response_model": "PutClusterCephHealthMuteCodeResponse"
+    },
     "put_cluster_firewall_aliases_name": {
       "group": "cluster",
       "request_model": "PutClusterFirewallAliasesNameRequest",
@@ -3103,6 +3294,16 @@
       "group": "cluster",
       "request_model": "PutClusterMetricsServerIdRequest",
       "response_model": "PutClusterMetricsServerIdResponse"
+    },
+    "put_cluster_multipath_overrides": {
+      "group": "cluster",
+      "request_model": "PutClusterMultipathOverridesRequest",
+      "response_model": "PutClusterMultipathOverridesResponse"
+    },
+    "put_cluster_multipath_wwid_wwid": {
+      "group": "cluster",
+      "request_model": "PutClusterMultipathWwidWwidRequest",
+      "response_model": "PutClusterMultipathWwidWwidResponse"
     },
     "put_cluster_notifications_endpoints_gotify_name": {
       "group": "cluster",
@@ -3294,6 +3495,11 @@
       "request_model": "PutNodesNodeLxcVmidSnapshotSnapnameConfigRequest",
       "response_model": "PutNodesNodeLxcVmidSnapshotSnapnameConfigResponse"
     },
+    "put_nodes_node_maintenance": {
+      "group": "nodes",
+      "request_model": "PutNodesNodeMaintenanceRequest",
+      "response_model": "PutNodesNodeMaintenanceResponse"
+    },
     "put_nodes_node_network": {
       "group": "nodes",
       "request_model": "PutNodesNodeNetworkRequest",
@@ -3385,6 +3591,6 @@
       "response_model": "PutStorageStorageResponse"
     }
   },
-  "source_sha256": "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b",
+  "source_sha256": "83d00ff237bdfac0cb144eb603209f20654125dc40350c35447707fd330a0179",
   "version_tag": "latest"
 }

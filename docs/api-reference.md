@@ -4,7 +4,7 @@ This page provides a comprehensive reference of all available endpoints in the P
 
 ## Endpoint Overview
 
-The server provides **675 operations / 444 Proxmox VE API paths** organized into the following categories:
+The server provides **716 operations / 481 Proxmox VE API paths** organized into the following categories:
 
 - **Access Control** - Users, groups, roles, permissions, ACLs
 - **Cluster** - Cluster configuration, HA, resources, firewall
@@ -49,7 +49,7 @@ Returns Proxmox VE API version information.
 **Response:**
 ```json
 {
-  "version": "9.2",
+  "version": "9.3",
   "release": "1",
   "repoid": "abc123"
 }
@@ -417,6 +417,18 @@ full `Location` value.
 
 ## Versioning
 
-The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 9.2** (with `latest` mirroring 9.2; 9.1.11 retained).
+The API follows the Proxmox VE API versioning scheme. The current implementation is based on **Proxmox VE 9.3** (with `latest` mirroring 9.3; 9.2 and 9.1.11 retained).
+
+Proxmox VE 9.3 adds unique guest identities. VMs and containers can expose a
+`uid` matching `[a-z2-7]{20}` in `GET /cluster/resources` and
+`GET /nodes/{node}/qemu|lxc/{vmid}/status/current`; it remains stable across
+migrations, snapshot rollbacks, backups, and restores, while clones receive a
+new identity and existing guests receive one when a 9.3 node first writes their
+configuration. `GET /cluster/status` exposes `cluster-id` on the cluster entry,
+or on the local node entry for a standalone node, and `/cluster/resources` adds
+`rtime`. Restore adds `allow-identity-mismatch`, and `unique` means not adopting
+the backup's `uid`. New path groups cover SAN, multipath, node access logs, APT
+history, storage plugins, and QEMU guest-agent statistics. Generated typed
+models expose optional `uid` and `cluster_id` (alias `cluster-id`) fields.
 
 For the most up-to-date endpoint reference, always check the Swagger UI at `/docs` when running the server.

@@ -79,9 +79,11 @@ Behavior:
 - proxmox_sdk/
   - Runtime package implementation.
 - proxmox_sdk/generated/proxmox/latest/
-  - Package-bundled PVE 9.2 alias: 444 paths and 675 operations.
+  - Package-bundled PVE 9.3 alias: 481 paths and 716 operations.
+- proxmox_sdk/generated/proxmox/9.3/
+  - Primary CI-tested PVE schema: 481 paths and 716 operations.
 - proxmox_sdk/generated/proxmox/9.2/
-  - Primary CI-tested PVE schema: 444 paths and 675 operations.
+  - Previous CI-tested PVE schema: 444 paths and 675 operations.
 - proxmox_sdk/generated/proxmox/9.1.11/
   - Retained compatibility schema: 431 paths and 649 operations.
 - proxmox_sdk/generated/pdm/latest/

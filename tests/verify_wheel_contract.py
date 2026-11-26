@@ -48,7 +48,7 @@ if not isinstance(paths, dict) or not required_paths.issubset(paths):
         f"Packaged PDM OpenAPI schema lacks required paths: {required_paths!r}"
     )
 
-for tag in ("latest", "9.2", "9.1.11"):
+for tag in ("latest", "9.3", "9.2", "9.1.11"):
     model = load_operation_model(tag, "get_nodes_node_qemu_vmid_config", "response")
     if model is None:
         raise AssertionError(f"Packaged PVE response model is missing for {tag}")

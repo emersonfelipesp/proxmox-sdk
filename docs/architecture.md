@@ -68,7 +68,7 @@ The FastAPI server can run in two modes, selected via `PROXMOX_API_MODE`:
 
     1. Load `generated/proxmox/latest/openapi.json`
     2. Load `generated/proxmox/latest/route_metadata.json`
-    3. `register_generated_proxmox_mock_routes()` iterates 675 metadata operations across 444 paths
+    3. `register_generated_proxmox_mock_routes()` iterates 716 metadata operations across 481 paths
     4. For each operation, create a lightweight FastAPI dispatcher with precomputed path, parameter, and mock-topology metadata
     5. Load request/response model classes lazily from `models/<group>.py` through `model_index.json`
     6. Routes perform CRUD on `SQLiteMockStore` by default, with shared-memory and dict backends available by env var
@@ -154,7 +154,7 @@ flowchart LR
     CRAWL["ProxmoxCrawler\nPlaywright"]
     PARSE["apidoc_parser.py"]
     NORM["normalize.py"]
-    OA["OpenAPIBuilder\n→ openapi.json\n5.2 MB · 675 ops"]
+    OA["OpenAPIBuilder\n→ openapi.json\n716 operations"]
     PYD["PydanticBuilder\n→ pydantic_models.py\n+ model shards"]
     META["RouteMetadataBuilder\n→ route_metadata.json\n+ model_index.json"]
     USE1["proxmox-sdk\nMock routes"]
@@ -191,7 +191,7 @@ A single codebase serves both development (mock) and production (real proxy) use
 
 ### 2. Metadata-Driven Route Registration
 
-Rather than hardcoding 675 routes or rebuilding all route topology at runtime,
+Rather than hardcoding 716 routes or rebuilding all route topology at runtime,
 the codegen pipeline emits `route_metadata.json`, `model_index.json`, and
 route-group model shards under each `generated/proxmox/<version>/` directory.
 The server registers lightweight FastAPI dispatchers from this metadata and
@@ -205,9 +205,9 @@ at startup.
 The OpenAPI schema, aggregate Pydantic models, lazy model shards, model index,
 and route metadata are committed to the repository so mock mode works
 completely offline without a Proxmox server. Each version is stored
-independently under `generated/proxmox/`; CI ships `9.2/`, `9.1.11/`, and
-`latest/` (alias for 9.2), exercising all three in parallel via
-`PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]`.
+independently under `generated/proxmox/`; CI ships `9.3/`, `9.2/`, `9.1.11/`,
+and `latest/` (alias for 9.3), exercising all four in parallel via
+`PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.3, 9.2, 9.1.11]`.
 
 ### 4. Full Request/Response Validation
 

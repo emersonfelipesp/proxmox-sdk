@@ -6,6 +6,7 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from proxmox_sdk.proxmox_codegen.parameter_variants import flatten_parameter_variants
 from proxmox_sdk.schema import ProxmoxSchemaValue
 
 #: Standard HTTP methods used in Proxmox API.
@@ -114,7 +115,7 @@ class NormalizedOperation(BaseModel):
         """Build a normalized operation from a validated raw method capture."""
 
         parameters = ProxmoxSchemaValue.model_validate(
-            method_data.parameters or {"type": "object"}
+            flatten_parameter_variants(method_data.parameters or {"type": "object"})
         ).normalize_proxmox_schema() or {"type": "object"}
         returns = ProxmoxSchemaValue.model_validate(
             method_data.returns or {"type": "object"}

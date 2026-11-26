@@ -50,13 +50,13 @@ uv run pbx --config /tmp/pve-9.2.json get /cluster/options
 uv run pbx --config /tmp/pve-9.2.json get /cluster/ha/rules
 ```
 
-## Test coverage (Proxmox VE 9.2)
+## Test coverage (Proxmox VE 9.2 and 9.3)
 
 The suite covers the following API areas:
 
-| Test | Endpoint | 9.2 feature |
+| Test | Endpoint | Coverage |
 |---|---|---|
-| `test_live_version_is_9_2` | `GET /version` | Version assertion |
+| `test_live_version_is_at_least_9_2` | `GET /version` | 9.2 feature minimum-version assertion |
 | `test_live_nodes_list` | `GET /nodes` | Connectivity |
 | `test_live_cluster_resources` | `GET /cluster/resources` | Connectivity |
 | `test_live_cluster_options_crs` | `GET /cluster/options` | CRS / Dynamic Load Balancing (xfail if unconfigured) |
@@ -72,11 +72,13 @@ The suite covers the following API areas:
 | `test_live_sdn_zones` | `GET /cluster/sdn/zones` | SDN ACL paths (zones added in 9.2) |
 | `test_live_write_cluster_options_crs_roundtrip` *(write)* | `PUT /cluster/options` | CRS write path |
 | `test_live_access_token_lifecycle` *(write)* | `POST/GET/DELETE /access/users/{u}/token/{t}` | Token lifecycle / secret rotation API |
+| `test_live_cluster_status_reports_cluster_id` | `GET /cluster/status` | 9.3 cluster identity consistency; skips on older nodes |
+| `test_live_guest_uids_are_well_formed_and_consistent` | `GET /cluster/resources`, `GET /nodes/{node}/qemu\|lxc/{vmid}/status/current` | 9.3 guest identity consistency; skips on older nodes or when no guest has a `uid` yet |
 
 ## Why not in CI?
 
 The current lab is LAN-only (`10.0.30.0/24`). CI exercises the offline schema
-matrix (`PROXMOX_MOCK_SCHEMA_VERSION=latest`, `=9.2`, and `=9.1.11`) which is
+matrix (`PROXMOX_MOCK_SCHEMA_VERSION=latest`, `=9.3`, `=9.2`, and `=9.1.11`) which is
 sufficient to catch regressions in mock routing, generated Pydantic models, and
 schema parsing. The live suite is for local certification of a new Proxmox
 release against the freshly-captured schema.

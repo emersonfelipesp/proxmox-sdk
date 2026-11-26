@@ -8,7 +8,7 @@ Frequently Asked Questions about the Proxmox OpenAPI server.
 
 Proxmox OpenAPI is a FastAPI-based server that provides two modes:
 
-1. **Mock Mode** - SQLite/WAL-backed Proxmox VE API simulator with 675 operations / 444 paths for development and testing; shared-memory and dict stores are optional
+1. **Mock Mode** - SQLite/WAL-backed Proxmox VE API simulator with 716 operations / 481 paths for development and testing; shared-memory and dict stores are optional
 2. **Real Mode** - Validated proxy to a real Proxmox VE API with full request/response validation
 
 It's designed to help developers build, test, and integrate with Proxmox infrastructure without requiring a live Proxmox cluster for every development task.
@@ -26,17 +26,18 @@ If you want to connect to a real Proxmox server, switch to real mode by setting 
 
 ### What Proxmox VE version is supported?
 
-The current schema is captured from **Proxmox VE 9.2**. The `9.2/` and
-`latest/` schema directories expose the same 444 paths and 675 operations, but
+The current schema is captured from **Proxmox VE 9.3**. The `9.3/` and
+`latest/` schema directories expose the same 481 paths and 716 operations, but
 their metadata identifies the explicit version and stable alias respectively.
-The 9.1.11 schema is retained for backward compatibility, and CI exercises all
-three tags.
+The 9.2 and 9.1.11 schemas are retained for backward compatibility, and CI
+exercises all four tags.
 
 | Version | Status | Schema directory |
 |---|---|---|
-| 9.2 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.2/` |
-| latest | Alias for 9.2 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
-| 9.1.11 | Retained (backward compat) | `proxmox_sdk/generated/proxmox/9.1.11/` |
+| 9.3 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.3/` |
+| latest | Alias for 9.3 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
+| 9.2 | Previous release (CI-tested) | `proxmox_sdk/generated/proxmox/9.2/` |
+| 9.1.11 | Older release (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
 
 Older releases (8.x, 7.x) may still work for endpoints whose shapes have not
 changed, but they are no longer in the CI matrix. To certify another version,
@@ -109,7 +110,7 @@ See the [Quick Start Guide](quickstart.md) for more details.
 
 Mock mode provides a schema-driven simulation of the Proxmox VE API. It:
 
-- Loads 675 operations / 444 paths from pre-generated route metadata
+- Loads 716 operations / 481 paths from pre-generated route metadata
 - Lazy-loads Pydantic route-group model shards on demand
 - Provides full CRUD operations (Create, Read, Update, Delete)
 - Stores data in SQLite/WAL by default, with shared-memory and dict backends available
@@ -298,7 +299,7 @@ from proxmox_sdk.proxmox_codegen import generate_proxmox_codegen_bundle
 
 bundle = generate_proxmox_codegen_bundle(
     output_dir="./output",
-    version_tag="9.2",
+    version_tag="9.3",
     worker_count=4,
 )
 ```
@@ -307,7 +308,7 @@ Or from the command line:
 
 ```bash
 proxmox-sdk-codegen \
-  --version-tag 9.2 \
+  --version-tag 9.3 \
   --output-dir proxmox_sdk/generated/proxmox \
   --workers 4
 ```

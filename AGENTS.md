@@ -13,9 +13,10 @@ Submodule layout and cross-repo links: `/root/personal-context/claude-reference/
 
 Package version: `0.0.15`. Python requirement: `>=3.11`.
 
-Generated inventories are authoritative: PVE `9.2` and `latest` each contain
-444 paths / 675 operations; retained PVE `9.1.11` contains 431 paths / 649
-operations; PDM `latest` contains 246 paths / 318 operations. Preserve older
+Generated inventories are authoritative: PVE `9.3` and `latest` each contain
+481 paths / 716 operations; retained PVE `9.2` contains 444 paths / 675
+operations; retained PVE `9.1.11` contains 431 paths / 649 operations; PDM
+`latest` contains 246 paths / 318 operations. Preserve older
 release statements as historical records when these current inventories move.
 
 `proxmox-sdk` is a schema-driven FastAPI package for Proxmox API that provides:
@@ -24,7 +25,7 @@ release statements as historical records when these current inventories move.
 2. **Standalone Python SDK** - Production-ready SDK without FastAPI server (async + sync)
 3. **CLI + TUI** - Typer CLI and Textual terminal UI for interactive use
 4. **Codegen pipeline** - Automatically crawl Proxmox API Viewer and convert to OpenAPI schema
-5. **675 operations / 444 paths** - Pre-generated Proxmox VE 9.2 API with full OpenAPI schema (`latest` exposes the same API surface; 9.1.11 retains 649 operations / 431 paths)
+5. **716 operations / 481 paths** - Pre-generated Proxmox VE 9.3 API with full OpenAPI schema (`latest` exposes the same API surface; 9.2 retains 675 operations / 444 paths and 9.1.11 retains 649 operations / 431 paths)
 6. **318 operations / 246 paths** - Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
 7. **Rate limiting** - Built-in protection via SlowAPI
 
@@ -216,7 +217,7 @@ uv run pytest tests/live -m live -v
 
 `.gitea/workflows/ci.yml` mirrors the secret-free review gates from GitHub for
 the Gitea-first feature path: pinned workflow tooling, Ruff, ty, Pyright,
-compile/import contracts, the full `latest`/`9.2`/`9.1.11` schema matrix,
+compile/import contracts, the full `latest`/`9.3`/`9.2`/`9.1.11` schema matrix,
 strict documentation, and installed-wheel validation. Pull-request jobs run
 only on the isolated `ci-untrusted-python312` label with read-only repository
 permissions; they must never publish, deploy, push, or receive credentials.

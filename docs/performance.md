@@ -36,7 +36,7 @@ without addressing the largest bottlenecks that were measured.
 
 ### Generated route metadata
 
-675 operations across 444 Proxmox VE 9.2 paths are registered at startup.
+716 operations across 481 Proxmox VE 9.3 paths are registered at startup.
 Runtime registration now prefers pre-generated `route_metadata.json` artifacts,
 so it does not rebuild topology, parameter maps, mounted paths, model names, and
 child collection relationships from OpenAPI on every app import.
@@ -357,8 +357,8 @@ proxmox_sdk = [
 ]
 ```
 
-The integrity tests check all supported schema tags (`latest`, `9.2`, and
-`9.1.11`):
+The integrity tests check all supported schema tags (`latest`, `9.3`, `9.2`,
+and `9.1.11`):
 
 - `openapi.json` SHA matches the generated model metadata
 - `route_metadata.json` source SHA matches `openapi.json`
@@ -377,6 +377,7 @@ run the full test suite across:
 
 ```bash
 PROXMOX_MOCK_SCHEMA_VERSION=latest
+PROXMOX_MOCK_SCHEMA_VERSION=9.3
 PROXMOX_MOCK_SCHEMA_VERSION=9.2
 PROXMOX_MOCK_SCHEMA_VERSION=9.1.11
 ```

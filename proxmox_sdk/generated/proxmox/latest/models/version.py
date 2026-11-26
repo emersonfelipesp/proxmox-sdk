@@ -10,8 +10,8 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr
 
 GENERATED_FOR_PROXMOX_VERSION = "latest"
-GENERATED_SOURCE_SHA256 = "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b"
-GENERATED_AT = "2026-08-06T18:55:01.885818+00:00"
+GENERATED_SOURCE_SHA256 = "83d00ff237bdfac0cb144eb603209f20654125dc40350c35447707fd330a0179"
+GENERATED_AT = "2026-11-26T14:19:39.255287+00:00"
 
 
 class ProxmoxBaseModel(BaseModel):

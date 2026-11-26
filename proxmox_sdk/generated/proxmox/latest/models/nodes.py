@@ -10,8 +10,8 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr
 
 GENERATED_FOR_PROXMOX_VERSION = "latest"
-GENERATED_SOURCE_SHA256 = "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b"
-GENERATED_AT = "2026-08-06T18:55:01.885818+00:00"
+GENERATED_SOURCE_SHA256 = "83d00ff237bdfac0cb144eb603209f20654125dc40350c35447707fd330a0179"
+GENERATED_AT = "2026-11-26T14:19:39.255287+00:00"
 
 
 class ProxmoxBaseModel(BaseModel):
@@ -46,6 +46,35 @@ class GetNodesNodeResponse(RootModel[list[dict[str, object]]]):
     """Model for index. Node index. response."""
     root: list[dict[str, object]] = Field(...)
 
+class GetNodesNodeAccessLogResponse(ProxmoxBaseModel):
+    """Model for access_log. Read a page of the API access log of pveproxy and spiceproxy, including its rotated copies, newest requests first. A page ends once enough requests matched or after reading 512 MiB of log data, also without any match, and the next page continues at its 'next-cursor'. The values of query parameters are redacted for all but root@pam. response."""
+    complete: bool = Field(..., description="Whether this page and the ones before it covered the whole log, without any gap. With 'after', whether this page holds all requests logged since.")
+    dated_copies: list[StrictStr] | None = Field(None, alias="dated-copies", description="Rotated copies named by date, as logrotate's 'dateext' names them, which are not read but can hold older requests. Only on the last page.")
+    entries: list[dict[str, object]] = Field(..., description='The matching requests, from the end of the log and its newest rotated copy on, in reverse order of logging. Their times need not decrease strictly, as requests can get logged late and rotated copies can overlap.')
+    gaps: list[dict[str, object]] = Field(..., description='The parts of the log this page skipped, as they could not be read.')
+    head_cursor: StrictStr | None = Field(None, alias="head-cursor", description="Where the log ended when this page started, to get the requests logged since with 'after'. Missing on pages continuing at a cursor, and if the log has no complete line yet or ends in an unfinished overlong one.")
+    invalid_lines: int = Field(..., alias="invalid-lines", description='The number of lines this page looked at that failed to parse.')
+    next_cursor: StrictStr | None = Field(None, alias="next-cursor", description='Where the next page continues, missing if no older requests are left to look at.')
+    searched_back_to: int | None = Field(None, alias="searched-back-to", description='The time of the oldest request this page looked at, matching or not, as UNIX epoch. Requests are not strictly ordered in the log, so older ones can still follow.')
+
+class GetNodesNodeAccessLogStatsResponse(ProxmoxBaseModel):
+    """Model for access_log_stats. Count the requests of the API access log of pveproxy and spiceproxy, including its rotated copies, in a time range, which defaults to the last day. As the log is not ordered by time, the counting reads through the files like a page of the access log does, as much as one page at most, and tells which parts of the files it covered. response."""
+    auth_ids: dict[str, object] = Field(..., alias="auth-ids", description='The users and API tokens with the most requests.')
+    clients: dict[str, object] = Field(..., description='The client addresses with the most requests.')
+    complete: bool = Field(..., description='Whether all lines of all files got counted. Otherwise, the counts are only those of the covered parts.')
+    covered: list[dict[str, object]] = Field(..., description='The parts of the files that got counted, newest first.')
+    dated_copies: list[StrictStr] | None = Field(None, alias="dated-copies", description="Rotated copies named by date, as logrotate's 'dateext' names them, which are not counted but can hold requests of the time range.")
+    gaps: list[dict[str, object]] = Field(..., description='The damaged compressed copy the counting stopped at.')
+    histogram: dict[str, object] = Field(..., description='The matching requests over the time range.')
+    invalid_lines: int = Field(..., alias="invalid-lines", description='The number of lines that failed to parse, of the ones parsed completely. Lines whose first fields already rule them out do not get parsed further.')
+    path_groups: dict[str, object] = Field(..., alias="path-groups", description='The path groups with the most requests, which replace the parts of API paths naming objects, like IDs, with placeholders.')
+    searched_back_to: int | None = Field(None, alias="searched-back-to", description='The time of the oldest request looked at, matching or not, as UNIX epoch. Requests are not strictly ordered in the log, so this does not bound the covered time.')
+    since: int = Field(..., description='The start of the time range, as UNIX epoch.')
+    statuses: dict[str, object] = Field(..., description='The status codes with the most requests. A missing key denotes an unknown status. Error counts include only requests with a known status.')
+    stopped: StrictStr | None = Field(None, description='Why the counting stopped before the oldest file ended.')
+    total: dict[str, object] = Field(..., description='The counts of all matching requests.')
+    until: int = Field(..., description='The end of the time range, as UNIX epoch.')
+
 class GetNodesNodeAplinfoResponse(RootModel[list[dict[str, object]]]):
     """Model for aplinfo. Get list of appliances. response."""
     root: list[dict[str, object]] = Field(...)
@@ -70,6 +99,37 @@ class GetNodesNodeAptResponse(RootModel[list[GetNodesNodeAptResponseItem]]):
 class GetNodesNodeAptChangelogResponse(RootModel[StrictStr]):
     """Model for changelog. Get package changelogs. response."""
     root: StrictStr = Field(...)
+
+class GetNodesNodeAptHistoryResponseItem(ProxmoxBaseModel):
+    """Model for history. List past APT transactions and their package changes, newest first. response."""
+    command_line: StrictStr | None = Field(None, alias="command-line", description='Command line of the APT invocation.')
+    comment: StrictStr | None = Field(None, description="Comment set through the 'APT::History::Comment' option.")
+    end_time: int | None = Field(None, alias="end-time", description='End time as Unix epoch, missing if the transaction is still running or got interrupted.')
+    error: StrictStr | None = Field(None, description='Error reported for the transaction, usually by dpkg.')
+    packages: list[dict[str, object]] | None = Field(None, description='Changed packages, in the order APT logged them.')
+    requested_by: StrictStr | None = Field(None, alias="requested-by", description='User who requested the transaction through sudo, pkexec or PackageKit.')
+    requested_by_uid: int | None = Field(None, alias="requested-by-uid", description='UID of the user who requested the transaction.')
+    running: bool | None = Field(None, description='Whether a transaction without end time is still running, or else got interrupted. Only the newest transaction can still be running. Missing if that could not be checked.')
+    start_index: int | None = Field(None, alias="start-index", description='Number of earlier transactions with the same start time in the same log file. Together with the start time, this identifies the transaction.')
+    start_time: int | None = Field(None, alias="start-time", description='Start time as Unix epoch.')
+
+class GetNodesNodeAptHistoryResponse(RootModel[list[GetNodesNodeAptHistoryResponseItem]]):
+    """List of items. history. List past APT transactions and their package changes, newest first. response."""
+    root: list[GetNodesNodeAptHistoryResponseItem] = Field(...)
+
+class GetNodesNodeAptInstalledChangelogResponseItem(ProxmoxBaseModel):
+    """Model for installed_changelog. Get the Debian changelog that an installed package ships, optionally limited to a version range. response."""
+    changes: StrictStr | None = Field(None, description='The changes as written in the changelog, usually as an indented list.')
+    date: StrictStr | None = Field(None, description='Date of the entry as written in the changelog.')
+    distributions: StrictStr | None = Field(None, description='Distributions the version was uploaded to, separated by spaces.')
+    maintainer: StrictStr | None = Field(None, description='Name and email address of the author of the entry.')
+    package: StrictStr | None = Field(None, description='Name of the source package.')
+    urgency: StrictStr | None = Field(None, description='Urgency of the upload.')
+    version: StrictStr | None = Field(None, description='Version of the source package.')
+
+class GetNodesNodeAptInstalledChangelogResponse(RootModel[list[GetNodesNodeAptInstalledChangelogResponseItem]]):
+    """List of items. installed_changelog. Get the Debian changelog that an installed package ships, optionally limited to a version range. response."""
+    root: list[GetNodesNodeAptInstalledChangelogResponseItem] = Field(..., description='The changelog entries, usually newest first.')
 
 class GetNodesNodeAptRepositoriesResponse(ProxmoxBaseModel):
     """Model for repositories. Get APT repository information. response."""
@@ -99,6 +159,22 @@ class PutNodesNodeAptRepositoriesResponse(RootModel[None]):
     """Model for add_repository. Add a standard repository to the configuration response."""
     root: None = Field(...)
 
+class GetNodesNodeAptTermlogResponse(RootModel[StrictStr]):
+    """Model for termlog. Get the terminal output of a past APT transaction. response."""
+    root: StrictStr = Field(..., description='The terminal output.')
+
+class GetNodesNodeAptTransactionChangelogsResponseItem(ProxmoxBaseModel):
+    """Model for transaction_changelogs. Get the changelog entries for the package changes of a past APT transaction, from the changelogs of the installed packages. response."""
+    entries: list[dict[str, object]] | None = Field(None, description='The entries of the versions that upgrades and downgrades changed between, for other changes only the newest one up to the new version, usually newest first.')
+    error: StrictStr | None = Field(None, description='Why the changelog could not be read.')
+    packages: list[dict[str, object]] | None = Field(None, description='The changes to binary packages of the source package that show these entries.')
+    source: StrictStr | None = Field(None, description='Name of the source package as its changelog lists it, or as APT names it for a changelog that could not be downloaded. Missing if no changelog is installed for the packages, or the source package is not known.')
+    unlisted_version: bool | None = Field(None, alias="unlisted-version", description='The changelog does not list the version the entries go up to, as for signed kernels, so the entries are only its newest one, which can belong to a later version.')
+
+class GetNodesNodeAptTransactionChangelogsResponse(RootModel[list[GetNodesNodeAptTransactionChangelogsResponseItem]]):
+    """List of items. transaction_changelogs. Get the changelog entries for the package changes of a past APT transaction, from the changelogs of the installed packages. response."""
+    root: list[GetNodesNodeAptTransactionChangelogsResponseItem] = Field(..., description='The changelog entries, grouped by source package, upgrades first, then downgrades, installs and other changes, each sorted by name.')
+
 class GetNodesNodeAptUpdateResponseItem(ProxmoxBaseModel):
     """Model for list_updates. List available updates. response."""
     arch: StrictStr | None = Field(None, alias="Arch", description='Package Architecture.')
@@ -124,6 +200,18 @@ class PostNodesNodeAptUpdateRequest(ProxmoxBaseModel):
 class PostNodesNodeAptUpdateResponse(RootModel[StrictStr]):
     """Model for update_database. This is used to resynchronize the package index files from their sources (apt-get update). response."""
     root: StrictStr = Field(...)
+
+class GetNodesNodeAptUpdateChangelogsResponseItem(ProxmoxBaseModel):
+    """Model for update_changelogs. Get the changelog entries for pending updates, grouped by source package. response."""
+    entries: list[dict[str, object]] | None = Field(None, description='The entries of the versions that upgrades and downgrades changed between, for other changes only the newest one up to the new version, usually newest first.')
+    error: StrictStr | None = Field(None, description='Why the changelog could not be read.')
+    packages: list[dict[str, object]] | None = Field(None, description='The changes to binary packages of the source package that show these entries.')
+    source: StrictStr | None = Field(None, description='Name of the source package as its changelog lists it, or as APT names it for a changelog that could not be downloaded. Missing if no changelog is installed for the packages, or the source package is not known.')
+    unlisted_version: bool | None = Field(None, alias="unlisted-version", description='The changelog does not list the version the entries go up to, as for signed kernels, so the entries are only its newest one, which can belong to a later version.')
+
+class GetNodesNodeAptUpdateChangelogsResponse(RootModel[list[GetNodesNodeAptUpdateChangelogsResponseItem]]):
+    """List of items. update_changelogs. Get the changelog entries for pending updates, grouped by source package. response."""
+    root: list[GetNodesNodeAptUpdateChangelogsResponseItem] = Field(..., description='The changelog entries, grouped by source package, upgrades first, then downgrades, installs and other changes, each sorted by name.')
 
 class GetNodesNodeAptVersionsResponseItem(ProxmoxBaseModel):
     """Model for versions. Get package information for important Proxmox packages. response."""
@@ -264,7 +352,7 @@ class PostNodesNodeCephInitRequest(ProxmoxBaseModel):
     disable_cephx: bool | None = Field(None, description='Disable cephx authentication.\n\nWARNING: cephx is a security feature protecting against man-in-the-middle attacks. Only consider disabling cephx if your network is private!')
     min_size: int | None = Field(None, description='Minimum number of available replicas per object to allow I/O')
     network: StrictStr | None = Field(None, description='Use specific network for all ceph related traffic')
-    pg_bits: int | None = Field(None, description='Placement group bits, used to specify the default number of placement groups.\n\nDepreacted. This setting was deprecated in recent Ceph versions.')
+    pg_bits: int | None = Field(None, description='Placement group bits, used to specify the default number of placement groups.\n\nDeprecated. This setting has been ignored since Ceph Nautilus.')
     size: int | None = Field(None, description='Targeted number of replicas per object')
 
 class PostNodesNodeCephInitResponse(RootModel[None]):
@@ -304,7 +392,7 @@ class DeleteNodesNodeCephMdsNameResponse(RootModel[StrictStr]):
 
 class PostNodesNodeCephMdsNameRequest(ProxmoxBaseModel):
     """Model for createmds. Create Ceph Metadata Server (MDS) request."""
-    hotstandby: bool | None = Field(None, description='Determines whether a ceph-mds daemon should poll and replay the log of an active MDS. Faster switch on MDS failure, but needs more idle resources.')
+    hotstandby: bool | None = Field(None, description='Determines whether a ceph-mds daemon should poll and replay the log of an active MDS. Faster switch on MDS failure, but needs more idle resources. Deprecated: the setting was removed in Ceph 14.1.1.')
 
 class PostNodesNodeCephMdsNameResponse(RootModel[StrictStr]):
     """Model for createmds. Create Ceph Metadata Server (MDS) response."""
@@ -524,12 +612,38 @@ class GetNodesNodeCephPoolNameStatusResponse(ProxmoxBaseModel):
     use_gmt_hitset: bool = Field(..., description='Set if hitsets use GMT timestamps (for cache-tier pools).')
     write_fadvise_dontneed: bool = Field(..., description='Set if the pool sets the FADV_DONTNEED hint on writes.')
 
+class GetNodesNodeCephReleasesResponseItem(ProxmoxBaseModel):
+    """Model for releases. List all known Ceph releases, marking which ones can be installed on this node. response."""
+    available: bool | None = Field(None, description="Whether this release can be installed on this node, that is, it has packages for the node's architecture and current Proxmox VE release.")
+    is_default: bool | None = Field(None, alias="is-default", description='Whether this release gets installed on this node if none is chosen, that is, the newest release running on other cluster nodes, or else the default for new installations.')
+    release: StrictStr | None = Field(None, description="The Ceph release code name, for example 'squid'.")
+    unsupported: bool | None = Field(None, description='Whether this release is not (yet) supported for production use.')
+    version: StrictStr | None = Field(None, description="The Ceph release major version, for example '19.2'.")
+
+class GetNodesNodeCephReleasesResponse(RootModel[list[GetNodesNodeCephReleasesResponseItem]]):
+    """List of items. releases. List all known Ceph releases, marking which ones can be installed on this node. response."""
+    root: list[GetNodesNodeCephReleasesResponseItem] = Field(...)
+
 class PostNodesNodeCephRestartRequest(ProxmoxBaseModel):
     """Model for restart. Restart ceph services. request."""
     service: StrictStr | None = Field(None, description='Ceph service name.')
 
 class PostNodesNodeCephRestartResponse(RootModel[StrictStr]):
     """Model for restart. Restart ceph services. response."""
+    root: StrictStr = Field(...)
+
+class PostNodesNodeCephRestartBulkRequest(ProxmoxBaseModel):
+    """Model for restart_bulk. Rolling restart of all Ceph OSDs on this node. Each OSD is restarted only after Ceph reports the previous one is back up and the next one is safe to stop. For non-OSD Ceph daemons, use the cluster-wide endpoint at /cluster/ceph/restart-bulk. The 'noout' flag is applied only to the OSDs targeted by this run, so unrelated OSDs on other nodes that fail during the restart window still get out-marked normally. Aborting the resulting task (for example via 'pvesh task stop') triggers a SIGTERM handler that unsets the per-OSD 'noout' if this endpoint set it. Per-daemon progress is checkpointed in Ceph's config-key store ('pve/ceph-bulk-restart/node/<node>'), so an aborted run can be resumed by re-issuing this endpoint with 'resume=1'. request."""
+    dry_run: bool | None = Field(None, alias="dry-run", description='Log the plan (which OSDs would be restarted, in what order) without actually doing anything.')
+    force: bool | None = Field(None, description='Proceed past a HEALTH_WARN with non-benign checks like PG_DEGRADED, SLOW_OPS, or MON_DOWN. A blocking HEALTH_ERR is fatal regardless of this flag. Checks that ceph reports as muted, and checks known to be harmless for a rolling restart, never block and are named in the task log. The cluster-wide OSD map flags are only ever evaluated for an OSD restart, since they govern nothing a mon, mgr or mds restart touches. The operator is responsible for confirming the cluster is stable enough to absorb a rolling restart.')
+    only_outdated: bool | None = Field(None, alias="only-outdated", description='Restart only OSDs whose running version differs from the locally-installed ceph-osd binary. Useful for post-upgrade rolling restarts that should touch only daemons that need it. Refuses if the local binary version cannot be determined. Ignored on resume (the saved plan is used as-is).')
+    resume: bool | None = Field(None, description="Resume an aborted bulk-restart from the checkpoint stored in Ceph's config-key store. The plan and noout decision from the prior run are honored; 'set-noout' is ignored. When false (default), the endpoint refuses to start if a checkpoint exists for this node, to avoid silently overwriting in-progress work.")
+    service_type: StrictStr = Field(..., alias="service-type", description='Ceph daemon type to restart. Only OSDs can be rolling-restarted on a per-node basis.')
+    set_noout: bool | None = Field(None, alias="set-noout", description="Set the 'noout' flag on each OSD targeted by this run for the duration of the rolling restart, and unset it on completion. Per-OSD rather than cluster-wide so that unrelated OSDs failing on other nodes still trigger backfill normally.")
+    timeout: int | None = Field(None, description='Per-OSD timeout (in seconds). Bounds both the wait for a restarted OSD to come back up and the wait for recovery to quiesce enough that Ceph reports the next OSD safe to stop. Default sized for busy clusters where multi-TB OSDs with many PGs can need several minutes to clear peering after a restart; bump higher for very large or heavily-loaded OSDs.')
+
+class PostNodesNodeCephRestartBulkResponse(RootModel[StrictStr]):
+    """Model for restart_bulk. Rolling restart of all Ceph OSDs on this node. Each OSD is restarted only after Ceph reports the previous one is back up and the next one is safe to stop. For non-OSD Ceph daemons, use the cluster-wide endpoint at /cluster/ceph/restart-bulk. The 'noout' flag is applied only to the OSDs targeted by this run, so unrelated OSDs on other nodes that fail during the restart window still get out-marked normally. Aborting the resulting task (for example via 'pvesh task stop') triggers a SIGTERM handler that unsets the per-OSD 'noout' if this endpoint set it. Per-daemon progress is checkpointed in Ceph's config-key store ('pve/ceph-bulk-restart/node/<node>'), so an aborted run can be resumed by re-issuing this endpoint with 'resume=1'. response."""
     root: StrictStr = Field(...)
 
 class GetNodesNodeCephRulesResponseItem(ProxmoxBaseModel):
@@ -582,7 +696,7 @@ class PostNodesNodeCertificatesAcmeCertificateResponse(RootModel[StrictStr]):
 
 class PutNodesNodeCertificatesAcmeCertificateRequest(ProxmoxBaseModel):
     """Model for renew_certificate. Renew existing certificate from CA. request."""
-    force: bool | None = Field(None, description='Force renewal even if expiry is more than 30 days away.')
+    force: bool | None = Field(None, description='Force renewal even if the certificate is not yet due for renewal.')
 
 class PutNodesNodeCertificatesAcmeCertificateResponse(RootModel[StrictStr]):
     """Model for renew_certificate. Renew existing certificate from CA. response."""
@@ -717,6 +831,7 @@ class GetNodesNodeDisksListResponseItem(ProxmoxBaseModel):
     parent: StrictStr | None = Field(None, description='For partitions only. The device path of the disk the partition resides on.')
     serial: StrictStr | None = Field(None)
     size: int | None = Field(None)
+    transport: StrictStr | None = Field(None, description="The device transport, for example 'sata', 'sas', 'usb', 'fc', 'nvme', 'nvme-fc', or 'nvme-tcp'.")
     used: StrictStr | None = Field(None)
     vendor: StrictStr | None = Field(None)
     wwn: StrictStr | None = Field(None)
@@ -732,8 +847,8 @@ class GetNodesNodeDisksLvmResponse(ProxmoxBaseModel):
 
 class PostNodesNodeDisksLvmRequest(ProxmoxBaseModel):
     """Model for create. Create an LVM Volume Group request."""
-    add_storage: bool | None = Field(None, description='Configure storage using the Volume Group')
-    device: StrictStr = Field(..., description='The block device you want to create the volume group on')
+    add_storage: bool | None = Field(None, description='Configure storage using the Volume Group. On a SAN LUN, this adds a new shared storage for all nodes. On a local disk, the storage is for this node, or this node joins a matching storage of that ID.')
+    device: StrictStr = Field(..., description='The block device you want to create the volume group on. Multipath mapped devices are supported.')
     name: StrictStr = Field(..., description='The storage identifier.')
 
 class PostNodesNodeDisksLvmResponse(RootModel[StrictStr]):
@@ -741,12 +856,12 @@ class PostNodesNodeDisksLvmResponse(RootModel[StrictStr]):
     root: StrictStr = Field(...)
 
 class DeleteNodesNodeDisksLvmNameRequest(ProxmoxBaseModel):
-    """Model for delete. Remove an LVM Volume Group. request."""
+    """Model for delete. Remove an LVM Volume Group. Refused if a shared storage is configured with a volume group of that name. request."""
     cleanup_config: bool | None = Field(None, alias="cleanup-config", description='Marks associated storage(s) as not available on this node anymore or removes them from the configuration (if configured for this node only).')
     cleanup_disks: bool | None = Field(None, alias="cleanup-disks", description='Also wipe disks so they can be repurposed afterwards.')
 
 class DeleteNodesNodeDisksLvmNameResponse(RootModel[StrictStr]):
-    """Model for delete. Remove an LVM Volume Group. response."""
+    """Model for delete. Remove an LVM Volume Group. Refused if a shared storage is configured with a volume group of that name. response."""
     root: StrictStr = Field(...)
 
 class GetNodesNodeDisksLvmthinResponseItem(ProxmoxBaseModel):
@@ -791,7 +906,7 @@ class GetNodesNodeDisksSmartResponse(ProxmoxBaseModel):
 
 class PutNodesNodeDisksWipediskRequest(ProxmoxBaseModel):
     """Model for wipe_disk. Wipe a disk or partition. request."""
-    disk: StrictStr = Field(..., description='Block device name')
+    disk: StrictStr = Field(..., description='Block device name. A SAN LUN can also be given by a by-id or mapper name.')
 
 class PutNodesNodeDisksWipediskResponse(RootModel[StrictStr]):
     """Model for wipe_disk. Wipe a disk or partition. response."""
@@ -896,7 +1011,7 @@ class GetNodesNodeFirewallOptionsResponse(ProxmoxBaseModel):
     nf_conntrack_max: int | None = Field(None, description='Maximum number of tracked connections.')
     nf_conntrack_tcp_timeout_established: int | None = Field(None, description='Conntrack established timeout.')
     nf_conntrack_tcp_timeout_syn_recv: int | None = Field(None, description='Conntrack syn recv timeout.')
-    nftables: bool | None = Field(None, description='Enable nftables based firewall (tech preview)')
+    nftables: bool | None = Field(None, description='Enable nftables based firewall.')
     nosmurfs: bool | None = Field(None, description='Enable SMURFS filter.')
     protection_synflood: bool | None = Field(None, description='Enable synflood protection')
     protection_synflood_burst: int | None = Field(None, description='Synflood protection rate burst by ip src.')
@@ -920,7 +1035,7 @@ class PutNodesNodeFirewallOptionsRequest(ProxmoxBaseModel):
     nf_conntrack_max: int | None = Field(None, description='Maximum number of tracked connections.')
     nf_conntrack_tcp_timeout_established: int | None = Field(None, description='Conntrack established timeout.')
     nf_conntrack_tcp_timeout_syn_recv: int | None = Field(None, description='Conntrack syn recv timeout.')
-    nftables: bool | None = Field(None, description='Enable nftables based firewall (tech preview)')
+    nftables: bool | None = Field(None, description='Enable nftables based firewall.')
     nosmurfs: bool | None = Field(None, description='Enable SMURFS filter.')
     protection_synflood: bool | None = Field(None, description='Enable synflood protection')
     protection_synflood_burst: int | None = Field(None, description='Synflood protection rate burst by ip src.')
@@ -1141,6 +1256,7 @@ class GetNodesNodeLxcResponse(RootModel[list[GetNodesNodeLxcResponseItem]]):
 
 class PostNodesNodeLxcRequest(ProxmoxBaseModel):
     """Model for create_vm. Create or restore a container. request."""
+    allow_identity_mismatch: bool | None = Field(None, alias="allow-identity-mismatch", description="Allow overwriting an existing guest with a backup of another guest, as detected by a different 'uid' in 'meta'. The guest then keeps its own uid. Not needed to restore a backup again over a guest that an unfinished restore of that backup left behind. A restore from standard input over a container that has a uid always needs this option, as the backup cannot be checked beforehand.")
     arch: StrictStr | None = Field(None, description='OS architecture type.')
     bwlimit: float | None = Field(None, description='Override I/O bandwidth limit (in KiB/s).')
     cmode: StrictStr | None = Field(None, description="Console mode. By default, the console command tries to open a connection to one of the available tty devices. By setting cmode to 'console' it tries to attach to /dev/console instead. If you set cmode to 'shell', it simply invokes a shell inside the container (no login).")
@@ -1162,7 +1278,7 @@ class PostNodesNodeLxcRequest(ProxmoxBaseModel):
     lock: StrictStr | None = Field(None, description='Lock/unlock the container.')
     memory: int | None = Field(None, description='Amount of RAM for the container in MB.')
     mp_n: StrictStr | None = Field(None, alias="mp[n]", description='Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.')
-    nameserver: StrictStr | None = Field(None, description='Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.')
+    nameserver: StrictStr | None = Field(None, description='Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.')
     net_n: StrictStr | None = Field(None, alias="net[n]", description='Specifies network interfaces for the container.')
     onboot: bool | None = Field(None, description='Specifies whether a container will be started during system bootup.')
     ostemplate: StrictStr = Field(..., description='The OS template or backup file.')
@@ -1182,7 +1298,7 @@ class PostNodesNodeLxcRequest(ProxmoxBaseModel):
     template: bool | None = Field(None, description='Enable/disable Template.')
     timezone: StrictStr | None = Field(None, description="Time zone to use in the container. If option isn't set, then nothing will be done. Can be set to 'host' to match the host time zone, or an arbitrary time zone option from /usr/share/zoneinfo/zone.tab")
     tty: int | None = Field(None, description='Specify the number of tty available to the container')
-    unique: bool | None = Field(None, description='Assign a unique random ethernet address.')
+    unique: bool | None = Field(None, description='Assign a unique random ethernet address and do not adopt the guest uid of the backup.')
     unprivileged: bool | None = Field(None, description='Makes the container run as unprivileged user. For creation, the default is 1. For restore, the default is the value from the backup. (Should not be modified manually.)')
     unused_n: StrictStr | None = Field(None, alias="unused[n]", description='Reference to unused volumes. This is used internally, and should not be modified manually.')
     vmid: int = Field(..., description='The (unique) ID of the VM.')
@@ -1245,8 +1361,9 @@ class GetNodesNodeLxcVmidConfigResponse(ProxmoxBaseModel):
     lock: StrictStr | None = Field(None, description='Lock/unlock the container.')
     lxc: list[list[StrictStr]] | None = Field(None, description='Array of lxc low-level configurations ([[key1, value1], [key2, value2] ...]).')
     memory: int | None = Field(None, description='Amount of RAM for the container in MB.')
+    meta: StrictStr | None = Field(None, description='Read-only meta-information about this container, for example its creation time.')
     mp_n: StrictStr | None = Field(None, alias="mp[n]", description='Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.')
-    nameserver: StrictStr | None = Field(None, description='Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.')
+    nameserver: StrictStr | None = Field(None, description='Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.')
     net_n: StrictStr | None = Field(None, alias="net[n]", description='Specifies network interfaces for the container.')
     onboot: bool | None = Field(None, description='Specifies whether a container will be started during system bootup.')
     ostype: StrictStr | None = Field(None, description="OS type. This is used to setup configuration inside the container, and corresponds to lxc setup scripts in /usr/share/lxc/config/<ostype>.common.conf. Value 'unmanaged' can be used to skip and OS specific setup.")
@@ -1283,7 +1400,7 @@ class PutNodesNodeLxcVmidConfigRequest(ProxmoxBaseModel):
     lock: StrictStr | None = Field(None, description='Lock/unlock the container.')
     memory: int | None = Field(None, description='Amount of RAM for the container in MB.')
     mp_n: StrictStr | None = Field(None, alias="mp[n]", description='Use volume as container mount point. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume.')
-    nameserver: StrictStr | None = Field(None, description='Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.')
+    nameserver: StrictStr | None = Field(None, description='Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.')
     net_n: StrictStr | None = Field(None, alias="net[n]", description='Specifies network interfaces for the container.')
     onboot: bool | None = Field(None, description='Specifies whether a container will be started during system bootup.')
     ostype: StrictStr | None = Field(None, description="OS type. This is used to setup configuration inside the container, and corresponds to lxc setup scripts in /usr/share/lxc/config/<ostype>.common.conf. Value 'unmanaged' can be used to skip and OS specific setup.")
@@ -1307,6 +1424,7 @@ class PutNodesNodeLxcVmidConfigResponse(RootModel[None]):
 class GetNodesNodeLxcVmidFeatureResponse(ProxmoxBaseModel):
     """Model for vm_feature. Check if feature for virtual machine is available. response."""
     has_feature: bool = Field(..., alias="hasFeature")
+    nodes: list[StrictStr] | None = Field(None, description="Nodes that pass the guest identity check for a clone. The storages of the container are not checked. Not set for 'snapshot'.")
 
 class GetNodesNodeLxcVmidFirewallResponse(RootModel[list[dict[str, object]]]):
     """Model for index. Directory index. response."""
@@ -1347,7 +1465,7 @@ class GetNodesNodeLxcVmidFirewallAliasesNameResponse(RootModel[dict[str, object]
 
 class PutNodesNodeLxcVmidFirewallAliasesNameRequest(ProxmoxBaseModel):
     """Model for update_alias. Update IP or Network alias. request."""
-    cidr: StrictStr = Field(..., description='Network/IP specification in CIDR format.')
+    cidr: StrictStr | None = Field(None, description='Network/IP specification in CIDR format.')
     comment: StrictStr | None = Field(None)
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     rename: StrictStr | None = Field(None, description='Rename an existing alias.')
@@ -1591,7 +1709,7 @@ class GetNodesNodeLxcVmidMigrateResponse(ProxmoxBaseModel):
     """Model for migrate_vm_precondition. Get preconditions for migration. response."""
     allowed_nodes: list[StrictStr] | None = Field(None, alias="allowed-nodes", description='List of nodes allowed for migration.')
     dependent_ha_resources: list[StrictStr] | None = Field(None, alias="dependent-ha-resources", description='HA resources, which will be migrated to the same target node as the VM, because these are in positive affinity with the VM.')
-    not_allowed_nodes: dict[str, object] | None = Field(None, alias="not-allowed-nodes", description='List of not allowed nodes with additional information.')
+    not_allowed_nodes: dict[str, object] | None = Field(None, alias="not-allowed-nodes", description='Not allowed nodes, keyed by node name, with the reasons.')
     running: bool = Field(..., description='Determines if the container is running.')
 
 class PostNodesNodeLxcVmidMigrateRequest(ProxmoxBaseModel):
@@ -1599,6 +1717,7 @@ class PostNodesNodeLxcVmidMigrateRequest(ProxmoxBaseModel):
     bwlimit: float | None = Field(None, description='Override I/O bandwidth limit (in KiB/s).')
     online: bool | None = Field(None, description='Use online/live migration.')
     restart: bool | None = Field(None, description='Use restart migration')
+    skip_config_check: bool | None = Field(None, alias="skip-config-check", description='For intra-cluster migration. Skip checking if the configuration can be parsed successfully by the target. Using this flag can lead to dropped or ignored configuration options if the target is too old to parse them.')
     target: StrictStr = Field(..., description='Target node.')
     target_storage: StrictStr | None = Field(None, alias="target-storage", description="Mapping from source to target storages. Providing only a single storage ID maps all source storages to that storage. Providing the special value '1' will map each source storage to itself.")
     timeout: int | None = Field(None, description='Timeout in seconds for shutdown for restart migration')
@@ -1651,6 +1770,7 @@ class GetNodesNodeLxcVmidPendingResponse(RootModel[list[GetNodesNodeLxcVmidPendi
 
 class PostNodesNodeLxcVmidRemoteMigrateRequest(ProxmoxBaseModel):
     """Model for remote_migrate_vm. Migrate the container to another cluster. Creates a new migration task. EXPERIMENTAL feature! request."""
+    allow_new_uid: bool | None = Field(None, alias="allow-new-uid", description='Allow the migration if another guest in the target cluster already has the uid of this guest. The migrated guest then gets a new uid.')
     bwlimit: float | None = Field(None, description='Override I/O bandwidth limit (in KiB/s).')
     delete: bool | None = Field(None, description='Delete the original CT and related data after successful migration. By default the original CT is kept on the source cluster in a stopped state.')
     online: bool | None = Field(None, description='Use online/live migration.')
@@ -1779,6 +1899,7 @@ class GetNodesNodeLxcVmidStatusCurrentResponse(ProxmoxBaseModel):
     status: StrictStr = Field(..., description='LXC Container status.')
     tags: StrictStr | None = Field(None, description='The current configured tags, if any.')
     template: bool | None = Field(None, description='Determines if the guest is a template.')
+    uid: StrictStr | None = Field(None, description='Random identifier of the guest, kept across restores and migrations and independent of the VMID.')
     uptime: int | None = Field(None, description='Uptime in seconds.')
     vmid: int = Field(..., description='The (unique) ID of the VM.')
 
@@ -1855,6 +1976,14 @@ class GetNodesNodeLxcVmidVncwebsocketResponse(ProxmoxBaseModel):
     """Model for vncwebsocket. Opens a websocket for VNC traffic. response."""
     port: StrictStr = Field(...)
 
+class PutNodesNodeMaintenanceRequest(ProxmoxBaseModel):
+    """Model for maintenance_set. Enable or disable maintenance mode for the node. Currently, this only requests the HA node maintenance mode. request."""
+    maintenance_mode: StrictStr = Field(..., alias="maintenance-mode", description='Specifies whether the maintenance mode for the specified node should be enabled or disabled.')
+
+class PutNodesNodeMaintenanceResponse(RootModel[None]):
+    """Model for maintenance_set. Enable or disable maintenance mode for the node. Currently, this only requests the HA node maintenance mode. response."""
+    root: None = Field(...)
+
 class PostNodesNodeMigrateallRequest(ProxmoxBaseModel):
     """Model for migrateall. Migrate all VMs and Containers. request."""
     max_workers: int | None = Field(None, alias="max-workers", description="Maximal number of parallel migration job. If not set, uses'max_workers' from datacenter.cfg. One of both must be set!")
@@ -1901,6 +2030,7 @@ class GetNodesNodeNetworkResponseItem(ProxmoxBaseModel):
     gateway: StrictStr | None = Field(None, description='Default gateway address.')
     gateway6: StrictStr | None = Field(None, description='Default ipv6 gateway address.')
     iface: StrictStr | None = Field(None, description='Network interface name.')
+    ip_forward: bool | None = Field(None, alias="ip-forward", description='Enable IPv4 forwarding on the interface, which is needed for interfaces that receive routed traffic, for example the uplinks of an SDN zone with a dedicated VRF. If not set, forwarding follows the defaults of the interface.')
     link_type: StrictStr | None = Field(None, alias="link-type", description='The link type.')
     method: StrictStr | None = Field(None, description='The network configuration method for IPv4.')
     method6: StrictStr | None = Field(None, description='The network configuration method for IPv6.')
@@ -1921,6 +2051,7 @@ class GetNodesNodeNetworkResponseItem(ProxmoxBaseModel):
     vlan_id: int | None = Field(None, alias="vlan-id", description='vlan-id for a custom named vlan interface (ifupdown2 only).')
     vlan_protocol: StrictStr | None = Field(None, alias="vlan-protocol", description='The VLAN protocol.')
     vlan_raw_device: StrictStr | None = Field(None, alias="vlan-raw-device", description='Specify the raw interface for the vlan interface.')
+    vrf: StrictStr | None = Field(None, description='VRF master interface.')
     vxlan_id: int | None = Field(None, alias="vxlan-id", description='The VXLAN ID.')
     vxlan_local_tunnelip: StrictStr | None = Field(None, alias="vxlan-local-tunnelip", description='The VXLAN local tunnel IP.')
     vxlan_physdev: StrictStr | None = Field(None, alias="vxlan-physdev", description='The physical device for the VXLAN tunnel.')
@@ -1948,6 +2079,7 @@ class PostNodesNodeNetworkRequest(ProxmoxBaseModel):
     gateway: StrictStr | None = Field(None, description='Default gateway address.')
     gateway6: StrictStr | None = Field(None, description='Default ipv6 gateway address.')
     iface: StrictStr = Field(..., description='Network interface name.')
+    ip_forward: bool | None = Field(None, alias="ip-forward", description='Enable IPv4 forwarding on the interface, which is needed for interfaces that receive routed traffic, for example the uplinks of an SDN zone with a dedicated VRF. If not set, forwarding follows the defaults of the interface.')
     mtu: int | None = Field(None, description='MTU.')
     netmask: StrictStr | None = Field(None, description='Network mask.')
     netmask6: int | None = Field(None, description='Network mask.')
@@ -1960,6 +2092,7 @@ class PostNodesNodeNetworkRequest(ProxmoxBaseModel):
     type: StrictStr = Field(..., description='Network interface type')
     vlan_id: int | None = Field(None, alias="vlan-id", description='vlan-id for a custom named vlan interface (ifupdown2 only).')
     vlan_raw_device: StrictStr | None = Field(None, alias="vlan-raw-device", description='Specify the raw interface for the vlan interface.')
+    vrf: StrictStr | None = Field(None, description='VRF master interface.')
 
 class PostNodesNodeNetworkResponse(RootModel[None]):
     """Model for create_network. Create network device configuration response."""
@@ -1981,6 +2114,7 @@ class GetNodesNodeNetworkIfaceResponse(ProxmoxBaseModel):
     """Model for network_config. Read network device configuration response."""
     method: StrictStr = Field(...)
     type: StrictStr = Field(...)
+    vrf_readonly: bool | None = Field(None, alias="vrf-readonly", description='The interface belongs to an SDN fabric, an existing VRF can be removed but no VRF can be set.')
 
 class PutNodesNodeNetworkIfaceRequest(ProxmoxBaseModel):
     """Model for update_network. Update network device configuration request."""
@@ -2000,6 +2134,7 @@ class PutNodesNodeNetworkIfaceRequest(ProxmoxBaseModel):
     delete: StrictStr | None = Field(None, description='A list of settings you want to delete.')
     gateway: StrictStr | None = Field(None, description='Default gateway address.')
     gateway6: StrictStr | None = Field(None, description='Default ipv6 gateway address.')
+    ip_forward: bool | None = Field(None, alias="ip-forward", description='Enable IPv4 forwarding on the interface, which is needed for interfaces that receive routed traffic, for example the uplinks of an SDN zone with a dedicated VRF. If not set, forwarding follows the defaults of the interface.')
     mtu: int | None = Field(None, description='MTU.')
     netmask: StrictStr | None = Field(None, description='Network mask.')
     netmask6: int | None = Field(None, description='Network mask.')
@@ -2012,6 +2147,7 @@ class PutNodesNodeNetworkIfaceRequest(ProxmoxBaseModel):
     type: StrictStr = Field(..., description='Network interface type')
     vlan_id: int | None = Field(None, alias="vlan-id", description='vlan-id for a custom named vlan interface (ifupdown2 only).')
     vlan_raw_device: StrictStr | None = Field(None, alias="vlan-raw-device", description='Specify the raw interface for the vlan interface.')
+    vrf: StrictStr | None = Field(None, description='VRF master interface.')
 
 class PutNodesNodeNetworkIfaceResponse(RootModel[None]):
     """Model for update_network. Update network device configuration response."""
@@ -2057,6 +2193,7 @@ class PostNodesNodeQemuRequest(ProxmoxBaseModel):
     acpi: bool | None = Field(None, description='Enable/disable ACPI.')
     affinity: StrictStr | None = Field(None, description='List of host cores used to execute guest processes, for example: 0,5,8-11')
     agent: StrictStr | None = Field(None, description='Enable/disable communication with the QEMU Guest Agent and its properties.')
+    allow_identity_mismatch: bool | None = Field(None, alias="allow-identity-mismatch", description="Allow overwriting an existing guest with a backup of another guest, as detected by a different 'uid' in 'meta'. The guest then keeps its own uid. Not needed to restore a backup again over a guest that an unfinished restore of that backup left behind.")
     allow_ksm: bool | None = Field(None, alias="allow-ksm", description='Allow memory pages of this guest to be merged via KSM (Kernel Samepage Merging).')
     amd_sev: StrictStr | None = Field(None, alias="amd-sev", description='Secure Encrypted Virtualization (SEV) features by AMD CPUs')
     arch: StrictStr | None = Field(None, description='Virtual processor architecture. Defaults to the host architecture.')
@@ -2135,7 +2272,7 @@ class PostNodesNodeQemuRequest(ProxmoxBaseModel):
     tdf: bool | None = Field(None, description='Enable/disable time drift fix.')
     template: bool | None = Field(None, description='Enable/disable Template.')
     tpmstate0: StrictStr | None = Field(None, description="Configure a Disk for storing TPM state. The format is fixed to 'raw'. Use the special syntax STORAGE_ID:SIZE_IN_GiB to allocate a new volume. Note that SIZE_IN_GiB is ignored here and 4 MiB will be used instead. Use STORAGE_ID:0 and the 'import-from' parameter to import from an existing volume.")
-    unique: bool | None = Field(None, description='Assign a unique random ethernet address.')
+    unique: bool | None = Field(None, description='Assign a unique random ethernet address and do not adopt the guest uid of the backup.')
     unused_n: StrictStr | None = Field(None, alias="unused[n]", description='Reference to unused volumes. This is used internally, and should not be modified manually.')
     usb_n: StrictStr | None = Field(None, alias="usb[n]", description='Configure an USB device (n is 0 to 4, for machine version >= 7.1 and ostype l26 or windows > 7, n can be up to 14).')
     vcpus: int | None = Field(None, description='Number of hotplugged vcpus.')
@@ -2231,12 +2368,28 @@ class PostNodesNodeQemuVmidAgentFstrimResponse(RootModel[dict[str, object]]):
     """Model for fstrim. Execute fstrim. response."""
     root: dict[str, object] = Field(...)
 
+class GetNodesNodeQemuVmidAgentGetCpustatsResponse(RootModel[dict[str, object]]):
+    """Model for get-cpustats. Execute get-cpustats. response."""
+    root: dict[str, object] = Field(...)
+
+class GetNodesNodeQemuVmidAgentGetDisksResponse(RootModel[dict[str, object]]):
+    """Model for get-disks. Execute get-disks. response."""
+    root: dict[str, object] = Field(...)
+
+class GetNodesNodeQemuVmidAgentGetDiskstatsResponse(RootModel[dict[str, object]]):
+    """Model for get-diskstats. Execute get-diskstats. response."""
+    root: dict[str, object] = Field(...)
+
 class GetNodesNodeQemuVmidAgentGetFsinfoResponse(RootModel[dict[str, object]]):
     """Model for get-fsinfo. Execute get-fsinfo. response."""
     root: dict[str, object] = Field(...)
 
 class GetNodesNodeQemuVmidAgentGetHostNameResponse(RootModel[dict[str, object]]):
     """Model for get-host-name. Execute get-host-name. response."""
+    root: dict[str, object] = Field(...)
+
+class GetNodesNodeQemuVmidAgentGetLoadResponse(RootModel[dict[str, object]]):
+    """Model for get-load. Execute get-load. response."""
     root: dict[str, object] = Field(...)
 
 class GetNodesNodeQemuVmidAgentGetMemoryBlockInfoResponse(RootModel[dict[str, object]]):
@@ -2309,7 +2462,7 @@ class PostNodesNodeQemuVmidCloneRequest(ProxmoxBaseModel):
     """Model for clone_vm. Create a copy of virtual machine/template. request."""
     bwlimit: int | None = Field(None, description='Override I/O bandwidth limit (in KiB/s).')
     description: StrictStr | None = Field(None, description='Description for the new VM.')
-    format: StrictStr | None = Field(None, description='Target format for file storage. Only valid for full clone.')
+    format: StrictStr | None = Field(None, description="Target disk format. Only valid for full clone. If the target storage does not support the format, the storage's default format is used instead.")
     full: bool | None = Field(None, description='Create a full copy of all disks. This is always done when you clone a normal VM. For VM templates, we try to create a linked clone by default.')
     name: StrictStr | None = Field(None, description='Set a name for the new VM.')
     newid: int = Field(..., description='VMID for the clone.')
@@ -2632,7 +2785,7 @@ class PostNodesNodeQemuVmidDbusVmstateResponse(RootModel[None]):
 class GetNodesNodeQemuVmidFeatureResponse(ProxmoxBaseModel):
     """Model for vm_feature. Check if feature for virtual machine is available. response."""
     has_feature: bool = Field(..., alias="hasFeature")
-    nodes: list[StrictStr] = Field(...)
+    nodes: list[StrictStr] = Field(..., description="Nodes on which the storages of the VM are available, for 'clone' and 'copy' only those that keep the guest identity.")
 
 class GetNodesNodeQemuVmidFirewallResponse(RootModel[list[dict[str, object]]]):
     """Model for index. Directory index. response."""
@@ -2673,7 +2826,7 @@ class GetNodesNodeQemuVmidFirewallAliasesNameResponse(RootModel[dict[str, object
 
 class PutNodesNodeQemuVmidFirewallAliasesNameRequest(ProxmoxBaseModel):
     """Model for update_alias. Update IP or Network alias. request."""
-    cidr: StrictStr = Field(..., description='Network/IP specification in CIDR format.')
+    cidr: StrictStr | None = Field(None, description='Network/IP specification in CIDR format.')
     comment: StrictStr | None = Field(None)
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.')
     rename: StrictStr | None = Field(None, description='Rename an existing alias.')
@@ -2909,7 +3062,7 @@ class GetNodesNodeQemuVmidMigrateResponse(ProxmoxBaseModel):
     local_resources: list[StrictStr] = Field(..., description='List local resources (e.g. pci, usb) that block migration.')
     mapped_resource_info: dict[str, object] = Field(..., alias="mapped-resource-info", description="Object of mapped resources with additional information such if they're live migratable.")
     mapped_resources: list[StrictStr] = Field(..., alias="mapped-resources", description="List of mapped resources e.g. pci, usb. Deprecated, use 'mapped-resource-info' instead.")
-    not_allowed_nodes: dict[str, object] | None = Field(None, description='List of not allowed nodes with additional information.')
+    not_allowed_nodes: dict[str, object] | None = Field(None, description='Not allowed nodes, keyed by node name, with the reasons.')
     running: bool = Field(..., description='Determines if the VM is running.')
 
 class PostNodesNodeQemuVmidMigrateRequest(ProxmoxBaseModel):
@@ -2919,6 +3072,7 @@ class PostNodesNodeQemuVmidMigrateRequest(ProxmoxBaseModel):
     migration_network: StrictStr | None = Field(None, description='CIDR of the (sub) network that is used for migration.')
     migration_type: StrictStr | None = Field(None, description='Migration traffic is encrypted using an SSH tunnel by default. On secure, completely private networks this can be disabled to increase performance.')
     online: bool | None = Field(None, description='Use online/live migration if VM is running. Ignored if VM is stopped.')
+    skip_config_check: bool | None = Field(None, alias="skip-config-check", description='For intra-cluster migration. Skip checking if the configuration can be parsed successfully by the target. Using this flag can lead to dropped configuration options if the target is too old to parse them.')
     target: StrictStr = Field(..., description='Target node.')
     targetstorage: StrictStr | None = Field(None, description="Mapping from source to target storages. Providing only a single storage ID maps all source storages to that storage. Providing the special value '1' will map each source storage to itself.")
     with_conntrack_state: bool | None = Field(None, alias="with-conntrack-state", description='Whether to migrate conntrack entries for running VMs.')
@@ -2942,7 +3096,7 @@ class PostNodesNodeQemuVmidMoveDiskRequest(ProxmoxBaseModel):
     delete: bool | None = Field(None, description='Delete the original disk after successful copy. By default the original disk is kept as unused disk.')
     digest: StrictStr | None = Field(None, description='Prevent changes if current configuration file has different SHA1 digest. This can be used to prevent concurrent modifications.')
     disk: StrictStr = Field(..., description='The disk you want to move.')
-    format: StrictStr | None = Field(None, description='Target Format.')
+    format: StrictStr | None = Field(None, description="Target disk format. Only used when moving to a different storage. If the target storage does not support the format, the storage's default format is used instead.")
     storage: StrictStr | None = Field(None, description='Target storage.')
     target_digest: StrictStr | None = Field(None, alias="target-digest", description='Prevent changes if the current config file of the target VM has a different SHA1 digest. This can be used to detect concurrent modifications.')
     target_disk: StrictStr | None = Field(None, alias="target-disk", description='The config key the disk will be moved to on the target VM (for example, ide0 or scsi1). Default is the source disk key.')
@@ -2981,6 +3135,7 @@ class GetNodesNodeQemuVmidPendingResponse(RootModel[list[GetNodesNodeQemuVmidPen
 
 class PostNodesNodeQemuVmidRemoteMigrateRequest(ProxmoxBaseModel):
     """Model for remote_migrate_vm. Migrate virtual machine to a remote cluster. Creates a new migration task. EXPERIMENTAL feature! request."""
+    allow_new_uid: bool | None = Field(None, alias="allow-new-uid", description='Allow the migration if another guest in the target cluster already has the uid of this guest. The migrated guest then gets a new uid.')
     bwlimit: int | None = Field(None, description='Override I/O bandwidth limit (in KiB/s).')
     delete: bool | None = Field(None, description='Delete the original VM and related data after successful migration. By default the original VM is kept on the source cluster in a stopped state.')
     online: bool | None = Field(None, description='Use online/live migration if VM is running. Ignored if VM is stopped.')
@@ -3070,6 +3225,7 @@ class PutNodesNodeQemuVmidSnapshotSnapnameConfigResponse(RootModel[None]):
 class PostNodesNodeQemuVmidSnapshotSnapnameRollbackRequest(ProxmoxBaseModel):
     """Model for rollback. Rollback VM state to specified snapshot. request."""
     start: bool | None = Field(None, description='Whether the VM should get started after rolling back successfully. (Note: VMs will be automatically started if the snapshot includes RAM.)')
+    sync_time_on_resume: bool | None = Field(None, alias="sync-time-on-resume", description="Override the 'sync-time-on-resume' setting from the VM's guest agent (QGA) config for this rollback only. Controls whether the guest's clock is synchronized after the RAM state is restored.")
 
 class PostNodesNodeQemuVmidSnapshotSnapnameRollbackResponse(RootModel[StrictStr]):
     """Model for rollback. Rollback VM state to specified snapshot. response."""
@@ -3127,6 +3283,7 @@ class GetNodesNodeQemuVmidStatusCurrentResponse(ProxmoxBaseModel):
     status: StrictStr = Field(..., description='QEMU process status.')
     tags: StrictStr | None = Field(None, description='The current configured tags, if any')
     template: bool | None = Field(None, description='Determines if the guest is a template.')
+    uid: StrictStr | None = Field(None, description='Random identifier of the guest, kept across restores and migrations and independent of the VMID.')
     uptime: int | None = Field(None, description='Uptime in seconds.')
     vmid: int = Field(..., description='The (unique) ID of the VM.')
 
@@ -3148,8 +3305,9 @@ class PostNodesNodeQemuVmidStatusResetResponse(RootModel[StrictStr]):
 
 class PostNodesNodeQemuVmidStatusResumeRequest(ProxmoxBaseModel):
     """Model for vm_resume. Resume virtual machine. request."""
-    nocheck: bool | None = Field(None)
+    nocheck: bool | None = Field(None, description='Do not check whether the VM is running, used internally during migration. Only root may use this option.')
     skiplock: bool | None = Field(None, description='Ignore locks - only root is allowed to use this option.')
+    sync_time_on_resume: bool | None = Field(None, alias="sync-time-on-resume", description="Override the 'sync-time-on-resume' setting from the VM's guest agent (QGA) config for this resume only. Controls whether the guest's clock is synchronized after resuming the VM.")
 
 class PostNodesNodeQemuVmidStatusResumeResponse(RootModel[StrictStr]):
     """Model for vm_resume. Resume virtual machine. response."""
@@ -3176,6 +3334,7 @@ class PostNodesNodeQemuVmidStatusStartRequest(ProxmoxBaseModel):
     nets_host_mtu: StrictStr | None = Field(None, alias="nets-host-mtu", description='Used for migration compat. List of VirtIO network devices and their effective host_mtu setting according to the QEMU object model on the source side of the migration. A value of 0 means that the host_mtu parameter is to be avoided for the corresponding device.')
     skiplock: bool | None = Field(None, description='Ignore locks - only root is allowed to use this option.')
     stateuri: StrictStr | None = Field(None, description='Some command save/restore state from this location.')
+    sync_time_on_resume: bool | None = Field(None, alias="sync-time-on-resume", description="Override the 'sync-time-on-resume' setting from the VM's guest agent (QGA) config for this start only. Controls whether the guest's clock is synchronized when starting a hibernated VM. No effect on a regular start.")
     targetstorage: StrictStr | None = Field(None, description="Mapping from source to target storages. Providing only a single storage ID maps all source storages to that storage. Providing the special value '1' will map each source storage to itself.")
     timeout: int | None = Field(None, description='Wait maximal timeout seconds.')
     with_conntrack_state: bool | None = Field(None, alias="with-conntrack-state", description='Whether to migrate conntrack entries for running VMs.')
@@ -3264,7 +3423,25 @@ class GetNodesNodeQueryUrlMetadataResponse(ProxmoxBaseModel):
 
 class GetNodesNodeReplicationResponseItem(ProxmoxBaseModel):
     """Model for status. List status of all replication jobs on this node. response."""
-    id: StrictStr | None = Field(None)
+    comment: StrictStr | None = Field(None, description='Description.')
+    disable: bool | None = Field(None, description='Whether the job is disabled.')
+    duration: float | None = Field(None, description='Duration of the last run in seconds.')
+    error: StrictStr | None = Field(None, description='Error of the last failed run.')
+    fail_count: int | None = Field(None, description='Number of consecutive failed runs.')
+    guest: int | None = Field(None, description='Guest ID.')
+    id: StrictStr | None = Field(None, description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
+    jobnum: int | None = Field(None, description='Unique, sequential ID assigned to each job.')
+    last_sync: int | None = Field(None, description='Start of the last successful run (UNIX epoch), 0 if there was none.')
+    last_try: int | None = Field(None, description='Start of the last run (UNIX epoch), 0 if there was none.')
+    next_sync: int | None = Field(None, description='Scheduled start of the next run (UNIX epoch), 0 if none is due.')
+    pid: int | None = Field(None, description='Process ID of the currently running job.')
+    rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
+    remove_job: StrictStr | None = Field(None, description='Whether the job is marked for removal, and in which mode.')
+    schedule: StrictStr | None = Field(None, description='Storage replication schedule.')
+    source: StrictStr | None = Field(None, description='The node the guest was on when the job last ran.')
+    target: StrictStr | None = Field(None, description='Target node.')
+    type: StrictStr | None = Field(None, description='Section type.')
+    vmtype: StrictStr | None = Field(None, description='Guest type.')
 
 class GetNodesNodeReplicationResponse(RootModel[list[GetNodesNodeReplicationResponseItem]]):
     """List of items. status. List status of all replication jobs on this node. response."""
@@ -3287,9 +3464,27 @@ class PostNodesNodeReplicationIdScheduleNowResponse(RootModel[StrictStr]):
     """Model for schedule_now. Schedule replication job to start as soon as possible. response."""
     root: StrictStr = Field(...)
 
-class GetNodesNodeReplicationIdStatusResponse(RootModel[dict[str, object]]):
+class GetNodesNodeReplicationIdStatusResponse(ProxmoxBaseModel):
     """Model for job_status. Get replication job status. response."""
-    root: dict[str, object] = Field(...)
+    comment: StrictStr | None = Field(None, description='Description.')
+    disable: bool | None = Field(None, description='Whether the job is disabled.')
+    duration: float | None = Field(None, description='Duration of the last run in seconds.')
+    error: StrictStr | None = Field(None, description='Error of the last failed run.')
+    fail_count: int | None = Field(None, description='Number of consecutive failed runs.')
+    guest: int = Field(..., description='Guest ID.')
+    id: StrictStr = Field(..., description="Replication Job ID. The ID is composed of a Guest ID and a job number, separated by a hyphen, i.e. '<GUEST>-<JOBNUM>'.")
+    jobnum: int = Field(..., description='Unique, sequential ID assigned to each job.')
+    last_sync: int | None = Field(None, description='Start of the last successful run (UNIX epoch), 0 if there was none.')
+    last_try: int | None = Field(None, description='Start of the last run (UNIX epoch), 0 if there was none.')
+    next_sync: int | None = Field(None, description='Scheduled start of the next run (UNIX epoch), 0 if none is due.')
+    pid: int | None = Field(None, description='Process ID of the currently running job.')
+    rate: float | None = Field(None, description='Rate limit in mbps (megabytes per second) as floating point number.')
+    remove_job: StrictStr | None = Field(None, description='Whether the job is marked for removal, and in which mode.')
+    schedule: StrictStr | None = Field(None, description='Storage replication schedule.')
+    source: StrictStr | None = Field(None, description='The node the guest was on when the job last ran.')
+    target: StrictStr | None = Field(None, description='Target node.')
+    type: StrictStr = Field(..., description='Section type.')
+    vmtype: StrictStr = Field(..., description='Guest type.')
 
 class GetNodesNodeReportResponse(RootModel[StrictStr]):
     """Model for report. Gather various systems information about a node response."""
@@ -3302,6 +3497,113 @@ class GetNodesNodeRrdResponse(ProxmoxBaseModel):
 class GetNodesNodeRrddataResponse(RootModel[list[dict[str, object]]]):
     """Model for rrddata. Read node RRD statistics response."""
     root: list[dict[str, object]] = Field(...)
+
+class GetNodesNodeSanResponseItem(ProxmoxBaseModel):
+    """Model for index. Directory index. response."""
+    name: StrictStr | None = Field(None)
+
+class GetNodesNodeSanResponse(RootModel[list[GetNodesNodeSanResponseItem]]):
+    """List of items. index. Directory index. response."""
+    root: list[GetNodesNodeSanResponseItem] = Field(...)
+
+class GetNodesNodeSanIscsiResponseItem(ProxmoxBaseModel):
+    """Model for index. Node iSCSI index. response."""
+    name: StrictStr | None = Field(None)
+
+class GetNodesNodeSanIscsiResponse(RootModel[list[GetNodesNodeSanIscsiResponseItem]]):
+    """List of items. index. Node iSCSI index. response."""
+    root: list[GetNodesNodeSanIscsiResponseItem] = Field(...)
+
+class GetNodesNodeSanIscsiStatusResponse(ProxmoxBaseModel):
+    """Model for status. Report the iSCSI initiator identity and availability. response."""
+    initiator_alias: StrictStr | None = Field(None, alias="initiator-alias", description='The initiator alias.')
+    initiator_name: StrictStr | None = Field(None, alias="initiator-name", description='The initiator IQN.')
+    supported: bool = Field(..., description='Whether open-iscsi is installed.')
+
+class GetNodesNodeSanIscsiTargetResponseItem(ProxmoxBaseModel):
+    """Model for targets. List iSCSI targets and their sessions and devices. response."""
+    devices: list[dict[str, object]] | None = Field(None, description='The block devices of the session.')
+    kernel_state: StrictStr | None = Field(None, alias="kernel-state", description='The kernel session state.')
+    portal: StrictStr | None = Field(None, description='The portal address and port.')
+    session_id: int | None = Field(None, alias="session-id", description='The kernel session ID.')
+    state: StrictStr | None = Field(None, description='The connection state.')
+    target: StrictStr | None = Field(None, description='The target IQN.')
+    used_by_storage: StrictStr | None = Field(None, alias="used-by-storage", description='An iSCSI storage using the target.')
+
+class GetNodesNodeSanIscsiTargetResponse(RootModel[list[GetNodesNodeSanIscsiTargetResponseItem]]):
+    """List of items. targets. List iSCSI targets and their sessions and devices. response."""
+    root: list[GetNodesNodeSanIscsiTargetResponseItem] = Field(...)
+
+class GetNodesNodeSanLunsResponseItem(ProxmoxBaseModel):
+    """Model for luns. List the SAN LUNs of the node with their paths and cached usage. response."""
+    by_id: StrictStr | None = Field(None, alias="by-id", description="A path under /dev/disk/by-id that encodes the device's identity and has been verified to resolve to this device. Absent when no such link could be verified.")
+    detail: StrictStr | None = Field(None, description="The cached signature or usage when usage is 'other'.")
+    devpath: StrictStr | None = Field(None, description='The device path.')
+    iscsi_lun: int | None = Field(None, alias="iscsi-lun", description='The number of the LUN on that target.')
+    iscsi_target: StrictStr | None = Field(None, alias="iscsi-target", description='An iSCSI target through which this node reaches the LUN; one of them if there are several.')
+    model: StrictStr | None = Field(None)
+    multipath: StrictStr | None = Field(None, description="How the node manages multipath for the LUN: 'manual' for a map with an explicit entry, 'storage' for the map of an iSCSI storage with the 'managed-multipath' option, 'unmanaged' for any other map, 'pending' while a map that an entry, a storage or the allow-list of the node requests does not exist yet, 'none' without a map or request, 'native' for the kernel-native multipath of an NVMe namespace.")
+    multipath_storage: StrictStr | None = Field(None, alias="multipath-storage", description='The multipath-enabled storage the LUN belongs to, whether or not it also has an explicit multipath entry.')
+    name: StrictStr | None = Field(None, description='The map alias, when different from its WWID.')
+    nvme_nsid: int | None = Field(None, alias="nvme-nsid", description='The namespace ID within the NVMe subsystem.')
+    nvme_subsystem: StrictStr | None = Field(None, alias="nvme-subsystem", description='The NVMe subsystem NQN.')
+    path_list: list[dict[str, object]] | None = Field(None, alias="path-list", description='The member paths of the device with their state.')
+    paths_active: int | None = Field(None, alias="paths-active", description='The number of active paths whose checker state is ready, ghost, or not reported. Native NVMe paths count when their controller is live and their ANA state is optimized, non-optimized, or not reported. A device of a LUN without a map counts while the kernel reports it as running.')
+    paths_expected: int | None = Field(None, alias="paths-expected", description='The number of paths the LUN should have on this node: the highest of the count of its multipath entry and, for each managed iSCSI storage of the LUN, the number of its portals. For a namespace of an NVMe over Fabrics storage, the number of its portals. Absent if no count is known.')
+    paths_total: int | None = Field(None, alias="paths-total", description='The number of paths of a multipath mapped device or of an NVMe namespace attached through multiple controllers, or the number of SCSI devices of a LUN without a map.')
+    serial: StrictStr | None = Field(None)
+    size: int | None = Field(None, description='The device size in bytes.')
+    state: StrictStr | None = Field(None, description='The health of the LUN from the state of its paths, when that is known. Absent while a requested multipath map is missing.')
+    transport: StrictStr | None = Field(None, description="The device transport, for example 'sata', 'sas', 'usb', 'fc', 'iscsi', 'nvme', 'nvme-fc', or 'nvme-tcp'.")
+    usage: StrictStr | None = Field(None, description='The usage indicated by cached device metadata.')
+    used_by_guest: int | None = Field(None, alias="used-by-guest", description='The ID of the virtual machine that this process belongs to. Only returned with the VM.Audit privilege on it.')
+    used_by_process: StrictStr | None = Field(None, alias="used-by-process", description='A process of the node that has the LUN, one of its paths or a partition open for writing, as PID followed by the command name in parentheses. A guest shows up like this if it has the LUN as disk by its device path or from a third-party storage plugin.')
+    used_by_storage: StrictStr | None = Field(None, alias="used-by-storage", description='The storage that uses the LUN: as its base volume or through the volume group on it, or as an iSCSI or NVMe over Fabrics storage that serves the LUNs of its target or subsystem as images.')
+    vendor: StrictStr | None = Field(None)
+    vgname: StrictStr | None = Field(None, description='The name of the LVM volume group the device belongs to.')
+    wwid: StrictStr | None = Field(None, description='The LUN WWID.')
+
+class GetNodesNodeSanLunsResponse(RootModel[list[GetNodesNodeSanLunsResponseItem]]):
+    """List of items. luns. List the SAN LUNs of the node with their paths and cached usage. response."""
+    root: list[GetNodesNodeSanLunsResponseItem] = Field(...)
+
+class GetNodesNodeSanNvmeofResponseItem(ProxmoxBaseModel):
+    """Model for index. Node NVMe over Fabrics index. response."""
+    name: StrictStr | None = Field(None)
+
+class GetNodesNodeSanNvmeofResponse(RootModel[list[GetNodesNodeSanNvmeofResponseItem]]):
+    """List of items. index. Node NVMe over Fabrics index. response."""
+    root: list[GetNodesNodeSanNvmeofResponseItem] = Field(...)
+
+class GetNodesNodeSanNvmeofControllerResponseItem(ProxmoxBaseModel):
+    """Model for controllers. List connected NVMe over Fabrics controllers and their states. response."""
+    controller: StrictStr | None = Field(None, description='The fabrics controller name, for example nvme3.')
+    namespaces: int | None = Field(None, description='The number of namespaces of the subsystem, counted by the devices that native NVMe multipath creates for them.')
+    portal: StrictStr | None = Field(None, description='The controller address and port, if applicable.')
+    state: StrictStr | None = Field(None, description='The controller state, such as live or connecting.')
+    subsysnqn: StrictStr | None = Field(None, description='The subsystem NQN.')
+    transport: StrictStr | None = Field(None, description='The controller transport.')
+    used_by_storage: StrictStr | None = Field(None, alias="used-by-storage", description='An NVMe over Fabrics storage using the subsystem.')
+
+class GetNodesNodeSanNvmeofControllerResponse(RootModel[list[GetNodesNodeSanNvmeofControllerResponseItem]]):
+    """List of items. controllers. List connected NVMe over Fabrics controllers and their states. response."""
+    root: list[GetNodesNodeSanNvmeofControllerResponseItem] = Field(...)
+
+class DeleteNodesNodeSanNvmeofControllerControllerRequest(ProxmoxBaseModel):
+    """Model for disconnect. Disconnect one fabrics controller. Refuse when a namespace in use has no other usable path. A storage still listing the portal reconnects it on activation. request."""
+    portal: StrictStr | None = Field(None, description='Refuse unless the controller still has this portal.')
+    subsysnqn: StrictStr | None = Field(None, description='Refuse unless the controller still has this subsystem NQN.')
+
+class DeleteNodesNodeSanNvmeofControllerControllerResponse(RootModel[StrictStr]):
+    """Model for disconnect. Disconnect one fabrics controller. Refuse when a namespace in use has no other usable path. A storage still listing the portal reconnects it on activation. response."""
+    root: StrictStr = Field(..., description='The task identifier.')
+
+class GetNodesNodeSanNvmeofStatusResponse(ProxmoxBaseModel):
+    """Model for status. Report the NVMe host identity and nvme-cli availability. response."""
+    error: StrictStr | None = Field(None, description='Why the host identity is unavailable.')
+    host_id: StrictStr | None = Field(None, alias="host-id", description='The persistent host UUID.')
+    host_nqn: StrictStr | None = Field(None, alias="host-nqn", description='The host NQN for target access control.')
+    supported: bool = Field(..., description='Whether nvme-cli is installed.')
 
 class GetNodesNodeScanResponseItem(ProxmoxBaseModel):
     """Model for index. Index of available scan methods response."""
@@ -3354,6 +3656,15 @@ class GetNodesNodeScanNfsResponse(RootModel[list[GetNodesNodeScanNfsResponseItem
     """List of items. nfsscan. Scan remote NFS server. response."""
     root: list[GetNodesNodeScanNfsResponseItem] = Field(...)
 
+class GetNodesNodeScanNvmeofResponseItem(ProxmoxBaseModel):
+    """Model for nvmeofscan. List the NVMe over TCP subsystems offered to this node by a discovery controller. response."""
+    portals: StrictStr | None = Field(None, description='The discovered TCP portals, comma separated.')
+    subsysnqn: StrictStr | None = Field(None, description='The subsystem NQN.')
+
+class GetNodesNodeScanNvmeofResponse(RootModel[list[GetNodesNodeScanNvmeofResponseItem]]):
+    """List of items. nvmeofscan. List the NVMe over TCP subsystems offered to this node by a discovery controller. response."""
+    root: list[GetNodesNodeScanNvmeofResponseItem] = Field(...)
+
 class GetNodesNodeScanPbsResponseItem(ProxmoxBaseModel):
     """Model for pbsscan. Scan remote Proxmox Backup Server. response."""
     comment: StrictStr | None = Field(None, description='Comment from server.')
@@ -3384,23 +3695,33 @@ class GetNodesNodeSdnFabricsFabricResponse(RootModel[list[GetNodesNodeSdnFabrics
     root: list[GetNodesNodeSdnFabricsFabricResponseItem] = Field(...)
 
 class GetNodesNodeSdnFabricsFabricInterfacesResponseItem(ProxmoxBaseModel):
-    """Model for interfaces. Get all interfaces for a fabric. response."""
+    """Model for interfaces. Get all interfaces for a fabric, empty if this node is not part of it. response."""
+    listen_port: float | None = Field(None, alias="listen-port", description='The listen port of the interface, omitted if WireGuard does not report the interface (WireGuard only).')
     name: StrictStr | None = Field(None, description='The name of the network interface.')
+    public_key: StrictStr | None = Field(None, alias="public-key", description='The public key of the interface, omitted if WireGuard does not report one (WireGuard only).')
     state: StrictStr | None = Field(None, description='The current state of the interface.')
-    type: StrictStr | None = Field(None, description='The type of this interface in the fabric (e.g. Point-to-Point, Broadcast, ..).')
+    type: StrictStr | None = Field(None, description='The type of this interface in the fabric (e.g. Point-to-Point, Broadcast, ..). Omitted for WireGuard if the interface is missing or is not a WireGuard interface.')
 
 class GetNodesNodeSdnFabricsFabricInterfacesResponse(RootModel[list[GetNodesNodeSdnFabricsFabricInterfacesResponseItem]]):
-    """List of items. interfaces. Get all interfaces for a fabric. response."""
+    """List of items. interfaces. Get all interfaces for a fabric, empty if this node is not part of it. response."""
     root: list[GetNodesNodeSdnFabricsFabricInterfacesResponseItem] = Field(...)
 
 class GetNodesNodeSdnFabricsFabricNeighborsResponseItem(ProxmoxBaseModel):
-    """Model for neighbors. Get all neighbors for a fabric. response."""
-    neighbor: StrictStr | None = Field(None, description='The IP or hostname of the neighbor.')
-    status: StrictStr | None = Field(None, description='The status of the neighbor, as returned by FRR.')
-    uptime: StrictStr | None = Field(None, description='The uptime of this neighbor, as returned by FRR (e.g. 8h24m12s).')
+    """Model for neighbors. Get all neighbors for a fabric, empty if this node is not part of it. response."""
+    allowed_ips: StrictStr | None = Field(None, alias="allowed-ips", description='The allowed IPs for this neighbor, omitted if there are none (WireGuard only)')
+    bytes_rx: float | None = Field(None, alias="bytes-rx", description='The number of bytes received from this neighbor (WireGuard only)')
+    bytes_tx: float | None = Field(None, alias="bytes-tx", description='The number of bytes transmitted to this neighbor (WireGuard only)')
+    interface: StrictStr | None = Field(None, description='The name of the interface that uses this neighbor as a peer (WireGuard only)')
+    latest_handshake: float | None = Field(None, alias="latest-handshake", description='UNIX Timestamp of the last successful handshake, omitted if no handshake happened yet (WireGuard only)')
+    name: StrictStr | None = Field(None, description='The name for this neighbor in the WireGuard fabric. Omitted for peers that are not part of the fabric configuration. (WireGuard only)')
+    neighbor: StrictStr | None = Field(None, description='The IP or hostname of the neighbor. For WireGuard, the endpoint currently used, including the port. Omitted for WireGuard peers without a known endpoint.')
+    persistent_keepalive: float | None = Field(None, alias="persistent-keepalive", description='The currently used persistent keepalive interval for this neighbor in seconds, omitted if disabled (WireGuard only)')
+    public_key: StrictStr | None = Field(None, alias="public-key", description='The public key used for this neighbor (WireGuard only)')
+    status: StrictStr | None = Field(None, description="The status of the neighbor. As returned by FRR for OSPF, Openfabric and BGP. For WireGuard, derived from the latest handshake: 'active' if the peer has a recent session, 'down' if it is unreachable despite persistent keepalive, 'idle' otherwise.")
+    uptime: StrictStr | None = Field(None, description='The uptime of this neighbor, as returned by FRR, e.g. 8h24m12s (OSPF, Openfabric, BGP only)')
 
 class GetNodesNodeSdnFabricsFabricNeighborsResponse(RootModel[list[GetNodesNodeSdnFabricsFabricNeighborsResponseItem]]):
-    """List of items. neighbors. Get all neighbors for a fabric. response."""
+    """List of items. neighbors. Get all neighbors for a fabric, empty if this node is not part of it. response."""
     root: list[GetNodesNodeSdnFabricsFabricNeighborsResponseItem] = Field(...)
 
 class GetNodesNodeSdnFabricsFabricRoutesResponseItem(ProxmoxBaseModel):
@@ -3554,10 +3875,12 @@ class GetNodesNodeStatusResponse(ProxmoxBaseModel):
     cpu: float = Field(..., description='The current cpu usage.')
     cpuinfo: dict[str, object] = Field(...)
     current_kernel: dict[str, object] = Field(..., alias="current-kernel", description='Meta-information about the currently booted kernel of this node.')
+    idle: int = Field(..., description='Sum of how much time each core has spent idle, in seconds.')
     loadavg: list[StrictStr] = Field(..., description='An array of load avg for 1, 5 and 15 minutes respectively.')
     memory: dict[str, object] = Field(...)
     pveversion: StrictStr = Field(..., description='The PVE version string.')
     rootfs: dict[str, object] = Field(...)
+    uptime: int = Field(..., description='The uptime of the system (including time spent in suspend), in seconds.')
 
 class PostNodesNodeStatusRequest(ProxmoxBaseModel):
     """Model for node_cmd. Reboot or shutdown a node. request."""
@@ -3619,6 +3942,7 @@ class GetNodesNodeStorageStorageContentResponseItem(ProxmoxBaseModel):
     verification: dict[str, object] | None = Field(None, description='Last backup verification result, only useful for PBS storages.')
     vmid: int | None = Field(None, description='Associated Owner VMID.')
     volid: StrictStr | None = Field(None, description='Volume identifier.')
+    vtype: StrictStr | None = Field(None, description='Volume type, for volumes of VMs and containers.')
 
 class GetNodesNodeStorageStorageContentResponse(RootModel[list[GetNodesNodeStorageStorageContentResponseItem]]):
     """List of items. index. List storage content. response."""
@@ -3907,6 +4231,7 @@ class GetNodesNodeVersionResponse(ProxmoxBaseModel):
     """Model for version. API version details response."""
     release: StrictStr = Field(..., description='The current installed Proxmox VE Release')
     repoid: StrictStr = Field(..., description='The short git commit hash ID from which this version was build')
+    ui_version: StrictStr | None = Field(None, alias="ui-version", description='A string generated from UI package versions, to detect changes.')
     version: StrictStr = Field(..., description='The current installed pve-manager package version')
 
 class PostNodesNodeVncshellRequest(ProxmoxBaseModel):
@@ -3945,8 +4270,8 @@ class PostNodesNodeVzdumpRequest(ProxmoxBaseModel):
     mailnotification: StrictStr | None = Field(None, description='Deprecated: use notification targets/matchers instead. Specify when to send a notification mail')
     mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     mode: StrictStr | None = Field(None, description='Backup mode.')
-    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, {{uid}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to 'none', no notification will be sent.")
     pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: StrictStr | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')
@@ -3984,8 +4309,8 @@ class GetNodesNodeVzdumpDefaultsResponse(ProxmoxBaseModel):
     mailto: StrictStr | None = Field(None, description='Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.')
     mode: StrictStr | None = Field(None, description='Backup mode.')
     node: StrictStr | None = Field(None, description='Only run if executed on this node.')
-    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
-    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not.")
+    notes_template: StrictStr | None = Field(None, alias="notes-template", description="Template string for generating notes for the backup(s). It can contain variables which will be replaced by their values. Currently supported are {{cluster}}, {{guestname}}, {{node}}, {{uid}}, and {{vmid}}, but more might be added in the future. Needs to be a single line, newline and backslash need to be escaped as '\\n' and '\\\\' respectively.")
+    notification_mode: StrictStr | None = Field(None, alias="notification-mode", description="Determine which notification system to use. If set to 'legacy-sendmail', vzdump will consider the mailto/mailnotification parameters and send emails to the specified address(es) via the 'sendmail' command. If set to 'notification-system', a notification will be sent via PVE's notification system, and the mailto and mailnotification will be ignored. If set to 'auto' (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to 'none', no notification will be sent.")
     pbs_change_detection_mode: StrictStr | None = Field(None, alias="pbs-change-detection-mode", description='PBS mode used to detect file changes and switch encoding format for container backups.')
     performance: StrictStr | None = Field(None, description='Other performance-related settings.')
     pigz: int | None = Field(None, description='Use pigz instead of gzip when N>0. N=1 uses half of cores, N>1 uses N as thread count.')

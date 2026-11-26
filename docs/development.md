@@ -249,7 +249,7 @@ pve = ProxmoxSDK.from_config(config)
 
 ### `mock/routes.py` — Mock Route Builder
 
-`register_generated_proxmox_mock_routes()` registers 675 operations across 444
+`register_generated_proxmox_mock_routes()` registers 716 operations across 481
 paths from bundled generated artifacts. The primary startup path reads
 `route_metadata.json` and creates lightweight FastAPI dispatchers with
 precomputed mounted paths, parameter metadata, and mock CRUD topology. Request
@@ -272,7 +272,7 @@ Proxmox VE API
       ↓
 [1. Crawler] - Fetch API structure
       ↓
-raw_capture.json (675 operations / 444 paths)
+raw_capture.json (716 operations / 481 paths)
       ↓
 [2. Pipeline] - Normalize & enrich
       ↓
@@ -298,17 +298,17 @@ from proxmox_sdk.proxmox_codegen import generate_proxmox_codegen_bundle
 
 bundle = generate_proxmox_codegen_bundle(
     output_dir="./output",
-    version_tag="9.2",
+    version_tag="9.3",
     worker_count=4,
 )
 
 # Output:
-# - output/9.2/raw_capture.json
-# - output/9.2/openapi.json
-# - output/9.2/pydantic_models.py
-# - output/9.2/route_metadata.json
-# - output/9.2/model_index.json
-# - output/9.2/models/<group>.py
+# - output/9.3/raw_capture.json
+# - output/9.3/openapi.json
+# - output/9.3/pydantic_models.py
+# - output/9.3/route_metadata.json
+# - output/9.3/model_index.json
+# - output/9.3/models/<group>.py
 ```
 
 ## Testing
@@ -355,7 +355,7 @@ async def test_proxmox_client_auth(mock_proxmox_server):
     client = ProxmoxClient(config)
     result = await client.request("GET", "/version")
 
-    assert result["version"] == "9.2"
+    assert result["version"] == "9.3"
 ```
 
 ### Running Tests
@@ -501,7 +501,7 @@ proper 504 Gateway Timeout response.
 `.gitea/workflows/ci.yml` is the Gitea-first, secret-free counterpart to the
 GitHub review workflow. For pushes and pull requests to `main` or `testing`, it
 checks pinned workflow inputs, Ruff, ty, Pyright, compile/import contracts, all
-three shipped Proxmox schemas (`latest`, `9.2`, and `9.1.11`), strict MkDocs,
+four shipped Proxmox schemas (`latest`, `9.3`, `9.2`, and `9.1.11`), strict MkDocs,
 distribution metadata, and the installed-wheel schema/PDM contract.
 
 All review jobs use the isolated `ci-untrusted-python312` label and read-only

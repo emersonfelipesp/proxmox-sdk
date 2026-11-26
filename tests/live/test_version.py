@@ -1,4 +1,4 @@
-"""Live Proxmox API smoke tests — Proxmox VE 9.2 feature coverage.
+"""Live Proxmox API smoke tests — Proxmox VE 9.2 feature coverage (9.2 or newer).
 
 These tests hit a real Proxmox node and are excluded from CI by default
 (see ``markers`` in ``pyproject.toml`` and ``pytest -m live`` to opt in).
@@ -17,6 +17,7 @@ Write tests (create/delete a temporary API token) require an extra opt-in:
 from __future__ import annotations
 
 import os
+import re
 import secrets
 from urllib.parse import urlsplit
 
@@ -89,11 +90,22 @@ def write_enabled() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_live_version_is_9_2(sdk) -> None:
-    """Version string must start with '9.2' — confirms the node is Proxmox VE 9.2.x."""
+def _major_minor(version: str) -> tuple[int, int]:
+    """Return ``(major, minor)`` from a Proxmox version string such as ``9.3.1``."""
+    parts = version.split(".")
+    try:
+        return int(parts[0]), int(parts[1])
+    except (IndexError, ValueError):
+        return (0, 0)
+
+
+async def test_live_version_is_at_least_9_2(sdk) -> None:
+    """The 9.2 feature checks below require Proxmox VE 9.2 or newer."""
     info = await sdk.version.get()
     version = (info or {}).get("version") or ""
-    assert version.startswith("9.2"), f"expected Proxmox 9.2.x on live node, got {version!r}"
+    assert _major_minor(version) >= (9, 2), (
+        f"expected Proxmox VE 9.2 or newer on live node, got {version!r}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -293,3 +305,67 @@ async def test_live_access_token_lifecycle(sdk, write_enabled) -> None:
                 await sdk.access.users(userid).token(tokenid).delete()
             except Exception as exc:
                 pytest.fail(f"could not delete test token {tokenid!r}: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# Proxmox VE 9.3 — unique guest identities
+# ---------------------------------------------------------------------------
+
+_GUEST_UID_PATTERN = re.compile(r"^[a-z2-7]{20}$")
+
+
+async def _require_9_3(sdk) -> None:
+    info = await sdk.version.get()
+    version = (info or {}).get("version") or ""
+    if _major_minor(version) < (9, 3):
+        pytest.skip(f"guest identity checks need Proxmox VE 9.3 or newer, node runs {version!r}")
+
+
+async def test_live_cluster_status_reports_cluster_id(sdk) -> None:
+    """GET /cluster/status — 9.3 publishes a random ``cluster-id``.
+
+    A cluster reports it on the ``cluster`` entry. A standalone node reports
+    its own identifier on its local ``node`` entry.
+    """
+    await _require_9_3(sdk)
+    status = await sdk.cluster.status.get()
+    assert isinstance(status, list) and status, "empty /cluster/status"
+    cluster_entries = [e for e in status if e.get("type") == "cluster"]
+    candidates = cluster_entries or [
+        e for e in status if e.get("type") == "node" and e.get("local")
+    ]
+    assert candidates, "no cluster entry and no local node entry in /cluster/status"
+    cluster_id = candidates[0].get("cluster-id")
+    assert isinstance(cluster_id, str) and cluster_id.strip(), (
+        f"expected a non-empty cluster-id on {candidates[0]!r}"
+    )
+
+
+def _guests_with_uid(resources: object) -> tuple[int, list[dict]]:
+    """Return the guest count and the guests that already carry a uid."""
+    guests = [r for r in resources or [] if r.get("type") in ("qemu", "lxc")]
+    return len(guests), [g for g in guests if g.get("uid")]
+
+
+async def test_live_guest_uids_are_well_formed_and_consistent(sdk) -> None:
+    """GET /cluster/resources — 9.3 guests carry a ``uid`` that status/current repeats.
+
+    Guests receive a uid only after a 9.3 node writes their configuration, so
+    the test skips explicitly when no guest has one yet instead of passing on
+    an empty set. One guest of each present type (qemu, lxc) is cross-checked.
+    """
+    await _require_9_3(sdk)
+    total, with_uid = _guests_with_uid(await sdk.cluster.resources.get(type="vm"))
+    if not with_uid:
+        pytest.skip(f"none of {total} guests has a uid yet (config not rewritten by 9.3)")
+    bad = [g["id"] for g in with_uid if not _GUEST_UID_PATTERN.match(str(g["uid"]))]
+    assert not bad, f"guest uids do not match [a-z2-7]{{20}}: {bad}"
+    uids = [g["uid"] for g in with_uid]
+    assert len(uids) == len(set(uids)), "two guests in one cluster share a uid"
+
+    first_per_type = {g["type"]: g for g in reversed(with_uid)}
+    for kind, guest in sorted(first_per_type.items()):
+        current = await sdk.nodes(guest["node"]).get(kind, str(guest["vmid"]), "status", "current")
+        assert (current or {}).get("uid") == guest["uid"], (
+            f"status/current uid differs from /cluster/resources for {guest['id']}"
+        )

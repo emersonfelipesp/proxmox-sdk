@@ -60,7 +60,12 @@ def _summary_result(
 def test_only_the_public_browser_matrix_moves_to_a_supported_host() -> None:
     jobs = _workflow("ci.yml")["jobs"]
     assert jobs["test"]["runs-on"] == "ubuntu-24.04"
-    assert jobs["test"]["strategy"]["matrix"]["proxmox_schema"] == ["latest", "9.2", "9.1.11"]
+    assert jobs["test"]["strategy"]["matrix"]["proxmox_schema"] == [
+        "latest",
+        "9.3",
+        "9.2",
+        "9.1.11",
+    ]
     assert jobs["test"]["strategy"]["fail-fast"] == "false"
     assert jobs["lint"]["runs-on"] == "ubuntu-latest"
     assert jobs["syntax"]["runs-on"] == "ubuntu-latest"

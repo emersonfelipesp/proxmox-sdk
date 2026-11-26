@@ -10,8 +10,8 @@ from typing import Annotated
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, RootModel, StrictBool, StrictInt, StrictStr
 
 GENERATED_FOR_PROXMOX_VERSION = "latest"
-GENERATED_SOURCE_SHA256 = "16bd9329d954c0de7c4ac55e8dd78c10e0f1d84899c42aeac06eadf6904dd96b"
-GENERATED_AT = "2026-08-06T18:55:01.885818+00:00"
+GENERATED_SOURCE_SHA256 = "83d00ff237bdfac0cb144eb603209f20654125dc40350c35447707fd330a0179"
+GENERATED_AT = "2026-11-26T14:19:39.255287+00:00"
 
 
 class ProxmoxBaseModel(BaseModel):
@@ -57,7 +57,8 @@ class PutPoolsRequest(ProxmoxBaseModel):
     """Model for update_pool. Update pool. request."""
     allow_move: bool | None = Field(None, alias="allow-move", description='Allow adding a guest even if already in another pool. The guest will be removed from its current pool and added to this one.')
     comment: StrictStr | None = Field(None)
-    delete: bool | None = Field(None, description='Remove the passed VMIDs and/or storage IDs instead of adding them.')
+    delete: bool | None = Field(None, description='Remove the passed VMIDs, storage IDs and/or network resources instead of adding them.')
+    network: StrictStr | None = Field(None, description="List of network resources to add or remove from this pool. 'vnet/<zone>/<vnet>' allows network devices on the VNet without VLAN tag or trunks, a trailing '/<tag>' allows that VLAN tag, and '/*' allows the VNet with or without any VLAN tag. This only controls the network device configuration, a device without VLAN tag can still carry tagged guest traffic on a VLAN-aware VNet.")
     poolid: StrictStr = Field(...)
     storage: StrictStr | None = Field(None, description='List of storage IDs to add or remove from this pool.')
     vms: StrictStr | None = Field(None, description='List of guest VMIDs to add or remove from this pool.')
@@ -79,7 +80,8 @@ class PutPoolsPoolidRequest(ProxmoxBaseModel):
     """Model for update_pool_deprecated. Update pool data (deprecated, no support for nested pools - use 'PUT /pools/?poolid={poolid}' instead). request."""
     allow_move: bool | None = Field(None, alias="allow-move", description='Allow adding a guest even if already in another pool. The guest will be removed from its current pool and added to this one.')
     comment: StrictStr | None = Field(None)
-    delete: bool | None = Field(None, description='Remove the passed VMIDs and/or storage IDs instead of adding them.')
+    delete: bool | None = Field(None, description='Remove the passed VMIDs, storage IDs and/or network resources instead of adding them.')
+    network: StrictStr | None = Field(None, description="List of network resources to add or remove from this pool. 'vnet/<zone>/<vnet>' allows network devices on the VNet without VLAN tag or trunks, a trailing '/<tag>' allows that VLAN tag, and '/*' allows the VNet with or without any VLAN tag. This only controls the network device configuration, a device without VLAN tag can still carry tagged guest traffic on a VLAN-aware VNet.")
     storage: StrictStr | None = Field(None, description='List of storage IDs to add or remove from this pool.')
     vms: StrictStr | None = Field(None, description='List of guest VMIDs to add or remove from this pool.')
 

@@ -14,10 +14,10 @@ flowchart TD
     PVE["Proxmox VE\nAPI Viewer\n/api2/json/..."]
 
     CRAWL["ProxmoxCrawler\nPlaywright-based\nrecursive exploration"]
-    RAW["raw_capture.json\n675 operations / 444 paths\npaths + methods + parameters"]
+    RAW["raw_capture.json\n716 operations / 481 paths\npaths + methods + parameters"]
     NORM["normalize.py\nDeduplication\nmetadata enrichment\nschema extraction"]
     OPENAPI_GEN["OpenAPIBuilder\nCreate paths\nBuild schemas\nAdd security defs"]
-    OPENAPI["openapi.json\n5.2 MB · OpenAPI 3.1\n675 operations · 444 paths"]
+    OPENAPI["openapi.json\nOpenAPI 3.1\n716 operations · 481 paths"]
     PYDANTIC_GEN["PydanticBuilder\nGenerate aggregate + shards\nAdd validators"]
     PYDANTIC["pydantic_models.py\nCompatibility aggregate"]
     SHARDS["models/<group>.py\nLazy route-group shards"]
@@ -72,11 +72,11 @@ sequenceDiagram
         CW->>PW: click tree item
         PW->>CW: endpoint metadata
     end
-    CW->>CLI: raw_capture.json (675 items)
+    CW->>CLI: raw_capture.json (716 items)
 ```
 
 !!! warning "Crawler requires a real Proxmox host"
-    The crawler must connect to a real Proxmox VE instance to render the API Viewer. The pre-generated schemas shipped with this package were produced from Proxmox VE 9.2. Re-running the crawler requires `PROXMOX_URL`, valid credentials, and network access.
+    The crawler must connect to a real Proxmox VE instance to render the API Viewer. The current pre-generated schema shipped with this package was produced from Proxmox VE 9.3. Re-running the crawler requires `PROXMOX_URL`, valid credentials, and network access.
 
 ---
 
@@ -102,14 +102,33 @@ sequenceDiagram
 
 ---
 
+### Variant parameter schemas (Proxmox VE 9.3+)
+
+Proxmox VE 9.3 publishes some request parameters as a common part plus
+type-dependent variants (`allOf` with a `oneOf` group whose members carry an
+`instance-type`, and a `type-property` discriminator). `POST`/`PUT /storage`,
+`POST`/`PUT /cluster/ha/rules`, and `POST /cluster/ha/resources/{sid}/migrate`
+use this form. `proxmox_codegen/parameter_variants.py` folds these schemas into
+one flat `properties` object before normalization, because the request-body and
+query-parameter builders read only flat properties:
+
+- every property of every variant is kept;
+- a property is required only when every variant requires it;
+- the discriminator (for example `type`) is added as an optional enum property,
+  and Proxmox remains the authority that rejects a missing or wrong value;
+- properties that only some variants accept carry `x-proxmox-instance-types`.
+
+Flat schemas from earlier releases pass through unchanged, so regenerating an
+older version produces the same parameters as before.
+
 ## Stage 4: OpenAPI Builder (`openapi_generator.py`)
 
 `proxmox_codegen/openapi_generator.py` produces an **OpenAPI 3.1** JSON document:
 
 | Stat | Value |
 |---|---|
-| Operations | 675 |
-| Paths | 444 |
+| Operations | 716 |
+| Paths | 481 |
 | File size | ~5.2 MB |
 | Format | OpenAPI 3.1 |
 | Security schemes | `ApiToken` (API token), `TicketAuth` (password/ticket) |
@@ -291,7 +310,7 @@ The codegen pipeline is exposed as a protected API endpoint on the FastAPI serve
     ```bash
     # Run full pipeline against the official Proxmox API viewer
     proxmox-sdk-codegen \
-      --version-tag 9.2 \
+      --version-tag 9.3 \
       --output-dir proxmox_sdk/generated/proxmox \
       --workers 4
 
@@ -371,6 +390,7 @@ proxmox_sdk/
         │   ├── model_index.json
         │   ├── pydantic_models.py
         │   └── models/
+        ├── 9.3/
         ├── 9.2/
         │   ├── openapi.json
         │   ├── route_metadata.json

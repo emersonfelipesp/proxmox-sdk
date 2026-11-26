@@ -8,7 +8,7 @@ Connect proxmox-sdk to actual Proxmox servers with full request/response validat
 
 Real mode transforms proxmox-sdk into a **validated proxy** for your Proxmox API:
 
-- ✅ **675 operations / 444 generated paths** route to the real Proxmox server
+- ✅ **716 operations / 481 generated paths** route to the real Proxmox server
 - ✅ **Request validation** - Pydantic models ensure correct request format
 - ✅ **Response validation** - Guarantees response data integrity
 - ✅ **Multiple auth methods** - API tokens or username/password
@@ -21,7 +21,7 @@ Real mode transforms proxmox-sdk into a **validated proxy** for your Proxmox API
 
 ### Prerequisites
 
-- Running Proxmox VE server (9.2 primary or 9.1.11 retained CI schema); older
+- Running Proxmox VE server (9.3 primary, with 9.2 and 9.1.11 retained CI schemas); older
   7.x and 8.x releases are best-effort only
 - API credentials (token or username/password)
 - Network access to Proxmox server
@@ -40,6 +40,16 @@ uvicorn proxmox_sdk.main:app
 ```
 
 Now all requests to `http://localhost:8000/api2/json/*` are proxied to your real Proxmox server!
+
+Proxmox VE 9.3 adds unique guest identities. VMs and containers can expose a
+stable `uid` matching `[a-z2-7]{20}` in cluster resources and current status;
+clones receive a new identity, and existing guests receive one when a 9.3 node
+first writes their configuration. Cluster status adds `cluster-id` (on the
+cluster entry, or the local node entry when standalone), cluster resources add
+`rtime`, and restore adds `allow-identity-mismatch` while `unique` means not
+adopting the backup's `uid`. New APIs cover SAN, multipath, access logs, APT
+history, storage plugins, and QEMU guest-agent statistics. Generated typed
+models expose optional `uid` and `cluster_id` (alias `cluster-id`) fields.
 
 ---
 
@@ -467,9 +477,9 @@ Response:
 {
   "mode": "real",
   "schema_version": "latest",
-  "proxmox_endpoints": 675,
-  "proxmox_paths": 444,
-  "proxmox_methods": 675,
+  "proxmox_endpoints": 716,
+  "proxmox_paths": 481,
+  "proxmox_methods": 716,
   "proxmox_url": "https://pve.example.com:8006",
   "auth_method": "token",
   "ssl_verify": true

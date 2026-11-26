@@ -9,7 +9,7 @@ facades, and real API connections.
 ## Features
 
 - **Dual Mode**: Mock mode (default) for development, Real mode for production Proxmox integration
-- **675 Operations / 444 Paths**: Pre-generated Proxmox VE 9.2 API with full OpenAPI schema
+- **716 Operations / 481 Paths**: Pre-generated Proxmox VE 9.3 API with full OpenAPI schema
 - **318 Operations / 246 Endpoints**: Pre-generated Proxmox Datacenter Manager (PDM) API with full OpenAPI schema
 - **Mock Data**: Automatically generate mock data for all endpoints with SQLite/WAL state by default; shared-memory and process-local dict stores are opt-in alternatives
 - **Real API Proxy**: Validated proxy to real Proxmox VE API with request/response validation
@@ -23,15 +23,30 @@ facades, and real API connections.
 
 | Version | Status | Schema directory |
 |---|---|---|
-| 9.2 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.2/` |
-| latest | Alias for 9.2 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
-| 9.1.11 | Previous release (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
+| 9.3 | Primary (CI-tested) | `proxmox_sdk/generated/proxmox/9.3/` |
+| latest | Alias for 9.3 (CI-tested) | `proxmox_sdk/generated/proxmox/latest/` |
+| 9.2 | Previous release (CI-tested) | `proxmox_sdk/generated/proxmox/9.2/` |
+| 9.1.11 | Older release (CI-tested) | `proxmox_sdk/generated/proxmox/9.1.11/` |
 
-All three schema directories ship in the package and CI exercises them
-in parallel via `PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.2, 9.1.11]`. Older releases
+All four schema directories ship in the package and CI exercises them in parallel
+via `PROXMOX_MOCK_SCHEMA_VERSION=[latest, 9.3, 9.2, 9.1.11]`. Older releases
 (8.x, 7.x) may still work for endpoints whose shapes have not changed, but they
 are no longer in the CI matrix — regenerate locally with
 `proxmox-sdk-codegen --version-tag <your-version>` if you need them.
+
+Proxmox VE 9.3 adds unique guest identities: each VM or container can expose a
+`uid` matching `[a-z2-7]{20}` through `GET /cluster/resources` and
+`GET /nodes/{node}/qemu|lxc/{vmid}/status/current`. The identity remains stable across migrations, snapshot
+rollbacks, backups, and restores; clones receive a new identity, and a guest
+receives one when a 9.3 node first writes its configuration. `GET /cluster/status`
+adds `cluster-id` on the cluster entry, or on the local node entry when standalone,
+and `/cluster/resources` adds `rtime`. Restore adds `allow-identity-mismatch`,
+while `unique` means not adopting the backup's `uid`. New path groups include
+`/cluster/san`, `/cluster/multipath`, `/nodes/{node}/san/*`,
+`/nodes/{node}/access-log`, `/nodes/{node}/apt/history`, `/plugins/storage`, and
+QEMU guest-agent statistic reads.
+Generated typed models expose optional `uid` and `cluster_id` (alias
+`cluster-id`) fields.
 
 The generated PDM schema also ships in every wheel at
 `proxmox_sdk/generated/pdm/latest/openapi.json`. CI and release validation run
