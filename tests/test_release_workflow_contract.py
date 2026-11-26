@@ -544,12 +544,12 @@ def test_current_python_base_and_direct_apk_inputs_are_pinned() -> None:
     assert dockerfile.count(reviewed) == 3
     for package in (
         "build-base=0.5-r4",
-        "curl=8.22.0-r0",
-        "nginx=1.30.4-r1",
+        "curl=8.23.0-r0",
+        "nginx=1.30.8-r0",
         "supervisor=4.3.0-r1",
-        "ca-certificates=20260611-r0",
-        "nss-tools=3.124-r0",
-        "openssl=3.5.8-r0",
+        "ca-certificates=20261020-r0",
+        "nss-tools=3.133-r0",
+        "openssl=3.5.9-r1",
     ):
         assert package in dockerfile
     all_workflow_text = "\n".join(
