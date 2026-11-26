@@ -64,7 +64,7 @@ packages on a runner.
    Candidate provenance records the canonical public server identity
    `https://git.nmulti.cloud`; it does not consume the runner-facing
    `github.server_url`, which can legitimately contain the server's internal
-   configured origin.
+   configured origin. The candidate build job prepares the same job-private Chromium runtime as pull-request CI before the regression suite, and clears its library path before the reproducible builds.
 3. The dependent `verify-and-seal` job anonymously fetches canonical `main` and
    the exact annotated tag from `https://git.nmulti.cloud`, proves that the tag
    peels to the immutable event SHA and remains in canonical `main`, validates

@@ -700,3 +700,39 @@ def test_permissions_are_read_only_and_tag_terminology_is_truthful() -> None:
     text = "\n".join(path.read_text(encoding="utf-8") for path in checked_paths)
     assert "immutable SHA tag" not in text
     assert "commit traceability tag" in text
+
+
+def _step(steps: list[dict[str, Any]], name: str) -> tuple[int, dict[str, Any]]:
+    for index, step in enumerate(steps):
+        if step.get("name") == name:
+            return index, step
+    raise AssertionError(f"missing workflow step {name!r}")
+
+
+def test_gitea_package_candidate_prepares_the_same_private_chromium_as_ci() -> None:
+    """The candidate build runs the real-browser regressions like pull-request CI.
+
+    Without the job-private runtime the cached headless shell cannot load its
+    system libraries and every candidate build fails.
+    """
+    prep_name = "Prepare job-private Chromium and authenticated Debian libraries"
+    ci_steps = _gitea("ci.yml")["jobs"]["schema-tests"]["steps"]
+    steps = _gitea("publish-package.yml")["jobs"]["prepare-package"]["steps"]
+    _ci_index, ci_prep = _step(ci_steps, prep_name)
+    prep_index, prep = _step(steps, prep_name)
+    suite_index, suite = _step(steps, "Run static analysis and complete regression suite")
+    build_index, _build = _step(steps, "Build twice and require byte-for-byte reproducibility")
+
+    assert prep["run"] == ci_prep["run"]
+    assert "if" not in prep and "continue-on-error" not in prep
+    assert prep_index < suite_index < build_index
+    assert suite["env"] == {
+        "FONTCONFIG_FILE": "${{ env.PROXMOX_CHROMIUM_RUNTIME }}/fontconfig/fonts.conf",
+        "FONTCONFIG_PATH": "${{ env.PROXMOX_CHROMIUM_RUNTIME }}/fontconfig",
+    }
+    # The browser library path must not leak into the reproducible build steps.
+    assert (
+        "printf 'LD_LIBRARY_PATH=\\nPLAYWRIGHT_BROWSERS_PATH=\\n' >> \"$GITHUB_ENV\""
+        in suite["run"]
+    )
+    assert suite["run"].index("pytest -n 4") < suite["run"].index("LD_LIBRARY_PATH=\\n")

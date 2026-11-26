@@ -113,7 +113,22 @@ jobs:
               output.write(f"version={version_text}\n")
           PY
 
+      - name: Prepare job-private Chromium and authenticated Debian libraries
+        run: |
+          set -euo pipefail
+          runtime="$(mktemp -d "${RUNNER_TEMP:?}/proxmox-chromium.XXXXXX")"
+          uv run --locked python tools/prepare_ci_chromium.py "$runtime/runtime"
+          export LD_LIBRARY_PATH="$runtime/runtime/prefix/usr/lib/x86_64-linux-gnu:$runtime/runtime/prefix/lib/x86_64-linux-gnu"
+          export PLAYWRIGHT_BROWSERS_PATH="$runtime/browsers"
+          uv run --locked playwright install chromium
+          test -x "$PLAYWRIGHT_BROWSERS_PATH/chromium_headless_shell-1208/chrome-headless-shell-linux64/chrome-headless-shell"
+          printf 'LD_LIBRARY_PATH=%s\nPLAYWRIGHT_BROWSERS_PATH=%s\nPROXMOX_CHROMIUM_RUNTIME=%s\n' \
+            "$LD_LIBRARY_PATH" "$PLAYWRIGHT_BROWSERS_PATH" "$runtime/runtime" >> "$GITHUB_ENV"
+
       - name: Run static analysis and complete regression suite
+        env:
+          FONTCONFIG_FILE: ${{ env.PROXMOX_CHROMIUM_RUNTIME }}/fontconfig/fonts.conf
+          FONTCONFIG_PATH: ${{ env.PROXMOX_CHROMIUM_RUNTIME }}/fontconfig
         run: |
           set -euo pipefail
           uv run --locked ruff check .
@@ -122,6 +137,9 @@ jobs:
           uv run --locked python -m compileall proxmox_sdk tests tools
           uv run --locked pytest -n 4 --cov=proxmox_sdk \
             --cov-report=term-missing --cov-report=xml tests
+          # The browser runtime is for the regression suite only. Clear it so the
+          # reproducible builds below match the independent verifier rebuilds.
+          printf 'LD_LIBRARY_PATH=\nPLAYWRIGHT_BROWSERS_PATH=\n' >> "$GITHUB_ENV"
 
       - name: Build twice and require byte-for-byte reproducibility
         env:
